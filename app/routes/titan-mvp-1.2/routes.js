@@ -13889,6 +13889,44 @@ router.get("/runner-v2/confirmation", function (req, res) {
   res.render("titan-mvp-1.2/runner/confirmation-v2");
 });
 
+router.get("/runner-v2/reuse-saved-answers", function (req, res) {
+  res.render("titan-mvp-1.2/runner/questions/reuse-saved-answers", {
+    error: req.session.data.error
+  });
+});
+
+router.post("/runner-v2/reuse-saved-answers", function (req, res) {
+  const { reuseEmail, referenceNumber } = req.body;
+  const errors = {};
+  if (!reuseEmail || !reuseEmail.trim()) errors.emailError = "Enter your email address";
+  if (!referenceNumber || !referenceNumber.trim()) errors.referenceError = "Enter your reference number";
+  if (Object.keys(errors).length > 0) {
+    req.session.data.error = errors;
+    req.session.data.reuseEmail = reuseEmail;
+    req.session.data.referenceNumber = referenceNumber;
+    return res.redirect("/runner-v2/reuse-saved-answers");
+  }
+  req.session.data.reuseEmail = reuseEmail;
+  req.session.data.referenceNumber = referenceNumber;
+  delete req.session.data.error;
+  res.redirect("/runner-v2/reuse-summary");
+});
+
+router.get("/runner-v2/reuse-summary", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  res.render("titan-mvp-1.2/runner/summary-reuse", {
+    data: req.session.data
+  });
+});
+
+router.post("/runner-v2/reuse-summary", function (req, res) {
+  res.redirect("/runner-v2/confirmation");
+});
+
+router.get("/titan-mvp-1.2/runner/confirmation-email-v2.html", function (req, res) {
+  res.render("titan-mvp-1.2/runner/confirmation-email-v2");
+});
+
 router.get("/summary", function (req, res) {
   console.log("Summary route - session data:", req.session.data);
   console.log("Summary route - session ID:", req.sessionID);

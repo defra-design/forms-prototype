@@ -22,7 +22,8 @@ Form submitted – {{ serviceName }} – GOV.UK
   <div class="govuk-grid-column-two-thirds">
 
     {{ govukPanel({
-    titleText: "Form submitted"
+    titleText: "Form submitted",
+     html: "Your reference number<br><strong>HDJ2123F</strong>"
     }) }}
 
     <h2 class="govuk-heading-m govuk-!-margin-top-6">What happens next</h2>
@@ -31,10 +32,14 @@ Form submitted – {{ serviceName }} – GOV.UK
       We will review your form and get back to you within 10 working days.
     </p>
 
-    <h2 class="govuk-heading-m govuk-!-margin-top-6">Accessing your submission</h2>
+    <h2 class="govuk-heading-m govuk-!-margin-top-6">Your saved answers</h2>
 
     <p class="govuk-body">
-      In the receipt email, we have added a link which will be available for 13 months in case you need to use the information to submit a new, renewal or make amendments to the current application.
+      You can <a href="/runner-v2/reuse-saved-answers" class="govuk-link">reuse your answers</a> if you need to submit this form again.
+    </p>
+
+    <p class="govuk-body">
+      This link is valid for 18 months.
     </p>
 
     <p class="govuk-body">
@@ -42,7 +47,7 @@ Form submitted – {{ serviceName }} – GOV.UK
     </p>
 
     <p class="govuk-body-s govuk-!-margin-top-8">
-      <a style="color: gray!important;" href="/titan-mvp-1.2/runner/confirmation-email.html" class="govuk-link">Go to email</a>
+      <a style="color: gray!important;" href="/titan-mvp-1.2/runner/confirmation-email-v2.html" class="govuk-link">Go to email</a>
     </p>
 
   </div>
