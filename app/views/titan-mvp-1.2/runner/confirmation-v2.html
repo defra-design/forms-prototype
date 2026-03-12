@@ -1,0 +1,51 @@
+{% extends "layouts/runner.html" %}
+
+{% block pageTitle %}
+Form submitted – {{ serviceName }} – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+
+{{ govukPhaseBanner({
+  tag: {
+    text: "Beta"
+  },
+  html: 'This is a new service. Help us improve it and <a class="govuk-link" target="_blank" href="/titan-mvp-1.2/form-editor/CSAT/form.html">give your feedback (opens in new tab)</a>.'
+}) }}
+{% endblock %}
+
+{% block content %}
+
+
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+
+    {{ govukPanel({
+    titleText: "Form submitted"
+    }) }}
+
+    <h2 class="govuk-heading-m govuk-!-margin-top-6">What happens next</h2>
+
+    <p class="govuk-body">
+      We will review your form and get back to you within 10 working days.
+    </p>
+
+    <h2 class="govuk-heading-m govuk-!-margin-top-6">Accessing your submission</h2>
+
+    <p class="govuk-body">
+      In the receipt email, we have added a link which will be available for 13 months in case you need to use the information to submit a new, renewal or make amendments to the current application.
+    </p>
+
+    <p class="govuk-body">
+      <a href="/titan-mvp-1.2/form-editor/CSAT/form.html" class="govuk-link">What did you think of this service?</a> (takes 30 seconds)
+    </p>
+
+    <p class="govuk-body-s govuk-!-margin-top-8">
+      <a style="color: gray!important;" href="/titan-mvp-1.2/runner/confirmation-email.html" class="govuk-link">Go to email</a>
+    </p>
+
+  </div>
+</div>
+
+{% endblock %}
