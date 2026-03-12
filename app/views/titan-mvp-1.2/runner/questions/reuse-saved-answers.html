@@ -1,0 +1,78 @@
+{% extends "layouts/runner.html" %}
+
+{% block pageTitle %}
+Reuse your saved answers – {{ serviceName }} – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+{{ govukBackLink({
+  text: "Back",
+  href: "javascript:window.history.back()"
+}) }}
+{% endblock %}
+
+{% block content %}
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+
+    {% if error %}
+      {{ govukErrorSummary({
+        titleText: "There is a problem",
+        errorList: [
+          { text: error.emailError, href: "#reuse-email" } if error.emailError else "",
+          { text: error.referenceError, href: "#reference-number" } if error.referenceError else ""
+        ]
+      }) }}
+    {% endif %}
+
+    <form method="post" action="/runner-v2/reuse-saved-answers">
+
+      <h1 class="govuk-heading-l">Reuse your saved answers</h1>
+
+      <p class="govuk-body">
+        You need the email address you used to submit the form and the form reference number to access your saved answers.
+      </p>
+
+      {{ govukInput({
+        label: {
+          text: "Email address",
+          classes: "govuk-label--m"
+        },
+        hint: {
+          text: "Use the same email address you used to submit the form last time."
+        },
+        id: "reuse-email",
+        name: "reuseEmail",
+        type: "email",
+        autocomplete: "email",
+        spellcheck: false,
+        errorMessage: { text: error.emailError } if error and error.emailError else null,
+        value: data['reuseEmail']
+      }) }}
+
+      {{ govukInput({
+        label: {
+          text: "Reference number",
+          classes: "govuk-label--m"
+        },
+        hint: {
+          text: "You can find the reference number in the confirmation email."
+        },
+        id: "reference-number",
+        name: "referenceNumber",
+        classes: "govuk-input--width-20",
+        errorMessage: { text: error.referenceError } if error and error.referenceError else null,
+        value: data['referenceNumber']
+      }) }}
+
+      {{ govukButton({
+        text: "Continue"
+      }) }}
+
+    </form>
+
+  </div>
+</div>
+
+{% endblock %}
