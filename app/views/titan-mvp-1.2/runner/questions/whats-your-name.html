@@ -28,7 +28,7 @@ href: "javascript:window.history.back()"
       }) }}
     {% endif %}
 
-    <form class="form" action="/whats-your-name" method="post">
+    <form class="form" action="{{ basePath ~ '/whats-your-name' if basePath else '/whats-your-name' }}" method="post">
 
       {{ govukInput({
       label: {

@@ -25,7 +25,7 @@ Declaration – {{ serviceName }} – GOV.UK
       }) }}
     {% endif %}
 
-    <form class="form" action="/declaration" method="post">
+    <form class="form" action="{{ basePath ~ '/declaration' if basePath else '/declaration' }}" method="post">
 
       {{ declarationCheckboxes({
         name: "declaration",

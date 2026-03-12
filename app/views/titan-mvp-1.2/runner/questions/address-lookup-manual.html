@@ -7,7 +7,7 @@
 {% block beforeContent %}
 {{ govukBackLink({
   text: "Back",
-  href: "/address-lookup-postcode?returnUrl=" + (data.returnUrl or '/do-you-want-your-unicorn-breeder-certificate-sent-to-this-address')
+  href: data.returnUrl or "/address-lookup-postcode?returnUrl=/do-you-want-your-unicorn-breeder-certificate-sent-to-this-address"
 }) }}
 {% endblock %}
 
@@ -91,7 +91,9 @@
             value: "use-manual-address",
             classes: "govuk-!-margin-right-1"
           }) }}
+          {% if data.returnUrl and data.returnUrl.indexOf('runner-v2') === -1 %}
           <p class="govuk-body govuk-!-margin-bottom-0">or <a href="/address-lookup-postcode?returnUrl={{ data.returnUrl or '/do-you-want-your-unicorn-breeder-certificate-sent-to-this-address' }}" class="govuk-link">find an address instead</a></p>
+          {% endif %}
         </div>
 
 

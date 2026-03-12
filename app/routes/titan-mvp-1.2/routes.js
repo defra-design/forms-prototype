@@ -13723,6 +13723,172 @@ router.post("/how-many-members-of-staff-will-look-after-the-unicorns", function 
   res.redirect("/payment-question");
 });
 
+// ── Runner v2: same form without payment or postcode lookup ─────────────────
+router.get("/runner-v2/start", function (req, res) {
+  res.render("titan-mvp-1.2/runner/questions/start-v2");
+});
+
+router.get("/runner-v2/declaration", function (req, res) {
+  res.render("titan-mvp-1.2/runner/questions/declaration", {
+    error: req.session.data.error,
+    basePath: "/runner-v2"
+  });
+});
+
+router.post("/runner-v2/declaration", function (req, res) {
+  const { declaration } = req.body;
+  if (!declaration || !declaration.includes("confirmed")) {
+    req.session.data.error = { declarationError: "You must accept the declaration to continue" };
+    return res.redirect("/runner-v2/declaration");
+  }
+  delete req.session.data.error;
+  res.redirect("/runner-v2/whats-your-name");
+});
+
+router.get("/runner-v2/whats-your-name", function (req, res) {
+  res.render("titan-mvp-1.2/runner/questions/whats-your-name", { error: req.session.data.error, basePath: "/runner-v2" });
+});
+router.post("/runner-v2/whats-your-name", function (req, res) {
+  const { name } = req.body;
+  if (!name || name.trim() === "") {
+    req.session.data.error = { nameError: "Enter your full name" };
+    return res.redirect("/runner-v2/whats-your-name");
+  }
+  req.session.data.name = name;
+  delete req.session.data.error;
+  res.redirect("/runner-v2/whats-your-email-address");
+});
+
+router.get("/runner-v2/whats-your-email-address", function (req, res) {
+  res.render("titan-mvp-1.2/runner/questions/whats-your-email-address", { error: req.session.data.error, basePath: "/runner-v2" });
+});
+router.post("/runner-v2/whats-your-email-address", function (req, res) {
+  const { email } = req.body;
+  if (!email || email.trim() === "") {
+    req.session.data.error = { emailError: "Enter your email address" };
+    return res.redirect("/runner-v2/whats-your-email-address");
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    req.session.data.error = { emailError: "Enter a valid email address" };
+    return res.redirect("/runner-v2/whats-your-email-address");
+  }
+  req.session.data.email = email;
+  delete req.session.data.error;
+  res.redirect("/runner-v2/whats-your-phone-number");
+});
+
+router.get("/runner-v2/whats-your-phone-number", function (req, res) {
+  res.render("titan-mvp-1.2/runner/questions/whats-your-phone-number", { error: req.session.data.error, basePath: "/runner-v2" });
+});
+router.post("/runner-v2/whats-your-phone-number", function (req, res) {
+  const { phoneNumber } = req.body;
+  if (!phoneNumber || phoneNumber.trim() === "") {
+    req.session.data.error = { phoneError: "Enter your phone number" };
+    return res.redirect("/runner-v2/whats-your-phone-number");
+  }
+  const phoneRegex = /^(\+44\s?7\d{3}|\(?07\d{3}\)?)\s?\d{3}\s?\d{3}$/;
+  if (!phoneRegex.test(phoneNumber.replace(/\s/g, ""))) {
+    req.session.data.error = { phoneError: "Enter a valid UK phone number" };
+    return res.redirect("/runner-v2/whats-your-phone-number");
+  }
+  req.session.data.phoneNumber = phoneNumber;
+  delete req.session.data.error;
+  res.redirect("/runner-v2/whats-your-address");
+});
+
+router.get("/runner-v2/whats-your-address", function (req, res) {
+  req.session.data.returnUrl = req.session.data.returnUrl || "/runner-v2/whats-your-address";
+  res.render("titan-mvp-1.2/runner/questions/whats-your-address-no-lookup", {
+    error: req.session.data.error
+  });
+});
+router.post("/runner-v2/whats-your-address", function (req, res) {
+  const { action } = req.body;
+  if (action === "continue") {
+    if (!req.session.data.selectedAddress && !req.session.data.finalAddress && !req.session.data['wZLWPy-address-line-1']) {
+      req.session.data.error = { addressError: true };
+      return res.redirect("/runner-v2/whats-your-address");
+    }
+    delete req.session.data.error;
+    res.redirect("/runner-v2/what-type-of-unicorns-will-you-breed");
+  } else if (action === "exit") {
+    req.session.data.returnUrl = "/runner-v2/whats-your-address";
+    res.redirect("/save-progress");
+  }
+});
+
+router.get("/runner-v2/what-type-of-unicorns-will-you-breed", function (req, res) {
+  res.render("titan-mvp-1.2/runner/questions/what-type-of-unicorns-will-you-breed", { error: req.session.data.error, basePath: "/runner-v2" });
+});
+router.post("/runner-v2/what-type-of-unicorns-will-you-breed", function (req, res) {
+  const { DyfjJC } = req.body;
+  if (!DyfjJC || DyfjJC.length === 0) {
+    req.session.data.error = { typeError: "Select at least one type of unicorn" };
+    return res.redirect("/runner-v2/what-type-of-unicorns-will-you-breed");
+  }
+  req.session.data.DyfjJC = DyfjJC;
+  delete req.session.data.error;
+  res.redirect("/runner-v2/how-many-unicorns-do-you-expect-to-breed-each-year");
+});
+
+router.get("/runner-v2/how-many-unicorns-do-you-expect-to-breed-each-year", function (req, res) {
+  res.render("titan-mvp-1.2/runner/questions/how-many-unicorns-do-you-expect-to-breed-each-year", { error: req.session.data.error, basePath: "/runner-v2" });
+});
+router.post("/runner-v2/how-many-unicorns-do-you-expect-to-breed-each-year", function (req, res) {
+  const { aitzzV } = req.body;
+  if (!aitzzV) {
+    req.session.data.error = { numberError: "Select how many unicorns you expect to breed" };
+    return res.redirect("/runner-v2/how-many-unicorns-do-you-expect-to-breed-each-year");
+  }
+  req.session.data.aitzzV = aitzzV;
+  delete req.session.data.error;
+  res.redirect("/runner-v2/where-will-you-keep-the-unicorns");
+});
+
+router.get("/runner-v2/where-will-you-keep-the-unicorns", function (req, res) {
+  res.render("titan-mvp-1.2/runner/questions/where-will-you-keep-the-unicorns", { error: req.session.data.error, basePath: "/runner-v2" });
+});
+router.post("/runner-v2/where-will-you-keep-the-unicorns", function (req, res) {
+  const { 'location-easting': easting, 'location-northing': northing } = req.body;
+  if (!easting || !northing) {
+    req.session.data.error = { locationError: "Enter both easting and northing coordinates" };
+    return res.redirect("/runner-v2/where-will-you-keep-the-unicorns");
+  }
+  req.session.data['location-easting'] = easting;
+  req.session.data['location-northing'] = northing;
+  delete req.session.data.error;
+  res.redirect("/runner-v2/how-many-members-of-staff-will-look-after-the-unicorns");
+});
+
+router.get("/runner-v2/how-many-members-of-staff-will-look-after-the-unicorns", function (req, res) {
+  res.render("titan-mvp-1.2/runner/questions/how-many-members-of-staff-will-look-after-the-unicorns", { error: req.session.data.error, basePath: "/runner-v2" });
+});
+router.post("/runner-v2/how-many-members-of-staff-will-look-after-the-unicorns", function (req, res) {
+  const { zhJMaM } = req.body;
+  if (!zhJMaM || zhJMaM.trim() === "") {
+    req.session.data.error = { staffError: "Enter the number of staff members" };
+    return res.redirect("/runner-v2/how-many-members-of-staff-will-look-after-the-unicorns");
+  }
+  req.session.data.zhJMaM = zhJMaM;
+  delete req.session.data.error;
+  res.redirect("/runner-v2/summary");
+});
+
+router.get("/runner-v2/summary", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  res.render("titan-mvp-1.2/runner/summary-no-payment", {
+    data: req.session.data
+  });
+});
+router.post("/runner-v2/summary", function (req, res) {
+  res.redirect("/runner-v2/confirmation");
+});
+
+router.get("/runner-v2/confirmation", function (req, res) {
+  res.render("titan-mvp-1.2/runner/confirmation-v2");
+});
+
 router.get("/summary", function (req, res) {
   console.log("Summary route - session data:", req.session.data);
   console.log("Summary route - session ID:", req.sessionID);
@@ -14072,6 +14238,9 @@ router.post("/address-lookup-results", function (req, res) {
 });
 
 router.get("/address-lookup-manual", function (req, res) {
+  if (req.query.returnUrl) {
+    req.session.data.returnUrl = req.query.returnUrl;
+  }
   res.render("titan-mvp-1.2/runner/questions/address-lookup-manual", {
     error: req.session.data.error
   });

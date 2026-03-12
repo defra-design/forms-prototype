@@ -16,7 +16,7 @@ href: "javascript:window.history.back()"
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
 
-    <form class="form" action="/what-type-of-unicorns-will-you-breed" method="post">
+    <form class="form" action="{{ basePath ~ '/what-type-of-unicorns-will-you-breed' if basePath else '/what-type-of-unicorns-will-you-breed' }}" method="post">
 
       {{ govukCheckboxes({
       idPrefix: "DyfjJC",
