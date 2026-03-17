@@ -145,7 +145,7 @@ Email - Form submitted
                 <div class="email-time">10:30 AM</div>
             </div>
             <div class="email-subject">Form submission: Register as a unicorn breeder</div>
-            <div class="email-preview">We received your form submission for 'Register as a unicorn breeder' on Tuesday 1 April 2025 at 10:30am. We will review your form and get back to you within 10 working days. In the receipt email, we have added a link which will be available for 13 months...</div>
+            <div class="email-preview">We received your form submission for 'Register as a unicorn breeder' on Tuesday 1 April 2025 at 10:30am. We will review your form and get back to you within 10 working days. In the receipt email, we have added a link which will be available for 18 months...</div>
         </div>
     </div>
 
@@ -161,7 +161,12 @@ Email - Form submitted
         </div>
 
         <div class="govuk-body">
-            <h1 class="govuk-heading-l">We have your form</h1>
+            <h1 class="govuk-heading-l">Form submitted</h1>
+
+            {% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+            {{ govukInsetText({
+            text: "Your reference number: EL3-5H4-L3N"
+            }) }}
 
             <p class="govuk-body">We received your form submission for 'Register as a unicorn breeder' on Tuesday 1 April
                 2025 at 10:30am.</p>
