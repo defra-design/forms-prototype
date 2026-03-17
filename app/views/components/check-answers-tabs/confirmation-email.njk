@@ -1,0 +1,42 @@
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+<span class="govuk-caption-l">Check answers</span>
+<h1 class="govuk-heading-l">Confirmation email</h1>
+
+<form class="form" action="/titan-mvp-1.2/form-editor/check-answers/settings-modular" method="post">
+  <input type="hidden" name="currentTab" value="confirmation-email">
+
+  {{ govukRadios({
+    name: "confirmationEmailEnabled",
+    fieldset: {
+      legend: {
+        text: "Send a confirmation email when the form is submitted?",
+        isPageHeading: false,
+        classes: "govuk-fieldset__legend--m"
+      }
+    },
+    hint: {
+      text: "Users will receive an email after they submit the form. You can customise the email content in the Confirmation email tab."
+    },
+    items: [
+      {
+        value: "yes",
+        text: "Yes, send a confirmation email"
+      },
+      {
+        value: "no",
+        text: "No, do not send a confirmation email"
+      }
+    ],
+    value: data.confirmationEmailEnabled
+  }) }}
+
+  <div class="govuk-button-group">
+    {{ govukButton({
+      text: "Save",
+      type: "submit",
+      id: "confirmation-email-save"
+    }) }}
+  </div>
+</form>

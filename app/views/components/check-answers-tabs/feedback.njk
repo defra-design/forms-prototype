@@ -1,0 +1,42 @@
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+<span class="govuk-caption-l">Check answers</span>
+<h1 class="govuk-heading-l">User feedback</h1>
+
+<form class="form" action="/titan-mvp-1.2/form-editor/check-answers/settings-modular" method="post">
+  <input type="hidden" name="currentTab" value="feedback">
+
+  {{ govukRadios({
+    name: "feedbackPageEnabled",
+    fieldset: {
+      legend: {
+        text: "Show the GOV.UK feedback page after form submission?",
+        isPageHeading: false,
+        classes: "govuk-fieldset__legend--m"
+      }
+    },
+    hint: {
+      text: "The GOV.UK feedback page lets users rate their experience and leave comments. You can turn this off if you do not want to collect feedback."
+    },
+    items: [
+      {
+        value: "yes",
+        text: "Yes, show the GOV.UK feedback page"
+      },
+      {
+        value: "no",
+        text: "No, remove the GOV.UK feedback page"
+      }
+    ],
+    value: data.feedbackPageEnabled
+  }) }}
+
+  <div class="govuk-button-group">
+    {{ govukButton({
+      text: "Save",
+      type: "submit",
+      id: "feedback-save"
+    }) }}
+  </div>
+</form>

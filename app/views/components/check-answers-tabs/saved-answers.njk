@@ -1,0 +1,74 @@
+{% from "govuk/components/checkboxes/macro.njk" import govukCheckboxes %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+<span class="govuk-caption-l">Check answers</span>
+<h1 class="govuk-heading-l">Saved answers</h1>
+
+<form class="form" action="/titan-mvp-1.2/form-editor/check-answers/settings-modular" method="post">
+  <input type="hidden" name="currentTab" value="saved-answers">
+
+  <p class="govuk-body">
+    Answers can be saved so users can reuse them the next time they complete this form. Answers are saved for 18 months.
+  </p>
+
+  <p class="govuk-body">
+    If a user decides to reuse or change their answers it counts as a new form submission. Payments are taken as usual and a new reference number is issued.
+  </p>
+
+  <p class="govuk-body">
+    Allowing users to reuse their answers confirms that you will:
+  </p>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>manage form submissions securely</li>
+    <li>identify possible misuse of data</li>
+    <li>confirm there are no legal or policy reasons preventing answers from being reused</li>
+  </ul>
+
+  <div class="govuk-warning-text">
+    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+    <strong class="govuk-warning-text__text">
+      <span class="govuk-visually-hidden">Warning</span>
+      If you allow users to save their answers, the confirmation email and reference number will be switched on automatically.
+    </strong>
+  </div>
+
+  {{ govukCheckboxes({
+    name: "savedAnswersEnabled",
+    fieldset: {
+      legend: {
+        text: "Save answers to this form",
+        isPageHeading: false,
+        classes: "govuk-visually-hidden"
+      }
+    },
+    items: [
+      {
+        value: "yes",
+        text: "Save answers to this form",
+        id: "saved-answers-checkbox"
+      }
+    ],
+    values: ["yes"] if (data and data.savedAnswersEnabled === "yes") else []
+  }) }}
+
+  <div class="govuk-button-group">
+    {{ govukButton({
+      text: "Save",
+      type: "submit",
+      id: "saved-answers-save"
+    }) }}
+  </div>
+</form>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var checkbox = document.getElementById('saved-answers-checkbox') || document.querySelector('input[name="savedAnswersEnabled"][type="checkbox"]');
+    var label = document.getElementById('preview-confirmation-email-label');
+    if (!checkbox || !label) return;
+    function updatePreviewLabel() {
+      label.textContent = checkbox.checked ? 'Confirmation email' : 'Confirmation email (optional)';
+    }
+    checkbox.addEventListener('change', updatePreviewLabel);
+    updatePreviewLabel();
+  });
+</script>
