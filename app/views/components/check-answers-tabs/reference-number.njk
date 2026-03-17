@@ -1,0 +1,42 @@
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+<span class="govuk-caption-l">Check answers</span>
+<h1 class="govuk-heading-l">Reference number</h1>
+
+<form class="form" action="/titan-mvp-1.2/form-editor/check-answers/settings-modular" method="post">
+  <input type="hidden" name="currentTab" value="reference-number">
+
+  {{ govukRadios({
+    name: "referenceNumberEnabled",
+    fieldset: {
+      legend: {
+        text: "Show a reference number when the form is submitted?",
+        isPageHeading: false,
+        classes: "govuk-fieldset__legend--m"
+      }
+    },
+    hint: {
+      text: "Users will see a unique reference number on the confirmation page and in their confirmation email. They can use it to track their submission."
+    },
+    items: [
+      {
+        value: "yes",
+        text: "Yes, show a reference number"
+      },
+      {
+        value: "no",
+        text: "No, do not show a reference number"
+      }
+    ],
+    value: data.referenceNumberEnabled
+  }) }}
+
+  <div class="govuk-button-group">
+    {{ govukButton({
+      text: "Save",
+      type: "submit",
+      id: "reference-number-save"
+    }) }}
+  </div>
+</form>
