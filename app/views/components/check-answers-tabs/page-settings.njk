@@ -13,11 +13,11 @@
         },
         value: (
           { text: "Added" } if (data and data.declarationOption === "yes-declaration" and data.declarationText and data.declarationText.trim())
-          else { html: '<a class="govuk-link govuk-link--no-visited-state" href="/titan-mvp-1.2/form-editor/check-answers/settings-modular?tab=declaration" id="declaration-action">Add declaration text</a>' }
+          else { html: '<a class="govuk-link govuk-link--no-visited-state" href="#" id="declaration-action">Add declaration text</a>' }
         ),
         actions: {
           items: (
-            [{ href: "/titan-mvp-1.2/form-editor/check-answers/settings-modular?tab=declaration", text: "Change", visuallyHiddenText: " declaration text", classes: "govuk-link--no-visited-state", attributes: { id: "declaration-action" } }] if (data and data.declarationOption === "yes-declaration" and data.declarationText and data.declarationText.trim())
+            [{ href: "#", text: "Change", visuallyHiddenText: " declaration text", classes: "govuk-link--no-visited-state", attributes: { id: "declaration-action" } }] if (data and data.declarationOption === "yes-declaration" and data.declarationText and data.declarationText.trim())
             else []
           )
         }
@@ -29,11 +29,11 @@
         },
         value: (
           { text: "Turned on" } if (data and data.confirmationEmailEnabled === "yes")
-          else { html: '<a class="govuk-link govuk-link--no-visited-state" href="/titan-mvp-1.2/form-editor/check-answers/settings-modular?tab=confirmation-email" id="confirmation-email-action">Turn on confirmation emails</a>' }
+          else { html: '<a class="govuk-link govuk-link--no-visited-state" href="#" id="confirmation-email-action">Turn on confirmation emails</a>' }
         ),
         actions: {
           items: (
-            [{ href: "/titan-mvp-1.2/form-editor/check-answers/settings-modular?tab=confirmation-email", text: "Change", visuallyHiddenText: " confirmation email", classes: "govuk-link--no-visited-state", attributes: { id: "confirmation-email-action" } }] if (data and data.confirmationEmailEnabled === "yes")
+            [{ href: "#", text: "Change", visuallyHiddenText: " confirmation email", classes: "govuk-link--no-visited-state", attributes: { id: "confirmation-email-action" } }] if (data and data.confirmationEmailEnabled === "yes")
             else []
           )
         }
@@ -45,11 +45,11 @@
         },
         value: (
           { text: "Turned on" } if (data and data.referenceNumberEnabled === "yes")
-          else { html: '<a class="govuk-link govuk-link--no-visited-state" href="/titan-mvp-1.2/form-editor/check-answers/settings-modular?tab=reference-number" id="reference-number-action">Turn on the reference number</a>' }
+          else { html: '<a class="govuk-link govuk-link--no-visited-state" href="#" id="reference-number-action">Turn on the reference number</a>' }
         ),
         actions: {
           items: (
-            [{ href: "/titan-mvp-1.2/form-editor/check-answers/settings-modular?tab=reference-number", text: "Change", visuallyHiddenText: " reference number", classes: "govuk-link--no-visited-state", attributes: { id: "reference-number-action" } }] if (data and data.referenceNumberEnabled === "yes")
+            [{ href: "#", text: "Change", visuallyHiddenText: " reference number", classes: "govuk-link--no-visited-state", attributes: { id: "reference-number-action" } }] if (data and data.referenceNumberEnabled === "yes")
             else []
           )
         }
@@ -77,11 +77,11 @@
         },
         value: (
           { text: "Turned on" } if (data and data.feedbackPageEnabled === "yes")
-          else { html: '<a class="govuk-link govuk-link--no-visited-state" href="/titan-mvp-1.2/form-editor/check-answers/settings-modular?tab=feedback" id="user-feedback-action">Add the GOV.UK feedback page</a>' }
+          else { html: '<a class="govuk-link govuk-link--no-visited-state" href="#" id="user-feedback-action">Add the GOV.UK feedback page</a>' }
         ),
         actions: {
           items: (
-            [{ href: "/titan-mvp-1.2/form-editor/check-answers/settings-modular?tab=feedback", text: "Change", visuallyHiddenText: " user feedback", classes: "govuk-link--no-visited-state", attributes: { id: "user-feedback-action" } }] if (data and data.feedbackPageEnabled === "yes")
+            [{ href: "#", text: "Change", visuallyHiddenText: " user feedback", classes: "govuk-link--no-visited-state", attributes: { id: "user-feedback-action" } }] if (data and data.feedbackPageEnabled === "yes")
             else []
           )
         }
@@ -128,13 +128,12 @@
       .then(function(data) {
         data = data || {};
         var base = '/titan-mvp-1.2/form-editor/check-answers/settings-modular?tab=';
-        function updateOverviewRow(actionId, isConfigured, valueText, changeLinkText, visuallyHiddenText, tab, notConfiguredLinkText) {
+        function updateOverviewRow(actionId, isConfigured, valueText, changeLinkText, visuallyHiddenText, href, notConfiguredLinkText) {
           var action = document.getElementById(actionId);
           if (!action) return;
           var row = action.closest('.govuk-summary-list__row');
           var valueCell = row ? row.querySelector('.govuk-summary-list__value') : null;
           if (!valueCell) return;
-          var href = base + tab;
           if (isConfigured) {
             valueCell.textContent = valueText;
             var actionsCell = row.querySelector('.govuk-summary-list__actions');
@@ -165,22 +164,22 @@
         }
 
         var declarationAdded = data.declarationOption === 'yes-declaration' && data.declarationText && data.declarationText.trim() !== '';
-        updateOverviewRow('declaration-action', declarationAdded, 'Added', 'Change', ' declaration text', 'declaration', 'Add declaration text');
+        updateOverviewRow('declaration-action', declarationAdded, 'Added', 'Change', ' declaration text', '#', 'Add declaration text');
 
         var confirmationOn = data.confirmationEmailEnabled === 'yes';
-        updateOverviewRow('confirmation-email-action', confirmationOn, 'Turned on', 'Change', ' confirmation email', 'confirmation-email', 'Turn on confirmation emails');
+        updateOverviewRow('confirmation-email-action', confirmationOn, 'Turned on', 'Change', ' confirmation email', '#', 'Turn on confirmation emails');
 
         var referenceOn = data.referenceNumberEnabled === 'yes';
-        updateOverviewRow('reference-number-action', referenceOn, 'Turned on', 'Change', ' reference number', 'reference-number', 'Turn on the reference number');
+        updateOverviewRow('reference-number-action', referenceOn, 'Turned on', 'Change', ' reference number', '#', 'Turn on the reference number');
 
         var sectionsAdded = data.sections && data.sections.length > 0;
-        updateOverviewRow('sections-action', sectionsAdded, 'Added', 'Change', ' sections', 'sections', 'Add and organise sections');
+        updateOverviewRow('sections-action', sectionsAdded, 'Added', 'Change', ' sections', base + 'sections', 'Add and organise sections');
 
         var feedbackOn = data.feedbackPageEnabled === 'yes';
-        updateOverviewRow('user-feedback-action', feedbackOn, 'Turned on', 'Change', ' user feedback', 'feedback', 'Add the GOV.UK feedback page');
+        updateOverviewRow('user-feedback-action', feedbackOn, 'Turned on', 'Change', ' user feedback', '#', 'Add the GOV.UK feedback page');
 
         var savedOn = data.savedAnswersEnabled === 'yes';
-        updateOverviewRow('saved-answers-action', savedOn, 'Turned on', 'Change', ' saved answers', 'saved-answers', 'Let users save their answers');
+        updateOverviewRow('saved-answers-action', savedOn, 'Turned on', 'Change', ' saved answers', base + 'saved-answers', 'Let users save their answers');
       })
       .catch(function() {});
   });
