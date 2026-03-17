@@ -1,7 +1,6 @@
 {% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-{# <span class="govuk-caption-l">Check answers</span> #}
 <h1 class="govuk-heading-l">Check answers page overview</h1>
 
 <form class="form" action="/titan-mvp-1.2/form-editor/listing" method="post">
@@ -9,33 +8,63 @@
     rows: [
       {
         key: {
-          text: "Declaration text (optional)"
+          text: "Declaration text (optional)",
+          classes: "govuk-summary-list__width40"
         },
         value: {
-          html: '<span id="declaration-value">Loading declaration...</span>'
+          html: '<a class="govuk-link govuk-link--no-visited-state" href="/titan-mvp-1.2/form-editor/check-answers/settings-modular?tab=declaration" id="declaration-action">Add declaration text</a>'
         },
-        actions: {
-          items: [
-            {
-              html: '<a href="/titan-mvp-1.2/form-editor/check-answers/settings-modular?tab=declaration" class="govuk-link govuk-link--no-visited-state" id="declaration-action">Add declaration text</a>'
-            }
-          ]
-        }
+        actions: { items: [] }
       },
       {
         key: {
-          text: "Sections (optional)"
+          text: "Confirmation email" if (data and data.savedAnswersEnabled === "yes") else "Confirmation email (optional)",
+          classes: "govuk-summary-list__width40"
         },
         value: {
-          html: '<span id="sections-value">Loading sections...</span>'
+          html: '<a class="govuk-link govuk-link--no-visited-state" href="/titan-mvp-1.2/form-editor/check-answers/settings-modular?tab=confirmation-email" id="confirmation-email-action">Turn off confirmation emails</a>'
         },
-        actions: {
-          items: [
-            {
-              html: '<a href="/titan-mvp-1.2/form-editor/check-answers/settings-modular?tab=sections" class="govuk-link govuk-link--no-visited-state" id="sections-action">Add sections</a>'
-            }
-          ]
-        }
+        actions: { items: [] }
+      },
+      {
+        key: {
+          text: "Reference number (optional)",
+          classes: "govuk-summary-list__width40"
+        },
+        value: {
+          html: '<a class="govuk-link govuk-link--no-visited-state" href="/titan-mvp-1.2/form-editor/check-answers/settings-modular?tab=reference-number" id="reference-number-action">Turn on the reference number</a>'
+        },
+        actions: { items: [] }
+      },
+      {
+        key: {
+          text: "Sections (optional)",
+          classes: "govuk-summary-list__width40"
+        },
+        value: {
+          html: '<a class="govuk-link govuk-link--no-visited-state" href="/titan-mvp-1.2/form-editor/check-answers/settings-modular?tab=sections" id="sections-action">Add and organise sections</a>'
+        },
+        actions: { items: [] }
+      },
+      {
+        key: {
+          html: '<span id="user-feedback">User feedback (optional)</span>',
+          classes: "govuk-summary-list__width40"
+        },
+        value: {
+          html: '<a class="govuk-link govuk-link--no-visited-state" href="/titan-mvp-1.2/form-editor/check-answers/settings-modular?tab=feedback" id="user-feedback-action">Remove the GOV.UK feedback page</a>'
+        },
+        actions: { items: [] }
+      },
+      {
+        key: {
+          text: "Saved answers (optional)",
+          classes: "govuk-summary-list__width40"
+        },
+        value: {
+          html: '<a class="govuk-link govuk-link--no-visited-state" href="/titan-mvp-1.2/form-editor/check-answers/settings-modular?tab=saved-answers" id="saved-answers-action">Let users save their answers</a>'
+        },
+        actions: { items: [] }
       }
     ]
   }) }}
@@ -61,64 +90,43 @@
     fetch('/titan-mvp-1.2/form-editor/check-answers/get-session-data')
       .then(response => response.json())
       .then(data => {
-        const sectionsValue = document.getElementById('sections-value');
-        const sectionsAction = document.getElementById('sections-action');
-        const declarationValue = document.getElementById('declaration-value');
         const declarationAction = document.getElementById('declaration-action');
+        const sectionsAction = document.getElementById('sections-action');
+        const confirmationEmailAction = document.getElementById('confirmation-email-action');
+        const referenceNumberAction = document.getElementById('reference-number-action');
+        const userFeedbackAction = document.getElementById('user-feedback-action');
+        const savedAnswersAction = document.getElementById('saved-answers-action');
 
-        // Handle declaration text and option
-        if (data.declarationOption === 'no-declaration') {
-          // Always show the link if user said no
-          declarationValue.innerHTML = '<a href="/titan-mvp-1.2/form-editor/check-answers/settings-modular?tab=declaration" class="govuk-link govuk-link--no-visited-state">Add declaration text</a>';
-          declarationAction.style.display = 'none'; // Hide the actions column when no declaration
-        } else if (data.declarationOption === 'yes-declaration' && data.declarationText && data.declarationText.trim() !== '') {
-          // Show declaration text preview (truncated if too long)
-          const preview = data.declarationText.length > 50
-            ? data.declarationText.substring(0, 50) + '...'
-            : data.declarationText;
-          declarationValue.innerHTML = preview;
-          // Update action link to "Change"
+        if (declarationAction && data.declarationOption === 'yes-declaration' && data.declarationText && data.declarationText.trim() !== '') {
           declarationAction.textContent = 'Change';
           declarationAction.href = '/titan-mvp-1.2/form-editor/check-answers/settings-modular?tab=declaration';
-        } else {
-          // Yes selected but no text
-          declarationValue.innerHTML = '<a href="/titan-mvp-1.2/form-editor/check-answers/settings-modular?tab=declaration" class="govuk-link govuk-link--no-visited-state">Add declaration text</a>';
-          declarationAction.style.display = 'none'; // Hide the actions column when no declaration text
         }
 
-        // Handle sections
-        if (data.sections && data.sections.length > 0) {
-          // Show sections information
-          const sectionCount = data.sections.length;
-          const sectionNames = data.sections.map(section => section.title || section.name).join(', ');
-
-          if (sectionCount === 1) {
-            sectionsValue.innerHTML = `1 section: ${sectionNames}`;
-          } else {
-            sectionsValue.innerHTML = `${sectionCount} sections: ${sectionNames}`;
-          }
-
-          // Update action link to "Change"
+        if (sectionsAction && data.sections && data.sections.length > 0) {
           sectionsAction.textContent = 'Change';
           sectionsAction.href = '/titan-mvp-1.2/form-editor/check-answers/settings-modular?tab=sections';
-        } else {
-          // No sections - show "Add sections" link
-          sectionsValue.innerHTML = '<a href="/titan-mvp-1.2/form-editor/check-answers/settings-modular?tab=sections" class="govuk-link govuk-link--no-visited-state">Add and organise sections</a>';
-          sectionsAction.style.display = 'none'; // Hide the actions column when no sections
+        }
+
+        if (confirmationEmailAction && data.confirmationEmailEnabled === 'no') {
+          confirmationEmailAction.textContent = 'Turn on confirmation emails';
+          confirmationEmailAction.href = '/titan-mvp-1.2/form-editor/check-answers/settings-modular?tab=confirmation-email';
+        }
+
+        if (referenceNumberAction && data.referenceNumberEnabled === 'yes') {
+          referenceNumberAction.textContent = 'Turn off the reference number';
+          referenceNumberAction.href = '/titan-mvp-1.2/form-editor/check-answers/settings-modular?tab=reference-number';
+        }
+
+        if (userFeedbackAction && data.feedbackPageEnabled === 'no') {
+          userFeedbackAction.textContent = 'Add the GOV.UK feedback page';
+          userFeedbackAction.href = '/titan-mvp-1.2/form-editor/check-answers/settings-modular?tab=feedback';
+        }
+
+        if (savedAnswersAction && data.savedAnswersEnabled === 'yes') {
+          savedAnswersAction.textContent = 'Change';
+          savedAnswersAction.href = '/titan-mvp-1.2/form-editor/check-answers/settings-modular?tab=saved-answers';
         }
       })
-      .catch(error => {
-        console.error('Error loading session data:', error);
-        // Fallback to default links if there's an error
-        const sectionsValue = document.getElementById('sections-value');
-        const declarationValue = document.getElementById('declaration-value');
-        const sectionsAction = document.getElementById('sections-action');
-        const declarationAction = document.getElementById('declaration-action');
-
-        sectionsValue.innerHTML = '<a href="/titan-mvp-1.2/form-editor/check-answers/settings-modular?tab=sections" class="govuk-link">Add sections</a>';
-        declarationValue.innerHTML = '<a href="/titan-mvp-1.2/form-editor/check-answers/settings-modular?tab=declaration" class="govuk-link">Enter declaration text</a>';
-        sectionsAction.style.display = 'none';
-        declarationAction.style.display = 'none';
-      });
+      .catch(function() {});
   });
 </script>

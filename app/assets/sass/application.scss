@@ -72,6 +72,24 @@
   }
 }
 
+// Check answers page – sub-nav active state (green underline)
+.check-answers-sub-nav {
+  .moj-sub-navigation__link--active,
+  .moj-sub-navigation__link[aria-current="page"] {
+    color: #0b0c0c !important;
+    font-weight: 700;
+
+    &::before {
+      background-color: #008938 !important;
+    }
+  }
+}
+
+// Summary list key column width (e.g. check answers page overview)
+.govuk-summary-list__key.govuk-summary-list__width40 {
+  width: 40%;
+}
+
 // // To make things wide globally
 // @mixin govuk-width-container($width: $govuk-page-width) {
 //   // By default, limit the width of the container to the page width

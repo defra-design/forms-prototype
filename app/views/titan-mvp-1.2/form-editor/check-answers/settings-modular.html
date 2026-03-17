@@ -79,6 +79,14 @@ navigationItems: [
                                         {% include "components/check-answers-tabs/declaration.njk" %}
                                         {% elif data.currentTab == 'sections' %}
                                         {% include "components/check-answers-tabs/sections.njk" %}
+                                        {% elif data.currentTab == 'confirmation-email' %}
+                                        {% include "components/check-answers-tabs/confirmation-email.njk" %}
+                                        {% elif data.currentTab == 'reference-number' %}
+                                        {% include "components/check-answers-tabs/reference-number.njk" %}
+                                        {% elif data.currentTab == 'feedback' %}
+                                        {% include "components/check-answers-tabs/feedback.njk" %}
+                                        {% elif data.currentTab == 'saved-answers' %}
+                                        {% include "components/check-answers-tabs/saved-answers.njk" %}
                                         {% else %}
                                         {% include "components/check-answers-tabs/page-settings.njk" %}
                                         {% endif %}
@@ -141,6 +149,13 @@ navigationItems: [
                     <!-- Dynamic Summary List -->
                     <div id="dynamic-summary-list">
                         <!-- Content will be populated by JavaScript -->
+                    </div>
+
+                    <!-- Confirmation email (label loses "(optional)" when saved answers is on) -->
+                    <div id="preview-confirmation-email" class="govuk-!-margin-top-6 govuk-!-margin-bottom-6">
+                        <label class="govuk-label govuk-label--m govuk-!-padding-top-6" id="preview-confirmation-email-label">{{ "Confirmation email" if (data and data.savedAnswersEnabled === "yes") else "Confirmation email (optional)" }}</label>
+                        <p class="govuk-hint govuk-!-margin-bottom-2" id="preview-confirmation-email-hint">Enter your email address to receive a confirmation email and a copy of your answers</p>
+                        <input class="govuk-input govuk-input--width-20" id="preview-confirmation-email-input" type="email" autocomplete="email" placeholder="" disabled style="background-color: #f3f2f1;">
                     </div>
 
                     <!-- Guidance Paragraph -->
@@ -330,8 +345,8 @@ navigationItems: [
 
         // Only populate if we're not on the sections tab (sections tab will populate it itself)
         if (dynamicSummaryList && !window.location.search.includes('tab=sections')) {
-            // Load session data to see if we have sections
-            fetch('/titan-mvp-1.2/form-editor/check-answers/get-session-data')
+            // Load session data to see if we have sections (cache-bust so we get fresh data after save)
+            fetch('/titan-mvp-1.2/form-editor/check-answers/get-session-data?t=' + Date.now())
                 .then(response => response.json())
                 .then(data => {
                     if (data.sections && data.sections.length > 0 && data.checkAnswersItems && data.checkAnswersItems.length > 0) {
@@ -366,6 +381,16 @@ navigationItems: [
                         if (continueButton) {
                             continueButton.textContent = "Accept and send";
                         }
+                    }
+
+                    // Always show confirmation email in preview; label loses "(optional)" when saved answers is on
+                    const previewConfirmationEmail = document.getElementById('preview-confirmation-email');
+                    const previewConfirmationEmailLabel = document.getElementById('preview-confirmation-email-label');
+                    if (previewConfirmationEmail && previewConfirmationEmailLabel) {
+                        previewConfirmationEmail.style.display = 'block';
+                        const label = data.savedAnswersEnabled === 'yes' ? 'Confirmation email' : 'Confirmation email (optional)';
+                        previewConfirmationEmailLabel.textContent = label;
+                        console.log('[check-answers preview] savedAnswersEnabled:', data.savedAnswersEnabled, '→ label:', label);
                     }
                 })
                 .catch(error => {

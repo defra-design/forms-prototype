@@ -10294,11 +10294,16 @@ router.get(
 router.get(
   "/titan-mvp-1.2/form-editor/check-answers/get-session-data",
   (req, res) => {
+    res.set("Cache-Control", "no-store");
     res.json({
       checkAnswersItems: req.session.data.checkAnswersItems || [],
       sections: req.session.data.sections || [],
       declarationText: req.session.data.declarationText || "",
       declarationOption: req.session.data.declarationOption || "no-declaration",
+      confirmationEmailEnabled: req.session.data.confirmationEmailEnabled,
+      referenceNumberEnabled: req.session.data.referenceNumberEnabled,
+      feedbackPageEnabled: req.session.data.feedbackPageEnabled,
+      savedAnswersEnabled: req.session.data.savedAnswersEnabled,
     });
   }
 );
@@ -10542,9 +10547,27 @@ router.get(
     } else if (tab === "declaration") {
       formData.showDeclarationTab = true;
       currentTab = "declaration";
+    } else if (tab === "confirmation-email") {
+      currentTab = "confirmation-email";
+    } else if (tab === "reference-number") {
+      currentTab = "reference-number";
     } else if (tab === "sections") {
       formData.showSectionsTab = true;
       currentTab = "sections";
+    } else if (tab === "feedback") {
+      currentTab = "feedback";
+    } else if (tab === "saved-answers") {
+      currentTab = "saved-answers";
+    }
+
+    // Use savedAnswersEnabled from URL if present (so it works even when session doesn't persist)
+    if (req.query.savedAnswersEnabled === "yes" || req.query.savedAnswersEnabled === "no") {
+      formData.savedAnswersEnabled = req.query.savedAnswersEnabled;
+      req.session.data = formData;
+    }
+    // Default so template always has a value when on saved-answers tab (avoids undefined when opening via nav)
+    if (currentTab === "saved-answers" && (formData.savedAnswersEnabled !== "yes" && formData.savedAnswersEnabled !== "no")) {
+      formData.savedAnswersEnabled = "no";
     }
 
     // If we're on a specific tab, make sure the tab is visible in the nav
@@ -10686,6 +10709,7 @@ router.get(
 
     console.log("=== RENDER DATA ===");
     console.log("currentTab:", renderData.currentTab);
+    console.log("savedAnswersEnabled:", renderData.savedAnswersEnabled);
     console.log("showDeclarationTab:", renderData.showDeclarationTab);
     console.log("showSectionsTab:", renderData.showSectionsTab);
 
@@ -10710,14 +10734,31 @@ router.post(
     // Handle declaration form submission specifically
     if (req.body.declarationOption) {
       formData.declarationOption = req.body.declarationOption;
-      console.log("Saved declaration option:", req.body.declarationOption);
     }
     if (req.body.checkAnswersGuidanceTextInput) {
       formData.declarationText = req.body.checkAnswersGuidanceTextInput;
-      console.log(
-        "Saved declaration text:",
-        req.body.checkAnswersGuidanceTextInput
-      );
+    }
+    // Persist new tab options
+    if (req.body.confirmationEmailEnabled) {
+      formData.confirmationEmailEnabled = req.body.confirmationEmailEnabled;
+    }
+    if (req.body.referenceNumberEnabled) {
+      formData.referenceNumberEnabled = req.body.referenceNumberEnabled;
+    }
+    if (req.body.feedbackPageEnabled) {
+      formData.feedbackPageEnabled = req.body.feedbackPageEnabled;
+    }
+    if (req.body.currentTab === "saved-answers") {
+      const raw = req.body.savedAnswersEnabled;
+      const isYes = raw === "yes" || (Array.isArray(raw) && raw.includes("yes"));
+      formData.savedAnswersEnabled = isYes ? "yes" : "no";
+      if (isYes) {
+        formData.confirmationEmailEnabled = "yes";
+        formData.referenceNumberEnabled = "yes";
+      }
+      console.log("[saved-answers POST] raw:", raw, "isYes:", isYes, "formData.savedAnswersEnabled:", formData.savedAnswersEnabled);
+    } else if (req.body.savedAnswersEnabled) {
+      formData.savedAnswersEnabled = req.body.savedAnswersEnabled;
     }
 
     // Determine which tab to redirect to based on form data
@@ -10730,10 +10771,15 @@ router.post(
 
     req.session.data = formData;
 
-    // Redirect back to the modular page with the appropriate tab
-    res.redirect(
-      `/titan-mvp-1.2/form-editor/check-answers/settings-modular?tab=${redirectTab}`
-    );
+    // Save session before redirect; pass savedAnswersEnabled in URL so next page has it even if session doesn't persist
+    req.session.save(function (err) {
+      if (err) return res.sendStatus(500);
+      let url = `/titan-mvp-1.2/form-editor/check-answers/settings-modular?tab=${redirectTab}`;
+      if (redirectTab === "saved-answers" && formData.savedAnswersEnabled) {
+        url += "&savedAnswersEnabled=" + formData.savedAnswersEnabled;
+      }
+      res.redirect(url);
+    });
   }
 );
 
