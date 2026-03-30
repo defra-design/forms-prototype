@@ -3836,6 +3836,143 @@ router.get("/titan-mvp-1.2/form-overview/submissions/download/downloading", (req
   });
 });
 
+// Attachments download: confirm recipient email (index)
+router.get("/titan-mvp-1.2/form-overview/submissions/attachments-download/index", (req, res) => {
+  const formData = req.session.data || {};
+  const form = {
+    id: formData.formId || "example-form",
+    name: formData.formName || "Example Form"
+  };
+
+  // If the link is expired, show the expired page
+  if (req.query.expired === "true") {
+    return res.render("titan-mvp-1.2/form-overview/submissions/attachments-download/expired", {
+      form,
+      pageName: `Download attached files - ${form.name}`
+    });
+  }
+
+  res.render("titan-mvp-1.2/form-overview/submissions/attachments-download/index", {
+    form,
+    submissionId: req.query.submissionId,
+    pageName: `Download attached files - ${form.name}`
+  });
+});
+
+router.post("/titan-mvp-1.2/form-overview/submissions/attachments-download/index", (req, res) => {
+  const formData = req.session.data || {};
+  const form = {
+    id: formData.formId || "example-form",
+    name: formData.formName || "Example Form"
+  };
+
+  const submissionId = req.query.submissionId || "ABC123";
+  const expectedEmail = "you@example.com";
+  const submittedEmail = (req.body.email || "").trim().toLowerCase();
+
+  if (!submittedEmail || submittedEmail !== expectedEmail) {
+    return res.render("titan-mvp-1.2/form-overview/submissions/attachments-download/index", {
+      form,
+      submissionId,
+      pageName: `Download attached files - ${form.name}`,
+      errorMessage: "This is not the email address the link was sent to."
+    });
+  }
+
+  res.redirect(`/titan-mvp-1.2/form-overview/submissions/attachments-download/files?submissionId=${encodeURIComponent(submissionId)}`);
+});
+
+// Attachments download: files list
+router.get("/titan-mvp-1.2/form-overview/submissions/attachments-download/files", (req, res) => {
+  const formData = req.session.data || {};
+  const form = {
+    id: formData.formId || "example-form",
+    name: formData.formName || "Example Form"
+  };
+
+  const submissionId = req.query.submissionId || "ABC123";
+
+  const base = `/titan-mvp-1.2/form-overview/submissions/attachments-download/file/${encodeURIComponent(submissionId)}`;
+
+  // Mocked attachments (real implementation would fetch by submissionId)
+  const attachments = [
+    {
+      id: "insurance-certificate",
+      filename: "insurance-certificate.pdf",
+      questionLabel: "Upload your insurance certificate",
+      meta: "PDF, 1.2MB",
+      sizeBytes: 1200000,
+      status: "queued",
+      href: `${base}/insurance-certificate?filename=${encodeURIComponent("insurance-certificate.pdf")}&bytes=${encodeURIComponent("1200000")}`,
+      downloadName: `${form.name || "Example Form"}_${submissionId}_insurance-certificate.pdf`
+    },
+    {
+      id: "methodology-statement",
+      filename: "methodology-statement.docx",
+      questionLabel: "Upload methodology statement",
+      meta: "Word document, 340KB",
+      sizeBytes: 340000,
+      status: "queued",
+      href: `${base}/methodology-statement?filename=${encodeURIComponent("methodology-statement.docx")}&bytes=${encodeURIComponent("340000")}`,
+      downloadName: `${form.name || "Example Form"}_${submissionId}_methodology-statement.docx`
+    },
+    {
+      id: "site-map",
+      filename: "site-map.png",
+      questionLabel: "Upload a map of the site",
+      meta: "PNG, 560KB",
+      sizeBytes: 560000,
+      status: "queued",
+      href: `${base}/site-map?filename=${encodeURIComponent("site-map.png")}&bytes=${encodeURIComponent("560000")}`,
+      downloadName: `${form.name || "Example Form"}_${submissionId}_site-map.png`
+    }
+  ];
+
+  res.render("titan-mvp-1.2/form-overview/submissions/attachments-download/files", {
+    form,
+    submissionId,
+    attachments,
+    pageName: `Download attached files - ${form.name}`
+  });
+});
+
+// Attachments download: serve a stable prototype file
+router.get("/titan-mvp-1.2/form-overview/submissions/attachments-download/file/:submissionId/:fileId", (req, res) => {
+  const submissionId = req.params.submissionId || "ABC123";
+  const fileId = req.params.fileId || "file";
+
+  const filename = (req.query.filename || `${fileId}.txt`).toString();
+  const bytes = parseInt((req.query.bytes || "0").toString(), 10);
+  const safeBytes = Number.isFinite(bytes) && bytes > 0 ? bytes : 1024;
+
+  // We return plain text content but let the filename drive the download name.
+  // This avoids relying on external document services for the prototype.
+  const body = [
+    `Prototype download`,
+    `submissionId: ${submissionId}`,
+    `fileId: ${fileId}`,
+    `filename: ${filename}`,
+    `approxSizeBytes: ${safeBytes}`,
+    ``,
+    `This is placeholder content for the attachments download journey.`
+  ].join("\n");
+
+  res.setHeader("Content-Type", "text/plain; charset=utf-8");
+  res.setHeader("Content-Disposition", `attachment; filename="${filename.replace(/"/g, "")}"`);
+  res.send(body);
+});
+
+// Attachments download: single download to represent "download all"
+router.get("/titan-mvp-1.2/form-overview/submissions/attachments-download/download-all", (req, res) => {
+  const submissionId = req.query.submissionId || "ABC123";
+  // Prototype: redirects to a stable local download endpoint to simulate "download all"
+  res.redirect(
+    `/titan-mvp-1.2/form-overview/submissions/attachments-download/file/${encodeURIComponent(submissionId)}/all?filename=${encodeURIComponent(
+      `${submissionId}-all-files.txt`
+    )}&bytes=1`
+  );
+});
+
 // Download submissions action (GET and POST) - redirect to downloading page
 router.get("/titan-mvp-1.2/form-overview/submissions/download", (req, res) => {
   // Redirect to downloading page
@@ -13770,6 +13907,53 @@ router.post("/how-many-members-of-staff-will-look-after-the-unicorns", function 
 });
 
 // ── Runner v2: same form without payment or postcode lookup ─────────────────
+function ensureReviewStore(req) {
+  if (!req.app.locals.reviewStore) {
+    req.app.locals.reviewStore = new Map();
+  }
+  return req.app.locals.reviewStore;
+}
+
+function createReviewToken() {
+  return require("crypto").randomBytes(24).toString("hex");
+}
+
+function reviewerAccessValues() {
+  return {
+    referenceNumber: "21218-ewfew-2e21e21",
+    memorableWord: "chicken nuggets"
+  };
+}
+
+function applyRunnerV3DemoData(data) {
+  const demoData = {
+    name: "Alex Example",
+    email: "alex.example@gov.uk",
+    phoneNumber: "07123 456789",
+    selectedAddress: "10 Example Street, London, SW1A 1AA",
+    aitzzV: "11 to 20",
+    DyfjJC: ["Rainbow", "Forest"],
+    "location-easting": "530047",
+    "location-northing": "180377",
+    zhJMaM: "12"
+  };
+
+  const hasRealAnswers =
+    Boolean(data.name) ||
+    Boolean(data.email) ||
+    Boolean(data.phoneNumber) ||
+    Boolean(data.selectedAddress || data.finalAddress) ||
+    Boolean(data.aitzzV) ||
+    Boolean(data.DyfjJC) ||
+    Boolean(data["location-easting"]) ||
+    Boolean(data["location-northing"]) ||
+    Boolean(data.zhJMaM);
+
+  if (!hasRealAnswers) {
+    Object.assign(data, demoData);
+  }
+}
+
 router.get("/runner-v2/start", function (req, res) {
   res.render("titan-mvp-1.2/runner/questions/start-v2");
 });
@@ -13889,21 +14073,7 @@ router.post("/runner-v2/how-many-unicorns-do-you-expect-to-breed-each-year", fun
   }
   req.session.data.aitzzV = aitzzV;
   delete req.session.data.error;
-  res.redirect("/runner-v2/where-will-you-keep-the-unicorns");
-});
-
-router.get("/runner-v2/where-will-you-keep-the-unicorns", function (req, res) {
-  res.render("titan-mvp-1.2/runner/questions/where-will-you-keep-the-unicorns", { error: req.session.data.error, basePath: "/runner-v2" });
-});
-router.post("/runner-v2/where-will-you-keep-the-unicorns", function (req, res) {
-  const { 'location-easting': easting, 'location-northing': northing } = req.body;
-  if (!easting || !northing) {
-    req.session.data.error = { locationError: "Enter both easting and northing coordinates" };
-    return res.redirect("/runner-v2/where-will-you-keep-the-unicorns");
-  }
-  req.session.data['location-easting'] = easting;
-  req.session.data['location-northing'] = northing;
-  delete req.session.data.error;
+  // Skip "where you keep the unicorns" question (removed from runner-v2 flow)
   res.redirect("/runner-v2/how-many-members-of-staff-will-look-after-the-unicorns");
 });
 
@@ -13932,6 +14102,891 @@ router.post("/runner-v2/summary", function (req, res) {
 });
 
 router.get("/runner-v2/confirmation", function (req, res) {
+  res.render("titan-mvp-1.2/runner/confirmation-v2");
+});
+
+// ── Runner v3: runner-v2 with reviewer-gated submission ─────────────────────
+router.get("/runner-v3/start", function (req, res) {
+  res.render("titan-mvp-1.2/runner/questions/start-v2");
+});
+
+router.get("/runner-v3/declaration", function (req, res) {
+  res.render("titan-mvp-1.2/runner/questions/declaration", {
+    error: req.session.data.error,
+    basePath: "/runner-v3"
+  });
+});
+
+router.post("/runner-v3/declaration", function (req, res) {
+  const { declaration } = req.body;
+  if (!declaration || !declaration.includes("confirmed")) {
+    req.session.data.error = { declarationError: "You must accept the declaration to continue" };
+    return res.redirect("/runner-v3/declaration");
+  }
+  delete req.session.data.error;
+  res.redirect("/runner-v3/whats-your-name");
+});
+
+router.get("/runner-v3/whats-your-name", function (req, res) {
+  res.render("titan-mvp-1.2/runner/questions/whats-your-name", { error: req.session.data.error, basePath: "/runner-v3" });
+});
+router.post("/runner-v3/whats-your-name", function (req, res) {
+  const { name } = req.body;
+  if (!name || name.trim() === "") {
+    req.session.data.error = { nameError: "Enter your full name" };
+    return res.redirect("/runner-v3/whats-your-name");
+  }
+  req.session.data.name = name;
+  delete req.session.data.error;
+  res.redirect("/runner-v3/whats-your-email-address");
+});
+
+router.get("/runner-v3/whats-your-email-address", function (req, res) {
+  res.render("titan-mvp-1.2/runner/questions/whats-your-email-address", { error: req.session.data.error, basePath: "/runner-v3" });
+});
+router.post("/runner-v3/whats-your-email-address", function (req, res) {
+  const { email } = req.body;
+  if (!email || email.trim() === "") {
+    req.session.data.error = { emailError: "Enter your email address" };
+    return res.redirect("/runner-v3/whats-your-email-address");
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    req.session.data.error = { emailError: "Enter a valid email address" };
+    return res.redirect("/runner-v3/whats-your-email-address");
+  }
+  req.session.data.email = email;
+  delete req.session.data.error;
+  res.redirect("/runner-v3/whats-your-phone-number");
+});
+
+router.get("/runner-v3/whats-your-phone-number", function (req, res) {
+  res.render("titan-mvp-1.2/runner/questions/whats-your-phone-number", { error: req.session.data.error, basePath: "/runner-v3" });
+});
+router.post("/runner-v3/whats-your-phone-number", function (req, res) {
+  const { phoneNumber } = req.body;
+  if (!phoneNumber || phoneNumber.trim() === "") {
+    req.session.data.error = { phoneError: "Enter your phone number" };
+    return res.redirect("/runner-v3/whats-your-phone-number");
+  }
+  const phoneRegex = /^(\+44\s?7\d{3}|\(?07\d{3}\)?)\s?\d{3}\s?\d{3}$/;
+  if (!phoneRegex.test(phoneNumber.replace(/\s/g, ""))) {
+    req.session.data.error = { phoneError: "Enter a valid UK phone number" };
+    return res.redirect("/runner-v3/whats-your-phone-number");
+  }
+  req.session.data.phoneNumber = phoneNumber;
+  delete req.session.data.error;
+  res.redirect("/runner-v3/whats-your-address");
+});
+
+router.get("/runner-v3/whats-your-address", function (req, res) {
+  req.session.data.returnUrl = req.session.data.returnUrl || "/runner-v3/whats-your-address";
+  res.render("titan-mvp-1.2/runner/questions/whats-your-address-no-lookup", {
+    error: req.session.data.error
+  });
+});
+router.post("/runner-v3/whats-your-address", function (req, res) {
+  const { action } = req.body;
+  if (action === "continue") {
+    if (!req.session.data.selectedAddress && !req.session.data.finalAddress && !req.session.data["wZLWPy-address-line-1"]) {
+      req.session.data.error = { addressError: true };
+      return res.redirect("/runner-v3/whats-your-address");
+    }
+    delete req.session.data.error;
+    res.redirect("/runner-v3/what-type-of-unicorns-will-you-breed");
+  } else if (action === "exit") {
+    req.session.data.returnUrl = "/runner-v3/whats-your-address";
+    res.redirect("/save-progress");
+  }
+});
+
+router.get("/runner-v3/what-type-of-unicorns-will-you-breed", function (req, res) {
+  res.render("titan-mvp-1.2/runner/questions/what-type-of-unicorns-will-you-breed", { error: req.session.data.error, basePath: "/runner-v3" });
+});
+router.post("/runner-v3/what-type-of-unicorns-will-you-breed", function (req, res) {
+  const { DyfjJC } = req.body;
+  if (!DyfjJC || DyfjJC.length === 0) {
+    req.session.data.error = { typeError: "Select at least one type of unicorn" };
+    return res.redirect("/runner-v3/what-type-of-unicorns-will-you-breed");
+  }
+  req.session.data.DyfjJC = DyfjJC;
+  delete req.session.data.error;
+  res.redirect("/runner-v3/how-many-unicorns-do-you-expect-to-breed-each-year");
+});
+
+router.get("/runner-v3/how-many-unicorns-do-you-expect-to-breed-each-year", function (req, res) {
+  res.render("titan-mvp-1.2/runner/questions/how-many-unicorns-do-you-expect-to-breed-each-year", { error: req.session.data.error, basePath: "/runner-v3" });
+});
+router.post("/runner-v3/how-many-unicorns-do-you-expect-to-breed-each-year", function (req, res) {
+  const { aitzzV } = req.body;
+  if (!aitzzV) {
+    req.session.data.error = { numberError: "Select how many unicorns you expect to breed" };
+    return res.redirect("/runner-v3/how-many-unicorns-do-you-expect-to-breed-each-year");
+  }
+  req.session.data.aitzzV = aitzzV;
+  delete req.session.data.error;
+  res.redirect("/runner-v3/where-will-you-keep-the-unicorns");
+});
+
+router.get("/runner-v3/where-will-you-keep-the-unicorns", function (req, res) {
+  res.render("titan-mvp-1.2/runner/questions/where-will-you-keep-the-unicorns", { error: req.session.data.error, basePath: "/runner-v3" });
+});
+router.post("/runner-v3/where-will-you-keep-the-unicorns", function (req, res) {
+  const { "location-easting": easting, "location-northing": northing } = req.body;
+  if (!easting || !northing) {
+    req.session.data.error = { locationError: "Enter both easting and northing coordinates" };
+    return res.redirect("/runner-v3/where-will-you-keep-the-unicorns");
+  }
+  req.session.data["location-easting"] = easting;
+  req.session.data["location-northing"] = northing;
+  delete req.session.data.error;
+  res.redirect("/runner-v3/how-many-members-of-staff-will-look-after-the-unicorns");
+});
+
+router.get("/runner-v3/how-many-members-of-staff-will-look-after-the-unicorns", function (req, res) {
+  res.render("titan-mvp-1.2/runner/questions/how-many-members-of-staff-will-look-after-the-unicorns", { error: req.session.data.error, basePath: "/runner-v3" });
+});
+router.post("/runner-v3/how-many-members-of-staff-will-look-after-the-unicorns", function (req, res) {
+  const { zhJMaM } = req.body;
+  if (!zhJMaM || zhJMaM.trim() === "") {
+    req.session.data.error = { staffError: "Enter the number of staff members" };
+    return res.redirect("/runner-v3/how-many-members-of-staff-will-look-after-the-unicorns");
+  }
+  req.session.data.zhJMaM = zhJMaM;
+  delete req.session.data.error;
+  req.session.data.reviewDeclarationComplete = false;
+  delete req.session.data.reviewDeclarationError;
+  res.redirect("/runner-v3/summary");
+});
+
+router.get("/runner-v3/summary", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  applyRunnerV3DemoData(req.session.data);
+  const newLinkGenerated = req.query.newLink === "1";
+
+  const reviewStore = ensureReviewStore(req);
+  let reviewToken = req.session.data.reviewToken;
+  if (!reviewToken) {
+    reviewToken = createReviewToken();
+    req.session.data.reviewToken = reviewToken;
+  }
+
+  const existingEntry = reviewStore.get(reviewToken);
+  const reviewerDeclarationComplete =
+    existingEntry && existingEntry.expires > Date.now()
+      ? Boolean(existingEntry.reviewDeclarationComplete)
+      : false;
+
+  req.session.data.reviewDeclarationComplete = reviewerDeclarationComplete;
+
+  reviewStore.set(reviewToken, {
+    data: { ...req.session.data },
+    reviewDeclarationComplete: reviewerDeclarationComplete,
+    reviewerDeclaredAt:
+      existingEntry && existingEntry.reviewerDeclaredAt
+        ? existingEntry.reviewerDeclaredAt
+        : null,
+    expires: Date.now() + (30 * 60 * 1000)
+  });
+
+  const shareReviewUrl = `/runner-v3/review-declaration?token=${encodeURIComponent(reviewToken)}`;
+  const absoluteShareReviewUrl = `${req.protocol}://${req.get("host")}${shareReviewUrl}`;
+  const reviewStatus = reviewerDeclarationComplete
+    ? "Reviewer declaration complete"
+    : "Awaiting reviewer declaration";
+
+  res.render("titan-mvp-1.2/runner-v3/summary-no-payment", {
+    data: req.session.data,
+    reviewStatus,
+    shareReviewUrl: absoluteShareReviewUrl,
+    newLinkGenerated
+  });
+});
+
+router.post("/runner-v3/summary/generate-review-link", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  const reviewStore = ensureReviewStore(req);
+  const previousToken = req.session.data.reviewToken;
+
+  if (previousToken) {
+    reviewStore.delete(previousToken);
+  }
+
+  const newToken = createReviewToken();
+  req.session.data.reviewToken = newToken;
+  req.session.data.reviewDeclarationComplete = false;
+  delete req.session.data.reviewDeclarationError;
+
+  reviewStore.set(newToken, {
+    data: { ...req.session.data },
+    reviewDeclarationComplete: false,
+    reviewerDeclaredAt: null,
+    expires: Date.now() + (30 * 60 * 1000)
+  });
+
+  return res.redirect("/runner-v3/summary?newLink=1");
+});
+
+router.post("/runner-v3/summary", function (req, res) {
+  const reviewStore = ensureReviewStore(req);
+  const reviewToken = req.session.data && req.session.data.reviewToken;
+  const reviewEntry = reviewToken ? reviewStore.get(reviewToken) : null;
+  const reviewerDeclarationComplete =
+    reviewEntry && reviewEntry.expires > Date.now()
+      ? Boolean(reviewEntry.reviewDeclarationComplete)
+      : false;
+
+  if (!reviewerDeclarationComplete) {
+    req.session.data.reviewDeclarationError =
+      "The reviewer must complete declaration before you can send this form";
+    return res.redirect("/runner-v3/summary");
+  }
+
+  delete req.session.data.reviewDeclarationError;
+  req.session.data.reviewDeclarationComplete = true;
+  res.redirect("/runner-v3/confirmation");
+});
+
+router.get("/runner-v3/review-declaration", function (req, res) {
+  const { token, success } = req.query;
+  const reviewStore = ensureReviewStore(req);
+  const reviewEntry = token ? reviewStore.get(token) : null;
+  const tokenValid = Boolean(reviewEntry && reviewEntry.expires > Date.now());
+
+  if (!tokenValid) {
+    return res.render("titan-mvp-1.2/runner-v3/review-declaration", {
+      tokenValid: false
+    });
+  }
+
+  if (!req.session.data) {
+    req.session.data = {};
+  }
+  if (reviewEntry.data && typeof reviewEntry.data === "object") {
+    // Merge form data into session without wiping reviewer access flags.
+    req.session.data = { ...req.session.data, ...reviewEntry.data };
+  }
+
+  const accessMap = req.session.data.reviewAccessTokens || {};
+  const hasReviewerAccess = Boolean(token && accessMap[token]);
+  const reviewAccessError = req.session.data.reviewAccessError;
+  const enteredReferenceNumber = req.session.data.enteredReviewerReferenceNumber || "";
+  const enteredMemorableWord = req.session.data.enteredReviewerMemorableWord || "";
+
+  if (!hasReviewerAccess) {
+    return res.render("titan-mvp-1.2/runner-v3/review-declaration", {
+      tokenValid: true,
+      token,
+      hasReviewerAccess: false,
+      reviewAccessError,
+      enteredReferenceNumber,
+      enteredMemorableWord
+    });
+  }
+
+  delete req.session.data.reviewAccessError;
+  delete req.session.data.enteredReviewerReferenceNumber;
+  delete req.session.data.enteredReviewerMemorableWord;
+  applyRunnerV3DemoData(req.session.data);
+  reviewEntry.data = { ...req.session.data };
+
+  const error = req.session.data && req.session.data.error;
+
+  res.render("titan-mvp-1.2/runner-v3/review-declaration", {
+    tokenValid: true,
+    token,
+    hasReviewerAccess: true,
+    data: reviewEntry.data || {},
+    success: success === "1",
+    error
+  });
+});
+
+router.post("/runner-v3/review-declaration/access", function (req, res) {
+  const { token, reviewerReferenceNumber, reviewerMemorableWord } = req.body;
+  const reviewStore = ensureReviewStore(req);
+  const reviewEntry = token ? reviewStore.get(token) : null;
+  const tokenValid = Boolean(reviewEntry && reviewEntry.expires > Date.now());
+
+  if (!tokenValid) {
+    return res.redirect("/runner-v3/review-declaration");
+  }
+
+  const expected = reviewerAccessValues();
+  const normalizedReference = (reviewerReferenceNumber || "").trim();
+  const normalizedWord = (reviewerMemorableWord || "").trim().toLowerCase();
+
+  if (
+    normalizedReference !== expected.referenceNumber ||
+    normalizedWord !== expected.memorableWord.toLowerCase()
+  ) {
+    req.session.data.reviewAccessError =
+      "Enter the correct reviewer reference number and memorable word";
+    req.session.data.enteredReviewerReferenceNumber = reviewerReferenceNumber || "";
+    req.session.data.enteredReviewerMemorableWord = reviewerMemorableWord || "";
+    return res.redirect(`/runner-v3/review-declaration?token=${encodeURIComponent(token)}`);
+  }
+
+  const accessMap = req.session.data.reviewAccessTokens || {};
+  accessMap[token] = true;
+  req.session.data.reviewAccessTokens = accessMap;
+  delete req.session.data.reviewAccessError;
+  delete req.session.data.enteredReviewerReferenceNumber;
+  delete req.session.data.enteredReviewerMemorableWord;
+
+  return res.redirect(`/runner-v3/review-declaration?token=${encodeURIComponent(token)}`);
+});
+
+router.post("/runner-v3/review-declaration", function (req, res) {
+  const { token, declaration } = req.body;
+  const reviewStore = ensureReviewStore(req);
+  const reviewEntry = token ? reviewStore.get(token) : null;
+  const tokenValid = Boolean(reviewEntry && reviewEntry.expires > Date.now());
+
+  if (!tokenValid) {
+    return res.redirect("/runner-v3/review-declaration");
+  }
+
+  if (!declaration || !declaration.includes("confirmed")) {
+    req.session.data.error = {
+      declarationError: "You must accept the declaration to continue"
+    };
+    return res.redirect(`/runner-v3/review-declaration?token=${encodeURIComponent(token)}`);
+  }
+
+  delete req.session.data.error;
+  reviewStore.set(token, {
+    ...reviewEntry,
+    reviewDeclarationComplete: true,
+    reviewerDeclaredAt: new Date().toISOString(),
+    expires: Date.now() + (30 * 60 * 1000)
+  });
+
+  return res.redirect(`/runner-v3/review-declaration?token=${encodeURIComponent(token)}&success=1`);
+});
+
+router.get("/runner-v3/confirmation", function (req, res) {
+  res.render("titan-mvp-1.2/runner/confirmation-v2");
+});
+
+// ── Runner v4: review moved to intervention page after Send ─────────────────
+router.use("/runner-v4", function (req, res, next) {
+  const interventionStarted = Boolean(
+    req.session &&
+      req.session.data &&
+      req.session.data.reviewInterventionStartedV4
+  );
+
+  if (!interventionStarted) {
+    return next();
+  }
+
+  const editablePaths = new Set([
+    "/declaration",
+    "/whats-your-name",
+    "/whats-your-email-address",
+    "/whats-your-phone-number",
+    "/whats-your-address",
+    "/what-type-of-unicorns-will-you-breed",
+    "/how-many-unicorns-do-you-expect-to-breed-each-year",
+    "/where-will-you-keep-the-unicorns",
+    "/how-many-members-of-staff-will-look-after-the-unicorns",
+    "/summary"
+  ]);
+
+  if (editablePaths.has(req.path)) {
+    return res.redirect("/runner-v4/intervention");
+  }
+
+  return next();
+});
+
+router.get("/runner-v4/start", function (req, res) {
+  res.render("titan-mvp-1.2/runner/questions/start-v2");
+});
+
+router.get("/runner-v4/declaration", function (req, res) {
+  res.render("titan-mvp-1.2/runner/questions/declaration", {
+    error: req.session.data.error,
+    basePath: "/runner-v4"
+  });
+});
+
+router.post("/runner-v4/declaration", function (req, res) {
+  const { declaration } = req.body;
+  if (!declaration || !declaration.includes("confirmed")) {
+    req.session.data.error = { declarationError: "You must accept the declaration to continue" };
+    return res.redirect("/runner-v4/declaration");
+  }
+  delete req.session.data.error;
+  res.redirect("/runner-v4/whats-your-name");
+});
+
+router.get("/runner-v4/whats-your-name", function (req, res) {
+  res.render("titan-mvp-1.2/runner/questions/whats-your-name", { error: req.session.data.error, basePath: "/runner-v4" });
+});
+router.post("/runner-v4/whats-your-name", function (req, res) {
+  const { name } = req.body;
+  if (!name || name.trim() === "") {
+    req.session.data.error = { nameError: "Enter your full name" };
+    return res.redirect("/runner-v4/whats-your-name");
+  }
+  req.session.data.name = name;
+  delete req.session.data.error;
+  res.redirect("/runner-v4/whats-your-email-address");
+});
+
+router.get("/runner-v4/whats-your-email-address", function (req, res) {
+  res.render("titan-mvp-1.2/runner/questions/whats-your-email-address", { error: req.session.data.error, basePath: "/runner-v4" });
+});
+router.post("/runner-v4/whats-your-email-address", function (req, res) {
+  const { email } = req.body;
+  if (!email || email.trim() === "") {
+    req.session.data.error = { emailError: "Enter your email address" };
+    return res.redirect("/runner-v4/whats-your-email-address");
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    req.session.data.error = { emailError: "Enter a valid email address" };
+    return res.redirect("/runner-v4/whats-your-email-address");
+  }
+  req.session.data.email = email;
+  delete req.session.data.error;
+  res.redirect("/runner-v4/whats-your-phone-number");
+});
+
+router.get("/runner-v4/whats-your-phone-number", function (req, res) {
+  res.render("titan-mvp-1.2/runner/questions/whats-your-phone-number", { error: req.session.data.error, basePath: "/runner-v4" });
+});
+router.post("/runner-v4/whats-your-phone-number", function (req, res) {
+  const { phoneNumber } = req.body;
+  if (!phoneNumber || phoneNumber.trim() === "") {
+    req.session.data.error = { phoneError: "Enter your phone number" };
+    return res.redirect("/runner-v4/whats-your-phone-number");
+  }
+  const phoneRegex = /^(\+44\s?7\d{3}|\(?07\d{3}\)?)\s?\d{3}\s?\d{3}$/;
+  if (!phoneRegex.test(phoneNumber.replace(/\s/g, ""))) {
+    req.session.data.error = { phoneError: "Enter a valid UK phone number" };
+    return res.redirect("/runner-v4/whats-your-phone-number");
+  }
+  req.session.data.phoneNumber = phoneNumber;
+  delete req.session.data.error;
+  res.redirect("/runner-v4/whats-your-address");
+});
+
+router.get("/runner-v4/whats-your-address", function (req, res) {
+  req.session.data.returnUrl = req.session.data.returnUrl || "/runner-v4/whats-your-address";
+  res.render("titan-mvp-1.2/runner/questions/whats-your-address-no-lookup", {
+    error: req.session.data.error
+  });
+});
+router.post("/runner-v4/whats-your-address", function (req, res) {
+  const { action } = req.body;
+  if (action === "continue") {
+    if (!req.session.data.selectedAddress && !req.session.data.finalAddress && !req.session.data["wZLWPy-address-line-1"]) {
+      req.session.data.error = { addressError: true };
+      return res.redirect("/runner-v4/whats-your-address");
+    }
+    delete req.session.data.error;
+    res.redirect("/runner-v4/what-type-of-unicorns-will-you-breed");
+  } else if (action === "exit") {
+    req.session.data.returnUrl = "/runner-v4/whats-your-address";
+    res.redirect("/save-progress");
+  }
+});
+
+router.get("/runner-v4/what-type-of-unicorns-will-you-breed", function (req, res) {
+  res.render("titan-mvp-1.2/runner/questions/what-type-of-unicorns-will-you-breed", { error: req.session.data.error, basePath: "/runner-v4" });
+});
+router.post("/runner-v4/what-type-of-unicorns-will-you-breed", function (req, res) {
+  const { DyfjJC } = req.body;
+  if (!DyfjJC || DyfjJC.length === 0) {
+    req.session.data.error = { typeError: "Select at least one type of unicorn" };
+    return res.redirect("/runner-v4/what-type-of-unicorns-will-you-breed");
+  }
+  req.session.data.DyfjJC = DyfjJC;
+  delete req.session.data.error;
+  res.redirect("/runner-v4/how-many-unicorns-do-you-expect-to-breed-each-year");
+});
+
+router.get("/runner-v4/how-many-unicorns-do-you-expect-to-breed-each-year", function (req, res) {
+  res.render("titan-mvp-1.2/runner/questions/how-many-unicorns-do-you-expect-to-breed-each-year", { error: req.session.data.error, basePath: "/runner-v4" });
+});
+router.post("/runner-v4/how-many-unicorns-do-you-expect-to-breed-each-year", function (req, res) {
+  const { aitzzV } = req.body;
+  if (!aitzzV) {
+    req.session.data.error = { numberError: "Select how many unicorns you expect to breed" };
+    return res.redirect("/runner-v4/how-many-unicorns-do-you-expect-to-breed-each-year");
+  }
+  req.session.data.aitzzV = aitzzV;
+  delete req.session.data.error;
+  res.redirect("/runner-v4/where-will-you-keep-the-unicorns");
+});
+
+router.get("/runner-v4/where-will-you-keep-the-unicorns", function (req, res) {
+  res.render("titan-mvp-1.2/runner/questions/where-will-you-keep-the-unicorns", { error: req.session.data.error, basePath: "/runner-v4" });
+});
+router.post("/runner-v4/where-will-you-keep-the-unicorns", function (req, res) {
+  const { "location-easting": easting, "location-northing": northing } = req.body;
+  if (!easting || !northing) {
+    req.session.data.error = { locationError: "Enter both easting and northing coordinates" };
+    return res.redirect("/runner-v4/where-will-you-keep-the-unicorns");
+  }
+  req.session.data["location-easting"] = easting;
+  req.session.data["location-northing"] = northing;
+  delete req.session.data.error;
+  res.redirect("/runner-v4/how-many-members-of-staff-will-look-after-the-unicorns");
+});
+
+router.get("/runner-v4/how-many-members-of-staff-will-look-after-the-unicorns", function (req, res) {
+  res.render("titan-mvp-1.2/runner/questions/how-many-members-of-staff-will-look-after-the-unicorns", { error: req.session.data.error, basePath: "/runner-v4" });
+});
+router.post("/runner-v4/how-many-members-of-staff-will-look-after-the-unicorns", function (req, res) {
+  const { zhJMaM } = req.body;
+  if (!zhJMaM || zhJMaM.trim() === "") {
+    req.session.data.error = { staffError: "Enter the number of staff members" };
+    return res.redirect("/runner-v4/how-many-members-of-staff-will-look-after-the-unicorns");
+  }
+  req.session.data.zhJMaM = zhJMaM;
+  delete req.session.data.error;
+  req.session.data.reviewDeclarationCompleteV4 = false;
+  delete req.session.data.reviewDeclarationErrorV4;
+  res.redirect("/runner-v4/summary");
+});
+
+router.get("/runner-v4/summary", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  applyRunnerV3DemoData(req.session.data);
+  // Always restart the intervention flow from the blue panel when user returns to summary.
+  req.session.data.reviewInterventionStartedV4 = false;
+  delete req.session.data.reviewDeclarationErrorV4;
+  res.render("titan-mvp-1.2/runner-v4/summary-no-payment", {
+    data: req.session.data
+  });
+});
+
+router.post("/runner-v4/summary", function (req, res) {
+  res.redirect("/runner-v4/intervention");
+});
+
+router.post("/runner-v4/intervention/begin", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  req.session.data.reviewInterventionStartedV4 = true;
+  return res.redirect("/runner-v4/intervention");
+});
+
+router.post("/runner-v4/intervention/return-for-changes", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+
+  const reviewStore = ensureReviewStore(req);
+  const currentToken = req.session.data.reviewTokenV4;
+  if (currentToken) {
+    reviewStore.delete(currentToken);
+  }
+
+  // Unlock answers so applicant can edit, and clear review state.
+  req.session.data.reviewInterventionStartedV4 = false;
+  req.session.data.reviewDeclarationCompleteV4 = false;
+  delete req.session.data.reviewDeclarationErrorV4;
+  delete req.session.data.reviewTokenV4;
+
+  return res.redirect("/runner-v4/summary");
+});
+
+router.get("/runner-v4/intervention", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  applyRunnerV3DemoData(req.session.data);
+  const newLinkGenerated = req.query.newLink === "1";
+
+  const reviewStore = ensureReviewStore(req);
+  let reviewToken = req.session.data.reviewTokenV4;
+  if (!reviewToken) {
+    reviewToken = createReviewToken();
+    req.session.data.reviewTokenV4 = reviewToken;
+  }
+
+  const existingEntry = reviewStore.get(reviewToken);
+  const reviewerDeclarationComplete =
+    existingEntry && existingEntry.expires > Date.now()
+      ? Boolean(existingEntry.reviewDeclarationComplete)
+      : false;
+
+  req.session.data.reviewDeclarationCompleteV4 = reviewerDeclarationComplete;
+
+  reviewStore.set(reviewToken, {
+    data: { ...req.session.data },
+    reviewDeclarationComplete: reviewerDeclarationComplete,
+    reviewerDeclaredAt:
+      existingEntry && existingEntry.reviewerDeclaredAt
+        ? existingEntry.reviewerDeclaredAt
+        : null,
+    expires: Date.now() + (30 * 60 * 1000)
+  });
+
+  const shareReviewUrl = `/runner-v4/review-declaration?token=${encodeURIComponent(reviewToken)}`;
+  const absoluteShareReviewUrl = `${req.protocol}://${req.get("host")}${shareReviewUrl}`;
+  const reviewStatus = reviewerDeclarationComplete
+    ? "Reviewer declaration complete"
+    : "Awaiting reviewer declaration";
+
+  res.render("titan-mvp-1.2/runner-v4/intervention", {
+    data: req.session.data,
+    reviewStatus,
+    shareReviewUrl: absoluteShareReviewUrl,
+    newLinkGenerated,
+    interventionStarted: Boolean(req.session.data.reviewInterventionStartedV4)
+  });
+});
+
+router.post("/runner-v4/intervention/generate-review-link", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  const reviewStore = ensureReviewStore(req);
+  const previousToken = req.session.data.reviewTokenV4;
+
+  if (previousToken) {
+    reviewStore.delete(previousToken);
+  }
+
+  const newToken = createReviewToken();
+  req.session.data.reviewTokenV4 = newToken;
+  req.session.data.reviewDeclarationCompleteV4 = false;
+  delete req.session.data.reviewDeclarationErrorV4;
+
+  reviewStore.set(newToken, {
+    data: { ...req.session.data },
+    reviewDeclarationComplete: false,
+    reviewerDeclaredAt: null,
+    expires: Date.now() + (30 * 60 * 1000)
+  });
+
+  return res.redirect("/runner-v4/intervention?newLink=1");
+});
+
+router.post("/runner-v4/intervention", function (req, res) {
+  const reviewStore = ensureReviewStore(req);
+  const reviewToken = req.session.data && req.session.data.reviewTokenV4;
+  const reviewEntry = reviewToken ? reviewStore.get(reviewToken) : null;
+  const reviewerDeclarationComplete =
+    reviewEntry && reviewEntry.expires > Date.now()
+      ? Boolean(reviewEntry.reviewDeclarationComplete)
+      : false;
+
+  if (!reviewerDeclarationComplete) {
+    req.session.data.reviewDeclarationErrorV4 =
+      "The reviewer must complete declaration before you can send this form";
+    return res.redirect("/runner-v4/intervention");
+  }
+
+  delete req.session.data.reviewDeclarationErrorV4;
+  req.session.data.reviewDeclarationCompleteV4 = true;
+  res.redirect("/runner-v4/confirmation");
+});
+
+router.get("/runner-v4/review-declaration", function (req, res) {
+  const { token, success } = req.query;
+  const reviewStore = ensureReviewStore(req);
+  const reviewEntry = token ? reviewStore.get(token) : null;
+  const tokenValid = Boolean(reviewEntry && reviewEntry.expires > Date.now());
+
+  if (!tokenValid) {
+    return res.render("titan-mvp-1.2/runner-v4/review-declaration", {
+      tokenValid: false
+    });
+  }
+
+  if (!req.session.data) {
+    req.session.data = {};
+  }
+  if (reviewEntry.data && typeof reviewEntry.data === "object") {
+    req.session.data = { ...req.session.data, ...reviewEntry.data };
+  }
+
+  const accessMap = req.session.data.reviewAccessTokensV4 || {};
+  const hasReviewerAccess = Boolean(token && accessMap[token]);
+  const reviewAccessError = req.session.data.reviewAccessErrorV4;
+  const enteredReferenceNumber = req.session.data.enteredReviewerReferenceNumberV4 || "";
+  const enteredMemorableWord = req.session.data.enteredReviewerMemorableWordV4 || "";
+  const reviewerDetailsMap = req.session.data.reviewerDetailsV4 || {};
+  const hasReviewerDetails = Boolean(token && reviewerDetailsMap[token]);
+
+  if (!hasReviewerAccess) {
+    return res.render("titan-mvp-1.2/runner-v4/review-declaration", {
+      tokenValid: true,
+      token,
+      hasReviewerAccess: false,
+      reviewAccessError,
+      enteredReferenceNumber,
+      enteredMemorableWord
+    });
+  }
+
+  if (!hasReviewerDetails) {
+    return res.redirect(`/runner-v4/reviewer-details?token=${encodeURIComponent(token)}`);
+  }
+
+  delete req.session.data.reviewAccessErrorV4;
+  delete req.session.data.enteredReviewerReferenceNumberV4;
+  delete req.session.data.enteredReviewerMemorableWordV4;
+  applyRunnerV3DemoData(req.session.data);
+  reviewEntry.data = { ...req.session.data };
+
+  const error = req.session.data && req.session.data.error;
+
+  res.render("titan-mvp-1.2/runner-v4/review-declaration", {
+    tokenValid: true,
+    token,
+    hasReviewerAccess: true,
+    data: reviewEntry.data || {},
+    reviewerDetails: reviewerDetailsMap[token],
+    success: success === "1",
+    error
+  });
+});
+
+router.get("/runner-v4/reviewer-details", function (req, res) {
+  const { token } = req.query;
+  const reviewStore = ensureReviewStore(req);
+  const reviewEntry = token ? reviewStore.get(token) : null;
+  const tokenValid = Boolean(reviewEntry && reviewEntry.expires > Date.now());
+
+  if (!tokenValid) {
+    return res.redirect("/runner-v4/review-declaration");
+  }
+
+  if (!req.session.data) req.session.data = {};
+  const accessMap = req.session.data.reviewAccessTokensV4 || {};
+  if (!accessMap[token]) {
+    return res.redirect(`/runner-v4/review-declaration?token=${encodeURIComponent(token)}`);
+  }
+
+  const reviewerDetailsMap = req.session.data.reviewerDetailsV4 || {};
+  const existing = reviewerDetailsMap[token] || {};
+  const formValues = req.session.data.reviewerDetailsFormV4 || {};
+  const errors = req.session.data.reviewerDetailsErrorsV4 || {};
+
+  return res.render("titan-mvp-1.2/runner-v4/reviewer-details", {
+    token,
+    errors,
+    values: {
+      reviewerName: formValues.reviewerName || existing.reviewerName || "",
+      reviewerOccupation: formValues.reviewerOccupation || existing.reviewerOccupation || "",
+      reviewerEmail: formValues.reviewerEmail || existing.reviewerEmail || "",
+      reviewerAddress: formValues.reviewerAddress || existing.reviewerAddress || ""
+    }
+  });
+});
+
+router.post("/runner-v4/reviewer-details", function (req, res) {
+  const { token, reviewerName, reviewerOccupation, reviewerEmail, reviewerAddress } = req.body;
+  const reviewStore = ensureReviewStore(req);
+  const reviewEntry = token ? reviewStore.get(token) : null;
+  const tokenValid = Boolean(reviewEntry && reviewEntry.expires > Date.now());
+
+  if (!tokenValid) {
+    return res.redirect("/runner-v4/review-declaration");
+  }
+
+  const errors = {};
+  if (!reviewerName || !reviewerName.trim()) errors.reviewerName = "Enter your name";
+  if (!reviewerOccupation || !reviewerOccupation.trim()) errors.reviewerOccupation = "Enter your occupation";
+  if (!reviewerEmail || !reviewerEmail.trim()) {
+    errors.reviewerEmail = "Enter your email address";
+  } else {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(reviewerEmail.trim())) errors.reviewerEmail = "Enter a valid email address";
+  }
+  if (!reviewerAddress || !reviewerAddress.trim()) errors.reviewerAddress = "Enter your UK address";
+
+  req.session.data.reviewerDetailsFormV4 = {
+    reviewerName: reviewerName || "",
+    reviewerOccupation: reviewerOccupation || "",
+    reviewerEmail: reviewerEmail || "",
+    reviewerAddress: reviewerAddress || ""
+  };
+
+  if (Object.keys(errors).length > 0) {
+    req.session.data.reviewerDetailsErrorsV4 = errors;
+    return res.redirect(`/runner-v4/reviewer-details?token=${encodeURIComponent(token)}`);
+  }
+
+  const reviewerDetailsMap = req.session.data.reviewerDetailsV4 || {};
+  reviewerDetailsMap[token] = {
+    reviewerName: reviewerName.trim(),
+    reviewerOccupation: reviewerOccupation.trim(),
+    reviewerEmail: reviewerEmail.trim(),
+    reviewerAddress: reviewerAddress.trim()
+  };
+  req.session.data.reviewerDetailsV4 = reviewerDetailsMap;
+  delete req.session.data.reviewerDetailsErrorsV4;
+  delete req.session.data.reviewerDetailsFormV4;
+
+  return res.redirect(`/runner-v4/review-declaration?token=${encodeURIComponent(token)}`);
+});
+
+router.post("/runner-v4/review-declaration/access", function (req, res) {
+  const { token, reviewerReferenceNumber, reviewerMemorableWord } = req.body;
+  const reviewStore = ensureReviewStore(req);
+  const reviewEntry = token ? reviewStore.get(token) : null;
+  const tokenValid = Boolean(reviewEntry && reviewEntry.expires > Date.now());
+
+  if (!tokenValid) {
+    return res.redirect("/runner-v4/review-declaration");
+  }
+
+  const expected = reviewerAccessValues();
+  const normalizedReference = (reviewerReferenceNumber || "").trim();
+  const normalizedWord = (reviewerMemorableWord || "").trim().toLowerCase();
+
+  if (
+    normalizedReference !== expected.referenceNumber ||
+    normalizedWord !== expected.memorableWord.toLowerCase()
+  ) {
+    req.session.data.reviewAccessErrorV4 =
+      "Enter the correct reviewer reference number and memorable word";
+    req.session.data.enteredReviewerReferenceNumberV4 = reviewerReferenceNumber || "";
+    req.session.data.enteredReviewerMemorableWordV4 = reviewerMemorableWord || "";
+    return res.redirect(`/runner-v4/review-declaration?token=${encodeURIComponent(token)}`);
+  }
+
+  const accessMap = req.session.data.reviewAccessTokensV4 || {};
+  accessMap[token] = true;
+  req.session.data.reviewAccessTokensV4 = accessMap;
+  delete req.session.data.reviewAccessErrorV4;
+  delete req.session.data.enteredReviewerReferenceNumberV4;
+  delete req.session.data.enteredReviewerMemorableWordV4;
+
+  return res.redirect(`/runner-v4/review-declaration?token=${encodeURIComponent(token)}`);
+});
+
+router.post("/runner-v4/review-declaration", function (req, res) {
+  const { token, declaration } = req.body;
+  const reviewStore = ensureReviewStore(req);
+  const reviewEntry = token ? reviewStore.get(token) : null;
+  const tokenValid = Boolean(reviewEntry && reviewEntry.expires > Date.now());
+
+  if (!tokenValid) {
+    return res.redirect("/runner-v4/review-declaration");
+  }
+
+  if (!declaration || !declaration.includes("confirmed")) {
+    req.session.data.error = {
+      declarationError: "You must accept the declaration to continue"
+    };
+    return res.redirect(`/runner-v4/review-declaration?token=${encodeURIComponent(token)}`);
+  }
+
+  delete req.session.data.error;
+  reviewStore.set(token, {
+    ...reviewEntry,
+    reviewDeclarationComplete: true,
+    reviewerDeclaredAt: new Date().toISOString(),
+    expires: Date.now() + (30 * 60 * 1000)
+  });
+
+  return res.redirect(`/runner-v4/review-declaration?token=${encodeURIComponent(token)}&success=1`);
+});
+
+router.get("/runner-v4/confirmation", function (req, res) {
   res.render("titan-mvp-1.2/runner/confirmation-v2");
 });
 
