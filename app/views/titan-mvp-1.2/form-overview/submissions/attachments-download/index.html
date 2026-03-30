@@ -1,0 +1,117 @@
+{% extends "layouts/main.html" %}
+{% from "components/service-header/macro.njk" import serviceHeader %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "Apply for an individual licence to release gamebirds on or near a European Site",
+accountName: "Chris Smith",
+homepageLink: "/",
+signOutLink: "/titan-mvp-1.2/onboarding/sign-out-confirmation",
+navigationItems: [
+{
+href: "/titan-mvp-1.2/library",
+text: "Forms library",
+id: "nav-library"
+},
+{
+href: "/titan-mvp-1.2/form-overview/{{ form.id }}",
+text: "Overview",
+id: "nav-overview",
+active: true
+},
+{
+    href: "/titan-mvp-1.2/form-overview/poc",
+    text: "Responses",
+    id: "nav-submissions"
+},
+{
+href: "/titan-mvp-1.2/form-editor/listing",
+text: "Editor",
+id: "nav-editor"
+}
+],
+activeLinkId: ""
+}) }}
+
+<div class="x-govuk-masthead x-govuk-masthead--large">
+  <div class="govuk-width-container">
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-full-from-desktop">
+        <h1 class="x-govuk-masthead__title">
+          <span class="govuk-caption-l" style="color: #fff;">
+            {{ form.name or "Example Form" }}
+          </span>
+          You have files to download
+        </h1>
+        <p class="x-govuk-masthead__description">
+          To confirm the files were meant for your team, enter the email address the link was sent to.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block pageTitle %}
+{{ pageName }}
+{% endblock %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      {% if errorMessage %}
+      {{ govukErrorSummary({
+        titleText: "There is a problem",
+        errorList: [
+          {
+            text: errorMessage,
+            href: "#email"
+          }
+        ]
+      }) }}
+      {% endif %}
+
+      <form method="post" action="/titan-mvp-1.2/form-overview/submissions/attachments-download/index{% if submissionId %}?submissionId={{ submissionId }}{% endif %}">
+        {% if errorMessage %}
+          {{ govukInput({
+            label: {
+              classes: "govuk-label--m",
+              text: "Email address"
+            },
+            id: "email",
+            name: "email",
+            type: "email",
+            autocomplete: "email",
+            spellcheck: false,
+            errorMessage: {
+              text: errorMessage
+            }
+          }) }}
+        {% else %}
+          {{ govukInput({
+            label: {
+              classes: "govuk-label--m",
+              text: "Email address"
+            },
+            id: "email",
+            name: "email",
+            type: "email",
+            autocomplete: "email",
+            spellcheck: false
+          }) }}
+        {% endif %}
+
+        {{ govukButton({
+          text: "Continue"
+        }) }}
+      </form>
+
+    </div>
+  </div>
+{% endblock %}

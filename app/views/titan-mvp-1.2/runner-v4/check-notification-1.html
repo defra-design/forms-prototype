@@ -144,15 +144,15 @@ Email - Form submitted
                 <div class="email-sender">Submit form to Defra (defra@notifications.gov.uk)</div>
                 <div class="email-time">10:30 AM</div>
             </div>
-            <div class="email-subject">Form submission: Register as a unicorn breeder</div>
-            <div class="email-preview">We received your form submission for 'Register as a unicorn breeder' on Tuesday 1 April 2025 at 10:30am. We will review your form and get back to you within 10 working days. In the receipt email, we have added a link which will be available for 18 months...</div>
+            <div class="email-subject">Form checked: Register as a unicorn breeder</div>
+            <div class="email-preview">Your form has been checked and can now be sent. Return to your form to submit it.</div>
         </div>
     </div>
 
     <!-- Email Content -->
     <div class="email-content">
         <div class="email-content-header">
-            <div class="email-content-subject">Form submission: Register as a unicorn breeder</div>
+            <div class="email-content-subject">Form checked: Register as a unicorn breeder</div>
             <div class="email-content-meta">
                 <strong>From:</strong> Submit form to Defra (defra@notifications.gov.uk)<br>
                 <strong>To:</strong> you@example.com<br>
@@ -161,31 +161,20 @@ Email - Form submitted
         </div>
 
         <div class="govuk-body">
-            <h1 class="govuk-heading-l">Form submitted</h1>
+            <h1 class="govuk-heading-l">Your form has been checked</h1>
 
-            {% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
-            {{ govukInsetText({
-            text: "Your reference number: EL3-5H4-L3N"
-            }) }}
-
-            <p class="govuk-body">We received your form submission for 'Register as a unicorn breeder' on Tuesday 1 April
+            <p class="govuk-body">We received a declaration that your form 'Register as a unicorn breeder' has been checked on Tuesday 1 April
                 2025 at 10:30am.</p>
 
-            <h2 class="govuk-heading-m">What happens next</h2>
-            <p class="govuk-body">We will review your form and get back to you within 10 working days.</p>
-
-            <h2 class="govuk-heading-m">Accessing your submission</h2>
-            <p class="govuk-body">In the receipt email, we have added a link which will be available for 18 months in case you need to use the information to submit a new, renewal or make amendments to the current application.</p>
+<div class="govuk-inset-text">
+    <p class="govuk-body">You can now <a class="govuk-link" href="/runner-v4/intervention">send your form</a>.</p>
+</div>
 
             <h2 class="govuk-heading-m">Get help</h2>
             <p class="govuk-body">Telephone 03000 200 301</p>
             <p class="govuk-body">Monday to Friday between 8:30am to 5pm.</p>
             <p class="govuk-body"><a href="mailto:">Example@example.com</a>.</p>
             <p class="govuk-body">We aim to respond within 2 working days.</p>
-
-            <h2 class="govuk-heading-m">Your saved answers</h2>
-            <p class="govuk-body">You can <a class="govuk-link govuk-link--no-visited-state" href="/runner-v2/reuse-saved-answers">reuse your answers</a> if you need to submit this form again.</p>
-            <p class="govuk-body">This link is valid for 18 months.</p>
 
             <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
 

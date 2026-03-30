@@ -1,0 +1,326 @@
+{% extends "layouts/main.html" %}
+{% from "components/service-header/macro.njk" import serviceHeader %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+accountName: "Chris Smith",
+homepageLink: "/",
+signOutLink: "/titan-mvp-1.2/onboarding/sign-out-confirmation",
+navigationItems: [
+{
+href: "/titan-mvp-1.2/library",
+text: "Forms library",
+id: "nav-library"
+},
+{
+href: "/titan-mvp-1.2/form-overview/{{ form.id }}",
+text: "Overview",
+id: "nav-overview",
+active: true
+},
+{
+    href: "/titan-mvp-1.2/form-overview/poc",
+    text: "Responses",
+    id: "nav-submissions"
+},
+{
+href: "/titan-mvp-1.2/form-editor/listing",
+text: "Editor",
+id: "nav-editor"
+}
+],
+activeLinkId: ""
+}) }}
+
+<div class="x-govuk-masthead x-govuk-masthead--large">
+  <div class="govuk-width-container">
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-full-from-desktop">
+        <h1 class="x-govuk-masthead__title">
+          <span class="govuk-caption-l" style="color: #fff;">
+            {{ form.name or "Example Form" }}
+          </span>
+          Download attached files
+        </h1>
+        <p class="x-govuk-masthead__description">
+          Links expire after 90 days.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block pageTitle %}
+{{ pageName }}
+{% endblock %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      <style>
+        .download-progress { margin-top: 5px; }
+        .download-progress__bar {
+          height: 6px;
+          background: #b1b4b6;
+          border-radius: 3px;
+          overflow: hidden;
+        }
+        .download-progress__bar-fill {
+          height: 100%;
+          width: 0%;
+          background: #1d70b8;
+          transition: width 0.2s linear;
+        }
+        .govuk-button[aria-disabled="true"] {
+          pointer-events: none;
+          opacity: 0.5;
+        }
+        .download-file-name {
+          font-weight: 700;
+        }
+        .download-file-name--error {
+          border-left: 4px solid #d4351c;
+          padding-left: 12px;
+        }
+      </style>
+
+      <div class="govuk-visually-hidden" aria-live="polite" id="statusInformation">
+        {% if attachments and (attachments | length) > 0 %}{{ attachments | length }} of {{ attachments | length }} files.{% endif %}
+      </div>
+
+      {% if attachments and (attachments | length) > 0 %}
+        <div class="govuk-error-summary govuk-!-display-none" data-module="govuk-error-summary" id="downloadErrorSummary">
+          <div role="alert">
+            <h2 class="govuk-error-summary__title">
+              There is a problem
+            </h2>
+            <div class="govuk-error-summary__body">
+              <ul class="govuk-list govuk-error-summary__list" id="downloadErrorSummaryList"></ul>
+            </div>
+          </div>
+        </div>
+
+        {{ govukButton({
+          text: "Download all files",
+          href: "/titan-mvp-1.2/form-overview/submissions/attachments-download/download-all?submissionId={{ submissionId }}",
+          attributes: { id: "downloadAllButton" }
+        }) }}
+
+        <p class="govuk-body govuk-!-display-none" aria-live="polite" id="downloadSummary"></p>
+
+        <dl class="govuk-summary-list govuk-summary-list--long-key">
+          {% for file in attachments %}
+          <div
+            class="govuk-summary-list__row"
+            data-module="download-row"
+            data-file-id="{{ file.id or loop.index }}"
+            data-filename="{{ file.filename }}"
+            data-size-bytes="{{ file.sizeBytes or '' }}"
+            data-href="{{ file.href or '' }}"
+            data-download-name="{{ file.downloadName or file.filename }}"
+            data-initial-status="queued"
+          >
+            <dt class="govuk-summary-list__key" data-file-key>
+              <div class="download-file-name">{{ file.filename }}</div>
+              {% if file.questionLabel %}
+              <div class="govuk-body govuk-!-margin-0">{{ file.questionLabel }}</div>
+              {% endif %}
+              {% if file.meta %}
+              <div class="govuk-hint govuk-!-margin-0">{{ file.meta }}</div>
+              {% endif %}
+              <div class="govuk-error-message govuk-!-margin-top-2 govuk-!-margin-bottom-0 govuk-!-display-none" data-error id="download-error-{{ file.id or loop.index }}">
+                <span class="govuk-visually-hidden">Error:</span> Download failed. Try again.
+              </div>
+              <div class="download-progress govuk-!-display-none" data-progress>
+                <div class="download-progress__bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                  <div class="download-progress__bar-fill" data-progress-bar></div>
+                </div>
+                <div class="govuk-hint govuk-!-margin-0" data-progress-text></div>
+              </div>
+            </dt>
+            <dd class="govuk-summary-list__value">
+              <strong class="govuk-tag govuk-!-display-none" data-status-tag></strong>
+            </dd>
+            <dd class="govuk-summary-list__actions">
+              <a class="govuk-link" href="{{ file.href or '#' }}" data-action="download-one">
+                Download<span class="govuk-visually-hidden"> {{ file.filename }}</span>
+              </a>
+              <span class="govuk-visually-hidden"> | </span>
+              <a class="govuk-link govuk-!-display-none" href="#" data-action="retry">
+
+                <span class="govuk-visually-hidden"> {{ file.filename }}</span>
+              </a>
+            </dd>
+          </div>
+          {% endfor %}
+        </dl>
+
+        <script>
+          (function () {
+            function clamp(n, a, b) { return Math.min(Math.max(n, a), b); }
+            function formatBytes(bytes) {
+              if (!bytes || bytes <= 0) return '0B';
+              var u = ['B', 'KB', 'MB', 'GB'], i = 0, v = bytes;
+              while (v >= 1024 && i < u.length - 1) { v /= 1024; i++; }
+              return v.toFixed(i ? 1 : 0) + u[i];
+            }
+            function setTag(el, state) {
+              if (!el) return;
+              el.className = 'govuk-tag';
+              if (state === 'queued') {
+                el.classList.add('govuk-!-display-none');
+                el.textContent = '';
+              }
+              else if (state === 'downloading') { el.classList.add('govuk-tag--yellow'); el.textContent = 'Downloading'; }
+              else if (state === 'downloaded') { el.classList.add('govuk-tag--green'); el.textContent = 'Downloaded'; }
+              else if (state === 'failed') { el.classList.add('govuk-tag--red'); el.textContent = 'Error'; }
+              else {
+                el.classList.add('govuk-!-display-none');
+                el.textContent = '';
+              }
+            }
+            function setRowState(row, state) {
+              row.dataset.state = state;
+              setTag(row.querySelector('[data-status-tag]'), state);
+              var pw = row.querySelector('[data-progress]');
+              var err = row.querySelector('[data-error]');
+              var key = row.querySelector('[data-file-key]');
+              var retry = row.querySelector('[data-action="retry"]');
+              if (err) err.classList.toggle('govuk-!-display-none', state !== 'failed');
+              if (key) key.classList.toggle('download-file-name--error', state === 'failed');
+              if (retry) retry.classList.toggle('govuk-!-display-none', state !== 'failed');
+              if (pw) pw.classList.toggle('govuk-!-display-none', state !== 'downloading');
+              if (state !== 'downloading') updateProgress(row, 0, 0);
+              updateErrorSummary();
+            }
+            function updateProgress(row, d, t) {
+              var fill = row.querySelector('[data-progress-bar]');
+              var bar = row.querySelector('.download-progress__bar');
+              var txt = row.querySelector('[data-progress-text]');
+              var pct = t > 0 ? clamp((d / t) * 100, 0, 100) : 0;
+              if (fill) fill.style.width = pct.toFixed(0) + '%';
+              if (bar) bar.setAttribute('aria-valuenow', pct.toFixed(0));
+              if (txt) txt.textContent = t > 0 ? formatBytes(d) + ' / ' + formatBytes(t) : '';
+            }
+            function rows() { return [].slice.call(document.querySelectorAll('[data-module="download-row"]')); }
+            function escapeHtml(s) {
+              return String(s || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+            }
+            function updateErrorSummary() {
+              var summary = document.getElementById('downloadErrorSummary');
+              var list = document.getElementById('downloadErrorSummaryList');
+              if (!summary || !list) return;
+              var failed = rows().filter(function (r) { return r.dataset.state === 'failed'; });
+              if (!failed.length) {
+                list.innerHTML = '';
+                summary.classList.add('govuk-!-display-none');
+                return;
+              }
+              list.innerHTML = failed.map(function (r) {
+                var err = r.querySelector('[data-error]');
+                var fileName = escapeHtml(r.dataset.filename || 'File');
+                var errorId = escapeHtml(err && err.id ? err.id : '');
+                return '<li><a href="#' + errorId + '">The file failed to download: ' + fileName + '</a></li>';
+              }).join('');
+              summary.classList.remove('govuk-!-display-none');
+            }
+            function setSummary(t, show) {
+              var el = document.getElementById('downloadSummary');
+              if (!el) return;
+              el.textContent = t || '';
+              el.classList.toggle('govuk-!-display-none', !show);
+            }
+            function setBtn(on) {
+              var b = document.getElementById('downloadAllButton');
+              if (!b) return;
+              b.setAttribute('aria-disabled', on ? 'true' : 'false');
+              b.textContent = on ? 'Downloading…' : 'Download all files';
+              b.classList.toggle('govuk-button--disabled', !!on);
+            }
+            function bgDownload(url) {
+              if (!url) return;
+              var f = document.createElement('iframe');
+              f.style.display = 'none';
+              f.setAttribute('aria-hidden', 'true');
+              f.src = url;
+              document.body.appendChild(f);
+              setTimeout(function () { try { document.body.removeChild(f); } catch (e) {} }, 4000);
+            }
+            function simulate(row, opts) {
+              opts = opts || {};
+              var t = parseInt(row.dataset.sizeBytes || '', 10);
+              if (isNaN(t) || t <= 0) t = 1200000;
+              var fail = typeof opts.failChance === 'number' ? opts.failChance : 0.12;
+              setRowState(row, 'downloading');
+              return new Promise(function (resolve) {
+                var d = 0, failAt = Math.random() < fail ? Math.floor(t * (0.25 + Math.random() * 0.5)) : null;
+                var id = setInterval(function () {
+                  d = Math.min(t, d + Math.floor(60000 + Math.random() * 100000));
+                  updateProgress(row, d, t);
+                  if (failAt != null && d >= failAt) { clearInterval(id); setRowState(row, 'failed'); resolve('failed'); return; }
+                  if (d >= t) { clearInterval(id); setRowState(row, 'downloaded'); resolve('downloaded'); }
+                }, 180);
+              });
+            }
+            function resetQueued() { rows().forEach(function (r) { setRowState(r, 'queued'); }); }
+            function count(s) { return rows().filter(function (r) { return r.dataset.state === s; }).length; }
+            async function downloadAll() {
+              var r = rows(), n = r.length, done = 0;
+              setBtn(true);
+              setSummary('Downloading ' + done + ' of ' + n, true);
+              resetQueued();
+              var btn = document.getElementById('downloadAllButton');
+              if (btn && btn.href) bgDownload(btn.href);
+              for (var i = 0; i < n; i++) {
+                var last = i === n - 1;
+                var res = await simulate(r[i], { failChance: last ? 0.35 : 0.12 });
+                if (res === 'downloaded') done++;
+                setSummary('Downloading ' + done + ' of ' + n, true);
+              }
+              var f = count('failed');
+              setSummary(f ? ('Downloaded ' + count('downloaded') + ' of ' + n + '. ' + f + ' file' + (f === 1 ? '' : 's') + ' failed.') : 'All files downloaded.', true);
+              setBtn(false);
+            }
+            document.getElementById('downloadAllButton') && document.getElementById('downloadAllButton').addEventListener('click', function (e) {
+              var b = document.getElementById('downloadAllButton');
+              if (b.getAttribute('aria-disabled') === 'true') return;
+              e.preventDefault();
+              downloadAll();
+            });
+            document.addEventListener('click', function (e) {
+              var a = e.target.closest('a[data-action]');
+              if (!a) return;
+              var act = a.getAttribute('data-action');
+              var row = a.closest('[data-module="download-row"]');
+              if (!row || (act !== 'download-one' && act !== 'retry')) return;
+              e.preventDefault();
+              var href = row.dataset.href;
+              if (act === 'download-one' && href) bgDownload(href);
+              simulate(row, { failChance: act === 'retry' ? 0.05 : 0.12 }).then(function () {
+                var n = rows().length, dl = count('downloaded'), fl = count('failed');
+                if (dl === n && !fl) setSummary('All files downloaded.', true);
+                else if (dl || fl) setSummary('Downloaded ' + dl + ' of ' + n + (fl ? ('. ' + fl + ' failed.') : ''), true);
+                else setSummary('', false);
+              });
+            });
+            rows().forEach(function (row) { setRowState(row, row.dataset.initialStatus || 'queued'); });
+          })();
+        </script>
+      {% else %}
+        <p class="govuk-body">There are no files attached to this submission.</p>
+      {% endif %}
+
+    </div>
+  </div>
+{% endblock %}

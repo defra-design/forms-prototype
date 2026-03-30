@@ -1,0 +1,259 @@
+{% extends "layouts/runner.html" %}
+
+{% block pageTitle %}
+Summary – {{ serviceName }} – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+{{ govukPhaseBanner({
+  tag: {
+    text: "Beta"
+  },
+  html: 'This is a new service. Help us improve it and <a class="govuk-link" target="_blank" href="/titan-mvp-1.2/form-editor/CSAT/form.html">give your feedback (opens in new tab)</a>.'
+}) }}
+
+{{ govukBackLink({
+text: "Back",
+href: "javascript:window.history.back()"
+}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% if data.reviewDeclarationError %}
+      {{ govukErrorSummary({
+        titleText: "There is a problem",
+        errorList: [
+          {
+            text: data.reviewDeclarationError,
+            href: "#send-form-button"
+          }
+        ]
+      }) }}
+    {% endif %}
+
+    <h1 class="govuk-heading-l">Check your answers before sending your form</h1>
+
+    <h2 class="govuk-heading-m">Declaration</h2>
+    <dl class="govuk-summary-list govuk-!-margin-bottom-9">
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Terms and conditions</dt>
+        <dd class="govuk-summary-list__value">
+          {% if data['declaration'] and data['declaration'].includes('confirmed') %}
+            I confirm that I understand and agree
+          {% else %}
+            Not provided
+          {% endif %}
+        </dd>
+        <dd class="govuk-summary-list__actions">
+          <a class="govuk-link" href="/runner-v3/declaration">Change<span class="govuk-visually-hidden"> declaration</span></a>
+        </dd>
+      </div>
+    </dl>
+
+    <h2 class="govuk-heading-m">Contact details</h2>
+    <dl class="govuk-summary-list govuk-!-margin-bottom-9">
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Name</dt><dd class="govuk-summary-list__value">{{ data['name'] or 'Not provided' }}</dd><dd class="govuk-summary-list__actions"><a class="govuk-link" href="/runner-v3/whats-your-name">Change<span class="govuk-visually-hidden"> name</span></a></dd></div>
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Email address</dt><dd class="govuk-summary-list__value">{{ data['email'] or 'Not provided' }}</dd><dd class="govuk-summary-list__actions"><a class="govuk-link" href="/runner-v3/whats-your-email-address">Change<span class="govuk-visually-hidden"> email address</span></a></dd></div>
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Phone number</dt><dd class="govuk-summary-list__value">{{ data['phoneNumber'] or 'Not provided' }}</dd><dd class="govuk-summary-list__actions"><a class="govuk-link" href="/runner-v3/whats-your-phone-number">Change<span class="govuk-visually-hidden"> phone number</span></a></dd></div>
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Address</dt><dd class="govuk-summary-list__value">{{ data['selectedAddress'] or data['finalAddress'] or 'Not provided' }}</dd><dd class="govuk-summary-list__actions"><a class="govuk-link" href="/runner-v3/whats-your-address">Change<span class="govuk-visually-hidden"> address</span></a></dd></div>
+    </dl>
+
+    <h2 class="govuk-heading-m">Unicorn details</h2>
+    <dl class="govuk-summary-list govuk-!-margin-bottom-9">
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Number of unicorns expected</dt><dd class="govuk-summary-list__value">{{ data['aitzzV'] or 'Not provided' }}</dd><dd class="govuk-summary-list__actions"><a class="govuk-link" href="/runner-v3/how-many-unicorns-do-you-expect-to-breed-each-year">Change<span class="govuk-visually-hidden"> number of unicorns expected</span></a></dd></div>
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Type of unicorns</dt><dd class="govuk-summary-list__value">{% if data['DyfjJC'] %}{% for type in data['DyfjJC'] %}{{ type }}{% if not loop.last %}, {% endif %}{% endfor %}{% else %}Not provided{% endif %}</dd><dd class="govuk-summary-list__actions"><a class="govuk-link" href="/runner-v3/what-type-of-unicorns-will-you-breed">Change<span class="govuk-visually-hidden"> type of unicorns</span></a></dd></div>
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Where you keep the unicorns</dt><dd class="govuk-summary-list__value">Easting: {{ data['location-easting'] or 'Not provided' }}, Northing: {{ data['location-northing'] or 'Not provided' }}</dd><dd class="govuk-summary-list__actions"><a class="govuk-link" href="/runner-v3/where-will-you-keep-the-unicorns">Change<span class="govuk-visually-hidden"> where you keep the unicorns</span></a></dd></div>
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Number of staff</dt><dd class="govuk-summary-list__value">{{ data['zhJMaM'] or 'Not provided' }}</dd><dd class="govuk-summary-list__actions"><a class="govuk-link" href="/runner-v3/how-many-members-of-staff-will-look-after-the-unicorns">Change<span class="govuk-visually-hidden"> number of staff</span></a></dd></div>
+    </dl>
+
+    <h2 class="govuk-heading-m">Get someone else to check your answers</h2>
+    {% if newLinkGenerated %}
+      {{ govukNotificationBanner({
+        titleText: "Success",
+        type: "success",
+        html: "<p class='govuk-notification-banner__heading'>A new review link has been created. The previous link no longer works.</p>"
+      }) }}
+    {% endif %}
+    <p class="govuk-body">
+      Before you send this form, someone else needs to check your answers and confirm they’re correct. Share this link with them so they can view your form and make the declaration. They won’t be able to change anything.
+    </p>
+    <div class="govuk-inset-text">
+      <h2 class="govuk-heading-s">Who can review your form</h2>
+      <p class="govuk-body">
+        They must be a registered vet.
+      </p>
+
+      <h2 class="govuk-heading-s">What they need</h2>
+
+      <p class="govuk-body">Only share these details with the person who is reviewing your form:</p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>reviewer reference number: <strong>21218-ewfew-2e21e21</strong></li>
+        <li>reviewer memorable word: <strong>chicken nuggets</strong></li>
+      </ul>
+
+
+    </div>
+
+    <div class="govuk-form-group">
+      <label class="govuk-label govuk-label--s" for="review-link">Review link</label>
+      <div style="display:flex; gap:8px; align-items:flex-end;">
+        <input
+          class="govuk-input"
+          id="review-link"
+          name="review-link"
+          type="text"
+          value="{{ shareReviewUrl }}"
+          readonly
+          style="flex:1;"
+        >
+        {{ govukButton({
+          text: "Copy link",
+          classes: "govuk-button--secondary govuk-!-margin-bottom-0",
+          type: "button",
+          attributes: {
+            id: "copy-review-link-button"
+          }
+        }) }}
+      </div>
+      <span id="copy-review-link-status" class="govuk-body govuk-!-display-block govuk-!-margin-top-2" aria-live="polite"></span>
+    </div>
+
+
+
+    <p class="govuk-body">
+      <strong>Status:</strong>
+      {% if reviewStatus == "Reviewer declaration complete" %}
+        {{ govukTag({
+          text: "Review complete",
+          classes: "govuk-tag--green"
+        }) }}
+      {% else %}
+        {{ govukTag({
+          text: "Waiting for review",
+          classes: "govuk-tag--yellow"
+        }) }}
+      {% endif %}
+    </p>
+    <p class="govuk-body">
+      If you need to send this to a different reviewer, create a new link. This will stop the previous link from working.
+    </p>
+    <form class="form" action="/runner-v3/summary/generate-review-link" method="post">
+      {{ govukButton({
+        text: "Generate a new review link",
+        classes: "govuk-button--secondary"
+      }) }}
+    </form>
+
+    <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+
+    <form class="form" action="/runner-v3/summary" method="post">
+      {{ govukInput({
+      label: {
+      text: "Confirmation email",
+      classes: "govuk-label--m"
+      },
+      hint: {
+      text: "Enter your email to receive a confirmation email and a link to reuse your answers next time"
+      },
+      id: "email",
+      name: "email",
+      type: "email",
+      autocomplete: "email",
+      spellcheck: false
+      }) }}
+
+      <div class="govuk-button-group">
+        {{ govukButton({
+        text: "Send",
+        classes: "govuk-button--primary govuk-!-margin-top-4 govuk-!-margin-bottom-0",
+        attributes: {
+          id: "send-form-button"
+        },
+        type: "submit"
+        }) }}
+
+        {{ govukButton({
+        text: "Save and exit",
+        classes: "govuk-button--secondary",
+        href: "/save-progress",
+        type: "button"
+        }) }}
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const copyButton = document.getElementById("copy-review-link-button");
+    const linkInput = document.getElementById("review-link");
+    const status = document.getElementById("copy-review-link-status");
+
+    if (!copyButton || !linkInput) {
+      return;
+    }
+
+    const originalButtonText = "Copy link";
+
+    function setButtonLabel(text) {
+      copyButton.textContent = text;
+    }
+
+    function copyUsingExecCommand(text) {
+      const tempTextArea = document.createElement("textarea");
+      tempTextArea.value = text;
+      tempTextArea.setAttribute("readonly", "");
+      tempTextArea.style.position = "absolute";
+      tempTextArea.style.left = "-9999px";
+      document.body.appendChild(tempTextArea);
+      tempTextArea.select();
+      const copied = document.execCommand("copy");
+      document.body.removeChild(tempTextArea);
+      return copied;
+    }
+
+    copyButton.addEventListener("click", function () {
+      const textToCopy = linkInput.value;
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard
+          .writeText(textToCopy)
+          .then(function () {
+            setButtonLabel("Copied");
+            if (status) status.textContent = "Link copied";
+            window.setTimeout(function () {
+              setButtonLabel(originalButtonText);
+            }, 2000);
+          })
+          .catch(function () {
+            const copied = copyUsingExecCommand(textToCopy);
+            if (copied) {
+              setButtonLabel("Copied");
+              if (status) status.textContent = "Link copied";
+            } else {
+              setButtonLabel("Copy failed");
+              if (status) status.textContent = "Could not copy link. Please copy it manually.";
+            }
+            window.setTimeout(function () {
+              setButtonLabel(originalButtonText);
+            }, 2000);
+          });
+      } else {
+        const copied = copyUsingExecCommand(textToCopy);
+        if (copied) {
+          setButtonLabel("Copied");
+          if (status) status.textContent = "Link copied";
+        } else {
+          setButtonLabel("Copy failed");
+          if (status) status.textContent = "Could not copy link. Please copy it manually.";
+        }
+        window.setTimeout(function () {
+          setButtonLabel(originalButtonText);
+        }, 2000);
+      }
+    });
+  });
+</script>
+{% endblock %}

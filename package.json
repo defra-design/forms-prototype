@@ -3,7 +3,8 @@
   "scripts": {
     "dev": "govuk-prototype-kit dev",
     "serve": "govuk-prototype-kit serve",
-    "start": "govuk-prototype-kit start"
+    "start": "govuk-prototype-kit start",
+    "screenshots:saved-answers": "node scripts/screenshot-saved-answers-pages.js"
   },
   "dependencies": {
     "@dwp/dwp-frontend": "^3.2.0",

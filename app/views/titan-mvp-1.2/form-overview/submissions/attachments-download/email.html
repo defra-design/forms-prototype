@@ -165,35 +165,61 @@ Email - Form submitted
 
             {% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
             {{ govukInsetText({
-            text: "Your reference number: EL3-5H4-L3N"
+            text: "For security reasons, the links in this email expire at 3:24pm on Tuesday 16 June 2026"
             }) }}
 
-            <p class="govuk-body">We received your form submission for 'Register as a unicorn breeder' on Tuesday 1 April
+            <p class="govuk-body">Register as a unicorn breeder form received at 2:24 on on 18 March 2026.
                 2025 at 10:30am.</p>
 
-            <h2 class="govuk-heading-m">What happens next</h2>
-            <p class="govuk-body">We will review your form and get back to you within 10 working days.</p>
+            {% set attachmentSubmissionId = submissionId or "ABC123" %}
+            {% set attachmentsDownloadIndexHref = "/titan-mvp-1.2/form-overview/submissions/attachments-download/index?submissionId=" ~ attachmentSubmissionId %}
+            {% set registrationReceipts = data.registrationReceipts or [
+              "Screenshot 2026-03-11 at 13.52.15.png",
+              "Screenshot 2026-03-18 at 13.32.17.png"
+            ] %}
+            {% set siteImageUploads = data.siteImageUploads or ["ailogo.svg"] %}
 
-            <h2 class="govuk-heading-m">Accessing your submission</h2>
-            <p class="govuk-body">In the receipt email, we have added a link which will be available for 18 months in case you need to use the information to submit a new, renewal or make amendments to the current application.</p>
+            <h2 class="govuk-heading-s">What do you want to order?</h2>
+            <p class="govuk-body">{{ data.orderChoice or "Pizza" }}</p>
 
-            <h2 class="govuk-heading-m">Get help</h2>
-            <p class="govuk-body">Telephone 03000 200 301</p>
-            <p class="govuk-body">Monday to Friday between 8:30am to 5pm.</p>
-            <p class="govuk-body"><a href="mailto:">Example@example.com</a>.</p>
-            <p class="govuk-body">We aim to respond within 2 working days.</p>
+            <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
 
-            <h2 class="govuk-heading-m">Your saved answers</h2>
-            <p class="govuk-body">You can <a class="govuk-link govuk-link--no-visited-state" href="/runner-v2/reuse-saved-answers">reuse your answers</a> if you need to submit this form again.</p>
-            <p class="govuk-body">This link is valid for 18 months.</p>
+            <h2 class="govuk-heading-s">Where should we deliver your order?</h2>
+            {% if data.deliveryAddressHtml %}
+            <p class="govuk-body">{{ data.deliveryAddressHtml | safe }}</p>
+            {% else %}
+            <p class="govuk-body">{{ data.deliveryAddressLine1 or "16 Mahindra Way" }}<br>
+              {{ data.deliveryAddressLine2 or "London" }}<br>
+              {{ data.deliveryPostcode or "E6 5AD" }}</p>
+            {% endif %}
+
+            <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+
+            <h2 class="govuk-heading-s">Upload your registration receipts</h2>
+            <p class="govuk-body">Uploaded {{ registrationReceipts | length }} file{% if (registrationReceipts | length) != 1 %}s{% endif %}:</p>
+            <ul class="govuk-list govuk-list--bullet">
+              {% for file in registrationReceipts %}
+                <li>{{ file.filename or file.text or file.name or file }}</li>
+              {% endfor %}
+            </ul>
+
+            <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+
+            <h2 class="govuk-heading-s">Upload an image of your site</h2>
+            <p class="govuk-body">Uploaded {{ siteImageUploads | length }} file{% if (siteImageUploads | length) != 1 %}s{% endif %}:</p>
+            <ul class="govuk-list govuk-list--bullet">
+              {% for file in siteImageUploads %}
+                <li>{{ file.filename or file.text or file.name or file }}</li>
+              {% endfor %}
+            </ul>
+
+            <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+
+            <h2 class="govuk-heading-s">Download uploaded files</h2>
+            <p class="govuk-body">Download files individually or all at once. You will need the email address the link was sent to.</p>
+            <p class="govuk-body"><a class="govuk-link" href="{{ attachmentsDownloadIndexHref }}">Download all attached files</a></p>
 
             <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
-
-            <p class="govuk-body">
-                Do not reply to this email. We do not monitor replies to this email address.
-            </p>
-
-            <p class="govuk-body">From Department for Environment, Food & Rural Affairs</p>
 
             <p class="govuk-body">Thanks,</p>
             <p class="govuk-body">Defra</p>

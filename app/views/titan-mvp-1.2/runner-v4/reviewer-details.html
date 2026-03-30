@@ -1,0 +1,68 @@
+{% extends "layouts/runner.html" %}
+
+{% block pageTitle %}
+Your details – {{ serviceName }} – GOV.UK
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">Enter your details before checking this form</h1>
+
+    {% if errors and (errors.reviewerName or errors.reviewerOccupation or errors.reviewerEmail or errors.reviewerAddress) %}
+      {{ govukErrorSummary({
+        titleText: "There is a problem",
+        errorList: [
+          { text: errors.reviewerName, href: "#reviewer-name" } if errors.reviewerName else "",
+          { text: errors.reviewerOccupation, href: "#reviewer-occupation" } if errors.reviewerOccupation else "",
+          { text: errors.reviewerEmail, href: "#reviewer-email" } if errors.reviewerEmail else "",
+          { text: errors.reviewerAddress, href: "#reviewer-address" } if errors.reviewerAddress else ""
+        ]
+      }) }}
+    {% endif %}
+
+    <form action="/runner-v4/reviewer-details" method="post">
+      <input type="hidden" name="token" value="{{ token }}">
+
+      {{ govukInput({
+        label: { text: "Name" },
+        id: "reviewer-name",
+        name: "reviewerName",
+        value: values.reviewerName,
+        errorMessage: { text: errors.reviewerName } if errors and errors.reviewerName else ""
+      }) }}
+
+      {{ govukInput({
+        label: { text: "Occupation" },
+        id: "reviewer-occupation",
+        name: "reviewerOccupation",
+        value: values.reviewerOccupation,
+        errorMessage: { text: errors.reviewerOccupation } if errors and errors.reviewerOccupation else ""
+      }) }}
+
+      {{ govukInput({
+        label: { text: "Email address" },
+        id: "reviewer-email",
+        name: "reviewerEmail",
+        type: "email",
+        autocomplete: "email",
+        value: values.reviewerEmail,
+        errorMessage: { text: errors.reviewerEmail } if errors and errors.reviewerEmail else ""
+      }) }}
+
+      {{ govukTextarea({
+        name: "reviewerAddress",
+        id: "reviewer-address",
+        label: { text: "UK address" },
+        rows: 4,
+        value: values.reviewerAddress,
+        errorMessage: { text: errors.reviewerAddress } if errors and errors.reviewerAddress else ""
+      }) }}
+
+      {{ govukButton({
+        text: "Continue"
+      }) }}
+    </form>
+  </div>
+</div>
+{% endblock %}

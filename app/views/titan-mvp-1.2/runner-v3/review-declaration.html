@@ -1,0 +1,134 @@
+{% extends "layouts/runner.html" %}
+{% from "components/declaration-checkboxes/macro.njk" import declarationCheckboxes %}
+
+{% block pageTitle %}
+Review and declaration – {{ serviceName }} – GOV.UK
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">Review this form and complete declaration</h1>
+
+    {% if not tokenValid %}
+      <h2 class="govuk-heading-m">This review link is invalid or has expired</h2>
+      <p class="govuk-body">Ask the applicant to generate and share a new review link.</p>
+    {% elseif not hasReviewerAccess %}
+      {% if reviewAccessError %}
+        {{ govukErrorSummary({
+          titleText: "There is a problem",
+          errorList: [
+            {
+              text: reviewAccessError,
+              href: "#reviewer-reference-number"
+            }
+          ]
+        }) }}
+      {% endif %}
+
+      <p class="govuk-body">
+        You received this link because the applicant needs you to review their answers and make a declaration. Enter the reference number and memorable word they sent you to open the form.</p>
+
+      <form class="form" action="/runner-v3/review-declaration/access" method="post">
+        <input type="hidden" name="token" value="{{ token }}">
+
+        {{ govukInput({
+          label: {
+            text: "Reviewer reference number"
+          },
+          id: "reviewer-reference-number",
+          name: "reviewerReferenceNumber",
+          value: enteredReferenceNumber,
+          errorMessage: {
+            text: reviewAccessError
+          } if reviewAccessError else ""
+        }) }}
+
+        {{ govukInput({
+          label: {
+            text: "Reviewer memorable word"
+          },
+          id: "reviewer-memorable-word",
+          name: "reviewerMemorableWord",
+          value: enteredMemorableWord,
+          errorMessage: {
+            text: reviewAccessError
+          } if reviewAccessError else ""
+        }) }}
+
+        {{ govukButton({
+          text: "Continue"
+        }) }}
+      </form>
+    {% else %}
+      {% if success %}
+        {{ govukPanel({
+          titleText: "Declaration completed",
+          html: "The applicant can now send this form."
+        }) }}
+      {% endif %}
+
+      {% if error and error.declarationError %}
+        {{ govukErrorSummary({
+          titleText: "There is a problem",
+          errorList: [
+            {
+              text: error.declarationError,
+              href: "#declaration-checkbox"
+            }
+          ]
+        }) }}
+      {% endif %}
+
+      <h2 class="govuk-heading-m">Contact details</h2>
+      <dl class="govuk-summary-list govuk-!-margin-bottom-6">
+        <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Name</dt><dd class="govuk-summary-list__value">{{ data.name or "Not provided" }}</dd><dd class="govuk-summary-list__actions"><a class="govuk-link" href="#">View<span class="govuk-visually-hidden"> name</span></a></dd></div>
+        <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Email</dt><dd class="govuk-summary-list__value">{{ data.email or "Not provided" }}</dd><dd class="govuk-summary-list__actions"><a class="govuk-link" href="#">View<span class="govuk-visually-hidden"> email</span></a></dd></div>
+        <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Phone number</dt><dd class="govuk-summary-list__value">{{ data.phoneNumber or "Not provided" }}</dd><dd class="govuk-summary-list__actions"><a class="govuk-link" href="#">View<span class="govuk-visually-hidden"> phone number</span></a></dd></div>
+        <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Address</dt><dd class="govuk-summary-list__value">{{ data.selectedAddress or data.finalAddress or "Not provided" }}</dd><dd class="govuk-summary-list__actions"><a class="govuk-link" href="#">View<span class="govuk-visually-hidden"> address</span></a></dd></div>
+      </dl>
+
+      <h2 class="govuk-heading-m">Unicorn details</h2>
+      <dl class="govuk-summary-list govuk-!-margin-bottom-7">
+        <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Number of unicorns expected</dt><dd class="govuk-summary-list__value">{{ data.aitzzV or "Not provided" }}</dd><dd class="govuk-summary-list__actions"><a class="govuk-link" href="#">View<span class="govuk-visually-hidden"> number of unicorns expected</span></a></dd></div>
+        <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Type of unicorns</dt><dd class="govuk-summary-list__value">{% if data.DyfjJC %}{% if data.DyfjJC.length %}{% for type in data.DyfjJC %}{{ type }}{% if not loop.last %}, {% endif %}{% endfor %}{% else %}{{ data.DyfjJC }}{% endif %}{% else %}Not provided{% endif %}</dd><dd class="govuk-summary-list__actions"><a class="govuk-link" href="#">View<span class="govuk-visually-hidden"> type of unicorns</span></a></dd></div>
+        <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Where you keep the unicorns</dt><dd class="govuk-summary-list__value">Easting: {{ data["location-easting"] or "Not provided" }}, Northing: {{ data["location-northing"] or "Not provided" }}</dd><dd class="govuk-summary-list__actions"><a class="govuk-link" href="#">View<span class="govuk-visually-hidden"> where you keep the unicorns</span></a></dd></div>
+        <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Number of staff</dt><dd class="govuk-summary-list__value">{{ data.zhJMaM or "Not provided" }}</dd><dd class="govuk-summary-list__actions"><a class="govuk-link" href="#">View<span class="govuk-visually-hidden"> number of staff</span></a></dd></div>
+      </dl>
+
+      {% if not success %}
+        <form class="form" action="/runner-v3/review-declaration" method="post">
+          <input type="hidden" name="token" value="{{ token }}">
+
+          {{ declarationCheckboxes({
+            name: "declaration",
+            fieldset: {
+              legend: {
+                text: "Declaration",
+                isPageHeading: false
+              }
+            },
+            content: {
+              html: "<p>I confirm that I have reviewed this form and declare that, to the best of my knowledge, the information is accurate.</p>"
+            },
+            errorMessage: {
+              text: error.declarationError
+            } if error and error.declarationError else "",
+            items: [
+              {
+                value: "confirmed",
+                text: "I have reviewed this form and agree to this declaration",
+                id: "declaration-checkbox"
+              }
+            ]
+          }) }}
+
+          {{ govukButton({
+            text: "Submit declaration"
+          }) }}
+        </form>
+      {% endif %}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

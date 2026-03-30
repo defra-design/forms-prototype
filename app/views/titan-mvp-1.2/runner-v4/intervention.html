@@ -1,0 +1,228 @@
+{% extends "layouts/runner.html" %}
+
+{% block pageTitle %}
+Get your form checked – {{ serviceName }} – GOV.UK
+{% endblock %}
+
+{% block head %}
+  {{ super() }}
+  <style>
+    .prototype-panel-blue {
+      background: #005eb8;
+      color: #ffffff;
+      border-color: #005eb8;
+      margin-bottom: 24px;
+    }
+
+    .prototype-panel-blue .govuk-panel__title,
+    .prototype-panel-blue .govuk-panel__body {
+      color: #ffffff;
+    }
+
+    .prototype-interruption-panel__actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .prototype-interruption-panel__actions form {
+      margin: 0;
+    }
+
+
+  </style>
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% if data.reviewDeclarationErrorV4 %}
+      {{ govukErrorSummary({
+        titleText: "There is a problem",
+        errorList: [
+          {
+            text: data.reviewDeclarationErrorV4,
+            href: "#send-form-button-v4"
+          }
+        ]
+      }) }}
+    {% endif %}
+
+    {% if not interventionStarted %}
+      <div class="govuk-panel govuk-panel--confirmation prototype-panel-blue">
+        <h1 class="govuk-panel__title">
+          This form cannot be sent until it has been checked
+        </h1>
+      </div>
+
+      <div class="govuk-warning-text govuk-!-margin-bottom-6">
+        <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+        <strong class="govuk-warning-text__text">
+          Once you start this check, you will not be able to change your answers.
+        </strong>
+      </div>
+
+      <div class="govuk-button-group">
+        <form action="/runner-v4/intervention/begin" method="post">
+          {{ govukButton({
+            text: "Start check"
+          }) }}
+        </form>
+        <a class="govuk-link" href="/runner-v4/summary">Cancel</a>
+      </div>
+    {% else %}
+
+    <h1 class="govuk-heading-l">
+    <span class="govuk-caption-l">
+    Status:
+        {% if reviewStatus == "Reviewer declaration complete" %}
+          {{ govukTag({
+            text: "Check complete",
+            classes: "govuk-tag--green"
+          }) }}
+        {% else %}
+          {{ govukTag({
+            text: "Not checked",
+            classes: "govuk-tag--yellow"
+          }) }}
+        {% endif %}
+      </span>Get your form checked</h1>
+
+      <p class="govuk-body">
+        Before you can send this form, someone else must check your answers and confirm they're correct.
+      </p>
+
+      <div class="govuk-inset-text">
+        <h2 class="govuk-heading-s">Who can check your form</h2>
+        <p class="govuk-body">They must be a registered vet.</p>
+        <h2 class="govuk-heading-s">What they need</h2>
+        {# <p class="govuk-body">Only share these details with the person who is checking your form:</p> #}
+        <ul class="govuk-list govuk-list--bullet">
+          <li>reference number: <strong>21218-ewfew-2e21e21</strong></li>
+          <li>memorable word: <strong>chicken nuggets</strong></li>
+        </ul>
+      </div>
+
+      <div class="govuk-form-group">
+        <label class="govuk-label govuk-label--s" for="review-link-v4">Link for the person checking your form</label>
+
+        <div style="display:flex; gap:8px; align-items:flex-end;">
+          <input
+            class="govuk-input"
+            id="review-link-v4"
+            name="review-link-v4"
+            type="text"
+            value="{{ shareReviewUrl }}"
+            readonly
+            style="flex:1;"
+          >
+          {{ govukButton({
+            text: "Copy link",
+            classes: "govuk-button--secondary govuk-!-margin-bottom-0",
+            type: "button",
+            attributes: {
+              id: "copy-review-link-button-v4"
+            }
+          }) }}
+        </div>
+        <span id="copy-review-link-status-v4" class="govuk-body govuk-!-display-block govuk-!-margin-top-2" aria-live="polite"></span>
+      </div>
+
+      <p class="govuk-body">
+        To send this form to someone else, <a class="govuk-link" href="/runner-v4/intervention/generate-review-link" method="post">reset the link</a>.
+      </p>
+      {# <form class="form" action="/runner-v4/intervention/generate-review-link" method="post">
+        {{ govukButton({
+          text: "Create a new check link",
+          classes: "govuk-button--secondary"
+        }) }}
+      </form> #}
+
+
+      <h2 class="govuk-heading-m">If changes are needed</h2>
+      <p class="govuk-body">You can update your form and send it to be checked again.
+        </p>
+
+      <form class="form" action="/runner-v4/intervention/return-for-changes" method="post">
+        {{ govukButton({
+          text: "Return to form",
+          classes: "govuk-button--secondary govuk-!-margin-bottom-8"
+        }) }}
+      </form>
+
+      <h2 class="govuk-heading-m">Send the form</h2>
+      <p class="govuk-body">You can send the form after the person checking has checked your answers and declared them correct.
+      </p>
+
+      <form class="form" action="/runner-v4/intervention" method="post">
+        {{ govukButton({
+          text: "Send form",
+          attributes: {
+            id: "send-form-button-v4"
+          }
+        }) }}
+      </form>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const copyButton = document.getElementById("copy-review-link-button-v4");
+    const linkInput = document.getElementById("review-link-v4");
+    const status = document.getElementById("copy-review-link-status-v4");
+
+    if (!copyButton || !linkInput) return;
+
+    const originalButtonText = "Copy link";
+    function setButtonLabel(text) {
+      copyButton.textContent = text;
+    }
+    function copyUsingExecCommand(text) {
+      const tempTextArea = document.createElement("textarea");
+      tempTextArea.value = text;
+      tempTextArea.setAttribute("readonly", "");
+      tempTextArea.style.position = "absolute";
+      tempTextArea.style.left = "-9999px";
+      document.body.appendChild(tempTextArea);
+      tempTextArea.select();
+      const copied = document.execCommand("copy");
+      document.body.removeChild(tempTextArea);
+      return copied;
+    }
+
+    copyButton.addEventListener("click", function () {
+      const textToCopy = linkInput.value;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(textToCopy).then(function () {
+          setButtonLabel("Copied");
+          if (status) status.textContent = "Link copied";
+          window.setTimeout(function () { setButtonLabel(originalButtonText); }, 2000);
+        }).catch(function () {
+          const copied = copyUsingExecCommand(textToCopy);
+          if (copied) {
+            setButtonLabel("Copied");
+            if (status) status.textContent = "Link copied";
+          } else {
+            setButtonLabel("Copy failed");
+            if (status) status.textContent = "Could not copy link. Please copy it manually.";
+          }
+          window.setTimeout(function () { setButtonLabel(originalButtonText); }, 2000);
+        });
+      } else {
+        const copied = copyUsingExecCommand(textToCopy);
+        if (copied) {
+          setButtonLabel("Copied");
+          if (status) status.textContent = "Link copied";
+        } else {
+          setButtonLabel("Copy failed");
+          if (status) status.textContent = "Could not copy link. Please copy it manually.";
+        }
+        window.setTimeout(function () { setButtonLabel(originalButtonText); }, 2000);
+      }
+    });
+  });
+</script>
+{% endblock %}
