@@ -13998,7 +13998,7 @@ function createReviewToken() {
 
 function reviewerAccessValues() {
   return {
-    referenceNumber: "21218-ewfew-2e21e21",
+    referenceNumber: "V25-AWC-M56",
     memorableWord: "chicken nuggets"
   };
 }
@@ -15363,7 +15363,20 @@ router.post("/runner-v4/send-for-checking/return-for-changes", function (req, re
 router.get("/runner-v4/review-declaration", function (req, res) {
   const { token, success } = req.query;
   const reviewStore = ensureReviewStore(req);
-  const reviewEntry = token ? reviewStore.get(token) : null;
+  let reviewEntry = token ? reviewStore.get(token) : null;
+
+  // User research helper: allow direct linking with a deterministic token.
+  if (!reviewEntry && token === RUNNER_V4_REVIEW_TOKEN) {
+    if (!req.session.data) req.session.data = {};
+    applyRunnerV3DemoData(req.session.data);
+    reviewEntry = {
+      data: { ...req.session.data },
+      reviewDeclarationComplete: false,
+      reviewerDeclaredAt: null,
+      expires: Date.now() + (30 * 60 * 1000)
+    };
+    reviewStore.set(token, reviewEntry);
+  }
   const tokenValid = Boolean(reviewEntry && reviewEntry.expires > Date.now());
 
   if (!tokenValid) {
@@ -15380,11 +15393,27 @@ router.get("/runner-v4/review-declaration", function (req, res) {
     req.session.data = {};
   }
   if (reviewEntry.data && typeof reviewEntry.data === "object") {
-    req.session.data = { ...req.session.data, ...reviewEntry.data };
+    // Merge stored form snapshot into the session, but keep any fresh session
+    // state (like access flags) that may have been set immediately before redirect.
+    req.session.data = { ...reviewEntry.data, ...req.session.data };
+  }
+
+  // User research: always require reference number + memorable word for the
+  // deterministic token, but allow a successful pass through the gate once.
+  const justGrantedMap = req.session.data.reviewAccessJustGrantedV4 || {};
+  const justGranted = Boolean(token && justGrantedMap[token]);
+  if (token === RUNNER_V4_REVIEW_TOKEN && !justGranted) {
+    if (req.session.data.reviewAccessTokensV4 && req.session.data.reviewAccessTokensV4[token]) {
+      delete req.session.data.reviewAccessTokensV4[token];
+    }
   }
 
   const accessMap = req.session.data.reviewAccessTokensV4 || {};
   const hasReviewerAccess = Boolean(token && accessMap[token]);
+  if (token === RUNNER_V4_REVIEW_TOKEN && hasReviewerAccess && justGrantedMap[token]) {
+    delete justGrantedMap[token];
+    req.session.data.reviewAccessJustGrantedV4 = justGrantedMap;
+  }
   const reviewAccessError = req.session.data.reviewAccessErrorV4;
   const enteredReferenceNumber = req.session.data.enteredReviewerReferenceNumberV4 || "";
   const enteredMemorableWord = req.session.data.enteredReviewerMemorableWordV4 || "";
@@ -15429,7 +15458,7 @@ router.get("/runner-v4/checker-demo-review", function (req, res) {
   if (!req.session.data) req.session.data = {};
   applyRunnerV3DemoData(req.session.data);
 
-  const demoToken = "7b5c3f2a";
+  const demoToken = RUNNER_V4_REVIEW_TOKEN;
   const reviewStore = ensureReviewStore(req);
 
   // Tie the demo token to the applicant journey so that visiting
@@ -15573,11 +15602,12 @@ router.post("/runner-v4/review-declaration/access", function (req, res) {
   }
 
   const expected = reviewerAccessValues();
-  const normalizedReference = (reviewerReferenceNumber || "").trim();
+  const normalizedReference = (reviewerReferenceNumber || "").trim().toUpperCase();
+  const expectedReference = String(expected.referenceNumber || "").trim().toUpperCase();
   const normalizedWord = (reviewerMemorableWord || "").trim().toLowerCase();
 
   if (
-    normalizedReference !== expected.referenceNumber ||
+    normalizedReference !== expectedReference ||
     normalizedWord !== expected.memorableWord.toLowerCase()
   ) {
     req.session.data.reviewAccessErrorV4 =
@@ -15590,6 +15620,12 @@ router.post("/runner-v4/review-declaration/access", function (req, res) {
   const accessMap = req.session.data.reviewAccessTokensV4 || {};
   accessMap[token] = true;
   req.session.data.reviewAccessTokensV4 = accessMap;
+
+  if (!req.session.data.reviewAccessJustGrantedV4) {
+    req.session.data.reviewAccessJustGrantedV4 = {};
+  }
+  req.session.data.reviewAccessJustGrantedV4[token] = true;
+
   delete req.session.data.reviewAccessErrorV4;
   delete req.session.data.enteredReviewerReferenceNumberV4;
   delete req.session.data.enteredReviewerMemorableWordV4;
