@@ -46,6 +46,14 @@ router.use((req, res, next) => {
   if (!req.session.data.formName) {
     req.session.data.formName = "Form name";
   }
+
+  // Backwards-compat: older research sessions used UR-V4-DEMO.
+  // Normalise to the new stable "in progress" token so participants don't
+  // unexpectedly land in the "checked" state.
+  if (req.session.data.reviewTokenV4 === "UR-V4-DEMO") {
+    req.session.data.reviewTokenV4 = RUNNER_V4_REVIEW_TOKEN_INPROGRESS;
+  }
+
   next();
 });
 
