@@ -15962,8 +15962,13 @@ router.post("/runner-v2/reuse-summary", function (req, res) {
 
 router.get("/titan-mvp-1.2/runner/confirmation-email-v2.html", function (req, res) {
   if (!req.session.data) req.session.data = {};
+  const runnerV5ReferenceNumber =
+    (req.query && req.query.ref) ||
+    req.session.data.runnerV5LastSubmittedReferenceNumber ||
+    "V5-1A2B-3C4D";
   res.render("titan-mvp-1.2/runner/confirmation-email-v2", {
-    data: req.session.data
+    data: req.session.data,
+    runnerV5ReferenceNumber
   });
 });
 
