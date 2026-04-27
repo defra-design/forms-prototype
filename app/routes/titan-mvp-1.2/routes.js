@@ -15441,11 +15441,10 @@ router.get("/runner-v4/checker-demo-review", function (req, res) {
     expires: Date.now() + (30 * 60 * 1000)
   });
 
-  // Grant access so the reviewer lands on the form immediately.
-  if (!req.session.data.reviewAccessTokensV4) {
-    req.session.data.reviewAccessTokensV4 = {};
+  // Always require reference number + memorable word for access.
+  if (req.session.data.reviewAccessTokensV4 && req.session.data.reviewAccessTokensV4[demoToken]) {
+    delete req.session.data.reviewAccessTokensV4[demoToken];
   }
-  req.session.data.reviewAccessTokensV4[demoToken] = true;
 
   return res.redirect(`/runner-v4/review-declaration?token=${encodeURIComponent(demoToken)}`);
 });
