@@ -13948,10 +13948,14 @@ function ensureReviewStore(req) {
 }
 
 function ensureRunnerV5SubmissionStore(req) {
-  if (!req.app.locals.runnerV5SubmissionStore) {
-    req.app.locals.runnerV5SubmissionStore = new Map();
+  // IMPORTANT: store in session, not app.locals.
+  // Heroku (and multi-process dev setups) can route requests to different
+  // processes/dynos, so app.locals memory cannot be relied on for lookups.
+  if (!req.session.data) req.session.data = {};
+  if (!Array.isArray(req.session.data.runnerV5SubmissionStore)) {
+    req.session.data.runnerV5SubmissionStore = [];
   }
-  return req.app.locals.runnerV5SubmissionStore;
+  return req.session.data.runnerV5SubmissionStore;
 }
 
 function normalizeRunnerV5Email(email) {
@@ -13970,13 +13974,8 @@ function findRunnerV5Submission(req, email, referenceNumber) {
   const normalizedEmail = normalizeRunnerV5Email(email);
   const normalizedRef = normalizeRunnerV5ReferenceNumber(referenceNumber);
 
-  // Fast path: exact-key lookup if possible
-  const directKey = `${normalizedEmail}::${String(referenceNumber || "").trim().toUpperCase()}`;
-  const directMatch = store.get(directKey);
-  if (directMatch) return directMatch;
-
   // Flexible path: match by normalized reference (ignore hyphens/spaces/case)
-  for (const entry of store.values()) {
+  for (const entry of store) {
     const entryEmail = normalizeRunnerV5Email(entry.email);
     const entryRef = normalizeRunnerV5ReferenceNumber(entry.referenceNumber);
     if (!entryRef || entryRef !== normalizedRef) continue;
@@ -14598,7 +14597,7 @@ router.get("/runner-v5/admin/set-form-version", function (req, res) {
 
 router.get("/runner-v5/admin/clear-submissions", function (req, res) {
   const store = ensureRunnerV5SubmissionStore(req);
-  store.clear();
+  store.length = 0;
   if (req.session.data) {
     delete req.session.data.runnerV5LastSubmittedReferenceNumber;
     delete req.session.data.runnerV5LastSubmittedEmail;
@@ -14760,7 +14759,8 @@ router.post("/runner-v5/check-answers", function (req, res) {
 
   const email = String(req.session.data.email || "").trim();
   const key = `${normalizeRunnerV5Email(email)}::${String(referenceNumber).trim().toUpperCase()}`;
-  store.set(key, {
+  store.push({
+    key,
     referenceNumber,
     email,
     submittedOn,
