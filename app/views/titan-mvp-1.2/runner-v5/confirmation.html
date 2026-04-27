@@ -16,9 +16,10 @@ Form submitted – {{ serviceName }} – GOV.UK
 {% block content %}
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
+    {% set runnerV5ReferenceNumber = data.runnerV5LastSubmittedReferenceNumber or "V5-1A2B-3C4D" %}
     {{ govukPanel({
       titleText: "Form submitted",
-      html: "Your reference number<br><strong>" ~ (data.runnerV5LastSubmittedReferenceNumber or "HDJ2123F") ~ "</strong>"
+      html: "Your reference number<br><strong>" ~ runnerV5ReferenceNumber ~ "</strong>"
     }) }}
 
     <h2 class="govuk-heading-m govuk-!-margin-top-6">What happens next</h2>

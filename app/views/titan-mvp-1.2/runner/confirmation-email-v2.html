@@ -165,7 +165,7 @@ Email - Form submitted
 
             {% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
             {{ govukInsetText({
-            text: "Your reference number: " ~ (data.runnerV5LastSubmittedReferenceNumber or data.runnerV5PreviousSubmissionReferenceNumber or "V5-1A2B-3C4D")
+            text: "Your reference number: " ~ (data.runnerV5LastSubmittedReferenceNumber or "V5-1A2B-3C4D")
             }) }}
 
             <p class="govuk-body">We received your form submission for 'Register as a unicorn breeder' on Tuesday 1 April
