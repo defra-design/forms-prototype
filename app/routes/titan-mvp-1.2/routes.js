@@ -7,9 +7,27 @@ const sections = require("../../routes/sections");
 const terms = require("../../data/dictionary.json");
 const express = require("express");
 
+// Public base URL for links you share externally (e.g. review links in emails).
+const PUBLIC_BASE_URL = "https://forms-prototype-d9d9fb55cd01.herokuapp.com";
+
 // Add middleware to make terms available to all templates
 router.use((req, res, next) => {
   res.locals.commonTerms = terms;
+  next();
+});
+
+// Add middleware to make runner start URL available to templates
+router.use((req, res, next) => {
+  const p = String((req && req.path) || "");
+  if (p.startsWith("/runner-v3")) {
+    res.locals.runnerStartUrl = "/runner-v3/start";
+  } else if (p.startsWith("/runner-v4")) {
+    res.locals.runnerStartUrl = "/runner-v4/start";
+  } else if (p.startsWith("/runner-v5")) {
+    res.locals.runnerStartUrl = "/runner-v5/start";
+  } else {
+    res.locals.runnerStartUrl = "/titan-mvp-1.2/runner/questions/start.html";
+  }
   next();
 });
 
@@ -13914,6 +13932,62 @@ function ensureReviewStore(req) {
   return req.app.locals.reviewStore;
 }
 
+function ensureRunnerV5SubmissionStore(req) {
+  if (!req.app.locals.runnerV5SubmissionStore) {
+    req.app.locals.runnerV5SubmissionStore = new Map();
+  }
+  return req.app.locals.runnerV5SubmissionStore;
+}
+
+function normalizeRunnerV5Email(email) {
+  return String(email || "").trim().toLowerCase();
+}
+
+function normalizeRunnerV5ReferenceNumber(referenceNumber) {
+  return String(referenceNumber || "")
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "");
+}
+
+function findRunnerV5Submission(req, email, referenceNumber) {
+  const store = ensureRunnerV5SubmissionStore(req);
+  const normalizedEmail = normalizeRunnerV5Email(email);
+  const normalizedRef = normalizeRunnerV5ReferenceNumber(referenceNumber);
+
+  // Fast path: exact-key lookup if possible
+  const directKey = `${normalizedEmail}::${String(referenceNumber || "").trim().toUpperCase()}`;
+  const directMatch = store.get(directKey);
+  if (directMatch) return directMatch;
+
+  // Flexible path: match by normalized reference (ignore hyphens/spaces/case)
+  for (const entry of store.values()) {
+    const entryEmail = normalizeRunnerV5Email(entry.email);
+    const entryRef = normalizeRunnerV5ReferenceNumber(entry.referenceNumber);
+    if (!entryRef || entryRef !== normalizedRef) continue;
+    // If the reference matches, allow it. Email acts as a hint only (useful if
+    // participants enter a different email, or the original submission had no email).
+    if (!normalizedEmail) return entry;
+    if (entryEmail === normalizedEmail) return entry;
+    if (!entryEmail) return entry;
+  }
+
+  return null;
+}
+
+function createRunnerV5ReferenceNumber() {
+  const bytes = require("crypto").randomBytes(4).toString("hex").toUpperCase();
+  return `V5-${bytes.slice(0, 4)}-${bytes.slice(4, 8)}`;
+}
+
+function getRunnerV5CurrentFormVersion(req) {
+  if (!req.session.data) req.session.data = {};
+  if (!req.session.data.runnerV5CurrentFormVersion) {
+    req.session.data.runnerV5CurrentFormVersion = 1;
+  }
+  return Number(req.session.data.runnerV5CurrentFormVersion) || 1;
+}
+
 function createReviewToken() {
   return require("crypto").randomBytes(24).toString("hex");
 }
@@ -13938,16 +14012,18 @@ function applyRunnerV3DemoData(data) {
     zhJMaM: "12"
   };
 
+  const hasDyfjJC =
+    Array.isArray(data.DyfjJC) ? data.DyfjJC.length > 0 : Boolean(data.DyfjJC);
   const hasRealAnswers =
-    Boolean(data.name) ||
-    Boolean(data.email) ||
-    Boolean(data.phoneNumber) ||
-    Boolean(data.selectedAddress || data.finalAddress) ||
-    Boolean(data.aitzzV) ||
-    Boolean(data.DyfjJC) ||
-    Boolean(data["location-easting"]) ||
-    Boolean(data["location-northing"]) ||
-    Boolean(data.zhJMaM);
+    Boolean(String(data.name || "").trim()) ||
+    Boolean(String(data.email || "").trim()) ||
+    Boolean(String(data.phoneNumber || "").trim()) ||
+    Boolean(String(data.selectedAddress || data.finalAddress || "").trim()) ||
+    Boolean(String(data.aitzzV || "").trim()) ||
+    hasDyfjJC ||
+    Boolean(String(data["location-easting"] || "").trim()) ||
+    Boolean(String(data["location-northing"] || "").trim()) ||
+    Boolean(String(data.zhJMaM || "").trim());
 
   if (!hasRealAnswers) {
     Object.assign(data, demoData);
@@ -14290,7 +14366,7 @@ router.get("/runner-v3/summary", function (req, res) {
   });
 
   const shareReviewUrl = `/runner-v3/review-declaration?token=${encodeURIComponent(reviewToken)}`;
-  const absoluteShareReviewUrl = `${req.protocol}://${req.get("host")}${shareReviewUrl}`;
+  const absoluteShareReviewUrl = `${PUBLIC_BASE_URL}${shareReviewUrl}`;
   const reviewStatus = reviewerDeclarationComplete
     ? "Reviewer declaration complete"
     : "Awaiting reviewer declaration";
@@ -14469,40 +14545,413 @@ router.get("/runner-v3/confirmation", function (req, res) {
   res.render("titan-mvp-1.2/runner/confirmation-v2");
 });
 
-// ── Runner v4: review moved to intervention page after Send ─────────────────
-router.use("/runner-v4", function (req, res, next) {
-  const interventionStarted = Boolean(
-    req.session &&
-      req.session.data &&
-      req.session.data.reviewInterventionStartedV4
-  );
+// ── Runner v4 ───────────────────────────────────────────────────────────────
 
-  if (!interventionStarted) {
-    return next();
-  }
+router.get("/runner-v4", function (req, res) {
+  return res.redirect("/runner-v4/start");
+});
 
-  const editablePaths = new Set([
-    "/declaration",
-    "/whats-your-name",
-    "/whats-your-email-address",
-    "/whats-your-phone-number",
-    "/whats-your-address",
-    "/what-type-of-unicorns-will-you-breed",
-    "/how-many-unicorns-do-you-expect-to-breed-each-year",
-    "/where-will-you-keep-the-unicorns",
-    "/how-many-members-of-staff-will-look-after-the-unicorns",
-    "/summary"
-  ]);
-
-  if (editablePaths.has(req.path)) {
-    return res.redirect("/runner-v4/intervention");
-  }
-
-  return next();
+router.get("/runner-v4/", function (req, res) {
+  return res.redirect("/runner-v4/start");
 });
 
 router.get("/runner-v4/start", function (req, res) {
-  res.render("titan-mvp-1.2/runner/questions/start-v2");
+  res.render("titan-mvp-1.2/runner/questions/start-v4");
+});
+
+// ── Runner v5: save and resubmit (reuse previous answers) ────────────────────
+router.get("/runner-v5", function (req, res) {
+  return res.redirect("/runner-v5/start");
+});
+
+router.get("/runner-v5/", function (req, res) {
+  return res.redirect("/runner-v5/start");
+});
+
+router.get("/runner-v5/start", function (req, res) {
+  return res.render("titan-mvp-1.2/runner-v5/start-v5");
+});
+
+router.get("/runner-v5/admin/set-form-version", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  const v = Number(req.query.version);
+  if (v && Number.isFinite(v)) {
+    req.session.data.runnerV5CurrentFormVersion = v;
+  }
+  return res.redirect("/runner-v5/start");
+});
+
+router.get("/runner-v5/admin/clear-submissions", function (req, res) {
+  const store = ensureRunnerV5SubmissionStore(req);
+  store.clear();
+  if (req.session.data) {
+    delete req.session.data.runnerV5LastSubmittedReferenceNumber;
+    delete req.session.data.runnerV5LastSubmittedEmail;
+    delete req.session.data.runnerV5LastSubmittedOn;
+  }
+  return res.redirect("/runner-v5/start");
+});
+
+router.get("/runner-v5/start-choice", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  return res.render("titan-mvp-1.2/runner-v5/start", {
+    data: req.session.data,
+    error: req.session.data.runnerV5Error
+  });
+});
+
+router.post("/runner-v5/start-choice", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  const { usePreviousSubmission } = req.body;
+
+  if (!usePreviousSubmission) {
+    req.session.data.runnerV5Error = {
+      usePreviousSubmission: "Select whether you want to use answers from a previous submission"
+    };
+    return res.redirect("/runner-v5/start-choice");
+  }
+
+  delete req.session.data.runnerV5Error;
+  req.session.data.runnerV5UsePreviousSubmission = usePreviousSubmission === "yes";
+
+  if (req.session.data.runnerV5UsePreviousSubmission) {
+    return res.redirect("/runner-v5/authenticate");
+  }
+
+  return res.redirect("/runner-v5/declaration");
+});
+
+router.get("/runner-v5/declaration", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  return res.render("titan-mvp-1.2/runner/questions/declaration", {
+    error: req.session.data.error,
+    basePath: "/runner-v5"
+  });
+});
+
+router.post("/runner-v5/declaration", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  const { declaration } = req.body;
+  // For research convenience, allow all v5 questions to be skipped.
+  req.session.data.declaration = declaration;
+  delete req.session.data.error;
+  return res.redirect("/runner-v5/whats-your-name");
+});
+
+router.get("/runner-v5/authenticate", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  return res.render("titan-mvp-1.2/runner-v5/authenticate", {
+    data: req.session.data,
+    error: req.session.data.runnerV5Error
+  });
+});
+
+router.post("/runner-v5/authenticate", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  const { previousSubmissionEmail, previousSubmissionReferenceNumber } = req.body;
+
+  const nextError = {};
+  if (
+    !previousSubmissionReferenceNumber ||
+    previousSubmissionReferenceNumber.trim() === ""
+  ) {
+    nextError.previousSubmissionReferenceNumber =
+      "Enter your reference number";
+  }
+
+  if (Object.keys(nextError).length > 0) {
+    req.session.data.runnerV5Error = nextError;
+    return res.redirect("/runner-v5/authenticate");
+  }
+
+  delete req.session.data.runnerV5Error;
+
+  const saved = findRunnerV5Submission(
+    req,
+    previousSubmissionEmail,
+    previousSubmissionReferenceNumber
+  );
+
+  if (!saved) {
+    req.session.data.runnerV5Error = {
+      previousSubmissionReferenceNumber: "Enter a valid reference number"
+    };
+    req.session.data.runnerV5PreviousSubmissionEmail = previousSubmissionEmail;
+    req.session.data.runnerV5PreviousSubmissionReferenceNumber = previousSubmissionReferenceNumber;
+    return res.redirect("/runner-v5/authenticate");
+  }
+
+  req.session.data.runnerV5UsePreviousSubmission = true;
+  req.session.data.runnerV5AuthedPreviousSubmission = true;
+  req.session.data.runnerV5PreviousSubmissionEmail = previousSubmissionEmail;
+  req.session.data.runnerV5PreviousSubmissionReferenceNumber = previousSubmissionReferenceNumber;
+  req.session.data.runnerV5PreviousFormName = saved.formName;
+  req.session.data.runnerV5PreviousSubmittedOn = saved.submittedOn;
+
+  // Load previous answers into the new form (earlier submission unchanged).
+  const a = saved.answers || {};
+  req.session.data.name = a.name;
+  req.session.data.email = a.email;
+  req.session.data.phoneNumber = a.phoneNumber;
+  req.session.data.selectedAddress = a.selectedAddress;
+  req.session.data.finalAddress = a.finalAddress;
+  req.session.data.DyfjJC = a.DyfjJC;
+  req.session.data.aitzzV = a.aitzzV;
+  req.session.data["location-easting"] = a["location-easting"];
+  req.session.data["location-northing"] = a["location-northing"];
+  req.session.data.zhJMaM = a.zhJMaM;
+
+  const currentVersion = getRunnerV5CurrentFormVersion(req);
+  const previousVersion = Number(saved.formVersion) || 1;
+  const hasNewOrInvalidQuestions = previousVersion < currentVersion;
+  req.session.data.runnerV5HasNewOrInvalidQuestions = hasNewOrInvalidQuestions;
+
+  if (hasNewOrInvalidQuestions) {
+    req.session.data.runnerV5NewQuestionsCompleted = false;
+    return res.redirect("/runner-v5/intervention");
+  }
+
+  return res.redirect("/runner-v5/check-answers");
+});
+
+router.get("/runner-v5/check-answers", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  if (
+    req.session.data.runnerV5UsePreviousSubmission &&
+    req.session.data.runnerV5HasNewOrInvalidQuestions &&
+    !req.session.data.runnerV5NewQuestionsCompleted
+  ) {
+    return res.redirect("/runner-v5/intervention");
+  }
+  return res.render("titan-mvp-1.2/runner-v5/check-answers", {
+    data: req.session.data
+  });
+});
+
+router.post("/runner-v5/check-answers", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  if (req.body.email && String(req.body.email).trim() !== "") {
+    req.session.data.email = String(req.body.email).trim();
+  }
+
+  const store = ensureRunnerV5SubmissionStore(req);
+  const formVersionAtSubmission = getRunnerV5CurrentFormVersion(req);
+  const referenceNumber = createRunnerV5ReferenceNumber();
+  const submittedOn = new Date().toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  });
+
+  const email = String(req.session.data.email || "").trim();
+  const key = `${normalizeRunnerV5Email(email)}::${String(referenceNumber).trim().toUpperCase()}`;
+  store.set(key, {
+    referenceNumber,
+    email,
+    submittedOn,
+    formName: "Register as a unicorn breeder",
+    formVersion: formVersionAtSubmission,
+    answers: {
+      name: req.session.data.name,
+      email: req.session.data.email,
+      phoneNumber: req.session.data.phoneNumber,
+      selectedAddress: req.session.data.selectedAddress,
+      finalAddress: req.session.data.finalAddress,
+      DyfjJC: req.session.data.DyfjJC,
+      aitzzV: req.session.data.aitzzV,
+      "location-easting": req.session.data["location-easting"],
+      "location-northing": req.session.data["location-northing"],
+      zhJMaM: req.session.data.zhJMaM
+    }
+  });
+
+  req.session.data.runnerV5LastSubmittedReferenceNumber = referenceNumber;
+  req.session.data.runnerV5LastSubmittedEmail = email;
+  req.session.data.runnerV5LastSubmittedOn = submittedOn;
+  req.session.data.runnerV5CurrentFormVersion = formVersionAtSubmission + 1;
+
+  return res.redirect("/runner-v5/confirmation");
+});
+
+router.get("/runner-v5/confirmation", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  return res.render("titan-mvp-1.2/runner-v5/confirmation", {
+    data: req.session.data
+  });
+});
+
+router.get("/runner-v5/previous-submission", function (req, res) {
+  return res.redirect("/runner-v5/intervention");
+});
+
+router.post("/runner-v5/previous-submission", function (req, res) {
+  return res.redirect("/runner-v5/intervention");
+});
+
+router.get("/runner-v5/intervention", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  return res.render("titan-mvp-1.2/runner-v5/intervention", {
+    data: req.session.data
+  });
+});
+
+router.post("/runner-v5/intervention", function (req, res) {
+  return res.redirect("/runner-v5/new-questions/declaration");
+});
+
+router.get("/runner-v5/new-questions", function (req, res) {
+  return res.redirect("/runner-v5/new-questions/declaration");
+});
+
+router.post("/runner-v5/new-questions", function (req, res) {
+  return res.redirect("/runner-v5/new-questions/declaration");
+});
+
+router.get("/runner-v5/new-questions/declaration", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  return res.render("titan-mvp-1.2/runner-v5/new-questions-declaration", {
+    data: req.session.data,
+    error: req.session.data.runnerV5NewQuestionsError
+  });
+});
+
+router.post("/runner-v5/new-questions/declaration", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  const { declaration } = req.body;
+  delete req.session.data.runnerV5NewQuestionsError;
+  req.session.data.declaration = declaration;
+  req.session.data.runnerV5NewQuestionsDeclarationConfirmed = true;
+  return res.redirect("/runner-v5/new-questions/unicorn-weight");
+});
+
+router.get("/runner-v5/new-questions/unicorn-weight", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  return res.render("titan-mvp-1.2/runner-v5/new-questions-unicorn-weight", {
+    data: req.session.data,
+    error: req.session.data.runnerV5NewQuestionsError
+  });
+});
+
+router.post("/runner-v5/new-questions/unicorn-weight", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  const { runnerV5UnicornWeightKg } = req.body;
+  delete req.session.data.runnerV5NewQuestionsError;
+  req.session.data.runnerV5UnicornWeightKg = String(runnerV5UnicornWeightKg || "").trim();
+  req.session.data.runnerV5NewQuestionsCompleted = true;
+  return res.redirect("/runner-v5/check-answers");
+});
+
+router.get("/runner-v5/whats-your-name", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  return res.render("titan-mvp-1.2/runner/questions/whats-your-name", {
+    error: req.session.data.error,
+    basePath: "/runner-v5"
+  });
+});
+
+router.post("/runner-v5/whats-your-name", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  const { name } = req.body;
+  req.session.data.name = name;
+  delete req.session.data.error;
+  return res.redirect("/runner-v5/whats-your-email-address");
+});
+
+router.get("/runner-v5/whats-your-email-address", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  return res.render("titan-mvp-1.2/runner/questions/whats-your-email-address", {
+    error: req.session.data.error,
+    basePath: "/runner-v5"
+  });
+});
+
+router.post("/runner-v5/whats-your-email-address", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  const { email } = req.body;
+  req.session.data.email = email;
+  delete req.session.data.error;
+  return res.redirect("/runner-v5/whats-your-phone-number");
+});
+
+router.get("/runner-v5/whats-your-phone-number", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  return res.render("titan-mvp-1.2/runner/questions/whats-your-phone-number", {
+    error: req.session.data.error,
+    basePath: "/runner-v5"
+  });
+});
+
+router.post("/runner-v5/whats-your-phone-number", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  const { phoneNumber } = req.body;
+  req.session.data.phoneNumber = phoneNumber;
+  delete req.session.data.error;
+  return res.redirect("/runner-v5/what-type-of-unicorns-will-you-breed");
+});
+
+router.get("/runner-v5/what-type-of-unicorns-will-you-breed", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  return res.render("titan-mvp-1.2/runner/questions/what-type-of-unicorns-will-you-breed", {
+    error: req.session.data.error,
+    basePath: "/runner-v5"
+  });
+});
+
+router.post("/runner-v5/what-type-of-unicorns-will-you-breed", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  const { DyfjJC } = req.body;
+  req.session.data.DyfjJC = DyfjJC;
+  delete req.session.data.error;
+  return res.redirect("/runner-v5/how-many-unicorns-do-you-expect-to-breed-each-year");
+});
+
+router.get("/runner-v5/how-many-unicorns-do-you-expect-to-breed-each-year", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  return res.render("titan-mvp-1.2/runner/questions/how-many-unicorns-do-you-expect-to-breed-each-year", {
+    error: req.session.data.error,
+    basePath: "/runner-v5"
+  });
+});
+
+router.post("/runner-v5/how-many-unicorns-do-you-expect-to-breed-each-year", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  const { aitzzV } = req.body;
+  req.session.data.aitzzV = aitzzV;
+  delete req.session.data.error;
+  return res.redirect("/runner-v5/where-will-you-keep-the-unicorns");
+});
+
+router.get("/runner-v5/where-will-you-keep-the-unicorns", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  return res.render("titan-mvp-1.2/runner/questions/where-will-you-keep-the-unicorns", {
+    error: req.session.data.error,
+    basePath: "/runner-v5"
+  });
+});
+
+router.post("/runner-v5/where-will-you-keep-the-unicorns", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  const { "location-easting": easting, "location-northing": northing } = req.body;
+  req.session.data["location-easting"] = easting;
+  req.session.data["location-northing"] = northing;
+  delete req.session.data.error;
+  return res.redirect("/runner-v5/how-many-members-of-staff-will-look-after-the-unicorns");
+});
+
+router.get("/runner-v5/how-many-members-of-staff-will-look-after-the-unicorns", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  return res.render("titan-mvp-1.2/runner/questions/how-many-members-of-staff-will-look-after-the-unicorns", {
+    error: req.session.data.error,
+    basePath: "/runner-v5"
+  });
+});
+
+router.post("/runner-v5/how-many-members-of-staff-will-look-after-the-unicorns", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  const { zhJMaM } = req.body;
+  req.session.data.zhJMaM = zhJMaM;
+  delete req.session.data.error;
+  return res.redirect("/runner-v5/check-answers");
 });
 
 router.get("/runner-v4/declaration", function (req, res) {
@@ -14514,10 +14963,8 @@ router.get("/runner-v4/declaration", function (req, res) {
 
 router.post("/runner-v4/declaration", function (req, res) {
   const { declaration } = req.body;
-  if (!declaration || !declaration.includes("confirmed")) {
-    req.session.data.error = { declarationError: "You must accept the declaration to continue" };
-    return res.redirect("/runner-v4/declaration");
-  }
+  // Persist declaration so it can be shown on the summary page.
+  req.session.data.declaration = declaration;
   delete req.session.data.error;
   res.redirect("/runner-v4/whats-your-name");
 });
@@ -14527,10 +14974,6 @@ router.get("/runner-v4/whats-your-name", function (req, res) {
 });
 router.post("/runner-v4/whats-your-name", function (req, res) {
   const { name } = req.body;
-  if (!name || name.trim() === "") {
-    req.session.data.error = { nameError: "Enter your full name" };
-    return res.redirect("/runner-v4/whats-your-name");
-  }
   req.session.data.name = name;
   delete req.session.data.error;
   res.redirect("/runner-v4/whats-your-email-address");
@@ -14541,15 +14984,6 @@ router.get("/runner-v4/whats-your-email-address", function (req, res) {
 });
 router.post("/runner-v4/whats-your-email-address", function (req, res) {
   const { email } = req.body;
-  if (!email || email.trim() === "") {
-    req.session.data.error = { emailError: "Enter your email address" };
-    return res.redirect("/runner-v4/whats-your-email-address");
-  }
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    req.session.data.error = { emailError: "Enter a valid email address" };
-    return res.redirect("/runner-v4/whats-your-email-address");
-  }
   req.session.data.email = email;
   delete req.session.data.error;
   res.redirect("/runner-v4/whats-your-phone-number");
@@ -14560,39 +14994,20 @@ router.get("/runner-v4/whats-your-phone-number", function (req, res) {
 });
 router.post("/runner-v4/whats-your-phone-number", function (req, res) {
   const { phoneNumber } = req.body;
-  if (!phoneNumber || phoneNumber.trim() === "") {
-    req.session.data.error = { phoneError: "Enter your phone number" };
-    return res.redirect("/runner-v4/whats-your-phone-number");
-  }
-  const phoneRegex = /^(\+44\s?7\d{3}|\(?07\d{3}\)?)\s?\d{3}\s?\d{3}$/;
-  if (!phoneRegex.test(phoneNumber.replace(/\s/g, ""))) {
-    req.session.data.error = { phoneError: "Enter a valid UK phone number" };
-    return res.redirect("/runner-v4/whats-your-phone-number");
-  }
   req.session.data.phoneNumber = phoneNumber;
   delete req.session.data.error;
-  res.redirect("/runner-v4/whats-your-address");
+  res.redirect("/runner-v4/what-type-of-unicorns-will-you-breed");
 });
 
 router.get("/runner-v4/whats-your-address", function (req, res) {
-  req.session.data.returnUrl = req.session.data.returnUrl || "/runner-v4/whats-your-address";
-  res.render("titan-mvp-1.2/runner/questions/whats-your-address-no-lookup", {
-    error: req.session.data.error
-  });
+  // v4 journey no longer captures address
+  delete req.session.data.error;
+  return res.redirect("/runner-v4/what-type-of-unicorns-will-you-breed");
 });
 router.post("/runner-v4/whats-your-address", function (req, res) {
-  const { action } = req.body;
-  if (action === "continue") {
-    if (!req.session.data.selectedAddress && !req.session.data.finalAddress && !req.session.data["wZLWPy-address-line-1"]) {
-      req.session.data.error = { addressError: true };
-      return res.redirect("/runner-v4/whats-your-address");
-    }
-    delete req.session.data.error;
-    res.redirect("/runner-v4/what-type-of-unicorns-will-you-breed");
-  } else if (action === "exit") {
-    req.session.data.returnUrl = "/runner-v4/whats-your-address";
-    res.redirect("/save-progress");
-  }
+  // v4 journey no longer captures address
+  delete req.session.data.error;
+  return res.redirect("/runner-v4/what-type-of-unicorns-will-you-breed");
 });
 
 router.get("/runner-v4/what-type-of-unicorns-will-you-breed", function (req, res) {
@@ -14600,10 +15015,6 @@ router.get("/runner-v4/what-type-of-unicorns-will-you-breed", function (req, res
 });
 router.post("/runner-v4/what-type-of-unicorns-will-you-breed", function (req, res) {
   const { DyfjJC } = req.body;
-  if (!DyfjJC || DyfjJC.length === 0) {
-    req.session.data.error = { typeError: "Select at least one type of unicorn" };
-    return res.redirect("/runner-v4/what-type-of-unicorns-will-you-breed");
-  }
   req.session.data.DyfjJC = DyfjJC;
   delete req.session.data.error;
   res.redirect("/runner-v4/how-many-unicorns-do-you-expect-to-breed-each-year");
@@ -14614,28 +15025,20 @@ router.get("/runner-v4/how-many-unicorns-do-you-expect-to-breed-each-year", func
 });
 router.post("/runner-v4/how-many-unicorns-do-you-expect-to-breed-each-year", function (req, res) {
   const { aitzzV } = req.body;
-  if (!aitzzV) {
-    req.session.data.error = { numberError: "Select how many unicorns you expect to breed" };
-    return res.redirect("/runner-v4/how-many-unicorns-do-you-expect-to-breed-each-year");
-  }
   req.session.data.aitzzV = aitzzV;
   delete req.session.data.error;
-  res.redirect("/runner-v4/where-will-you-keep-the-unicorns");
+  res.redirect("/runner-v4/how-many-members-of-staff-will-look-after-the-unicorns");
 });
 
 router.get("/runner-v4/where-will-you-keep-the-unicorns", function (req, res) {
-  res.render("titan-mvp-1.2/runner/questions/where-will-you-keep-the-unicorns", { error: req.session.data.error, basePath: "/runner-v4" });
+  // v4 journey no longer captures coordinates
+  delete req.session.data.error;
+  return res.redirect("/runner-v4/how-many-members-of-staff-will-look-after-the-unicorns");
 });
 router.post("/runner-v4/where-will-you-keep-the-unicorns", function (req, res) {
-  const { "location-easting": easting, "location-northing": northing } = req.body;
-  if (!easting || !northing) {
-    req.session.data.error = { locationError: "Enter both easting and northing coordinates" };
-    return res.redirect("/runner-v4/where-will-you-keep-the-unicorns");
-  }
-  req.session.data["location-easting"] = easting;
-  req.session.data["location-northing"] = northing;
+  // v4 journey no longer captures coordinates
   delete req.session.data.error;
-  res.redirect("/runner-v4/how-many-members-of-staff-will-look-after-the-unicorns");
+  return res.redirect("/runner-v4/how-many-members-of-staff-will-look-after-the-unicorns");
 });
 
 router.get("/runner-v4/how-many-members-of-staff-will-look-after-the-unicorns", function (req, res) {
@@ -14643,10 +15046,6 @@ router.get("/runner-v4/how-many-members-of-staff-will-look-after-the-unicorns", 
 });
 router.post("/runner-v4/how-many-members-of-staff-will-look-after-the-unicorns", function (req, res) {
   const { zhJMaM } = req.body;
-  if (!zhJMaM || zhJMaM.trim() === "") {
-    req.session.data.error = { staffError: "Enter the number of staff members" };
-    return res.redirect("/runner-v4/how-many-members-of-staff-will-look-after-the-unicorns");
-  }
   req.session.data.zhJMaM = zhJMaM;
   delete req.session.data.error;
   req.session.data.reviewDeclarationCompleteV4 = false;
@@ -14657,8 +15056,6 @@ router.post("/runner-v4/how-many-members-of-staff-will-look-after-the-unicorns",
 router.get("/runner-v4/summary", function (req, res) {
   if (!req.session.data) req.session.data = {};
   applyRunnerV3DemoData(req.session.data);
-  // Always restart the intervention flow from the blue panel when user returns to summary.
-  req.session.data.reviewInterventionStartedV4 = false;
   delete req.session.data.reviewDeclarationErrorV4;
   res.render("titan-mvp-1.2/runner-v4/summary-no-payment", {
     data: req.session.data
@@ -14666,37 +15063,60 @@ router.get("/runner-v4/summary", function (req, res) {
 });
 
 router.post("/runner-v4/summary", function (req, res) {
-  res.redirect("/runner-v4/intervention");
-});
-
-router.post("/runner-v4/intervention/begin", function (req, res) {
   if (!req.session.data) req.session.data = {};
+  // Summary page captures (or reconfirms) email.
+  if (typeof req.body.email === "string" && req.body.email.trim() !== "") {
+    req.session.data.email = req.body.email.trim();
+  }
   req.session.data.reviewInterventionStartedV4 = true;
-  return res.redirect("/runner-v4/intervention");
+  return res.redirect("/runner-v4/send-for-checking");
 });
 
-router.post("/runner-v4/intervention/return-for-changes", function (req, res) {
-  if (!req.session.data) req.session.data = {};
+// ── Runner v4: send for checking (replaces /runner-v4/intervention) ──────────
+router.use("/runner-v4", function (req, res, next) {
+  const checkingStarted = Boolean(
+    req.session &&
+      req.session.data &&
+      req.session.data.reviewInterventionStartedV4
+  );
 
-  const reviewStore = ensureReviewStore(req);
-  const currentToken = req.session.data.reviewTokenV4;
-  if (currentToken) {
-    reviewStore.delete(currentToken);
+  if (!checkingStarted) {
+    return next();
   }
 
-  // Unlock answers so applicant can edit, and clear review state.
-  req.session.data.reviewInterventionStartedV4 = false;
-  req.session.data.reviewDeclarationCompleteV4 = false;
-  delete req.session.data.reviewDeclarationErrorV4;
-  delete req.session.data.reviewTokenV4;
-
-  return res.redirect("/runner-v4/summary");
+  return next();
 });
 
-router.get("/runner-v4/intervention", function (req, res) {
+router.get("/runner-v4/send-for-checking", function (req, res) {
   if (!req.session.data) req.session.data = {};
   applyRunnerV3DemoData(req.session.data);
   const newLinkGenerated = req.query.newLink === "1";
+  const inviteEmailSent = req.query.inviteSent === "1";
+  const inviteEmailResent = req.query.inviteResent === "1";
+  const inviteContactChanged = req.query.inviteChanged === "1";
+  const inviteThrottled = req.query.inviteThrottled === "1";
+  const RESEND_COOLDOWN_SECONDS = 30;
+  const inviteSentAtIso = req.session.data.runnerV4InviteCheckerSentAt || null;
+  let inviteSentAtText = null;
+  let inviteCooldownRemainingSeconds = 0;
+  if (inviteSentAtIso) {
+    const d = new Date(inviteSentAtIso);
+    if (!Number.isNaN(d.getTime())) {
+      const minutes = String(d.getMinutes()).padStart(2, "0");
+      const rawHours = d.getHours();
+      const ampm = rawHours >= 12 ? "pm" : "am";
+      const hours12 = rawHours % 12 || 12;
+      const time = `${hours12}:${minutes}${ampm}`;
+      const date = d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+      inviteSentAtText = `Sent at ${time} on ${date}`;
+
+      const remainingMs =
+        (RESEND_COOLDOWN_SECONDS * 1000) - (Date.now() - d.getTime());
+      if (remainingMs > 0) {
+        inviteCooldownRemainingSeconds = Math.ceil(remainingMs / 1000);
+      }
+    }
+  }
 
   const reviewStore = ensureReviewStore(req);
   let reviewToken = req.session.data.reviewTokenV4;
@@ -14712,6 +15132,12 @@ router.get("/runner-v4/intervention", function (req, res) {
       : false;
 
   req.session.data.reviewDeclarationCompleteV4 = reviewerDeclarationComplete;
+  req.session.data.reviewApprovedV4 = reviewerDeclarationComplete;
+
+  if (reviewerDeclarationComplete) {
+    delete req.session.data.reviewDeclarationErrorV4;
+    return res.redirect(`/runner-v4/ready-to-submit?token=${encodeURIComponent(reviewToken)}`);
+  }
 
   reviewStore.set(reviewToken, {
     data: { ...req.session.data },
@@ -14724,21 +15150,171 @@ router.get("/runner-v4/intervention", function (req, res) {
   });
 
   const shareReviewUrl = `/runner-v4/review-declaration?token=${encodeURIComponent(reviewToken)}`;
-  const absoluteShareReviewUrl = `${req.protocol}://${req.get("host")}${shareReviewUrl}`;
+  const absoluteShareReviewUrl = `${PUBLIC_BASE_URL}${shareReviewUrl}`;
   const reviewStatus = reviewerDeclarationComplete
     ? "Reviewer declaration complete"
     : "Awaiting reviewer declaration";
 
-  res.render("titan-mvp-1.2/runner-v4/intervention", {
+  return res.render("titan-mvp-1.2/runner-v4/intervention", {
     data: req.session.data,
     reviewStatus,
     shareReviewUrl: absoluteShareReviewUrl,
     newLinkGenerated,
-    interventionStarted: Boolean(req.session.data.reviewInterventionStartedV4)
+    interventionStarted: Boolean(req.session.data.reviewInterventionStartedV4),
+    inviteEmailSent,
+    inviteEmailResent,
+    inviteContactChanged,
+    inviteThrottled,
+    inviteSentAtText,
+    inviteSentAtIso,
+    inviteCooldownSeconds: RESEND_COOLDOWN_SECONDS,
+    inviteCooldownRemainingSeconds,
+    inviteContactMethod: req.session.data.runnerV4InviteCheckerContactMethod,
+    inviteEmail: req.session.data.runnerV4InviteCheckerEmail,
+    invitePhone: req.session.data.runnerV4InviteCheckerPhone
   });
 });
 
-router.post("/runner-v4/intervention/generate-review-link", function (req, res) {
+router.post("/runner-v4/send-for-checking/email-details", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  const email = req.body && typeof req.body.inviteReviewerEmail === "string"
+    ? req.body.inviteReviewerEmail.trim()
+    : "";
+  // Backwards compatible with older UI: treat as email contact.
+  req.session.data.runnerV4InviteCheckerContactMethod = "email";
+  req.session.data.runnerV4InviteCheckerEmail = email;
+  delete req.session.data.runnerV4InviteCheckerPhone;
+  req.session.data.runnerV4InviteCheckerSentAt = new Date().toISOString();
+  return res.redirect("/runner-v4/send-for-checking?inviteSent=1");
+});
+
+router.post("/runner-v4/send-for-checking/contact-details", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  const contact = req.body && typeof req.body.contact === "string"
+    ? req.body.contact.trim()
+    : "";
+
+  req.session.data.runnerV4InviteCheckerContactMethod = contact;
+
+  const email = req.body && typeof req.body.contactByEmail === "string"
+    ? req.body.contactByEmail.trim()
+    : "";
+  const phone = req.body && typeof req.body.contactByPhone === "string"
+    ? req.body.contactByPhone.trim()
+    : "";
+
+  if (contact === "phone" || contact === "text-message" || contact === "text") {
+    req.session.data.runnerV4InviteCheckerPhone = phone;
+    delete req.session.data.runnerV4InviteCheckerEmail;
+  } else {
+    // Default to email for prototype.
+    req.session.data.runnerV4InviteCheckerEmail = email;
+    delete req.session.data.runnerV4InviteCheckerPhone;
+    req.session.data.runnerV4InviteCheckerContactMethod = "email";
+  }
+
+  req.session.data.runnerV4InviteCheckerSentAt = new Date().toISOString();
+  return res.redirect("/runner-v4/send-for-checking?inviteSent=1");
+});
+
+router.post("/runner-v4/send-for-checking/email-details/resend", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  const RESEND_COOLDOWN_SECONDS = 30;
+  const lastSentIso = req.session.data.runnerV4InviteCheckerSentAt || null;
+  if (lastSentIso) {
+    const d = new Date(lastSentIso);
+    if (!Number.isNaN(d.getTime())) {
+      const elapsedMs = Date.now() - d.getTime();
+      if (elapsedMs < RESEND_COOLDOWN_SECONDS * 1000) {
+        return res.redirect("/runner-v4/send-for-checking?inviteSent=1&inviteThrottled=1");
+      }
+    }
+  }
+
+  // Prototype only: treat as "send again" using stored contact details.
+  req.session.data.runnerV4InviteCheckerSentAt = new Date().toISOString();
+  return res.redirect("/runner-v4/send-for-checking?inviteSent=1&inviteResent=1");
+});
+
+router.post("/runner-v4/send-for-checking/email-details/change", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  delete req.session.data.runnerV4InviteCheckerContactMethod;
+  delete req.session.data.runnerV4InviteCheckerEmail;
+  delete req.session.data.runnerV4InviteCheckerPhone;
+  delete req.session.data.runnerV4InviteCheckerSentAt;
+  return res.redirect("/runner-v4/send-for-checking?inviteChanged=1");
+});
+
+router.get("/runner-v4/ready-to-submit", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  applyRunnerV3DemoData(req.session.data);
+
+  const reviewStore = ensureReviewStore(req);
+  const token = (req.query && req.query.token) || req.session.data.reviewTokenV4;
+  if (!token) {
+    return res.redirect("/runner-v4/send-for-checking");
+  }
+
+  req.session.data.reviewTokenV4 = token;
+
+  const existingEntry = reviewStore.get(token);
+  const reviewerDeclarationComplete =
+    existingEntry && existingEntry.expires > Date.now()
+      ? Boolean(existingEntry.reviewDeclarationComplete)
+      : false;
+
+  req.session.data.reviewDeclarationCompleteV4 = reviewerDeclarationComplete;
+  req.session.data.reviewApprovedV4 = reviewerDeclarationComplete;
+
+  if (!reviewerDeclarationComplete) {
+    return res.redirect("/runner-v4/send-for-checking");
+  }
+
+  const reviewerDetailsMap = req.session.data.reviewerDetailsV4 || {};
+  const reviewerDetails = reviewerDetailsMap[token] || {};
+  const checkedByName =
+    (existingEntry && String(existingEntry.approvedByName || "").trim()) ||
+    String(reviewerDetails.reviewerName || "").trim();
+  const checkedAtIso =
+    (existingEntry && (existingEntry.approvedAt || existingEntry.reviewerDeclaredAt)) || null;
+  let checkedByText = checkedByName || "Not provided";
+  if (checkedAtIso) {
+    const checkedAtDate = new Date(checkedAtIso);
+    if (!Number.isNaN(checkedAtDate.getTime())) {
+      checkedByText += ` on ${checkedAtDate.toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+      })}`;
+    }
+  }
+
+  return res.render("titan-mvp-1.2/runner-v4/ready-to-submit", {
+    data: req.session.data,
+    token,
+    reviewerDetails,
+    checkedByText
+  });
+});
+
+router.post("/runner-v4/submit", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  applyRunnerV3DemoData(req.session.data);
+
+  const token = (req.body && req.body.token) || req.session.data.reviewTokenV4;
+  if (token) {
+    req.session.data.reviewTokenV4 = token;
+  }
+
+  req.session.data.runnerV4SubmittedAt = new Date().toISOString();
+  req.session.data.reviewSubmittedV4 = true;
+
+  return res.redirect(
+    `/runner-v4/confirmation${token ? `?token=${encodeURIComponent(token)}` : ""}`
+  );
+});
+
+router.post("/runner-v4/send-for-checking/generate-review-link", function (req, res) {
   if (!req.session.data) req.session.data = {};
   const reviewStore = ensureReviewStore(req);
   const previousToken = req.session.data.reviewTokenV4;
@@ -14759,27 +15335,25 @@ router.post("/runner-v4/intervention/generate-review-link", function (req, res) 
     expires: Date.now() + (30 * 60 * 1000)
   });
 
-  return res.redirect("/runner-v4/intervention?newLink=1");
+  return res.redirect("/runner-v4/send-for-checking?newLink=1");
 });
 
-router.post("/runner-v4/intervention", function (req, res) {
-  const reviewStore = ensureReviewStore(req);
-  const reviewToken = req.session.data && req.session.data.reviewTokenV4;
-  const reviewEntry = reviewToken ? reviewStore.get(reviewToken) : null;
-  const reviewerDeclarationComplete =
-    reviewEntry && reviewEntry.expires > Date.now()
-      ? Boolean(reviewEntry.reviewDeclarationComplete)
-      : false;
+router.post("/runner-v4/send-for-checking/return-for-changes", function (req, res) {
+  if (!req.session.data) req.session.data = {};
 
-  if (!reviewerDeclarationComplete) {
-    req.session.data.reviewDeclarationErrorV4 =
-      "The reviewer must complete declaration before you can send this form";
-    return res.redirect("/runner-v4/intervention");
+  const reviewStore = ensureReviewStore(req);
+  const currentToken = req.session.data.reviewTokenV4;
+  if (currentToken) {
+    reviewStore.delete(currentToken);
   }
 
+  // Unlock answers so applicant can edit, and clear review state.
+  req.session.data.reviewInterventionStartedV4 = false;
+  req.session.data.reviewDeclarationCompleteV4 = false;
   delete req.session.data.reviewDeclarationErrorV4;
-  req.session.data.reviewDeclarationCompleteV4 = true;
-  res.redirect("/runner-v4/confirmation");
+  delete req.session.data.reviewTokenV4;
+
+  return res.redirect("/runner-v4/summary");
 });
 
 router.get("/runner-v4/review-declaration", function (req, res) {
@@ -14789,9 +15363,13 @@ router.get("/runner-v4/review-declaration", function (req, res) {
   const tokenValid = Boolean(reviewEntry && reviewEntry.expires > Date.now());
 
   if (!tokenValid) {
-    return res.render("titan-mvp-1.2/runner-v4/review-declaration", {
+    return res.render("titan-mvp-1.2/runner-v4/review-declaration-no-back", {
       tokenValid: false
     });
+  }
+
+  if (success === "1") {
+    return res.redirect(`/runner-v4/review-declaration/complete?token=${encodeURIComponent(token)}`);
   }
 
   if (!req.session.data) {
@@ -14810,7 +15388,7 @@ router.get("/runner-v4/review-declaration", function (req, res) {
   const hasReviewerDetails = Boolean(token && reviewerDetailsMap[token]);
 
   if (!hasReviewerAccess) {
-    return res.render("titan-mvp-1.2/runner-v4/review-declaration", {
+    return res.render("titan-mvp-1.2/runner-v4/review-declaration-no-back", {
       tokenValid: true,
       token,
       hasReviewerAccess: false,
@@ -14820,9 +15398,8 @@ router.get("/runner-v4/review-declaration", function (req, res) {
     });
   }
 
-  if (!hasReviewerDetails) {
-    return res.redirect(`/runner-v4/reviewer-details?token=${encodeURIComponent(token)}`);
-  }
+  // For research convenience, allow reviewers to view the form before entering
+  // their own details. The page will still let them add/change reviewer details.
 
   delete req.session.data.reviewAccessErrorV4;
   delete req.session.data.enteredReviewerReferenceNumberV4;
@@ -14832,14 +15409,63 @@ router.get("/runner-v4/review-declaration", function (req, res) {
 
   const error = req.session.data && req.session.data.error;
 
-  res.render("titan-mvp-1.2/runner-v4/review-declaration", {
+  res.render("titan-mvp-1.2/runner-v4/review-declaration-no-back", {
     tokenValid: true,
     token,
     hasReviewerAccess: true,
     data: reviewEntry.data || {},
-    reviewerDetails: reviewerDetailsMap[token],
-    success: success === "1",
+    reviewerDetails: reviewerDetailsMap[token] || {},
     error
+  });
+});
+
+// Prototype helper: seed a valid reviewer token and redirect.
+// This keeps static email previews clickable (token won't be "no longer valid").
+router.get("/runner-v4/checker-demo-review", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  applyRunnerV3DemoData(req.session.data);
+
+  const demoToken = "7b5c3f2a";
+  const reviewStore = ensureReviewStore(req);
+
+  // Tie the demo token to the applicant journey so that visiting
+  // /runner-v4/send-for-checking can detect completion and redirect.
+  req.session.data.reviewInterventionStartedV4 = true;
+  req.session.data.reviewTokenV4 = demoToken;
+
+  // Ensure token is valid in the review store.
+  reviewStore.set(demoToken, {
+    data: { ...req.session.data },
+    reviewDeclarationComplete: false,
+    reviewerDeclaredAt: null,
+    expires: Date.now() + (30 * 60 * 1000)
+  });
+
+  // Grant access so the reviewer lands on the form immediately.
+  if (!req.session.data.reviewAccessTokensV4) {
+    req.session.data.reviewAccessTokensV4 = {};
+  }
+  req.session.data.reviewAccessTokensV4[demoToken] = true;
+
+  return res.redirect(`/runner-v4/review-declaration?token=${encodeURIComponent(demoToken)}`);
+});
+
+router.get("/runner-v4/review-declaration/complete", function (req, res) {
+  const { token } = req.query;
+  const reviewStore = ensureReviewStore(req);
+  const reviewEntry = token ? reviewStore.get(token) : null;
+  const tokenValid = Boolean(reviewEntry && reviewEntry.expires > Date.now());
+
+  if (!tokenValid) {
+    return res.redirect("/runner-v4/review-declaration");
+  }
+
+  if (!reviewEntry.reviewDeclarationComplete) {
+    return res.redirect(`/runner-v4/review-declaration?token=${encodeURIComponent(token)}`);
+  }
+
+  return res.render("titan-mvp-1.2/runner-v4/review-declaration-complete", {
+    token
   });
 });
 
@@ -14876,8 +15502,21 @@ router.get("/runner-v4/reviewer-details", function (req, res) {
   });
 });
 
+router.get("/runner-v4/privacy-notice", function (req, res) {
+  const { token } = req.query;
+  const reviewStore = ensureReviewStore(req);
+  const reviewEntry = token ? reviewStore.get(token) : null;
+  const tokenValid = Boolean(reviewEntry && reviewEntry.expires > Date.now());
+
+  if (!tokenValid) {
+    return res.redirect("/runner-v4/review-declaration");
+  }
+
+  return res.render("titan-mvp-1.2/runner-v4/privacy-notice", { token });
+});
+
 router.post("/runner-v4/reviewer-details", function (req, res) {
-  const { token, reviewerName, reviewerOccupation, reviewerEmail, reviewerAddress } = req.body;
+  const { token, reviewerName, reviewerOccupation, reviewerEmail } = req.body;
   const reviewStore = ensureReviewStore(req);
   const reviewEntry = token ? reviewStore.get(token) : null;
   const tokenValid = Boolean(reviewEntry && reviewEntry.expires > Date.now());
@@ -14895,13 +15534,11 @@ router.post("/runner-v4/reviewer-details", function (req, res) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(reviewerEmail.trim())) errors.reviewerEmail = "Enter a valid email address";
   }
-  if (!reviewerAddress || !reviewerAddress.trim()) errors.reviewerAddress = "Enter your UK address";
 
   req.session.data.reviewerDetailsFormV4 = {
     reviewerName: reviewerName || "",
     reviewerOccupation: reviewerOccupation || "",
-    reviewerEmail: reviewerEmail || "",
-    reviewerAddress: reviewerAddress || ""
+    reviewerEmail: reviewerEmail || ""
   };
 
   if (Object.keys(errors).length > 0) {
@@ -14913,8 +15550,7 @@ router.post("/runner-v4/reviewer-details", function (req, res) {
   reviewerDetailsMap[token] = {
     reviewerName: reviewerName.trim(),
     reviewerOccupation: reviewerOccupation.trim(),
-    reviewerEmail: reviewerEmail.trim(),
-    reviewerAddress: reviewerAddress.trim()
+    reviewerEmail: reviewerEmail.trim()
   };
   req.session.data.reviewerDetailsV4 = reviewerDetailsMap;
   delete req.session.data.reviewerDetailsErrorsV4;
@@ -14975,19 +15611,151 @@ router.post("/runner-v4/review-declaration", function (req, res) {
     return res.redirect(`/runner-v4/review-declaration?token=${encodeURIComponent(token)}`);
   }
 
+  if (!req.session.data) req.session.data = {};
+
+  const reviewerDetailsMap = req.session.data.reviewerDetailsV4 || {};
+  const reviewerDetails = reviewerDetailsMap[token] || {};
+  const approvedAtIso = new Date().toISOString();
+  const approvedByName = String(reviewerDetails.reviewerName || "").trim();
+  const formName = "DxT design survey";
+  const applicantEmail =
+    (reviewEntry &&
+      reviewEntry.data &&
+      typeof reviewEntry.data === "object" &&
+      String(reviewEntry.data.email || "").trim()) ||
+    String(req.session.data.email || "").trim();
+
   delete req.session.data.error;
   reviewStore.set(token, {
     ...reviewEntry,
     reviewDeclarationComplete: true,
-    reviewerDeclaredAt: new Date().toISOString(),
+    reviewerDeclaredAt: approvedAtIso,
+    approvedAt: approvedAtIso,
+    approvedByName,
+    approvedByEmail: String(reviewerDetails.reviewerEmail || "").trim(),
+    approvedByOccupation: String(reviewerDetails.reviewerOccupation || "").trim(),
+    approvedByAddress: String(reviewerDetails.reviewerAddress || "").trim(),
     expires: Date.now() + (30 * 60 * 1000)
   });
 
-  return res.redirect(`/runner-v4/review-declaration?token=${encodeURIComponent(token)}&success=1`);
+  req.session.data.runnerV4ApprovalEmailSnapshot = {
+    token,
+    formName,
+    approvedByName,
+    applicantEmail,
+    approvedAt: Date.now()
+  };
+
+  return res.redirect(`/runner-v4/review-declaration/complete?token=${encodeURIComponent(token)}`);
+});
+
+router.get("/titan-mvp-1.2/runner-v4/approval-notification.html", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  applyRunnerV3DemoData(req.session.data);
+
+  const reviewStore = ensureReviewStore(req);
+  const token = (req.query && req.query.token) || req.session.data.reviewTokenV4;
+  const entry = token ? reviewStore.get(token) : null;
+
+  const approvalSnapshot =
+    req.session.data.runnerV4ApprovalEmailSnapshot &&
+    req.session.data.runnerV4ApprovalEmailSnapshot.token === token
+      ? req.session.data.runnerV4ApprovalEmailSnapshot
+      : null;
+
+  const storedData =
+    entry && entry.expires > Date.now() && entry.data && typeof entry.data === "object" ? entry.data : {};
+  const storedClean = Object.fromEntries(
+    Object.entries(storedData).filter(([, v]) => v !== "" && v !== null && typeof v !== "undefined")
+  );
+  const answers = { ...req.session.data, ...storedClean };
+
+  const formName =
+    (approvalSnapshot && approvalSnapshot.formName) ||
+    (entry && entry.formName) ||
+    "DxT design survey";
+  const approvedByName =
+    (approvalSnapshot && approvalSnapshot.approvedByName) ||
+    (entry && entry.approvedByName) ||
+    "Your checker";
+  const applicantEmail =
+    (approvalSnapshot && approvalSnapshot.applicantEmail) ||
+    String(answers.email || "you@example.com");
+
+  return res.render("titan-mvp-1.2/runner-v4/approval-notification", {
+    data: req.session.data,
+    answers,
+    token,
+    formName,
+    approvedByName,
+    applicantEmail
+  });
+});
+
+router.get("/titan-mvp-1.2/runner-v4/applicant-return-notification.html", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  applyRunnerV3DemoData(req.session.data);
+
+  return res.render("titan-mvp-1.2/runner-v4/applicant-return-notification", {
+    applicantEmail: String(req.session.data.email || "you@example.com")
+  });
 });
 
 router.get("/runner-v4/confirmation", function (req, res) {
-  res.render("titan-mvp-1.2/runner/confirmation-v2");
+  if (!req.session.data) req.session.data = {};
+  applyRunnerV3DemoData(req.session.data);
+
+  // Ensure we always have a token for the email preview link.
+  const reviewStore = ensureReviewStore(req);
+  let token = (req.query && req.query.token) || req.session.data.reviewTokenV4;
+  if (!token) {
+    token = createReviewToken();
+  }
+  req.session.data.reviewTokenV4 = token;
+  const existing = reviewStore.get(token);
+
+  const sessionHasAnyV4Answers =
+    Boolean(String(req.session.data.name || "").trim()) ||
+    Boolean(String(req.session.data.phoneNumber || "").trim()) ||
+    (Array.isArray(req.session.data.DyfjJC)
+      ? req.session.data.DyfjJC.length > 0
+      : Boolean(req.session.data.DyfjJC)) ||
+    Boolean(String(req.session.data.aitzzV || "").trim()) ||
+    Boolean(String(req.session.data.zhJMaM || "").trim());
+
+  if (
+    !sessionHasAnyV4Answers &&
+    existing &&
+    existing.expires > Date.now() &&
+    existing.data &&
+    typeof existing.data === "object"
+  ) {
+    req.session.data = { ...req.session.data, ...existing.data };
+  }
+
+  // Always refresh the stored snapshot so the email preview can show answers.
+  reviewStore.set(token, {
+    ...(existing && typeof existing === "object" ? existing : {}),
+    data: { ...req.session.data },
+    reviewDeclarationComplete:
+      existing && typeof existing.reviewDeclarationComplete !== "undefined"
+        ? Boolean(existing.reviewDeclarationComplete)
+        : Boolean(req.session.data.reviewDeclarationCompleteV4),
+    reviewerDeclaredAt:
+      existing && existing.reviewerDeclaredAt ? existing.reviewerDeclaredAt : null,
+    expires: Date.now() + (30 * 60 * 1000)
+  });
+
+  // Also persist a snapshot in the session so it survives server restarts.
+  req.session.data.runnerV4EmailSnapshot = {
+    token,
+    data: { ...req.session.data },
+    savedAt: Date.now()
+  };
+
+  return res.render("titan-mvp-1.2/runner-v4/confirmation", {
+    data: req.session.data
+  });
 });
 
 router.get("/runner-v2/reuse-saved-answers", function (req, res) {
@@ -15025,7 +15793,67 @@ router.post("/runner-v2/reuse-summary", function (req, res) {
 });
 
 router.get("/titan-mvp-1.2/runner/confirmation-email-v2.html", function (req, res) {
-  res.render("titan-mvp-1.2/runner/confirmation-email-v2");
+  if (!req.session.data) req.session.data = {};
+  res.render("titan-mvp-1.2/runner/confirmation-email-v2", {
+    data: req.session.data
+  });
+});
+
+router.get("/titan-mvp-1.2/runner-v4/check-notification-1.html", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  applyRunnerV3DemoData(req.session.data);
+
+  const reviewStore = ensureReviewStore(req);
+  const token = (req.query && req.query.token) || req.session.data.reviewTokenV4;
+  const entry = token ? reviewStore.get(token) : null;
+  const sessionSnapshot =
+    req.session.data.runnerV4EmailSnapshot &&
+    req.session.data.runnerV4EmailSnapshot.token === token
+      ? req.session.data.runnerV4EmailSnapshot.data
+      : null;
+  const storedData = sessionSnapshot
+    ? sessionSnapshot
+    : entry && entry.expires > Date.now() && entry.data && typeof entry.data === "object"
+        ? entry.data
+        : {};
+  const storedClean = Object.fromEntries(
+    Object.entries(storedData).filter(([, v]) => v !== "" && v !== null && typeof v !== "undefined")
+  );
+  const answers = { ...req.session.data, ...storedClean };
+  const hasAnyV4Answers =
+    Boolean(String(answers.name || "").trim()) ||
+    Boolean(String(answers.phoneNumber || "").trim()) ||
+    (Array.isArray(answers.DyfjJC) ? answers.DyfjJC.length > 0 : Boolean(answers.DyfjJC)) ||
+    Boolean(String(answers.aitzzV || "").trim()) ||
+    Boolean(String(answers.zhJMaM || "").trim());
+  if (!hasAnyV4Answers) {
+    applyRunnerV3DemoData(answers);
+  }
+
+  const skipKeys = new Set([
+    "error",
+    "errors",
+    "reviewAccessTokensV4",
+    "reviewAccessErrorV4",
+    "enteredReviewerReferenceNumberV4",
+    "enteredReviewerMemorableWordV4",
+    "reviewDeclarationErrorV4",
+    "reviewInterventionStartedV4"
+  ]);
+  const answerItems = Object.entries(answers)
+    .filter(([k, v]) => !skipKeys.has(k))
+    .filter(([, v]) => v !== "" && v !== null && typeof v !== "undefined")
+    .filter(([, v]) => !(Array.isArray(v) && v.length === 0))
+    .map(([k, v]) => ({
+      key: k,
+      value: Array.isArray(v) ? v.join(", ") : String(v)
+    }));
+
+  res.render("titan-mvp-1.2/runner-v4/check-notification-1", {
+    data: req.session.data,
+    answers,
+    answerItems
+  });
 });
 
 router.get("/summary", function (req, res) {
@@ -15387,6 +16215,8 @@ router.get("/address-lookup-manual", function (req, res) {
 
 router.post("/address-lookup-manual", function (req, res) {
   const { addressLine1, addressLine2, townCity, addressPostcode, action, returnUrl } = req.body;
+  const resolvedReturnUrl =
+    returnUrl || (req.session && req.session.data && req.session.data.returnUrl) || "/whats-your-address";
 
   if (action === "use-manual-address") {
     // Validate required fields
@@ -15397,7 +16227,7 @@ router.post("/address-lookup-manual", function (req, res) {
 
     if (Object.keys(errors).length > 0) {
       req.session.data.error = errors;
-      return res.redirect("/address-lookup-manual?returnUrl=" + encodeURIComponent(returnUrl));
+      return res.redirect("/address-lookup-manual?returnUrl=" + encodeURIComponent(resolvedReturnUrl));
     }
 
     // Create formatted address for display
@@ -15427,7 +16257,7 @@ router.post("/address-lookup-manual", function (req, res) {
     // Clear any errors
     delete req.session.data.error;
 
-    res.redirect(returnUrl || "/whats-your-address");
+    res.redirect(resolvedReturnUrl);
   }
 });
 
