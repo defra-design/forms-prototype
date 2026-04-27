@@ -14795,6 +14795,20 @@ router.get("/runner-v5/confirmation", function (req, res) {
   });
 });
 
+// Use this route for the "Go to email" link so we can reliably pass the
+// reference number even when the email template is otherwise auto-rendered.
+router.get("/runner-v5/confirmation-email", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  const runnerV5ReferenceNumber =
+    (req.query && req.query.ref) ||
+    req.session.data.runnerV5LastSubmittedReferenceNumber ||
+    "V5-1A2B-3C4D";
+  return res.render("titan-mvp-1.2/runner/confirmation-email-v2", {
+    data: req.session.data,
+    runnerV5ReferenceNumber
+  });
+});
+
 router.get("/runner-v5/previous-submission", function (req, res) {
   return res.redirect("/runner-v5/intervention");
 });
