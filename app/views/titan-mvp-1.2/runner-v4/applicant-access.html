@@ -1,0 +1,54 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+
+{% block beforeContent %}{% endblock %}
+
+{% block pageTitle %}
+Access your form – {{ serviceName }} – GOV.UK
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">Access your form</h1>
+
+    {% if errorMessage %}
+      {{ govukErrorSummary({
+        titleText: "There is a problem",
+        errorList: [
+          { text: errorMessage, href: "#applicant-reference-number" }
+        ]
+      }) }}
+    {% endif %}
+
+    <p class="govuk-body">
+      Enter the reference number and memorable word to continue with your form.
+    </p>
+
+    <form class="form" action="/runner-v4/applicant-access" method="post">
+      <input type="hidden" name="token" value="{{ token }}">
+      <input type="hidden" name="next" value="{{ next }}">
+
+      {{ govukInput({
+        label: { text: "Reference number" },
+        id: "applicant-reference-number",
+        name: "referenceNumber",
+        value: enteredReferenceNumber,
+        errorMessage: { text: errorMessage } if errorMessage else null
+      }) }}
+
+      {{ govukInput({
+        label: { text: "Memorable word" },
+        id: "applicant-memorable-word",
+        name: "memorableWord",
+        value: enteredMemorableWord,
+        errorMessage: { text: errorMessage } if errorMessage else null
+      }) }}
+
+      {{ govukButton({ text: "Continue" }) }}
+    </form>
+  </div>
+</div>
+{% endblock %}

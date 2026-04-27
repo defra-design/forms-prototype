@@ -15261,6 +15261,33 @@ router.get("/runner-v4/ready-to-submit", function (req, res) {
 
   req.session.data.reviewTokenV4 = token;
 
+  // User research: deterministic token should always be "checked complete"
+  // so participants can deep-link into the post-check flow reliably.
+  if (token === RUNNER_V4_REVIEW_TOKEN) {
+    const existing = reviewStore.get(token);
+    if (!existing || !(existing.expires > Date.now())) {
+      reviewStore.set(token, {
+        data: { ...req.session.data },
+        reviewDeclarationComplete: true,
+        reviewerDeclaredAt: new Date().toISOString(),
+        approvedAt: new Date().toISOString(),
+        approvedByName: "Sam Reviewer",
+        approvedByEmail: "sam.reviewer@example.com",
+        approvedByOccupation: "Registered vet",
+        approvedByAddress: "1 Review Street, London, SW1A 1AA",
+        expires: Date.now() + (30 * 60 * 1000)
+      });
+    } else if (!existing.reviewDeclarationComplete) {
+      reviewStore.set(token, {
+        ...existing,
+        reviewDeclarationComplete: true,
+        reviewerDeclaredAt: existing.reviewerDeclaredAt || new Date().toISOString(),
+        approvedAt: existing.approvedAt || new Date().toISOString(),
+        expires: Date.now() + (30 * 60 * 1000)
+      });
+    }
+  }
+
   const existingEntry = reviewStore.get(token);
   const reviewerDeclarationComplete =
     existingEntry && existingEntry.expires > Date.now()
@@ -15693,8 +15720,33 @@ router.get("/titan-mvp-1.2/runner-v4/approval-notification.html", function (req,
   applyRunnerV3DemoData(req.session.data);
 
   const reviewStore = ensureReviewStore(req);
-  const token = (req.query && req.query.token) || req.session.data.reviewTokenV4;
-  const entry = token ? reviewStore.get(token) : null;
+  // User research: keep approval email links stable.
+  const token = RUNNER_V4_REVIEW_TOKEN;
+  req.session.data.reviewTokenV4 = token;
+  // Ensure the token exists and is marked complete (so applicant can proceed).
+  const existing = reviewStore.get(token);
+  if (!existing || !(existing.expires > Date.now())) {
+    reviewStore.set(token, {
+      data: { ...req.session.data },
+      reviewDeclarationComplete: true,
+      reviewerDeclaredAt: new Date().toISOString(),
+      approvedAt: new Date().toISOString(),
+      approvedByName: "Sam Reviewer",
+      approvedByEmail: "sam.reviewer@example.com",
+      approvedByOccupation: "Registered vet",
+      approvedByAddress: "1 Review Street, London, SW1A 1AA",
+      expires: Date.now() + (30 * 60 * 1000)
+    });
+  } else if (!existing.reviewDeclarationComplete) {
+    reviewStore.set(token, {
+      ...existing,
+      reviewDeclarationComplete: true,
+      reviewerDeclaredAt: existing.reviewerDeclaredAt || new Date().toISOString(),
+      approvedAt: existing.approvedAt || new Date().toISOString(),
+      expires: Date.now() + (30 * 60 * 1000)
+    });
+  }
+  const entry = reviewStore.get(token) || null;
 
   const approvalSnapshot =
     req.session.data.runnerV4ApprovalEmailSnapshot &&
@@ -15729,6 +15781,72 @@ router.get("/titan-mvp-1.2/runner-v4/approval-notification.html", function (req,
     approvedByName,
     applicantEmail
   });
+});
+
+// Runner v4: applicant access gate (reference number + memorable word)
+router.get("/runner-v4/applicant-access", function (req, res) {
+  const token = (req.query && req.query.token) || RUNNER_V4_REVIEW_TOKEN;
+  const nextUrl = (req.query && typeof req.query.next === "string" && req.query.next.trim() !== "")
+    ? req.query.next.trim()
+    : "";
+  if (!req.session.data) req.session.data = {};
+  req.session.data.reviewInterventionStartedV4 = true;
+  req.session.data.reviewTokenV4 = token;
+
+  res.render("titan-mvp-1.2/runner-v4/applicant-access", {
+    token,
+    next: nextUrl,
+    enteredReferenceNumber: req.session.data.enteredApplicantReferenceNumberV4 || "",
+    enteredMemorableWord: req.session.data.enteredApplicantMemorableWordV4 || "",
+    errorMessage: req.session.data.applicantAccessErrorV4 || null
+  });
+});
+
+router.post("/runner-v4/applicant-access", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  const token = (req.body && req.body.token) || RUNNER_V4_REVIEW_TOKEN;
+  const nextUrl = (req.body && typeof req.body.next === "string" && req.body.next.trim() !== "")
+    ? req.body.next.trim()
+    : "";
+  const expected = reviewerAccessValues();
+
+  const normalizedRef = String((req.body && req.body.referenceNumber) || "").trim().toUpperCase();
+  const expectedRef = String(expected.referenceNumber || "").trim().toUpperCase();
+  const normalizedWord = String((req.body && req.body.memorableWord) || "").trim().toLowerCase();
+  const expectedWord = String(expected.memorableWord || "").trim().toLowerCase();
+
+  if (normalizedRef !== expectedRef || normalizedWord !== expectedWord) {
+    req.session.data.applicantAccessErrorV4 =
+      "Enter the correct reference number and memorable word";
+    req.session.data.enteredApplicantReferenceNumberV4 = (req.body && req.body.referenceNumber) || "";
+    req.session.data.enteredApplicantMemorableWordV4 = (req.body && req.body.memorableWord) || "";
+    return res.redirect(`/runner-v4/applicant-access?token=${encodeURIComponent(token)}`);
+  }
+
+  delete req.session.data.applicantAccessErrorV4;
+  delete req.session.data.enteredApplicantReferenceNumberV4;
+  delete req.session.data.enteredApplicantMemorableWordV4;
+
+  req.session.data.reviewInterventionStartedV4 = true;
+  req.session.data.reviewTokenV4 = token;
+
+  // If caller provided a next URL, always go there after successful access.
+  if (nextUrl) {
+    return res.redirect(nextUrl);
+  }
+
+  // User research: the approval email path should reliably land on ready-to-submit.
+  if (token === RUNNER_V4_REVIEW_TOKEN) {
+    return res.redirect(`/runner-v4/ready-to-submit?token=${encodeURIComponent(token)}`);
+  }
+
+  const reviewStore = ensureReviewStore(req);
+  const entry = token ? reviewStore.get(token) : null;
+  const complete = Boolean(entry && entry.expires > Date.now() && entry.reviewDeclarationComplete);
+  if (complete) {
+    return res.redirect(`/runner-v4/ready-to-submit?token=${encodeURIComponent(token)}`);
+  }
+  return res.redirect("/runner-v4/send-for-checking");
 });
 
 router.get("/titan-mvp-1.2/runner-v4/applicant-return-notification.html", function (req, res) {
