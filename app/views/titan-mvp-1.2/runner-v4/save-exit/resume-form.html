@@ -1,0 +1,71 @@
+{% extends "layouts/runner.html" %}
+
+{% block pageTitle %}
+Continue with your form – {{ serviceName }} – GOV.UK
+{% endblock %}
+
+{% block content %}
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+
+    <h1 class="govuk-heading-l">
+      Continue with your form
+    </h1>
+
+    <p class="govuk-body">
+      Enter the answer to your security question to retrieve your information and continue with your form.
+    </p>
+
+    <p class="govuk-body">
+      You have 3 attempts to enter your answer. Make sure your answer matches the exact style and format you used when saving your progress.
+    </p>
+
+    {% if data['attemptsV4'] and data['attemptsV4'] > 0 %}
+      {{ govukErrorSummary({
+        titleText: "There is a problem",
+        errorList: [
+          {
+            text: "Your answer is incorrect. You have " + (3 - data['attemptsV4']) + " attempt" + ("s" if (3 - data['attemptsV4']) != 1 else "") + " remaining.",
+            href: "#security-answer"
+          }
+        ]
+      }) }}
+    {% endif %}
+
+    <form class="form" action="/runner-v4/validate-security-answer" method="post">
+      {% set securityQuestionText = "What is a memorable place you have visited?" %}
+      {% if data['securityQuestion'] == "memorable-place" %}
+        {% set securityQuestionText = "What is a memorable place you have visited?" %}
+      {% elif data['securityQuestion'] == "favourite-character" %}
+        {% set securityQuestionText = "What's the name of your favourite character from a story or TV show?" %}
+      {% elif data['securityQuestion'] == "album-song" %}
+        {% set securityQuestionText = "What album or song do you always recommend to others?" %}
+      {% endif %}
+
+      {{ govukInput({
+        label: {
+          text: securityQuestionText,
+          classes: "govuk-label--m"
+        },
+        id: "security-answer",
+        name: "userSecurityAnswer",
+        errorMessage: {
+          text: "Your answer is incorrect. You have " + (3 - (data['attemptsV4'] or 0)) + " attempt" + ("s" if (3 - (data['attemptsV4'] or 0)) != 1 else "") + " remaining."
+        } if data['attemptsV4'] and data['attemptsV4'] > 0 else null
+      }) }}
+
+      {{ govukWarningText({
+        text: "This will use up your save link. To save your progress again, you will need to repeat the save process and generate another link.",
+        iconFallbackText: "Warning"
+      }) }}
+
+      {{ govukButton({
+        text: "Continue"
+      }) }}
+    </form>
+
+  </div>
+</div>
+
+{% endblock %}

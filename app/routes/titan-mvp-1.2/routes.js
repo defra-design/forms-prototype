@@ -10,6 +10,10 @@ const express = require("express");
 // Public base URL for links you share externally (e.g. review links in emails).
 const PUBLIC_BASE_URL = "https://forms-prototype-d9d9fb55cd01.herokuapp.com";
 
+// Deterministic tokens for user research (avoids broken deep links).
+const RUNNER_V4_REVIEW_TOKEN = "UR-V4-DEMO";
+const RUNNER_V3_REVIEW_TOKEN = "UR-V3-DEMO";
+
 // Add middleware to make terms available to all templates
 router.use((req, res, next) => {
   res.locals.commonTerms = terms;
@@ -14388,7 +14392,7 @@ router.post("/runner-v3/summary/generate-review-link", function (req, res) {
     reviewStore.delete(previousToken);
   }
 
-  const newToken = createReviewToken();
+  const newToken = RUNNER_V3_REVIEW_TOKEN;
   req.session.data.reviewToken = newToken;
   req.session.data.reviewDeclarationComplete = false;
   delete req.session.data.reviewDeclarationError;
@@ -15121,7 +15125,7 @@ router.get("/runner-v4/send-for-checking", function (req, res) {
   const reviewStore = ensureReviewStore(req);
   let reviewToken = req.session.data.reviewTokenV4;
   if (!reviewToken) {
-    reviewToken = createReviewToken();
+    reviewToken = RUNNER_V4_REVIEW_TOKEN;
     req.session.data.reviewTokenV4 = reviewToken;
   }
 
@@ -15323,7 +15327,7 @@ router.post("/runner-v4/send-for-checking/generate-review-link", function (req, 
     reviewStore.delete(previousToken);
   }
 
-  const newToken = createReviewToken();
+  const newToken = RUNNER_V4_REVIEW_TOKEN;
   req.session.data.reviewTokenV4 = newToken;
   req.session.data.reviewDeclarationCompleteV4 = false;
   delete req.session.data.reviewDeclarationErrorV4;
@@ -16320,6 +16324,85 @@ router.get("/progress-saved", function (req, res) {
 
 router.get("/resume-form", function (req, res) {
   res.render("titan-mvp-1.2/runner/save-exit/resume-form");
+});
+
+// ── Runner v4: resume saved form (prototype) ─────────────────────────────────
+router.get("/runner-v4/resume-form", function (req, res) {
+  res.render("titan-mvp-1.2/runner-v4/save-exit/resume-form", {
+    data: req.session.data || {}
+  });
+});
+
+router.post("/runner-v4/validate-security-answer", function (req, res) {
+  const userInput = req.body.userSecurityAnswer;
+  const correctAnswer = req.session.data.securityAnswer || "test answer";
+  const attempts = (req.session.data.attemptsV4 || 0) + 1;
+
+  req.session.data.attemptsV4 = attempts;
+
+  const trimmedUserInput = userInput ? userInput.trim() : "";
+  const trimmedCorrectAnswer = correctAnswer ? correctAnswer.trim() : "";
+
+  if (userInput && trimmedUserInput === trimmedCorrectAnswer) {
+    delete req.session.data.attemptsV4;
+    return res.redirect("/runner-v4/welcome-back");
+  }
+
+  if (attempts >= 3) {
+    delete req.session.data.attemptsV4;
+    return res.redirect("/runner-v4/failed-attempts");
+  }
+
+  return res.redirect("/runner-v4/resume-form");
+});
+
+router.get("/runner-v4/welcome-back", function (req, res) {
+  res.render("titan-mvp-1.2/runner-v4/save-exit/welcome-back", {
+    data: req.session.data || {}
+  });
+});
+
+router.get("/runner-v4/failed-attempts", function (req, res) {
+  res.render("titan-mvp-1.2/runner-v4/save-exit/failed-attempts");
+});
+
+router.get("/runner-v4/resume-to-next-question", function (req, res) {
+  const sessionData = req.session.data || {};
+
+  const formFlow = [
+    { url: "/runner-v4/whats-your-name", field: "name" },
+    { url: "/runner-v4/whats-your-email-address", field: "email" },
+    { url: "/runner-v4/whats-your-phone-number", field: "phoneNumber" },
+    { url: "/runner-v4/what-type-of-unicorns-will-you-breed", field: "DyfjJC" },
+    { url: "/runner-v4/how-many-unicorns-do-you-expect-to-breed-each-year", field: "aitzzV" },
+    { url: "/runner-v4/where-will-you-keep-the-unicorns", field: "location-easting" },
+    { url: "/runner-v4/how-many-members-of-staff-will-look-after-the-unicorns", field: "zhJMaM" },
+    { url: "/runner-v4/declaration", field: "declaration" },
+    { url: "/runner-v4/summary", field: null }
+  ];
+
+  let nextQuestion = "/runner-v4/summary";
+
+  for (const question of formFlow) {
+    if (question.field === null) {
+      nextQuestion = question.url;
+      break;
+    }
+
+    const fieldValue = sessionData[question.field];
+    const isAnswered =
+      fieldValue &&
+      (Array.isArray(fieldValue)
+        ? fieldValue.length > 0
+        : fieldValue.toString().trim() !== "");
+
+    if (!isAnswered) {
+      nextQuestion = question.url;
+      break;
+    }
+  }
+
+  return res.redirect(nextQuestion);
 });
 
 router.post("/validate-security-answer", function (req, res) {

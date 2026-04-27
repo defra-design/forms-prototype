@@ -1,0 +1,44 @@
+{% extends "layouts/runner.html" %}
+
+{% block pageTitle %}
+Welcome back to your form – {{ serviceName }} – GOV.UK
+{% endblock %}
+
+{% block content %}
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+
+    <h1 class="govuk-heading-l">
+      Welcome back to your form
+    </h1>
+
+    <p class="govuk-body">
+      You will return to the page where you saved your progress unless new questions have been added to the form.
+    </p>
+
+    {{ govukWarningText({
+      text: "If new questions have been added to the form, you will be taken to the earliest new question."
+    }) }}
+
+    <p class="govuk-body">
+      You will need to repeat the save process again and generate a new link if you want to save your progress in the future.
+    </p>
+
+    <div class="govuk-button-group">
+      {{ govukButton({
+        text: "Resume form",
+        href: "/runner-v4/resume-to-next-question"
+      }) }}
+
+      {{ govukButton({
+        text: "Cancel",
+        classes: "govuk-button--secondary",
+        href: "/runner-v4/start"
+      }) }}
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
