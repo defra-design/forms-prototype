@@ -11,7 +11,9 @@ const express = require("express");
 const PUBLIC_BASE_URL = "https://forms-prototype-d9d9fb55cd01.herokuapp.com";
 
 // Deterministic tokens for user research (avoids broken deep links).
-const RUNNER_V4_REVIEW_TOKEN = "UR-V4-DEMO";
+// Use two stable states so journeys don't depend on hidden/session state.
+const RUNNER_V4_REVIEW_TOKEN_INPROGRESS = "UR-V4-INPROGRESS";
+const RUNNER_V4_REVIEW_TOKEN_CHECKED = "UR-V4-CHECKED";
 const RUNNER_V3_REVIEW_TOKEN = "UR-V3-DEMO";
 
 // Add middleware to make terms available to all templates
@@ -15126,7 +15128,7 @@ router.get("/runner-v4/send-for-checking", function (req, res) {
   const reviewStore = ensureReviewStore(req);
   let reviewToken = req.session.data.reviewTokenV4;
   if (!reviewToken) {
-    reviewToken = RUNNER_V4_REVIEW_TOKEN;
+    reviewToken = RUNNER_V4_REVIEW_TOKEN_INPROGRESS;
     req.session.data.reviewTokenV4 = reviewToken;
   }
 
@@ -15262,9 +15264,9 @@ router.get("/runner-v4/ready-to-submit", function (req, res) {
 
   req.session.data.reviewTokenV4 = token;
 
-  // User research: deterministic token should always be "checked complete"
+  // User research: checked token should always be "checked complete"
   // so participants can deep-link into the post-check flow reliably.
-  if (token === RUNNER_V4_REVIEW_TOKEN) {
+  if (token === RUNNER_V4_REVIEW_TOKEN_CHECKED) {
     const existing = reviewStore.get(token);
     if (!existing || !(existing.expires > Date.now())) {
       reviewStore.set(token, {
@@ -15355,7 +15357,7 @@ router.post("/runner-v4/send-for-checking/generate-review-link", function (req, 
     reviewStore.delete(previousToken);
   }
 
-  const newToken = RUNNER_V4_REVIEW_TOKEN;
+  const newToken = RUNNER_V4_REVIEW_TOKEN_INPROGRESS;
   req.session.data.reviewTokenV4 = newToken;
   req.session.data.reviewDeclarationCompleteV4 = false;
   delete req.session.data.reviewDeclarationErrorV4;
@@ -15393,8 +15395,8 @@ router.get("/runner-v4/review-declaration", function (req, res) {
   const reviewStore = ensureReviewStore(req);
   let reviewEntry = token ? reviewStore.get(token) : null;
 
-  // User research helper: allow direct linking with a deterministic token.
-  if (!reviewEntry && token === RUNNER_V4_REVIEW_TOKEN) {
+  // User research helper: allow direct linking for the "in progress" token.
+  if (!reviewEntry && token === RUNNER_V4_REVIEW_TOKEN_INPROGRESS) {
     if (!req.session.data) req.session.data = {};
     applyRunnerV3DemoData(req.session.data);
     reviewEntry = {
@@ -15430,7 +15432,7 @@ router.get("/runner-v4/review-declaration", function (req, res) {
   // deterministic token, but allow a successful pass through the gate once.
   const justGrantedMap = req.session.data.reviewAccessJustGrantedV4 || {};
   const justGranted = Boolean(token && justGrantedMap[token]);
-  if (token === RUNNER_V4_REVIEW_TOKEN && !justGranted) {
+  if (token === RUNNER_V4_REVIEW_TOKEN_INPROGRESS && !justGranted) {
     if (req.session.data.reviewAccessTokensV4 && req.session.data.reviewAccessTokensV4[token]) {
       delete req.session.data.reviewAccessTokensV4[token];
     }
@@ -15438,7 +15440,7 @@ router.get("/runner-v4/review-declaration", function (req, res) {
 
   const accessMap = req.session.data.reviewAccessTokensV4 || {};
   const hasReviewerAccess = Boolean(token && accessMap[token]);
-  if (token === RUNNER_V4_REVIEW_TOKEN && hasReviewerAccess && justGrantedMap[token]) {
+  if (token === RUNNER_V4_REVIEW_TOKEN_INPROGRESS && hasReviewerAccess && justGrantedMap[token]) {
     delete justGrantedMap[token];
     req.session.data.reviewAccessJustGrantedV4 = justGrantedMap;
   }
@@ -15486,7 +15488,7 @@ router.get("/runner-v4/checker-demo-review", function (req, res) {
   if (!req.session.data) req.session.data = {};
   applyRunnerV3DemoData(req.session.data);
 
-  const demoToken = RUNNER_V4_REVIEW_TOKEN;
+  const demoToken = RUNNER_V4_REVIEW_TOKEN_INPROGRESS;
   const reviewStore = ensureReviewStore(req);
 
   // Tie the demo token to the applicant journey so that visiting
@@ -15722,7 +15724,7 @@ router.get("/titan-mvp-1.2/runner-v4/approval-notification.html", function (req,
 
   const reviewStore = ensureReviewStore(req);
   // User research: keep approval email links stable.
-  const token = RUNNER_V4_REVIEW_TOKEN;
+  const token = RUNNER_V4_REVIEW_TOKEN_CHECKED;
   req.session.data.reviewTokenV4 = token;
   // Ensure the token exists and is marked complete (so applicant can proceed).
   const existing = reviewStore.get(token);
@@ -15786,7 +15788,7 @@ router.get("/titan-mvp-1.2/runner-v4/approval-notification.html", function (req,
 
 // Runner v4: applicant access gate (reference number + memorable word)
 router.get("/runner-v4/applicant-access", function (req, res) {
-  const token = (req.query && req.query.token) || RUNNER_V4_REVIEW_TOKEN;
+  const token = (req.query && req.query.token) || RUNNER_V4_REVIEW_TOKEN_INPROGRESS;
   const nextUrl = (req.query && typeof req.query.next === "string" && req.query.next.trim() !== "")
     ? req.query.next.trim()
     : "";
@@ -15805,7 +15807,7 @@ router.get("/runner-v4/applicant-access", function (req, res) {
 
 router.post("/runner-v4/applicant-access", function (req, res) {
   if (!req.session.data) req.session.data = {};
-  const token = (req.body && req.body.token) || RUNNER_V4_REVIEW_TOKEN;
+  const token = (req.body && req.body.token) || RUNNER_V4_REVIEW_TOKEN_INPROGRESS;
   const nextUrl = (req.body && typeof req.body.next === "string" && req.body.next.trim() !== "")
     ? req.body.next.trim()
     : "";
@@ -15836,8 +15838,8 @@ router.post("/runner-v4/applicant-access", function (req, res) {
     return res.redirect(nextUrl);
   }
 
-  // User research: the approval email path should reliably land on ready-to-submit.
-  if (token === RUNNER_V4_REVIEW_TOKEN) {
+  // User research: the checked token should reliably land on ready-to-submit.
+  if (token === RUNNER_V4_REVIEW_TOKEN_CHECKED) {
     return res.redirect(`/runner-v4/ready-to-submit?token=${encodeURIComponent(token)}`);
   }
 
