@@ -2,6 +2,9 @@
 {% from "components/declaration-checkboxes/macro.njk" import declarationCheckboxes %}
 {% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
 
+{# Remove the default back link injected by layouts/runner.html #}
+{% block beforeContent %}{% endblock %}
+
 {% block pageTitle %}
 Check this form – {{ serviceName }} – GOV.UK
 {% endblock %}
@@ -11,7 +14,7 @@ Check this form – {{ serviceName }} – GOV.UK
   <div class="govuk-grid-column-two-thirds">
     <h1 class="govuk-heading-l">Check this form</h1>
 
-    {# {% if tokenValid %}
+    {% if tokenValid %}
       {{ govukSummaryList({
         rows: [
           {
@@ -19,16 +22,12 @@ Check this form – {{ serviceName }} – GOV.UK
             value: { text: "Register as a unicorn breeder" }
           },
           {
-            key: { text: "Reason for check" },
-            value: { text: "It must be checked by a registered vet" }
-          },
-          {
-            key: { text: "Applicant" },
+            key: { text: "Requested by" },
             value: { text: ("applicant@example.com") }
           }
         ]
       }) }}
-    {% endif %} #}
+    {% endif %}
 
     {# <div class="govuk-inset-text">
       <h2 class="govuk-heading-s govuk-!-margin-top-0 govuk-!-margin-bottom-2">About this form</h2>
@@ -48,7 +47,7 @@ Check this form – {{ serviceName }} – GOV.UK
       {% endif %}
     </div> #}
 
-    {# {% if not tokenValid %}
+    {% if not tokenValid %}
       <h2 class="govuk-heading-m">This check link is invalid or has expired</h2>
       <p class="govuk-body">Ask the applicant to generate and share a new check link.</p>
     {% elseif not hasReviewerAccess %}
@@ -62,7 +61,7 @@ Check this form – {{ serviceName }} – GOV.UK
             }
           ]
         }) }}
-      {% endif %} #}
+      {% endif %}
 
 
 <p class="govuk-body">
@@ -119,7 +118,7 @@ Check this form – {{ serviceName }} – GOV.UK
         <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Number of staff</dt><dd class="govuk-summary-list__value">{{ data.zhJMaM or "Not provided" }}</dd><dd class="govuk-summary-list__actions"><a class="govuk-link" href="#">View<span class="govuk-visually-hidden"> number of staff</span></a></dd></div>
       </dl>
 
-      <h2 class="govuk-heading-m">Details of the person checking this form</h2>
+      {# <h2 class="govuk-heading-m">Details of the person checking this form</h2>
       <dl class="govuk-summary-list govuk-!-margin-bottom-6">
         <div class="govuk-summary-list__row">
           <dt class="govuk-summary-list__key">Name</dt>
@@ -142,7 +141,7 @@ Check this form – {{ serviceName }} – GOV.UK
             <a class="govuk-link" href="/runner-v4/reviewer-details?token={{ token }}">Change<span class="govuk-visually-hidden"> email address</span></a>
           </dd>
         </div>
-      </dl>
+      </dl> #}
 
       {% if not success %}
         <form class="form" action="/runner-v4/review-declaration" method="post">

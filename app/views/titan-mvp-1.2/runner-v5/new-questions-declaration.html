@@ -1,0 +1,83 @@
+{% extends "layouts/runner.html" %}
+{% from "components/declaration-checkboxes/macro.njk" import declarationCheckboxes %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+
+{% block pageTitle %}
+Declaration – {{ serviceName }} – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+{{ govukBackLink({
+  text: "Back",
+  href: "javascript:window.history.back()"
+}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+
+    {{ govukNotificationBanner({
+      titleText: "Important",
+      text: "These questions are shown because since you last submitted this form, some questions have changed or need to be answered again."
+    }) }}
+
+    {% if error and error.declarationError %}
+      {{ govukErrorSummary({
+        titleText: "There is a problem",
+        errorList: [
+          {
+            text: error.declarationError,
+            href: "#declaration-checkbox"
+          }
+        ]
+      }) }}
+    {% endif %}
+
+    <form class="form" action="/runner-v5/new-questions/declaration" method="post">
+      {{ declarationCheckboxes({
+        name: "declaration",
+        fieldset: {
+          legend: {
+            text: "Declaration",
+            isPageHeading: true
+          }
+        },
+        hint: {
+          text: ""
+        },
+        content: {
+          html: "<p>I confirm that:</p>
+          <ul class='govuk-list govuk-list--bullet'>
+            <li>I own a real unicorn and not just a horse with a cone on its head</li>
+            <li>I understand the importance of keeping the unicorn safe and healthy and not letting it escape</li>
+            <li>I accept responsibility for any false statements and any consequences of my actions</li>
+          </ul>
+          <p>You must agree to this declaration to legally own unicorns.</p>"
+        },
+        errorMessage: {
+          text: error.declarationError
+        } if error and error.declarationError else "",
+        items: [
+          {
+            value: "confirmed",
+            text: "I understand and agree",
+            id: "declaration-checkbox"
+          }
+        ]
+      }) }}
+
+      <div class="govuk-button-group">
+        {{ govukButton({ text: "Continue" }) }}
+        {{ govukButton({
+          text: "Save and exit",
+          classes: "govuk-button--secondary",
+          href: "/save-progress",
+          type: "button"
+        }) }}
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+

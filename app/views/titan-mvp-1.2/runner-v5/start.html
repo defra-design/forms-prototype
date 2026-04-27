@@ -1,0 +1,70 @@
+{% extends "layouts/runner.html" %}
+
+{% block pageTitle %}
+Use answers from a previous form – {{ serviceName }} – GOV.UK
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+
+    {% if error and error.usePreviousSubmission %}
+      {{ govukErrorSummary({
+        titleText: "There is a problem",
+        errorList: [
+          {
+            text: error.usePreviousSubmission,
+            href: "#use-previous-submission"
+          }
+        ]
+      }) }}
+    {% endif %}
+
+    <h1 class="govuk-heading-xl">Use answers from a previous form</h1>
+
+    <p class="govuk-body">
+      When you start a new form, you can choose to reuse answers from a previous online form that you submitted.
+    </p>
+
+    <p class="govuk-body">If you do:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>we’ll use your previous answers to start a new form</li>
+      <li>your earlier submission will not be changed or replaced</li>
+      <li>you can review and change your answers before you submit</li>
+    </ul>
+
+    <form class="form" action="/runner-v5/start-choice" method="post">
+      {{ govukRadios({
+        idPrefix: "use-previous-submission",
+        name: "usePreviousSubmission",
+        fieldset: {
+          legend: {
+            text: "Do you want to use answers from a previous submission of this form?",
+            isPageHeading: false,
+            classes: "govuk-fieldset__legend--m"
+          }
+        },
+        errorMessage: {
+          text: error.usePreviousSubmission
+        } if error and error.usePreviousSubmission else null,
+        items: [
+          {
+            value: "yes",
+            text: "Yes, use answers from a previous submission"
+          },
+          {
+            value: "no",
+            text: "No, start a new blank form"
+          }
+        ]
+      }) }}
+
+      {{ govukButton({
+        text: "Continue"
+      }) }}
+    </form>
+
+  </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,48 @@
+{% extends "layouts/runner.html" %}
+
+{% block pageTitle %}
+Privacy notice – {{ serviceName }} – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({
+    text: "Back",
+    href: "javascript:window.close()"
+  }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">Privacy notice</h1>
+
+    <p class="govuk-body">
+      This service collects and processes personal information so you can check someone’s form before they submit it.
+    </p>
+
+    <h2 class="govuk-heading-m">What information we collect</h2>
+    <p class="govuk-body">When you enter your details, we collect:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>your name</li>
+      <li>your occupation</li>
+      <li>your email address</li>
+      <li>your UK address</li>
+    </ul>
+
+    <h2 class="govuk-heading-m">Why we collect it</h2>
+    <p class="govuk-body">
+      We use your details to record who checked the form and to show the applicant that a named person has completed the check.
+    </p>
+
+    <h2 class="govuk-heading-m">How long we keep it</h2>
+    <p class="govuk-body">
+      Your details are kept only for as long as needed to support this form-checking journey.
+    </p>
+
+    <h2 class="govuk-heading-m">Your rights</h2>
+    <p class="govuk-body">
+      You have rights under data protection law, including the right to access your data and ask for it to be corrected or deleted.
+    </p>
+  </div>
+</div>
+{% endblock %}

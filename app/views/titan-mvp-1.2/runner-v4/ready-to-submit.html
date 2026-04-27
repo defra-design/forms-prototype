@@ -1,0 +1,141 @@
+{% extends "layouts/runner.html" %}
+
+{% block pageTitle %}
+Your form has been checked – {{ serviceName }} – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+{{ govukPhaseBanner({
+  tag: {
+    text: "Beta"
+  },
+  html: 'This is a new service. Help us improve it and <a class="govuk-link" target="_blank" href="/titan-mvp-1.2/form-editor/CSAT/form.html">give your feedback (opens in new tab)</a>.'
+}) }}
+
+{{ govukBackLink({
+  text: "Back",
+  href: "/runner-v4/send-for-checking"
+}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% set html %}
+      <p class="govuk-notification-banner__heading">
+        Your form has been checked and is ready to be submitted.
+      </p>
+    {% endset %}
+
+    {{ govukNotificationBanner({
+      html: html    }) }}
+
+    {# {{ govukSummaryList({
+      rows: [
+        {
+          key: {
+            text: "Form"
+          },
+          value: {
+            text: "Register as a unicorn breeder"
+          }
+        },
+        {
+          key: {
+            text: "Checked by"
+          },
+          value: {
+            text: checkedByText or "Not provided"
+          }
+        }
+      ]
+    }) }} #}
+
+    <h2 class="govuk-heading-l">Your answers</h2>
+
+    <h2 class="govuk-heading-m">Contact details</h2>
+    <dl class="govuk-summary-list govuk-!-margin-bottom-6">
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Name</dt>
+        <dd class="govuk-summary-list__value">{{ data.name or "Not provided" }}</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Email</dt>
+        <dd class="govuk-summary-list__value">{{ data.email or "Not provided" }}</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Phone number</dt>
+        <dd class="govuk-summary-list__value">{{ data.phoneNumber or "Not provided" }}</dd>
+      </div>
+    </dl>
+
+    <h2 class="govuk-heading-m">Unicorn details</h2>
+    <dl class="govuk-summary-list govuk-!-margin-bottom-7">
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Number of unicorns expected</dt>
+        <dd class="govuk-summary-list__value">{{ data.aitzzV or "Not provided" }}</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Type of unicorns</dt>
+        <dd class="govuk-summary-list__value">
+          {% if data.DyfjJC %}
+            {% if data.DyfjJC.length %}
+              {% for type in data.DyfjJC %}{{ type }}{% if not loop.last %}, {% endif %}{% endfor %}
+            {% else %}
+              {{ data.DyfjJC }}
+            {% endif %}
+          {% else %}
+            Not provided
+          {% endif %}
+        </dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Number of staff</dt>
+        <dd class="govuk-summary-list__value">{{ data.zhJMaM or "Not provided" }}</dd>
+      </div>
+    </dl>
+
+    {# <h2 class="govuk-heading-m">Details of the person who checked your form</h2>
+    <dl class="govuk-summary-list govuk-!-margin-bottom-6">
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Name</dt>
+        <dd class="govuk-summary-list__value">{{ reviewerDetails.reviewerName or "Not provided" }}</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Occupation</dt>
+        <dd class="govuk-summary-list__value">{{ reviewerDetails.reviewerOccupation or "Not provided" }}</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Email address</dt>
+        <dd class="govuk-summary-list__value">{{ reviewerDetails.reviewerEmail or "Not provided" }}</dd>
+      </div>
+    </dl> #}
+
+
+    <form class="form" action="/runner-v4/submit" method="post">
+      {% if token %}
+        <input type="hidden" name="token" value="{{ token }}">
+      {% endif %}
+
+      {{ govukButton({
+        text: "Submit"
+      }) }}
+    </form>
+
+    <h2 class="govuk-heading-m">Change your answers</h2>
+    <p class="govuk-body">
+      If you change your answers, you must send the form for checking again before you can submit it.
+    </p>
+
+    <form class="form" action="/runner-v4/send-for-checking/return-for-changes" method="post">
+      {{ govukButton({
+        text: "Change your answers",
+        classes: "govuk-button--secondary"
+      }) }}
+    </form>
+
+
+  </div>
+</div>
+{% endblock %}
+

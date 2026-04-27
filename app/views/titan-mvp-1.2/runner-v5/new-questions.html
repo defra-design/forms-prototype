@@ -1,0 +1,46 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+
+{% block pageTitle %}
+New questions – {{ serviceName }} – GOV.UK
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">New questions</h1>
+
+    {{ govukNotificationBanner({
+      titleText: "Important",
+      text: "These questions are shown because since you last submitted this form, some questions have changed or need to be answered again."
+    }) }}
+
+    <p class="govuk-body">
+      You need to answer these questions before you can review all your answers.
+    </p>
+
+    <form class="form" action="/runner-v5/new-questions" method="post">
+      {{ govukInput({
+        label: {
+          text: "New question",
+          classes: "govuk-label--m"
+        },
+        id: "runner-v5-new-question",
+        name: "runnerV5NewQuestionAnswer",
+        value: data.runnerV5NewQuestionAnswer
+      }) }}
+
+      <div class="govuk-button-group">
+        {{ govukButton({ text: "Continue" }) }}
+        {{ govukButton({
+          text: "Save and exit",
+          classes: "govuk-button--secondary",
+          href: "/save-progress",
+          type: "button"
+        }) }}
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+

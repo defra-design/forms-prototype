@@ -50,14 +50,20 @@ Your details – {{ serviceName }} – GOV.UK
         errorMessage: { text: errors.reviewerEmail } if errors and errors.reviewerEmail else ""
       }) }}
 
-      {{ govukTextarea({
+      {# {{ govukTextarea({
         name: "reviewerAddress",
         id: "reviewer-address",
         label: { text: "UK address" },
         rows: 4,
         value: values.reviewerAddress,
         errorMessage: { text: errors.reviewerAddress } if errors and errors.reviewerAddress else ""
-      }) }}
+      }) }} #}
+
+      {# <p class="govuk-body">
+        <a class="govuk-link" href="/runner-v4/privacy-notice?token={{ token }}" target="_blank" rel="noreferrer noopener">
+          Read the privacy notice (opens in a new tab)
+        </a>
+      </p> #}
 
       {{ govukButton({
         text: "Continue"

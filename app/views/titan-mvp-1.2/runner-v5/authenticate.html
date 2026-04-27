@@ -1,0 +1,92 @@
+{% extends "layouts/runner.html" %}
+
+{% block pageTitle %}
+Confirm your email address and reference number – {{ serviceName }} – GOV.UK
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+
+    {% set emailError = error and error.previousSubmissionEmail %}
+    {% set refError = error and error.previousSubmissionReferenceNumber %}
+
+    {% if emailError or refError %}
+      {{ govukErrorSummary({
+        titleText: "There is a problem",
+        errorList: [
+          {
+            text: error.previousSubmissionEmail,
+            href: "#previous-submission-email"
+          } if emailError else null,
+          {
+            text: error.previousSubmissionReferenceNumber,
+            href: "#previous-submission-reference-number"
+          } if refError else null
+        ]
+      }) }}
+    {% endif %}
+
+    <h1 class="govuk-heading-l">Confirm your email address and reference number</h1>
+
+    <p class="govuk-body">
+      To access your previous answers, you need the email address and reference number you used for that form.
+    </p>
+
+    <p class="govuk-body">
+      You can find these in your confirmation email.
+    </p>
+
+    <p class="govuk-body">
+      This will not change or replace anything you submitted.
+    </p>
+
+    <form class="form" action="/runner-v5/authenticate" method="post">
+      {{ govukInput({
+        label: {
+          text: "Email address",
+          classes: "govuk-label--m"
+        },
+        hint: {
+          text: "Use the same email address you used in your previous submission"
+        },
+        id: "previous-submission-email",
+        name: "previousSubmissionEmail",
+        type: "email",
+        autocomplete: "email",
+        value: data.runnerV5PreviousSubmissionEmail,
+        errorMessage: {
+          text: error.previousSubmissionEmail
+        } if emailError else null
+      }) }}
+
+      {{ govukInput({
+        label: {
+          text: "Reference number",
+          classes: "govuk-label--m"
+        },
+        hint: {
+          text: "You can find this in your submission confirmation email"
+        },
+        id: "previous-submission-reference-number",
+        name: "previousSubmissionReferenceNumber",
+        value: data.runnerV5PreviousSubmissionReferenceNumber,
+        errorMessage: {
+          text: error.previousSubmissionReferenceNumber
+        } if refError else null
+      }) }}
+
+      <div class="govuk-button-group">
+        {{ govukButton({ text: "Continue" }) }}
+        {{ govukButton({
+          text: "Save and exit",
+          classes: "govuk-button--secondary",
+          href: "/save-progress",
+          type: "button"
+        }) }}
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+

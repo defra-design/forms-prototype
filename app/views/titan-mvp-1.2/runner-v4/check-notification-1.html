@@ -144,48 +144,110 @@ Email - Form submitted
                 <div class="email-sender">Submit form to Defra (defra@notifications.gov.uk)</div>
                 <div class="email-time">10:30 AM</div>
             </div>
-            <div class="email-subject">Form checked: Register as a unicorn breeder</div>
-            <div class="email-preview">Your form has been checked and can now be sent. Return to your form to submit it.</div>
+            <div class="email-subject">Form submitted to Defra</div>
+            <div class="email-preview">We received your form submission.</div>
         </div>
     </div>
 
     <!-- Email Content -->
     <div class="email-content">
         <div class="email-content-header">
-            <div class="email-content-subject">Form checked: Register as a unicorn breeder</div>
+            <div class="email-content-subject">Form submitted to Defra</div>
             <div class="email-content-meta">
                 <strong>From:</strong> Submit form to Defra (defra@notifications.gov.uk)<br>
-                <strong>To:</strong> you@example.com<br>
-                <strong>Date:</strong> Tuesday, 1 April 2025 at 10:30 AM
+                <strong>To:</strong> {{ (answers.email or data.email or "you@example.com") }}<br>
+                <strong>Date:</strong> Monday, 20 April 2026 at 2:49 PM
             </div>
         </div>
 
         <div class="govuk-body">
-            <h1 class="govuk-heading-l">Your form has been checked</h1>
+            <h1 class="govuk-heading-l">Form submitted</h1>
 
-            <p class="govuk-body">We received a declaration that your form 'Register as a unicorn breeder' has been checked on Tuesday 1 April
-                2025 at 10:30am.</p>
+           {{ govukInsetText({
+            html: 'Your reference number: ' ~ (answers.referenceNumber or data.referenceNumber or "V25-AWC-M56")
+           }) }}
 
-<div class="govuk-inset-text">
-    <p class="govuk-body">You can now <a class="govuk-link" href="/runner-v4/intervention">send your form</a>.</p>
-</div>
+           <p class="govuk-body">
+            Someone you asked to check this form checked it at 10:20am on Monday 20 April 2026.</p>
+
+
+           <p class="govuk-body">
+            We received your form submission for ‘Register as a unicorn breeder’ at 2:49pm on Monday 20 April 2026.
+           </p>
+
+
+            <h2 class="govuk-heading-m">What happens next</h2>
+            <p class="govuk-body">Will report back which theme was favourited the most.</p>
 
             <h2 class="govuk-heading-m">Get help</h2>
-            <p class="govuk-body">Telephone 03000 200 301</p>
-            <p class="govuk-body">Monday to Friday between 8:30am to 5pm.</p>
-            <p class="govuk-body"><a href="mailto:">Example@example.com</a>.</p>
-            <p class="govuk-body">We aim to respond within 2 working days.</p>
+            <p class="govuk-body">
+              <a class="govuk-link" href="mailto:daniel.dasilveira@defra.gov.uk">daniel.dasilveira@defra.gov.uk</a>
+            </p>
+            <p class="govuk-body">We aim to get back to you within 5 working days.</p>
 
-            <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
+            <h2 class="govuk-heading-m">Your answers</h2>
+            <p class="govuk-body">Find a copy of your answers at the bottom of this email.</p>
 
             <p class="govuk-body">
                 Do not reply to this email. We do not monitor replies to this email address.
             </p>
 
-            <p class="govuk-body">From Department for Environment, Food & Rural Affairs</p>
+            <p class="govuk-body">From Defra</p>
 
-            <p class="govuk-body">Thanks,</p>
-            <p class="govuk-body">Defra</p>
+            {% if answerItems and answerItems.length %}
+              <h3 class="govuk-heading-s">Submitted answers</h3>
+              <dl class="govuk-summary-list govuk-!-margin-bottom-6">
+                {% for item in answerItems %}
+                  <div class="govuk-summary-list__row">
+                    <dt class="govuk-summary-list__key">{{ item.key }}</dt>
+                    <dd class="govuk-summary-list__value">{{ item.value }}</dd>
+                  </div>
+                {% endfor %}
+              </dl>
+            {% endif %}
+
+            <h3 class="govuk-heading-s">Name</h3>
+            <p class="govuk-body">{{ answers.name or "Alex Example" }}</p>
+
+            <h3 class="govuk-heading-s">Phone number</h3>
+            <p class="govuk-body">{{ answers.phoneNumber or "07123 456789" }}</p>
+
+            <h3 class="govuk-heading-s">Type of unicorns</h3>
+            <p class="govuk-body">
+              {% if answers.DyfjJC %}
+                {% if answers.DyfjJC.length %}
+                  {% for type in answers.DyfjJC %}{{ type }}{% if not loop.last %}, {% endif %}{% endfor %}
+                {% else %}
+                  {{ answers.DyfjJC }}
+                {% endif %}
+              {% else %}
+                Rainbow, Forest
+              {% endif %}
+            </p>
+
+            <h3 class="govuk-heading-s">Number of unicorns expected</h3>
+            <p class="govuk-body">{{ answers.aitzzV or "11 to 20" }}</p>
+
+            <h3 class="govuk-heading-s">Number of staff</h3>
+            <p class="govuk-body">{{ answers.zhJMaM or "12" }}</p>
+
+            {% set reviewerToken = answers.reviewTokenV4 or data.reviewTokenV4 %}
+            {% set reviewerDetailsMap = (answers.reviewerDetailsV4 or data.reviewerDetailsV4) or {} %}
+            {% set reviewer = reviewerDetailsMap[reviewerToken] if reviewerToken else null %}
+
+            <h3 class="govuk-heading-s govuk-!-margin-top-6">Details of the person that checked the form</h3>
+
+            <h4 class="govuk-heading-s govuk-!-margin-bottom-1">Name</h4>
+            <p class="govuk-body">{{ (reviewer.reviewerName if reviewer else null) or "Sam Reviewer" }}</p>
+
+            <h4 class="govuk-heading-s govuk-!-margin-bottom-1">Occupation</h4>
+            <p class="govuk-body">{{ (reviewer.reviewerOccupation if reviewer else null) or "Registered vet" }}</p>
+
+            <h4 class="govuk-heading-s govuk-!-margin-bottom-1">Email address</h4>
+            <p class="govuk-body">{{ (reviewer.reviewerEmail if reviewer else null) or "sam.reviewer@example.com" }}</p>
+
+            <h4 class="govuk-heading-s govuk-!-margin-bottom-1">UK address</h4>
+            <p class="govuk-body">{{ (reviewer.reviewerAddress if reviewer else null) or "1 Review Street, London, SW1A 1AA" }}</p>
         </div>
     </div>
 </div>

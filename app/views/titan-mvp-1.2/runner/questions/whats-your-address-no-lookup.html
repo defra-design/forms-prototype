@@ -51,7 +51,7 @@
                   ' ~ (data.finalAddress or data.selectedAddress) ~ '
                 </p>
                 <p class="govuk-body">
-                  <a href="/address-lookup-manual?returnUrl=' ~ (data.returnUrl or '/runner-v2/whats-your-address') ~ '" class="govuk-link">Use a different address</a>
+                  <a href="/address-lookup-manual?returnUrl=' ~ (data.returnUrl or ((basePath or "/runner-v2") ~ "/whats-your-address")) ~ '" class="govuk-link">Use a different address</a>
                 </p>',
                 classes: "govuk-!-margin-top-0 govuk-!-margin-bottom-0"
               }) }}
@@ -74,7 +74,7 @@
             {% else %}
               {# Manual entry only - no postcode lookup #}
               <div class="govuk-button-group govuk-!-margin-bottom-0">
-                <a href="/address-lookup-manual?returnUrl={{ data.returnUrl or '/runner-v2/whats-your-address' }}" id="enter-address-link" class="govuk-button govuk-button govuk-!-margin-right-1">Enter address manually</a>
+                <a href="/address-lookup-manual?returnUrl={{ data.returnUrl or ((basePath or '/runner-v2') ~ '/whats-your-address') }}" id="enter-address-link" class="govuk-button govuk-button govuk-!-margin-right-1">Enter address manually</a>
               </div>
             {% endif %}
           </fieldset>

@@ -16,18 +16,6 @@ href: "javascript:window.history.back()"
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
 
-    {% if error %}
-      {{ govukErrorSummary({
-        titleText: "There is a problem",
-        errorList: [
-          {
-            text: error.nameError,
-            href: "#name"
-          } if error.nameError else ""
-        ]
-      }) }}
-    {% endif %}
-
     <form class="form" action="{{ basePath ~ '/whats-your-name' if basePath else '/whats-your-name' }}" method="post">
 
       {{ govukInput({
@@ -39,7 +27,6 @@ href: "javascript:window.history.back()"
       id: "name",
       name: "name",
       autocomplete: "name",
-      errorMessage: { text: error.nameError } if error.nameError else "",
       value: data['name']
       }) }}
 
@@ -71,36 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if (saveExitButton) {
     saveExitButton.addEventListener('click', function(e) {
       e.preventDefault();
-      
-      // Validate required fields
-      const nameField = document.querySelector('input[name="name"]');
-      const nameValue = nameField ? nameField.value.trim() : '';
-      
-      if (!nameValue) {
-        // Show error message
-        const errorMessage = document.createElement('div');
-        errorMessage.className = 'govuk-error-message';
-        errorMessage.innerHTML = '<span class="govuk-visually-hidden">Error:</span>Enter your full name';
-        
-        // Remove any existing error messages
-        const existingError = document.querySelector('.govuk-error-message');
-        if (existingError) {
-          existingError.remove();
-        }
-        
-        // Add error message above the input field
-        const formGroup = nameField.closest('.govuk-form-group');
-        if (formGroup) {
-          formGroup.classList.add('govuk-form-group--error');
-          nameField.classList.add('govuk-input--error');
-          formGroup.insertBefore(errorMessage, nameField);
-        }
-        
-        // Focus on the field
-        nameField.focus();
-        return;
-      }
-      
+
       // Get the current page URL
       const currentUrl = window.location.pathname;
       

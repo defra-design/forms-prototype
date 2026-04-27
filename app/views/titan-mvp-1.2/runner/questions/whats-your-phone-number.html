@@ -16,18 +16,6 @@ href: "javascript:window.history.back()"
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
 
-    {% if error %}
-      {{ govukErrorSummary({
-        titleText: "There is a problem",
-        errorList: [
-          {
-            text: error.phoneError,
-            href: "#phoneNumber"
-          } if error.phoneError else ""
-        ]
-      }) }}
-    {% endif %}
-
     <form class="form" action="{{ basePath ~ '/whats-your-phone-number' if basePath else '/whats-your-phone-number' }}" method="post">
 
       {{ govukInput({
@@ -40,7 +28,6 @@ href: "javascript:window.history.back()"
       name: "phoneNumber",
       type: "tel",
       autocomplete: "tel",
-      errorMessage: { text: error.phoneError } if error.phoneError else "",
       value: data['phoneNumber']
       }) }}
 
@@ -72,36 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if (saveExitButton) {
     saveExitButton.addEventListener('click', function(e) {
       e.preventDefault();
-      
-      // Validate required fields
-      const phoneField = document.querySelector('input[name="phoneNumber"]');
-      const phoneValue = phoneField ? phoneField.value.trim() : '';
-      
-      if (!phoneValue) {
-        // Show error message
-        const errorMessage = document.createElement('div');
-        errorMessage.className = 'govuk-error-message';
-        errorMessage.innerHTML = '<span class="govuk-visually-hidden">Error:</span>Enter your phone number';
-        
-        // Remove any existing error messages
-        const existingError = document.querySelector('.govuk-error-message');
-        if (existingError) {
-          existingError.remove();
-        }
-        
-        // Add error message above the input field
-        const formGroup = phoneField.closest('.govuk-form-group');
-        if (formGroup) {
-          formGroup.classList.add('govuk-form-group--error');
-          phoneField.classList.add('govuk-input--error');
-          formGroup.insertBefore(errorMessage, phoneField);
-        }
-        
-        // Focus on the field
-        phoneField.focus();
-        return;
-      }
-      
+
       // Get the current page URL
       const currentUrl = window.location.pathname;
       

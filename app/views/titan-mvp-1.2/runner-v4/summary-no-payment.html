@@ -21,9 +21,10 @@ href: "javascript:window.history.back()"
 {% block content %}
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
-    <h1 class="govuk-heading-l">Check your answers before sending your form</h1>
 
-    {# <h2 class="govuk-heading-m">Declaration</h2>
+    <h1 class="govuk-heading-l">Check your answers</h1>
+
+    <h2 class="govuk-heading-m">Declaration</h2>
     <dl class="govuk-summary-list govuk-!-margin-bottom-9">
       <div class="govuk-summary-list__row">
         <dt class="govuk-summary-list__key">Terms and conditions</dt>
@@ -38,46 +39,105 @@ href: "javascript:window.history.back()"
           <a class="govuk-link" href="/runner-v4/declaration">Change<span class="govuk-visually-hidden"> declaration</span></a>
         </dd>
       </div>
-    </dl> #}
+    </dl>
 
     <h2 class="govuk-heading-m">Contact details</h2>
     <dl class="govuk-summary-list govuk-!-margin-bottom-9">
-      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Name</dt><dd class="govuk-summary-list__value">{{ data['name'] or 'Not provided' }}</dd><dd class="govuk-summary-list__actions"><a class="govuk-link" href="/runner-v4/whats-your-name">Change<span class="govuk-visually-hidden"> name</span></a></dd></div>
-      {# <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Email address</dt><dd class="govuk-summary-list__value">{{ data['email'] or 'Not provided' }}</dd><dd class="govuk-summary-list__actions"><a class="govuk-link" href="/runner-v4/whats-your-email-address">Change<span class="govuk-visually-hidden"> email address</span></a></dd></div> #}
-      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Phone number</dt><dd class="govuk-summary-list__value">{{ data['phoneNumber'] or 'Not provided' }}</dd><dd class="govuk-summary-list__actions"><a class="govuk-link" href="/runner-v4/whats-your-phone-number">Change<span class="govuk-visually-hidden"> phone number</span></a></dd></div>
-      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Address</dt><dd class="govuk-summary-list__value">{{ data['selectedAddress'] or data['finalAddress'] or 'Not provided' }}</dd><dd class="govuk-summary-list__actions"><a class="govuk-link" href="/runner-v4/whats-your-address">Change<span class="govuk-visually-hidden"> address</span></a></dd></div>
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Name</dt><dd class="govuk-summary-list__value">{{ data['name'] or 'Not provided' }}</dd>{% if not data.reviewInterventionStartedV4 %}<dd class="govuk-summary-list__actions"><a class="govuk-link" href="/runner-v4/whats-your-name">Change<span class="govuk-visually-hidden"> name</span></a></dd>{% endif %}</div>
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Email address</dt><dd class="govuk-summary-list__value">{{ data['email'] or 'Not provided' }}</dd>{% if not data.reviewInterventionStartedV4 %}<dd class="govuk-summary-list__actions"><a class="govuk-link" href="/runner-v4/whats-your-email-address">Change<span class="govuk-visually-hidden"> email address</span></a></dd>{% endif %}</div>
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Phone number</dt><dd class="govuk-summary-list__value">{{ data['phoneNumber'] or 'Not provided' }}</dd>{% if not data.reviewInterventionStartedV4 %}<dd class="govuk-summary-list__actions"><a class="govuk-link" href="/runner-v4/whats-your-phone-number">Change<span class="govuk-visually-hidden"> phone number</span></a></dd>{% endif %}</div>
     </dl>
 
     <h2 class="govuk-heading-m">Unicorn details</h2>
     <dl class="govuk-summary-list govuk-!-margin-bottom-9">
-      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Number of unicorns expected</dt><dd class="govuk-summary-list__value">{{ data['aitzzV'] or 'Not provided' }}</dd><dd class="govuk-summary-list__actions"><a class="govuk-link" href="/runner-v4/how-many-unicorns-do-you-expect-to-breed-each-year">Change<span class="govuk-visually-hidden"> number of unicorns expected</span></a></dd></div>
-      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Type of unicorns</dt><dd class="govuk-summary-list__value">{% if data['DyfjJC'] %}{% for type in data['DyfjJC'] %}{{ type }}{% if not loop.last %}, {% endif %}{% endfor %}{% else %}Not provided{% endif %}</dd><dd class="govuk-summary-list__actions"><a class="govuk-link" href="/runner-v4/what-type-of-unicorns-will-you-breed">Change<span class="govuk-visually-hidden"> type of unicorns</span></a></dd></div>
-      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Where you keep the unicorns</dt><dd class="govuk-summary-list__value">Easting: {{ data['location-easting'] or 'Not provided' }}, Northing: {{ data['location-northing'] or 'Not provided' }}</dd><dd class="govuk-summary-list__actions"><a class="govuk-link" href="/runner-v4/where-will-you-keep-the-unicorns">Change<span class="govuk-visually-hidden"> where you keep the unicorns</span></a></dd></div>
-      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Number of staff</dt><dd class="govuk-summary-list__value">{{ data['zhJMaM'] or 'Not provided' }}</dd><dd class="govuk-summary-list__actions"><a class="govuk-link" href="/runner-v4/how-many-members-of-staff-will-look-after-the-unicorns">Change<span class="govuk-visually-hidden"> number of staff</span></a></dd></div>
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Number of unicorns expected</dt><dd class="govuk-summary-list__value">{{ data['aitzzV'] or 'Not provided' }}</dd>{% if not data.reviewInterventionStartedV4 %}<dd class="govuk-summary-list__actions"><a class="govuk-link" href="/runner-v4/how-many-unicorns-do-you-expect-to-breed-each-year">Change<span class="govuk-visually-hidden"> number of unicorns expected</span></a></dd>{% endif %}</div>
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Type of unicorns</dt><dd class="govuk-summary-list__value">{% if data['DyfjJC'] %}{% for type in data['DyfjJC'] %}{{ type }}{% if not loop.last %}, {% endif %}{% endfor %}{% else %}Not provided{% endif %}</dd>{% if not data.reviewInterventionStartedV4 %}<dd class="govuk-summary-list__actions"><a class="govuk-link" href="/runner-v4/what-type-of-unicorns-will-you-breed">Change<span class="govuk-visually-hidden"> type of unicorns</span></a></dd>{% endif %}</div>
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Number of staff</dt><dd class="govuk-summary-list__value">{{ data['zhJMaM'] or 'Not provided' }}</dd>{% if not data.reviewInterventionStartedV4 %}<dd class="govuk-summary-list__actions"><a class="govuk-link" href="/runner-v4/how-many-members-of-staff-will-look-after-the-unicorns">Change<span class="govuk-visually-hidden"> number of staff</span></a></dd>{% endif %}</div>
     </dl>
 
     <form class="form" action="/runner-v4/summary" method="post">
-      {{ govukInput({
-      label: {
-      text: "Confirmation email",
-      classes: "govuk-label--m"
-      },
-      hint: {
-      text: "Enter your email to receive a confirmation email and a link to reuse your answers next time"
-      },
-      id: "email",
-      name: "email",
-      type: "email",
-      autocomplete: "email",
-      spellcheck: false
-      }) }}
+
+{# <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible"> #}
+
+<h2 class="govuk-heading-m">Before you can submit this form</h2>
+<p class="govuk-body">
+  You cannot submit this form until someone else has checked it.
+</p>
+
+<ol class="govuk-list govuk-list--number">
+  <li>
+    <p class="govuk-body">
+      On the next screen you’ll enter the details of the person checking your form.
+    </p>
+  </li>
+  <li>
+    <p class="govuk-body govuk-!-margin-bottom-0">
+      We’ll email you the details you need to access the form again while it is being checked.
+    </p>
+  </li>
+</ol>
+
+{{ govukInput({
+  label: {
+  text: "Confirmation email",
+  classes: "govuk-label--m"
+  },
+  hint: {
+  text: "We’ll email you access details and a confirmation after submission"
+  },
+  id: "email",
+  name: "email",
+  value: data['email'] or '',
+  type: "email",
+  autocomplete: "email",
+  spellcheck: false
+  }) }}
+
+{#
+<p class="govuk-body">Once you send it for checking:</p>
+
+  <ul class="govuk-list govuk-list--bullet">
+    <li>you will not be able to change your answers</li>
+    <li>the person checking it can review your answers but not edit them.</li>
+  </ul>
+</p> #}
+
+{#
+<div class="govuk-form-group">
+      {{ govukRadios({
+        classes: "govuk-radios--inline",
+        name: "changedName",
+        fieldset: {
+          legend: {
+            text: "Are you ready to start the checking process?
+",
+            isPageHeading: true,
+            classes: "govuk-fieldset__legend--m"
+          }
+        },
+        hint: {
+          text: "If you continue, your answers will be locked while the form is checked. You will get a link on the next page to send to the person checking the form."
+        },
+        items: [
+          {
+            value: "yes",
+            text: " Yes, start the checking process"
+          },
+          {
+            value: "no",
+            text: "No, I want to check my answers again"
+          }
+        ]
+      }) }} #}
+
+
 
       {% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
 
 
       <div class="govuk-button-group">
         {{ govukButton({
-        text: "Send",
+        text: "Continue",
         classes: "govuk-button--primary govuk-!-margin-top-4 govuk-!-margin-bottom-0",
         type: "submit"
         }) }}

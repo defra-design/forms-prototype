@@ -165,7 +165,7 @@ Email - Form submitted
 
             {% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
             {{ govukInsetText({
-            text: "Your reference number: EL3-5H4-L3N"
+            text: "Your reference number: " ~ (data.runnerV5LastSubmittedReferenceNumber or "EL3-5H4-L3N")
             }) }}
 
             <p class="govuk-body">We received your form submission for 'Register as a unicorn breeder' on Tuesday 1 April
@@ -174,8 +174,17 @@ Email - Form submitted
             <h2 class="govuk-heading-m">What happens next</h2>
             <p class="govuk-body">We will review your form and get back to you within 10 working days.</p>
 
-            <h2 class="govuk-heading-m">Accessing your submission</h2>
-            <p class="govuk-body">In the receipt email, we have added a link which will be available for 18 months in case you need to use the information to submit a new, renewal or make amendments to the current application.</p>
+            <h2 class="govuk-heading-m">Use answers from this form again</h2>
+            <p class="govuk-body">You can <a class="govuk-link govuk-link--no-visited-state" href="/runner-v5/start-choice">use answers from this form</a> to start a new submission. You will need to enter your email address and reference number.</p>
+
+<p class="govuk-body">
+    Keep this email so you can find your reference number again.
+  </p>
+
+            <p class="govuk-body">This link is valid for 18 months.</p>
+
+            {# <h2 class="govuk-heading-m">Accessing your submission</h2>
+            <p class="govuk-body">In the receipt email, we have added a link which will be available for 18 months in case you need to use the information to submit a new, renewal or make amendments to the current application.</p> #}
 
             <h2 class="govuk-heading-m">Get help</h2>
             <p class="govuk-body">Telephone 03000 200 301</p>
@@ -183,9 +192,7 @@ Email - Form submitted
             <p class="govuk-body"><a href="mailto:">Example@example.com</a>.</p>
             <p class="govuk-body">We aim to respond within 2 working days.</p>
 
-            <h2 class="govuk-heading-m">Your saved answers</h2>
-            <p class="govuk-body">You can <a class="govuk-link govuk-link--no-visited-state" href="/runner-v2/reuse-saved-answers">reuse your answers</a> if you need to submit this form again.</p>
-            <p class="govuk-body">This link is valid for 18 months.</p>
+
 
             <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
 

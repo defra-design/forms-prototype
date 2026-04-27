@@ -16,18 +16,6 @@ href: "javascript:window.history.back()"
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
 
-    {% if error %}
-      {{ govukErrorSummary({
-        titleText: "There is a problem",
-        errorList: [
-          {
-            text: error.emailError,
-            href: "#email"
-          } if error.emailError else ""
-        ]
-      }) }}
-    {% endif %}
-
     <form class="form" action="{{ basePath ~ '/whats-your-email-address' if basePath else '/whats-your-email-address' }}" method="post">
 
       {{ govukInput({
@@ -41,7 +29,6 @@ href: "javascript:window.history.back()"
       type: "email",
       autocomplete: "email",
       spellcheck: false,
-      errorMessage: { text: error.emailError } if error.emailError else "",
       value: data['email']
       }) }}
 
@@ -73,36 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if (saveExitButton) {
     saveExitButton.addEventListener('click', function(e) {
       e.preventDefault();
-      
-      // Validate required fields
-      const emailField = document.querySelector('input[name="email"]');
-      const emailValue = emailField ? emailField.value.trim() : '';
-      
-      if (!emailValue) {
-        // Show error message
-        const errorMessage = document.createElement('div');
-        errorMessage.className = 'govuk-error-message';
-        errorMessage.innerHTML = '<span class="govuk-visually-hidden">Error:</span>Enter your email address';
-        
-        // Remove any existing error messages
-        const existingError = document.querySelector('.govuk-error-message');
-        if (existingError) {
-          existingError.remove();
-        }
-        
-        // Add error message above the input field
-        const formGroup = emailField.closest('.govuk-form-group');
-        if (formGroup) {
-          formGroup.classList.add('govuk-form-group--error');
-          emailField.classList.add('govuk-input--error');
-          formGroup.insertBefore(errorMessage, emailField);
-        }
-        
-        // Focus on the field
-        emailField.focus();
-        return;
-      }
-      
+
       // Get the current page URL
       const currentUrl = window.location.pathname;
       
