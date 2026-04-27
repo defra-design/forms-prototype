@@ -140,7 +140,7 @@ Email - Form checker completed
        Your form submission for ‘Register as a unicorn breeder’ has been checked successfully.</p>
 
        {{ govukInsetText({
-        html: "You now need to <a class='govuk-link' href='/runner-v4/applicant-access?token=UR-V4-DEMO&next=/runner-v4/ready-to-submit%3Ftoken%3DUR-V4-DEMO'>submit it</a>."
+        html: "You now need to <a class='govuk-link' href='" ~ (publicBaseUrl or '') ~ "/runner-v4/applicant-access?token=UR-V4-DEMO&next=/runner-v4/ready-to-submit%3Ftoken%3DUR-V4-DEMO'>submit it</a>."
        }) }}
 
        <p class="govuk-body">

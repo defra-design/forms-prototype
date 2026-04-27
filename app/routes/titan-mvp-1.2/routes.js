@@ -17,6 +17,7 @@ const RUNNER_V3_REVIEW_TOKEN = "UR-V3-DEMO";
 // Add middleware to make terms available to all templates
 router.use((req, res, next) => {
   res.locals.commonTerms = terms;
+  res.locals.publicBaseUrl = PUBLIC_BASE_URL;
   next();
 });
 
