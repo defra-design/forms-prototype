@@ -42,10 +42,12 @@ https://prototype-kit.service.gov.uk/docs/how-to-use-layouts
 {% endblock %}
 
 {% block header %}
+{% set _serviceStartUrl = runnerStartUrl or "/titan-mvp-1.2/runner/questions/start.html" %}
+
 {{ govukHeader({
   homepageUrl: "#",
   serviceName: "Register as a unicorn breeder",
-  serviceUrl: "/titan-mvp-1.2/runner/questions/start.html"
+  serviceUrl: _serviceStartUrl
 }) }}
 {% endblock %}
 
@@ -56,7 +58,7 @@ meta: {
 items: [
 
 {
-href: "/titan-mvp-1.2/runner/questions/start.html",
+href: _serviceStartUrl,
 text: "Start of prototype"
 },
 {

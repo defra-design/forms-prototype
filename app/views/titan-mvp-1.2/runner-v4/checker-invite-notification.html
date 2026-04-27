@@ -1,0 +1,182 @@
+{% extends "layouts/email.html" %}
+
+{% block pageTitle %}
+Email - Check a form
+{% endblock %}
+
+{% block content %}
+<style>
+  .inbox-container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: #f8f8f8;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+  }
+  .inbox-header {
+    background: #ffffff;
+    border: 1px solid #d0d0d0;
+    border-radius: 8px 8px 0 0;
+    padding: 15px 20px;
+    border-bottom: none;
+  }
+  .inbox-toolbar {
+    background: #f5f5f5;
+    border: 1px solid #d0d0d0;
+    border-top: none;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    color: #666;
+  }
+  .email-list {
+    background: #ffffff;
+    border: 1px solid #d0d0d0;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+  }
+  .email-item {
+    border-bottom: 1px solid #e0e0e0;
+    padding: 15px 20px;
+    cursor: pointer;
+  }
+  .email-item.selected {
+    background-color: #e3f2fd;
+    border-left: 4px solid #1976d2;
+  }
+  .email-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .email-sender {
+    font-weight: bold;
+    color: #1976d2;
+    font-size: 14px;
+  }
+  .email-time {
+    color: #666;
+    font-size: 12px;
+  }
+  .email-subject {
+    font-weight: bold;
+    color: #333;
+    font-size: 16px;
+    margin-bottom: 5px;
+  }
+  .email-preview {
+    color: #666;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  .email-content {
+    background: #ffffff;
+    border: 1px solid #d0d0d0;
+    border-radius: 8px;
+    margin-top: 20px;
+    padding: 20px;
+  }
+  .email-content-header {
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+  }
+  .email-content-subject {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+  }
+  .email-content-meta {
+    color: #666;
+    font-size: 14px;
+  }
+  .inbox-stats {
+    color: #666;
+    font-size: 12px;
+  }
+</style>
+
+{# Static prototype email (optimum scenario) #}
+{% set reviewLink = "/runner-v4/checker-demo-review" %}
+{% set checkerEmail = "sam.reviewer@example.com" %}
+{% set referenceNumber = "V25-AWC-M56" %}
+{% set applicantName = "Alex Example" %}
+{% set applicantEmail = "alex.example@unicorns.example" %}
+
+<div class="inbox-container">
+  <div class="inbox-header">
+    <h1 style="margin: 0; font-size: 24px; color: #333;">Inbox</h1>
+  </div>
+
+  <div class="inbox-toolbar">
+    <div>
+      <span class="inbox-stats">1 message</span>
+    </div>
+    <div>
+      <span>Search</span>
+    </div>
+  </div>
+
+  <div class="email-list">
+    <div class="email-item selected">
+      <div class="email-header">
+        <div class="email-sender">Submit form to Defra (defra@notifications.gov.uk)</div>
+        <div class="email-time">Now</div>
+      </div>
+      <div class="email-subject">Check a form: 'Register as a unicorn breeder'</div>
+      <div class="email-preview">
+        Check form {{ referenceNumber }} from {{ applicantEmail }} before it is submitted.
+      </div>
+    </div>
+  </div>
+
+  <div class="email-content">
+    <div class="email-content-header">
+      <div class="email-content-subject">Check a form: 'Register as a unicorn breeder'</div>
+      <div class="email-content-meta">
+        <strong>From:</strong> Submit form to Defra (defra@notifications.gov.uk)<br>
+        <strong>To:</strong> {{ checkerEmail }}<br>
+      </div>
+    </div>
+
+    <div class="govuk-body">
+      <h1 class="govuk-heading-l">Check a form</h1>
+
+      <p class="govuk-body">
+        {{ applicantEmail }} has asked you to check the form for 'Register as a unicorn breeder'.
+      </p>
+
+      {% set insetHtml %}
+        <p class="govuk-body">Use these details to check the form:</p>
+        <p class="govuk-body">
+          <a class="govuk-link" href="{{ reviewLink }}">{{ reviewLink }}</a>
+        </p>
+        <p class="govuk-body">Reference number: <strong>{{ referenceNumber }}</strong></p>
+        <p class="govuk-body">Memorable word: <strong>chicken nuggets</strong></p>
+      {% endset %}
+
+      {{ govukInsetText({
+        html: insetHtml
+      }) }}
+
+
+
+      <p class="govuk-body">
+        The link is valid for 28 days. After that time, you will no longer be able to check the form.
+      </p>
+
+      <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+
+      <p class="govuk-body">
+        Do not reply to this email. We do not monitor replies to this email address.
+      </p>
+
+      <p class="govuk-body">From Defra</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
