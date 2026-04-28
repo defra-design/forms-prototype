@@ -2848,7 +2848,7 @@ router.post("/titan-mvp-1.2/question-configuration-save", function (req, res) {
     currentPage.questions[existingQuestionIndex].label = questionLabel;
     currentPage.questions[existingQuestionIndex].hint = questionHint;
     currentPage.questions[existingQuestionIndex].options = questionOptions;
-    
+
     // Update subType if finalSubType is set
     if (finalSubType) {
       currentPage.questions[existingQuestionIndex].subType = finalSubType;
@@ -3000,13 +3000,13 @@ router.post("/titan-mvp-1.2/question-configuration-save", function (req, res) {
       currentPage.questions[existingQuestionIndex].isOptional = makeOptional;
       currentPage.questions[existingQuestionIndex].hint = req.body["hintTextInputPreciseLocation"] || req.body["hintTextInputLocationUserChoice"] || "";
       currentPage.questions[existingQuestionIndex].errorMessage = req.body["errorMessageInputPreciseLocation"] || req.body["errorMessageInputLocationUserChoice"] || "";
-      
+
       // Update location methods for user-choice type
       const existingSubType = currentPage.questions[existingQuestionIndex].subType;
       if (locationSubType === "user-choice" || finalSubType === "location-user-choice" || existingSubType === "location-user-choice" || existingSubType === "user-choice") {
         const locationMethodsRaw = req.body["locationMethods"];
-        const locationMethods = Array.isArray(locationMethodsRaw) 
-          ? locationMethodsRaw 
+        const locationMethods = Array.isArray(locationMethodsRaw)
+          ? locationMethodsRaw
           : (locationMethodsRaw ? [locationMethodsRaw] : []);
         const acceptAll = locationMethods.includes("accept_all");
         if (acceptAll) {
@@ -3156,12 +3156,12 @@ router.post("/titan-mvp-1.2/question-configuration-save", function (req, res) {
       newQuestion.isOptional = makeOptional;
       newQuestion.hint = req.body["hintTextInputPreciseLocation"] || req.body["hintTextInputLocationUserChoice"] || "";
       newQuestion.errorMessage = req.body["errorMessageInputPreciseLocation"] || req.body["errorMessageInputLocationUserChoice"] || "";
-      
+
       // Save location methods for user-choice type
       if (locationSubType === "user-choice" || finalSubType === "location-user-choice") {
         const locationMethodsRaw = req.body["locationMethods"];
-        const locationMethods = Array.isArray(locationMethodsRaw) 
-          ? locationMethodsRaw 
+        const locationMethods = Array.isArray(locationMethodsRaw)
+          ? locationMethodsRaw
           : (locationMethodsRaw ? [locationMethodsRaw] : []);
         const acceptAll = locationMethods.includes("accept_all");
         if (acceptAll) {
@@ -14711,8 +14711,6 @@ router.post("/runner-v5/authenticate", function (req, res) {
   req.session.data.finalAddress = a.finalAddress;
   req.session.data.DyfjJC = a.DyfjJC;
   req.session.data.aitzzV = a.aitzzV;
-  req.session.data["location-easting"] = a["location-easting"];
-  req.session.data["location-northing"] = a["location-northing"];
   req.session.data.zhJMaM = a.zhJMaM;
 
   const currentVersion = getRunnerV5CurrentFormVersion(req);
@@ -14947,23 +14945,18 @@ router.post("/runner-v5/how-many-unicorns-do-you-expect-to-breed-each-year", fun
   const { aitzzV } = req.body;
   req.session.data.aitzzV = aitzzV;
   delete req.session.data.error;
-  return res.redirect("/runner-v5/where-will-you-keep-the-unicorns");
+  // Runner v5 no longer asks for easting/northing coordinates.
+  return res.redirect("/runner-v5/how-many-members-of-staff-will-look-after-the-unicorns");
 });
 
 router.get("/runner-v5/where-will-you-keep-the-unicorns", function (req, res) {
   if (!req.session.data) req.session.data = {};
-  return res.render("titan-mvp-1.2/runner/questions/where-will-you-keep-the-unicorns", {
-    error: req.session.data.error,
-    basePath: "/runner-v5"
-  });
+  // Legacy URL kept for users returning to old bookmarks.
+  return res.redirect("/runner-v5/how-many-members-of-staff-will-look-after-the-unicorns");
 });
 
 router.post("/runner-v5/where-will-you-keep-the-unicorns", function (req, res) {
   if (!req.session.data) req.session.data = {};
-  const { "location-easting": easting, "location-northing": northing } = req.body;
-  req.session.data["location-easting"] = easting;
-  req.session.data["location-northing"] = northing;
-  delete req.session.data.error;
   return res.redirect("/runner-v5/how-many-members-of-staff-will-look-after-the-unicorns");
 });
 
@@ -15334,6 +15327,18 @@ router.get("/runner-v4/ready-to-submit", function (req, res) {
   const checkedAtIso =
     (existingEntry && (existingEntry.approvedAt || existingEntry.reviewerDeclaredAt)) || null;
   let checkedByText = checkedByName || "Not provided";
+  const checkedByContact =
+    (existingEntry && String(existingEntry.approvedByEmail || "").trim()) ||
+    String(reviewerDetails.reviewerEmail || "").trim() ||
+    String(reviewerDetails.reviewerPhone || "").trim() ||
+    "Not provided";
+
+  const checkedDeclarationText =
+    existingEntry && existingEntry.expires > Date.now() && existingEntry.reviewDeclarationComplete
+      ? "Agreed by the person checking the form"
+      : "Not provided";
+
+  let checkedOnText = "Not provided";
   if (checkedAtIso) {
     const checkedAtDate = new Date(checkedAtIso);
     if (!Number.isNaN(checkedAtDate.getTime())) {
@@ -15342,6 +15347,20 @@ router.get("/runner-v4/ready-to-submit", function (req, res) {
         month: "long",
         year: "numeric"
       })}`;
+      const checkedDateText = checkedAtDate.toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+      });
+      const checkedTimeText = checkedAtDate
+        .toLocaleTimeString("en-GB", {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true
+        })
+        .replace(" ", "")
+        .toLowerCase();
+      checkedOnText = `${checkedDateText} at ${checkedTimeText}`;
     }
   }
 
@@ -15349,7 +15368,10 @@ router.get("/runner-v4/ready-to-submit", function (req, res) {
     data: req.session.data,
     token,
     reviewerDetails,
-    checkedByText
+    checkedByText,
+    checkedByContact,
+    checkedOnText,
+    checkedDeclarationText
   });
 });
 
@@ -15745,29 +15767,22 @@ router.get("/titan-mvp-1.2/runner-v4/approval-notification.html", function (req,
   applyRunnerV3DemoData(req.session.data);
 
   const reviewStore = ensureReviewStore(req);
-  // User research: keep approval email links stable.
-  const token = RUNNER_V4_REVIEW_TOKEN_CHECKED;
+  // User research: default to a stable token, but allow overriding for previews.
+  const token = (req.query && req.query.token) || RUNNER_V4_REVIEW_TOKEN_CHECKED;
   req.session.data.reviewTokenV4 = token;
-  // Ensure the token exists and is marked complete (so applicant can proceed).
+
   const existing = reviewStore.get(token);
+  // Ensure the token exists for clickable previews (don't force it complete for all tokens).
   if (!existing || !(existing.expires > Date.now())) {
     reviewStore.set(token, {
       data: { ...req.session.data },
-      reviewDeclarationComplete: true,
-      reviewerDeclaredAt: new Date().toISOString(),
-      approvedAt: new Date().toISOString(),
+      reviewDeclarationComplete: token === RUNNER_V4_REVIEW_TOKEN_CHECKED,
+      reviewerDeclaredAt: token === RUNNER_V4_REVIEW_TOKEN_CHECKED ? new Date().toISOString() : null,
+      approvedAt: token === RUNNER_V4_REVIEW_TOKEN_CHECKED ? new Date().toISOString() : null,
       approvedByName: "Sam Reviewer",
       approvedByEmail: "sam.reviewer@example.com",
       approvedByOccupation: "Registered vet",
       approvedByAddress: "1 Review Street, London, SW1A 1AA",
-      expires: Date.now() + (30 * 60 * 1000)
-    });
-  } else if (!existing.reviewDeclarationComplete) {
-    reviewStore.set(token, {
-      ...existing,
-      reviewDeclarationComplete: true,
-      reviewerDeclaredAt: existing.reviewerDeclaredAt || new Date().toISOString(),
-      approvedAt: existing.approvedAt || new Date().toISOString(),
       expires: Date.now() + (30 * 60 * 1000)
     });
   }
@@ -15798,13 +15813,16 @@ router.get("/titan-mvp-1.2/runner-v4/approval-notification.html", function (req,
     (approvalSnapshot && approvalSnapshot.applicantEmail) ||
     String(answers.email || "you@example.com");
 
+  const { referenceNumber } = reviewerAccessValues();
+
   return res.render("titan-mvp-1.2/runner-v4/approval-notification", {
     data: req.session.data,
     answers,
     token,
     formName,
     approvedByName,
-    applicantEmail
+    applicantEmail,
+    referenceNumber
   });
 });
 

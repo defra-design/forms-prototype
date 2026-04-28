@@ -117,6 +117,26 @@ Your form has been checked – {{ serviceName }} – GOV.UK
         <input type="hidden" name="token" value="{{ token }}">
       {% endif %}
 
+      <h2 class="govuk-heading-m">Details of the person who checked your form</h2>
+
+      {{ govukSummaryList({
+        classes: "govuk-!-margin-bottom-4",
+        rows: [
+          {
+            key: { text: "Checked by" },
+            value: { text: checkedByContact or "Not provided" }
+          },
+          {
+            key: { text: "Checked on" },
+            value: { text: checkedOnText or "Not provided" }
+          },
+          {
+            key: { text: "Declaration" },
+            value: { text: checkedDeclarationText or "Not provided" }
+          }
+        ]
+      }) }}
+
       {{ govukButton({
         text: "Submit"
       }) }}
