@@ -15813,7 +15813,7 @@ router.get("/titan-mvp-1.2/runner-v4/approval-notification.html", function (req,
     (approvalSnapshot && approvalSnapshot.applicantEmail) ||
     String(answers.email || "you@example.com");
 
-  const { referenceNumber } = reviewerAccessValues();
+  const { referenceNumber, memorableWord } = reviewerAccessValues();
 
   return res.render("titan-mvp-1.2/runner-v4/approval-notification", {
     data: req.session.data,
@@ -15822,7 +15822,8 @@ router.get("/titan-mvp-1.2/runner-v4/approval-notification.html", function (req,
     formName,
     approvedByName,
     applicantEmail,
-    referenceNumber
+    referenceNumber,
+    memorableWord
   });
 });
 

@@ -139,13 +139,21 @@ Email - Form checker completed
       <p class="govuk-body">
        Your form submission for ‘Register as a unicorn breeder’ has been checked successfully by {{ checkedByContact or "joe@bloggs.com" }} on {{ checkedOnText or "Monday, 20 April 2026 at 2:49 PM" }}.</p>
 
-       <p class="govuk-body">
-        Your reference number: <strong>{{ referenceNumber or answers.referenceNumber or data.referenceNumber or "V25-AWC-M56" }}</strong>
-      </p>
-
        {{ govukInsetText({
         html: "You now need to <a class='govuk-link' href='" ~ (publicBaseUrl or '') ~ "/runner-v4/applicant-access?token=UR-V4-CHECKED&next=/runner-v4/ready-to-submit%3Ftoken%3DUR-V4-CHECKED'>submit it</a>."
        }) }}
+
+       <p class="govuk-body">
+        Reference number: <strong>{{ referenceNumber or answers.referenceNumber or data.referenceNumber or "V25-AWC-M56" }}</strong>
+      </p>
+
+      <p class="govuk-body govuk-!-margin-bottom-6">
+        Memorable word: <strong>{{ memorableWord or answers.memorableWord or data.memorableWord or "chicken nuggets" }}</strong>
+      </p>
+
+       {# {{ govukInsetText({
+        html: "You now need to <a class='govuk-link' href='" ~ (publicBaseUrl or '') ~ "/runner-v4/applicant-access?token=UR-V4-CHECKED&next=/runner-v4/ready-to-submit%3Ftoken%3DUR-V4-CHECKED'>submit it</a>."
+       }) }} #}
 
 
 
