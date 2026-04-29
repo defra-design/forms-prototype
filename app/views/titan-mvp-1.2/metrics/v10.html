@@ -1,0 +1,223 @@
+{% extends "titan-mvp-1.2/metrics/v8.html" %}
+
+{% set metricsVersion = "v10" %}
+
+{% macro featureTags(items, limit=2) %}
+  {% set hiddenCount = (items | length) - limit %}
+  <div class="app-feature-tags" data-expanded="false">
+    <span class="govuk-visually-hidden">Features:</span>
+    {% for f in items %}
+      {% if loop.index <= limit %}
+        <strong class="govuk-tag app-feature-tag">{{ f }}</strong>
+      {% else %}
+        <strong class="govuk-tag app-feature-tag app-feature-tag--hidden" hidden>{{ f }}</strong>
+      {% endif %}
+    {% endfor %}
+    {% if hiddenCount > 0 %}
+      <a href="#" class="govuk-link app-feature-tags__toggle govuk-!-font-size-16" data-more="{{ hiddenCount }}">+{{ hiddenCount }} more</a>
+    {% endif %}
+  </div>
+{% endmacro %}
+
+{% block mainTable %}
+  {% set features_waste_carrier = ["File upload", "Email confirmation"] %}
+  {% set features_export_health = ["File upload", "Declarations", "GOV.UK Pay"] %}
+  {% set features_fishing_licence = ["Email confirmation"] %}
+  {% set features_bps_claim = ["File upload", "Email confirmation", "Declarations", "GOV.UK Pay"] %}
+  {% set features_protected_species = ["File upload", "Declarations"] %}
+  {% set features_water_abstraction = ["Email confirmation"] %}
+  {% set features_pet_travel = ["Email confirmation"] %}
+  {% set features_countryside_stewardship = ["File upload", "Email confirmation", "Declarations", "GOV.UK Pay"] %}
+  {% set features_hazardous_waste = ["File upload", "Email confirmation", "Declarations"] %}
+  {% set features_tree_felling = ["File upload"] %}
+
+  {{ govukTable({
+
+    firstCellIsHeader: true,
+    head: [
+      { text: "Form name" },
+      { text: "Status" },
+      { text: "Pages" },
+      { text: "Question types" },
+      { text: "Conditions" },
+      { text: "Sections" },
+      { text: "Re-published" },
+      { text: "Days to publish" },
+      { text: "Features" },
+      { text: "Submissions" }
+    ],
+    rows: [
+      [
+        { html: '<a href="#" class="govuk-link">Waste carrier registration</a><span class="govuk-caption-m govuk-!-display-block">Environment Agency</span>' },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }) },
+        { text: "14" },
+        { text: "8" },
+        { text: "12" },
+        { text: "3" },
+        { text: "5" },
+        { text: "12" },
+        { html: featureTags(features_waste_carrier) },
+        { text: "1,234" }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Export health certificate</a><span class="govuk-caption-m govuk-!-display-block">APHA</span>' },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }) },
+        { text: "28" },
+        { text: "12" },
+        { text: "18" },
+        { text: "5" },
+        { text: "3" },
+        { text: "21" },
+        { html: featureTags(features_export_health) },
+        { text: "856" }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Fishing licence application</a><span class="govuk-caption-m govuk-!-display-block">Defra</span>' },
+        { html: govukTag({ text: "Draft", classes: "govuk-tag--yellow" }) },
+        { text: "8" },
+        { text: "5" },
+        { text: "4" },
+        { text: "2" },
+        { text: "0" },
+        { text: "-" },
+        { html: featureTags(features_fishing_licence) },
+        { text: "0" }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Basic Payment Scheme claim</a><span class="govuk-caption-m govuk-!-display-block">Rural Payments Agency</span>' },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }) },
+        { text: "42" },
+        { text: "15" },
+        { text: "28" },
+        { text: "8" },
+        { text: "7" },
+        { text: "15" },
+        { html: featureTags(features_bps_claim) },
+        { text: "3,421" }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Protected species licence</a><span class="govuk-caption-m govuk-!-display-block">Natural England</span>' },
+        { html: govukTag({ text: "Draft", classes: "govuk-tag--yellow" }) },
+        { text: "18" },
+        { text: "10" },
+        { text: "9" },
+        { text: "4" },
+        { text: "0" },
+        { text: "-" },
+        { html: featureTags(features_protected_species) },
+        { text: "0" }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Water abstraction return</a><span class="govuk-caption-m govuk-!-display-block">Environment Agency</span>' },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }) },
+        { text: "6" },
+        { text: "4" },
+        { text: "2" },
+        { text: "1" },
+        { text: "2" },
+        { text: "8" },
+        { html: featureTags(features_water_abstraction) },
+        { text: "567" }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Pet travel declaration</a><span class="govuk-caption-m govuk-!-display-block">Defra</span>' },
+        { html: govukTag({ text: "Draft", classes: "govuk-tag--yellow" }) },
+        { text: "5" },
+        { text: "3" },
+        { text: "1" },
+        { text: "1" },
+        { text: "0" },
+        { text: "-" },
+        { html: featureTags(features_pet_travel) },
+        { text: "0" }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Countryside Stewardship application</a><span class="govuk-caption-m govuk-!-display-block">Rural Payments Agency</span>' },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }) },
+        { text: "35" },
+        { text: "14" },
+        { text: "22" },
+        { text: "6" },
+        { text: "4" },
+        { text: "18" },
+        { html: featureTags(features_countryside_stewardship) },
+        { text: "2,189" }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Hazardous waste consignment</a><span class="govuk-caption-m govuk-!-display-block">Environment Agency</span>' },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }) },
+        { text: "12" },
+        { text: "7" },
+        { text: "8" },
+        { text: "3" },
+        { text: "3" },
+        { text: "14" },
+        { html: featureTags(features_hazardous_waste) },
+        { text: "923" }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Tree felling licence</a><span class="govuk-caption-m govuk-!-display-block">Forestry Commission</span>' },
+        { html: govukTag({ text: "Draft", classes: "govuk-tag--yellow" }) },
+        { text: "9" },
+        { text: "6" },
+        { text: "5" },
+        { text: "2" },
+        { text: "0" },
+        { text: "-" },
+        { html: featureTags(features_tree_felling) },
+        { text: "0" }
+      ]
+    ]
+  }) }}
+{% endblock %}
+
+{% block extraPageScripts %}
+  <style>
+    .app-feature-tags {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .app-feature-tag {
+      font-size: 14px;
+      line-height: 1.2;
+      padding: 2px 6px;
+      margin-bottom:5px;
+    }
+
+    .app-feature-tag[hidden] {
+      display: none !important;
+    }
+
+    .app-feature-tags__toggle {
+      white-space: nowrap;
+    }
+  </style>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      document.addEventListener('click', function (e) {
+        const toggle = e.target.closest('.app-feature-tags__toggle');
+        if (!toggle) return;
+
+        e.preventDefault();
+        const container = toggle.closest('.app-feature-tags');
+        if (!container) return;
+
+        const isExpanded = container.getAttribute('data-expanded') === 'true';
+        const hiddenTags = container.querySelectorAll('.app-feature-tag--hidden');
+
+        hiddenTags.forEach(tag => {
+          tag.hidden = isExpanded;
+        });
+
+        container.setAttribute('data-expanded', isExpanded ? 'false' : 'true');
+        const moreCount = toggle.getAttribute('data-more') || '';
+        toggle.textContent = isExpanded ? `+${moreCount} more` : 'Show fewer';
+      });
+    });
+  </script>
+{% endblock %}
+
