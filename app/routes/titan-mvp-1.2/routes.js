@@ -7474,6 +7474,22 @@ router.get("/titan-mvp-1.2/metrics/v3", function (req, res) {
   res.render("titan-mvp-1.2/metrics/v3");
 });
 
+router.get("/titan-mvp-1.2/metrics/v7", function (req, res) {
+  res.render("titan-mvp-1.2/metrics/v7");
+});
+
+router.get("/titan-mvp-1.2/metrics/v8", function (req, res) {
+  res.render("titan-mvp-1.2/metrics/v8");
+});
+
+router.get("/titan-mvp-1.2/metrics/v9", function (req, res) {
+  res.render("titan-mvp-1.2/metrics/v9");
+});
+
+router.get("/titan-mvp-1.2/metrics/v10", function (req, res) {
+  res.render("titan-mvp-1.2/metrics/v10");
+});
+
 // Handle prototype routing selection
 router.post("/titan-mvp-1.2/choose", function (req, res) {
   const selection = req.body.prototype;

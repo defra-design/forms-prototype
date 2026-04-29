@@ -1,0 +1,236 @@
+{% extends "titan-mvp-1.2/metrics/v8.html" %}
+
+{% set metricsVersion = "v9" %}
+
+{% block mainTable %}
+  {{ govukTable({
+
+    firstCellIsHeader: true,
+    head: [
+      { text: "Form name" },
+      { text: "Status" },
+      { text: "Pages" },
+      { text: "Question types" },
+      { text: "Conditions" },
+      { text: "Sections" },
+      { text: "Re-published" },
+      { text: "Days to publish" },
+      { text: "Features" },
+      { text: "Submissions" }
+    ],
+    rows: [
+      [
+        { html: '<a href="#" class="govuk-link">Waste carrier registration</a><span class="govuk-caption-m govuk-!-display-block">Environment Agency</span>' },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }) },
+        { text: "14" },
+        { text: "8" },
+        { text: "12" },
+        { text: "3" },
+        { text: "5" },
+        { text: "12" },
+        { html: '<span>2 features</span> <a href="#" class="govuk-link app-features-view" data-features="File upload|Email confirmation">View</a>' },
+        { text: "1,234" }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Export health certificate</a><span class="govuk-caption-m govuk-!-display-block">APHA</span>' },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }) },
+        { text: "28" },
+        { text: "12" },
+        { text: "18" },
+        { text: "5" },
+        { text: "3" },
+        { text: "21" },
+        { html: '<span>3 features</span> <a href="#" class="govuk-link app-features-view" data-features="File upload|Declarations|GOV.UK Pay">View</a>' },
+        { text: "856" }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Fishing licence application</a><span class="govuk-caption-m govuk-!-display-block">Defra</span>' },
+        { html: govukTag({ text: "Draft", classes: "govuk-tag--yellow" }) },
+        { text: "8" },
+        { text: "5" },
+        { text: "4" },
+        { text: "2" },
+        { text: "0" },
+        { text: "-" },
+        { html: '<span>1 feature</span> <a href="#" class="govuk-link app-features-view" data-features="Email confirmation">View</a>' },
+        { text: "0" }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Basic Payment Scheme claim</a><span class="govuk-caption-m govuk-!-display-block">Rural Payments Agency</span>' },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }) },
+        { text: "42" },
+        { text: "15" },
+        { text: "28" },
+        { text: "8" },
+        { text: "7" },
+        { text: "15" },
+        { html: '<span>4 features</span> <a href="#" class="govuk-link app-features-view" data-features="File upload|Email confirmation|Declarations|GOV.UK Pay">View</a>' },
+        { text: "3,421" }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Protected species licence</a><span class="govuk-caption-m govuk-!-display-block">Natural England</span>' },
+        { html: govukTag({ text: "Draft", classes: "govuk-tag--yellow" }) },
+        { text: "18" },
+        { text: "10" },
+        { text: "9" },
+        { text: "4" },
+        { text: "0" },
+        { text: "-" },
+        { html: '<span>2 features</span> <a href="#" class="govuk-link app-features-view" data-features="File upload|Declarations">View</a>' },
+        { text: "0" }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Water abstraction return</a><span class="govuk-caption-m govuk-!-display-block">Environment Agency</span>' },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }) },
+        { text: "6" },
+        { text: "4" },
+        { text: "2" },
+        { text: "1" },
+        { text: "2" },
+        { text: "8" },
+        { html: '<span>1 feature</span> <a href="#" class="govuk-link app-features-view" data-features="Email confirmation">View</a>' },
+        { text: "567" }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Pet travel declaration</a><span class="govuk-caption-m govuk-!-display-block">Defra</span>' },
+        { html: govukTag({ text: "Draft", classes: "govuk-tag--yellow" }) },
+        { text: "5" },
+        { text: "3" },
+        { text: "1" },
+        { text: "1" },
+        { text: "0" },
+        { text: "-" },
+        { html: '<span>1 feature</span> <a href="#" class="govuk-link app-features-view" data-features="Email confirmation">View</a>' },
+        { text: "0" }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Countryside Stewardship application</a><span class="govuk-caption-m govuk-!-display-block">Rural Payments Agency</span>' },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }) },
+        { text: "35" },
+        { text: "14" },
+        { text: "22" },
+        { text: "6" },
+        { text: "4" },
+        { text: "18" },
+        { html: '<span>4 features</span> <a href="#" class="govuk-link app-features-view" data-features="File upload|Email confirmation|Declarations|GOV.UK Pay">View</a>' },
+        { text: "2,189" }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Hazardous waste consignment</a><span class="govuk-caption-m govuk-!-display-block">Environment Agency</span>' },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }) },
+        { text: "12" },
+        { text: "7" },
+        { text: "8" },
+        { text: "3" },
+        { text: "3" },
+        { text: "14" },
+        { html: '<span>3 features</span> <a href="#" class="govuk-link app-features-view" data-features="File upload|Email confirmation|Declarations">View</a>' },
+        { text: "923" }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Tree felling licence</a><span class="govuk-caption-m govuk-!-display-block">Forestry Commission</span>' },
+        { html: govukTag({ text: "Draft", classes: "govuk-tag--yellow" }) },
+        { text: "9" },
+        { text: "6" },
+        { text: "5" },
+        { text: "2" },
+        { text: "0" },
+        { text: "-" },
+        { html: '<span>1 feature</span> <a href="#" class="govuk-link app-features-view" data-features="File upload">View</a>' },
+        { text: "0" }
+      ]
+    ]
+  }) }}
+
+  <div class="app-features-modal-overlay" hidden></div>
+  <div class="app-features-modal" hidden role="dialog" aria-modal="true" aria-labelledby="app-features-modal-title">
+    <div class="app-features-modal__content">
+      <h2 id="app-features-modal-title" class="govuk-heading-m govuk-!-margin-bottom-3">Features</h2>
+      <ul class="govuk-list govuk-list--bullet app-features-modal__list"></ul>
+      <button type="button" class="govuk-button govuk-!-margin-bottom-0 app-features-modal__close">Close</button>
+    </div>
+  </div>
+{% endblock %}
+
+{% block extraPageScripts %}
+  <style>
+    .app-features-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(11, 12, 12, 0.6);
+      z-index: 1000;
+    }
+
+    .app-features-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #ffffff;
+      width: min(520px, calc(100vw - 32px));
+      border: 1px solid #b1b4b6;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      z-index: 1001;
+    }
+
+    .app-features-modal__content {
+      padding: 24px;
+    }
+  </style>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const overlay = document.querySelector('.app-features-modal-overlay');
+      const modal = document.querySelector('.app-features-modal');
+      const list = document.querySelector('.app-features-modal__list');
+      const closeButton = document.querySelector('.app-features-modal__close');
+
+      if (!overlay || !modal || !list || !closeButton) return;
+
+      let lastActive = null;
+
+      function closeModal() {
+        modal.hidden = true;
+        overlay.hidden = true;
+        list.innerHTML = '';
+        if (lastActive && typeof lastActive.focus === 'function') lastActive.focus();
+      }
+
+      function openModal(features, opener) {
+        lastActive = opener || null;
+        list.innerHTML = features
+          .map(f => `<li>${f}</li>`)
+          .join('');
+        overlay.hidden = false;
+        modal.hidden = false;
+        closeButton.focus();
+      }
+
+      document.addEventListener('click', function (e) {
+        const viewLink = e.target.closest('.app-features-view');
+        if (!viewLink) return;
+
+        e.preventDefault();
+        const raw = viewLink.getAttribute('data-features') || '';
+        const features = raw.split('|').map(s => s.trim()).filter(Boolean);
+        openModal(features, viewLink);
+      });
+
+      overlay.addEventListener('click', function () {
+        closeModal();
+      });
+
+      closeButton.addEventListener('click', function () {
+        closeModal();
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !modal.hidden) {
+          e.preventDefault();
+          closeModal();
+        }
+      });
+    });
+  </script>
+{% endblock %}
+
