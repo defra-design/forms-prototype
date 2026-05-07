@@ -46,6 +46,26 @@ router.use((req, res, next) => {
   next();
 });
 
+// Minimal diagnostics endpoint for hosted environments (e.g. Heroku)
+router.get("/__meta", (req, res) => {
+  res.set("Cache-Control", "no-store");
+  res.json({
+    node: process.version,
+    env: process.env.NODE_ENV || null,
+    port: process.env.PORT || null,
+    heroku: {
+      appName: process.env.HEROKU_APP_NAME || null,
+      dyno: process.env.DYNO || null,
+      releaseVersion: process.env.HEROKU_RELEASE_VERSION || null,
+      slugCommit:
+        process.env.HEROKU_SLUG_COMMIT ||
+        process.env.SOURCE_VERSION ||
+        process.env.SLUG_COMMIT ||
+        null,
+    },
+  });
+});
+
 // Import and use titan-mvp-1.2 routes
 router.use("/titan-mvp-1.2", require("./routes/titan-mvp-1.2/routes.js"));
 // Also mount titan-mvp-1.2 routes at root for legacy URLs (e.g. /runner-v5/*)
