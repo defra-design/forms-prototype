@@ -1,6 +1,9 @@
 // Service Header Component Styles
 // Based on DEFRA forms-designer repository
 
+// Legacy One Login service header styles (non-rebranded classnames used by our templates)
+@import "../../../../node_modules/govuk-one-login-service-header/dist/styles/service-header-no-imports";
+
 .service-header {
   // Base styles
   border-bottom: 1px solid #b1b4b6;
@@ -17,29 +20,29 @@
   .govuk-service-navigation {
     background-color: #f8f9fa;
     border-bottom: 1px solid #d1d5db;
-    
+
     // Inverse navigation styling
     &--inverse {
       background-color: #0a8631;
       border-bottom-color: #ffffff;
-      
+
       .govuk-service-navigation__link {
         color: #ffffff !important;
-        
+
         &:hover {
           color: #ffffff !important;
           text-decoration: underline;
         }
-        
+
         &:focus {
           color: #0b0c0c !important;
         }
       }
-      
+
       .service-header__heading {
         color: #ffffff !important;
       }
-      
+
       .govuk-service-navigation__toggle {
         color: #ffffff !important;
       }
@@ -156,160 +159,6 @@
       font-size: 20px;
     }
   }
-
-  // Cross service header (One Login)
-  .cross-service-header {
-    background-color: #008531;
-
-    .one-login-header {
-      &__container {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 15px 0;
-
-        @media (max-width: 768px) {
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 15px;
-        }
-      }
-
-      &__logo {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-      }
-
-      &__link {
-        color: #ffffff;
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-
-        &:hover {
-          text-decoration: underline;
-        }
-
-        &:focus {
-          outline: 3px solid #ffdd00;
-          outline-offset: 2px;
-        }
-      }
-
-      &__logotype {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-
-      &__logotype-crown {
-        color: #ffffff;
-        flex-shrink: 0;
-      }
-
-      &__logotype-text {
-        font-size: 18px;
-        font-weight: 600;
-        color: #ffffff;
-      }
-
-      &__product-name {
-        font-size: 16px;
-        font-weight: 500;
-        color: #ffffff;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-
-      &__nav {
-        &__list {
-          list-style: none;
-          margin: 0;
-          padding: 0;
-          display: flex;
-          gap: 20px;
-
-          @media (max-width: 768px) {
-            display: none;
-            flex-direction: column;
-            gap: 0;
-            width: 100%;
-
-            &.one-login-header__nav--open {
-              display: flex;
-            }
-          }
-        }
-
-        &__list-item {
-          margin: 0;
-        }
-
-        &__link {
-          color: #ffffff;
-          text-decoration: none;
-          padding: 8px 12px;
-          border-radius: 4px;
-          transition: background-color 0.2s ease;
-
-          &:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-          }
-
-          &:focus {
-            outline: 3px solid #ffdd00;
-            outline-offset: 2px;
-          }
-
-          &--one-login {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-          }
-        }
-      }
-    }
-
-    // Account button
-    .cross-service-header__button {
-      background: none;
-      border: none;
-      color: #ffffff;
-      cursor: pointer;
-      padding: 8px 12px;
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: background-color 0.2s ease;
-
-      &:hover {
-        background-color: rgba(255, 255, 255, 0.1);
-      }
-
-      &:focus {
-        outline: 3px solid #ffdd00;
-        outline-offset: 2px;
-      }
-
-      &--open {
-        background-color: rgba(255, 255, 255, 0.1);
-      }
-
-      &-icon {
-        width: 22px;
-        height: 22px;
-        flex-shrink: 0;
-      }
-
-      &-content {
-        font-weight: 600;
-      }
-    }
-  }
 }
 
 // Responsive breakpoints
@@ -328,114 +177,10 @@
         }
       }
     }
-
-    .cross-service-header {
-      .one-login-header {
-        &__nav {
-          &__toggle {
-            display: block;
-          }
-
-          &__list {
-            display: none;
-
-            &.one-login-header__nav--open {
-              display: flex;
-            }
-          }
-        }
-      }
-    }
   }
 }
 
 // JavaScript functionality for mobile navigation
 .govuk-js-service-navigation--open {
   display: flex !important;
-}
-
-.one-login-header__nav--open {
-  display: flex !important;
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Styles previously provided by govuk-one-login-service-header@1.1.0
-// service-header-no-imports.scss (v1 used non-rebranded class names;
-// v5 uses only .rebranded-* names so these must be declared explicitly).
-// ─────────────────────────────────────────────────────────────────────────────
-
-// Account toggle button: hidden on desktop (nav items are visible inline).
-// The JS adds .toggle-enabled to the parent so the button only appears on mobile.
-.cross-service-header__button {
-  display: none;
-
-  .toggle-enabled & {
-    display: flex;
-
-    @include govuk-media-query($from: tablet) {
-      display: none;
-    }
-  }
-}
-
-// Person icon inside the account toggle button.
-// The "focus" variant is hidden by default and swapped in on keyboard focus.
-.cross-service-header__button-icon {
-  margin-left: govuk-spacing(2);
-  font-size: 0;
-
-  &--focus {
-    display: none;
-  }
-
-  .cross-service-header__button:focus & {
-    &--default { display: none; }
-    &--focus    { display: inline; }
-  }
-
-  .cross-service-header__button:focus:not(:focus-visible) & {
-    &--default { display: inline; }
-    &--focus    { display: none; }
-  }
-
-  .cross-service-header__button:focus-visible & {
-    &--default { display: none; }
-    &--focus    { display: inline; }
-  }
-}
-
-// Account nav panel: visible by default (no JS); hidden on mobile once JS
-// adds .toggle-enabled, then re-shown via .one-login-header__nav--open or
-// from tablet width upward.
-.one-login-header__nav {
-  display: block;
-
-  .toggle-enabled & {
-    display: none;
-
-    &.one-login-header__nav--open {
-      display: block;
-    }
-
-    @include govuk-media-query($from: tablet) {
-      display: block;
-    }
-  }
-
-  @include govuk-media-query($until: tablet) {
-    width: 100%;
-  }
-}
-
-// Nav list: inline flex row on tablet+, stacked on mobile.
-.one-login-header__nav__list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-
-  @include govuk-media-query($from: tablet) {
-    padding: govuk-spacing(2) 0;
-    display: flex;
-    align-items: center;
-  }
 }
