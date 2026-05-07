@@ -1,0 +1,367 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% import "components/one-login-service-header/service-header.njk" as oneLoginHeader %}
+
+{% block head %}
+  {{ super() }}
+  <style>
+    .prototype-link-button {
+      background: none;
+      border: 0;
+      padding: 0;
+      cursor: pointer;
+      font: inherit;
+      color: #1d70b8;
+      text-decoration: underline;
+    }
+
+    .prototype-link-button:hover {
+      color: #003078;
+      text-decoration-thickness: max(3px, .1875rem, .12em);
+      text-decoration-skip-ink: none;
+    }
+
+    .prototype-link-button:focus {
+      color: #0b0c0c;
+      background: #fd0;
+      box-shadow: 0 -2px #fd0, 0 4px #0b0c0c;
+      outline: 3px solid transparent;
+      text-decoration: none;
+    }
+
+    .govuk-button-group > form {
+      display: contents;
+    }
+  </style>
+{% endblock %}
+
+{% block pageTitle %}
+Get this form checked – {{ formDef.formName }} – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({
+    text: "Back",
+    href: "/runner-sign-in/forms/" + application.formKey + "/" + application.id + "/check-answers"
+  }) }}
+{% endblock %}
+
+{% block header %}
+  {{ oneLoginHeader.govukOneLoginServiceHeader({
+    signOutLink: "/titan-mvp-1.2/roles/sign-out",
+    homepageLink: "/runner-sign-in/applications",
+    oneLoginLinkText: "you@example.com",
+    productName: formDef.formName
+  }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% if inviteSent %}
+      {% set inviteBannerHtml %}
+        <h3 class="govuk-notification-banner__heading">
+          {% if application.checking.inviteContactMethod != "email" and application.checking.invitePhone %}
+            We sent the check details to <strong>{{ application.checking.invitePhone }}</strong>
+          {% else %}
+            We sent the check details to <strong>{{ application.checking.inviteEmail }}</strong>
+          {% endif %}
+        </h3>
+        <p class="govuk-body govuk-!-margin-bottom-0">
+          We’ll email you when they’ve finished checking the form. You can then submit it.
+        </p>
+      {% endset %}
+
+      {{ govukNotificationBanner({
+        html: inviteBannerHtml,
+        type: "success"
+      }) }}
+    {% endif %}
+
+    {% if inviteChanged %}
+      {% set changedHtml %}
+        <p class="govuk-notification-banner__heading">
+          You can send the form to a different person.
+        </p>
+      {% endset %}
+      {{ govukNotificationBanner({ html: changedHtml }) }}
+    {% endif %}
+
+    {% if inviteThrottled %}
+      {% set throttledHtml %}
+        <p class="govuk-notification-banner__heading">
+          You need to wait before sending again
+        </p>
+        <p class="govuk-body govuk-!-margin-bottom-0">
+          You can send again in <span id="resend-countdown-banner">{{ inviteCooldownRemainingSeconds or 0 }}</span> seconds.
+        </p>
+      {% endset %}
+      {{ govukNotificationBanner({ html: throttledHtml }) }}
+    {% endif %}
+
+    <span class="govuk-caption-xl">Apply for a small grant</span>
+    <h1 class="govuk-heading-xl">Get this form checked</h1>
+
+    {{ govukWarningText({
+      text: "Someone else must check your answers before you can submit this form.",
+      iconFallbackText: "Warning"
+    }) }}
+
+    {# <div class="govuk-warning-text govuk-!-margin-bottom-6">
+      <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+      <strong class="govuk-warning-text__text">
+        If you change your answers after sending this form for checking, you’ll need to send it for checking again.
+      </strong>
+    </div> #}
+
+    {% set emailHtml %}
+      {{ govukInput({
+        id: "contact-by-email",
+        name: "contactByEmail",
+        type: "email",
+        autocomplete: "email",
+        spellcheck: false,
+        value: application.checking.inviteEmail,
+        label: { text: "Email address" }
+      }) }}
+
+      {{ govukInput({
+        id: "contact-by-email-confirm",
+        name: "contactByEmailConfirm",
+        type: "email",
+        autocomplete: "email",
+        spellcheck: false,
+        label: { text: "Confirm email address" }
+      }) }}
+    {% endset %}
+
+    {% set phoneHtml %}
+      {{ govukInput({
+        id: "contact-by-phone",
+        name: "contactByPhone",
+        type: "tel",
+        autocomplete: "tel",
+        classes: "govuk-input--width-20",
+        value: application.checking.invitePhone,
+        label: { text: "Mobile phone number" }
+      }) }}
+    {% endset %}
+
+    {% set selectedContact = application.checking.inviteContactMethod or "email" %}
+    {% set inviteValue = (application.checking.inviteEmail if selectedContact == "email" else application.checking.invitePhone) %}
+
+
+        <h2 class="govuk-heading-m">1. Choose who can check your form</h2>
+        <p class="govuk-body">They must be a registered vet.</p>
+
+
+        <h2 class="govuk-heading-m">2. Send the form to the person checking it</h2>
+        <p class="govuk-body">They can view your answers but cannot make changes.</p>
+
+
+
+    {% if not (inviteSent and inviteValue) %}
+      <form action="/runner-sign-in/forms/{{ application.formKey }}/{{ application.id }}/send-for-checking/contact-details" method="post">
+        {{ govukRadios({
+          name: "contact",
+          fieldset: {
+            legend: {
+              text: "How should we contact the person checking your form?",
+
+              classes: "govuk-fieldset__legend--m"
+            }
+          },
+          hint: {
+            text: "We’ll send the link, reference number and memorable word to the person checking your answers"
+          },
+          items: [
+            {
+              value: "email",
+              text: "Email",
+              checked: (selectedContact == "email"),
+              conditional: { html: emailHtml }
+            },
+            {
+              value: "text-message",
+              text: "Text message",
+              checked: (selectedContact == "text-message"),
+              conditional: { html: phoneHtml }
+            }
+          ]
+        }) }}
+
+        <div class="govuk-button-group">
+          {{ govukButton({ text: "Send to checker" }) }}
+          {{ govukButton({
+            text: "Save and exit",
+            classes: "govuk-button--secondary",
+            href: "/runner-sign-in/applications"
+          }) }}
+        </div>
+      </form>
+    {% else %}
+      {{ govukSummaryList({
+        rows: [
+          { key: { text: "Status" }, value: { text: inviteSentAtText or "Sent" } },
+          { key: { text: "Sent to" }, value: { text: inviteValue } }
+        ]
+      }) }}
+
+      {# <p class="govuk-body">
+        <a class="govuk-link" href="/runner-sign-in/checker-invite-notification?token={{ application.checking.reviewToken }}">
+          View the message sent to the checker (prototype only)
+        </a>
+      </p> #}
+
+      <div class="govuk-button-group govuk-!-margin-top-4">
+        <form class="govuk-button-group__item" action="/runner-sign-in/forms/{{ application.formKey }}/{{ application.id }}/send-for-checking/resend" method="post">
+          {% if inviteCooldownRemainingSeconds and inviteCooldownRemainingSeconds > 0 %}
+            <button
+              type="submit"
+              class="govuk-button govuk-!-margin-bottom-0"
+              data-module="govuk-button"
+              disabled
+              aria-disabled="true"
+              data-resend-remaining="{{ inviteCooldownRemainingSeconds }}"
+              id="resend-button"
+            >
+              Send again
+            </button>
+          {% else %}
+            {{ govukButton({
+              text: "Send again",
+              classes: "govuk-!-margin-bottom-0",
+              attributes: { id: "resend-button" }
+            }) }}
+          {% endif %}
+        </form>
+
+        <span class="govuk-button-group__item govuk-body govuk-!-margin-bottom-0 govuk-!-margin-right-2">or</span>
+
+        <form class="govuk-button-group__item" action="/runner-sign-in/forms/{{ application.formKey }}/{{ application.id }}/send-for-checking/change" method="post">
+          <button type="submit" class="govuk-link prototype-link-button">
+            send to a different person
+          </button>
+        </form>
+      </div>
+
+      {% if inviteCooldownRemainingSeconds and inviteCooldownRemainingSeconds > 0 %}
+        <p id="resend-help" class="govuk-hint govuk-!-margin-top-1 govuk-!-margin-bottom-0">
+          You can send again in <span id="resend-countdown">{{ inviteCooldownRemainingSeconds }}</span> seconds.
+        </p>
+      {% endif %}
+
+    {% endif %}
+
+    <details class="govuk-details">
+      <summary class="govuk-details__summary">
+        <span class="govuk-details__summary-text">
+          You can send the details to the checker yourself instead
+        </span>
+      </summary>
+      <div class="govuk-details__text">
+
+    <h3 class="govuk-heading-s">Details the checker will need</h3>
+    {{ govukSummaryList({
+      classes: "govuk-!-margin-bottom-6",
+      rows: [
+        { key: { text: "Reference number" }, value: { text: application.checking.referenceNumber } },
+        { key: { text: "Memorable word" }, value: { text: application.checking.memorableWord } },
+        { key: { text: "Check link" }, value: { html: "<a class='govuk-link' href='" + shareCheckUrl + "'>" + shareCheckUrl + "</a>" } }
+      ]
+    }) }}
+  </div>
+</details>
+
+      </li>
+        <h2 class="govuk-heading-m">3. Wait for them to finish</h2>
+        <p class="govuk-body">You will receive an email when they have finished checking it.</p>
+
+        <div class="govuk-inset-text">
+          We’ll send the email to <strong>{{ data.runnerSignInEmail or "you@example.com" }}</strong>.
+        </div>
+
+    {% if application.checking and application.checking.status == "awaiting_check" %}
+      <h2 class="govuk-heading-m govuk-!-margin-top-6">If changes are needed</h2>
+      <p class="govuk-body">
+        If they ask for changes, update your answers and send the form for checking again.
+      </p>
+
+      <form class="form" action="/runner-sign-in/forms/{{ application.formKey }}/{{ application.id }}/send-for-checking/return-for-changes" method="post">
+        {{ govukButton({
+          text: "Return to form",
+          classes: "govuk-button--secondary"
+        }) }}
+      </form>
+    {% endif %}
+
+    <h2 class="govuk-heading-m">Leaving this page</h2>
+    <p class="govuk-body">
+      You can leave at any time. We’ll save your progress.
+    </p>
+
+    {# {{ govukButton({
+      text: "Save and exit",
+      classes: "govuk-button--secondary",
+      href: "/runner-sign-in/applications"
+    }) }} #}
+
+    <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+
+    {% set journeyHtml %}
+      <p class="govuk-body">You can:</p>
+      <ul class="govuk-list">
+        <li>
+          <a class="govuk-link" href="/runner-sign-in/checker-invite-notification?token={{ application.checking.reviewToken }}" target="_blank" rel="noreferrer noopener">
+            View the message sent to the checker (opens in new tab)
+          </a>
+        </li>
+      </ul>
+    {% endset %}
+
+    {{ govukNotificationBanner({
+      titleText: "Prototype options",
+      classes: "govuk-notification-banner--journey-options",
+      html: journeyHtml
+    }) }}
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const resendButton = document.getElementById("resend-button");
+    const helpCountdown = document.getElementById("resend-countdown");
+    const bannerCountdown = document.getElementById("resend-countdown-banner");
+    const helpText = document.getElementById("resend-help");
+    const remainingAttr = resendButton ? resendButton.getAttribute("data-resend-remaining") : null;
+    let remaining = remainingAttr ? Number.parseInt(remainingAttr, 10) : 0;
+    if (Number.isNaN(remaining) || remaining < 0) remaining = 0;
+
+    if (resendButton && resendButton.disabled && remaining > 0) {
+      const tick = function () {
+        if (helpCountdown) helpCountdown.textContent = String(remaining);
+        if (bannerCountdown) bannerCountdown.textContent = String(remaining);
+
+        if (remaining <= 0) {
+          resendButton.disabled = false;
+          resendButton.removeAttribute("aria-disabled");
+          resendButton.removeAttribute("data-resend-remaining");
+          if (helpText && helpText.parentNode) helpText.parentNode.removeChild(helpText);
+          return;
+        }
+
+        remaining -= 1;
+        window.setTimeout(tick, 1000);
+      };
+
+      tick();
+    }
+  });
+</script>
+{% endblock %}
+
