@@ -357,3 +357,85 @@
 .one-login-header__nav--open {
   display: flex !important;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Styles previously provided by govuk-one-login-service-header@1.1.0
+// service-header-no-imports.scss (v1 used non-rebranded class names;
+// v5 uses only .rebranded-* names so these must be declared explicitly).
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Account toggle button: hidden on desktop (nav items are visible inline).
+// The JS adds .toggle-enabled to the parent so the button only appears on mobile.
+.cross-service-header__button {
+  display: none;
+
+  .toggle-enabled & {
+    display: flex;
+
+    @include govuk-media-query($from: tablet) {
+      display: none;
+    }
+  }
+}
+
+// Person icon inside the account toggle button.
+// The "focus" variant is hidden by default and swapped in on keyboard focus.
+.cross-service-header__button-icon {
+  margin-left: govuk-spacing(2);
+  font-size: 0;
+
+  &--focus {
+    display: none;
+  }
+
+  .cross-service-header__button:focus & {
+    &--default { display: none; }
+    &--focus    { display: inline; }
+  }
+
+  .cross-service-header__button:focus:not(:focus-visible) & {
+    &--default { display: inline; }
+    &--focus    { display: none; }
+  }
+
+  .cross-service-header__button:focus-visible & {
+    &--default { display: none; }
+    &--focus    { display: inline; }
+  }
+}
+
+// Account nav panel: visible by default (no JS); hidden on mobile once JS
+// adds .toggle-enabled, then re-shown via .one-login-header__nav--open or
+// from tablet width upward.
+.one-login-header__nav {
+  display: block;
+
+  .toggle-enabled & {
+    display: none;
+
+    &.one-login-header__nav--open {
+      display: block;
+    }
+
+    @include govuk-media-query($from: tablet) {
+      display: block;
+    }
+  }
+
+  @include govuk-media-query($until: tablet) {
+    width: 100%;
+  }
+}
+
+// Nav list: inline flex row on tablet+, stacked on mobile.
+.one-login-header__nav__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  @include govuk-media-query($from: tablet) {
+    padding: govuk-spacing(2) 0;
+    display: flex;
+    align-items: center;
+  }
+}
