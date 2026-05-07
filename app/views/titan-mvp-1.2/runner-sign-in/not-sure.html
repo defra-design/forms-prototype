@@ -1,0 +1,35 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% block pageTitle %}
+If you’re not sure – {{ serviceName }} – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ href: "/runner-sign-in/choose-method", text: "Back" }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">If you’re not sure</h1>
+
+    <p class="govuk-body">
+      If you’ve used this service before, you’ll have signed in with either an email address or a mobile phone number.
+    </p>
+
+    <p class="govuk-body">
+      Start with the one you think you used. If it does not work, you can come back and try the other option.
+    </p>
+
+    <div class="govuk-button-group">
+      {{ govukButton({
+        text: "Use my email address",
+        href: "/runner-sign-in/email"
+      }) }}
+
+      <a class="govuk-link" href="/runner-sign-in/phone">Use my mobile phone number instead</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

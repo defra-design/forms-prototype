@@ -1,0 +1,196 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% import "components/one-login-service-header/service-header.njk" as oneLoginHeader %}
+
+{% set baseHref = "/runner-sign-in/forms/" + application.formKey + "/" + application.id %}
+{% set lastStepId = (formDef.steps | last).id if formDef.steps else "" %}
+
+{% block pageTitle %}
+Check your answers – {{ formDef.formName }} – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({
+    text: "Back",
+    href: baseHref + "/" + (application.step or lastStepId)
+  }) }}
+{% endblock %}
+
+{% block header %}
+  {{ oneLoginHeader.govukOneLoginServiceHeader({
+    signOutLink: "/titan-mvp-1.2/roles/sign-out",
+    homepageLink: "/runner-sign-in/applications",
+    oneLoginLinkText: "you@example.com",
+    productName: formDef.formName
+  }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-xl">Check your answers</h1>
+
+    {% if application.formKey == "change-contact-details" %}
+      {{ govukSummaryList({
+        rows: [
+          {
+            key: { text: "Full name" },
+            value: { text: application.answers.fullName or "Not provided" },
+            actions: { items: [{ href: baseHref + "/name", text: "Change", visuallyHiddenText: "full name" }] }
+          },
+          {
+            key: { text: "Email address" },
+            value: { text: application.answers.email or "Not provided" },
+            actions: { items: [{ href: baseHref + "/contact", text: "Change", visuallyHiddenText: "email address" }] }
+          },
+          {
+            key: { text: "Mobile phone number" },
+            value: { text: application.answers.phone or "Not provided" },
+            actions: { items: [{ href: baseHref + "/contact", text: "Change", visuallyHiddenText: "mobile phone number" }] }
+          },
+          {
+            key: { text: "Preferred contact method" },
+            value: { text: application.answers.preferredContactMethod or "Not provided" },
+            actions: { items: [{ href: baseHref + "/preference", text: "Change", visuallyHiddenText: "preferred contact method" }] }
+          }
+        ]
+      }) }}
+    {% elif application.formKey == "report-local-issue" %}
+      {{ govukSummaryList({
+        rows: [
+          {
+            key: { text: "Issue type" },
+            value: { text: application.answers.issueType or "Not provided" },
+            actions: { items: [{ href: baseHref + "/details", text: "Change", visuallyHiddenText: "issue type" }] }
+          },
+          {
+            key: { text: "What happened" },
+            value: { text: application.answers.whatHappened or "Not provided" },
+            actions: { items: [{ href: baseHref + "/details", text: "Change", visuallyHiddenText: "what happened" }] }
+          },
+          {
+            key: { text: "Postcode or place" },
+            value: { text: application.answers.postcodeOrPlace or "Not provided" },
+            actions: { items: [{ href: baseHref + "/location", text: "Change", visuallyHiddenText: "postcode or place" }] }
+          },
+          {
+            key: { text: "When did it happen?" },
+            value: { text: application.answers.whenHappened or "Not provided" },
+            actions: { items: [{ href: baseHref + "/when", text: "Change", visuallyHiddenText: "when it happened" }] }
+          },
+          {
+            key: { text: "Urgency" },
+            value: { text: application.answers.urgency or "Not provided" },
+            actions: { items: [{ href: baseHref + "/urgency", text: "Change", visuallyHiddenText: "urgency" }] }
+          }
+        ]
+      }) }}
+    {% elif application.formKey == "request-refund" %}
+      {{ govukSummaryList({
+        rows: [
+          {
+            key: { text: "Payment reference" },
+            value: { text: application.answers.paymentReference or "Not provided" },
+            actions: { items: [{ href: baseHref + "/reference", text: "Change", visuallyHiddenText: "payment reference" }] }
+          },
+          {
+            key: { text: "Reason for refund" },
+            value: { text: application.answers.refundReason or "Not provided" },
+            actions: { items: [{ href: baseHref + "/reason", text: "Change", visuallyHiddenText: "reason for refund" }] }
+          },
+          {
+            key: { text: "Account name" },
+            value: { text: application.answers.accountName or "Not provided" },
+            actions: { items: [{ href: baseHref + "/bank-details", text: "Change", visuallyHiddenText: "account name" }] }
+          },
+          {
+            key: { text: "Sort code" },
+            value: { text: application.answers.sortCode or "Not provided" },
+            actions: { items: [{ href: baseHref + "/bank-details", text: "Change", visuallyHiddenText: "sort code" }] }
+          },
+          {
+            key: { text: "Account number" },
+            value: { text: application.answers.accountNumber or "Not provided" },
+            actions: { items: [{ href: baseHref + "/bank-details", text: "Change", visuallyHiddenText: "account number" }] }
+          }
+        ]
+      }) }}
+    {% elif application.formKey == "apply-small-grant" %}
+      {{ govukSummaryList({
+        rows: [
+          {
+            key: { text: "Organisation name" },
+            value: { text: application.answers.organisationName or "Not provided" },
+            actions: { items: [{ href: baseHref + "/organisation", text: "Change", visuallyHiddenText: "organisation name" }] }
+          },
+          {
+            key: { text: "Organisation type" },
+            value: { text: application.answers.organisationType or "Not provided" },
+            actions: { items: [{ href: baseHref + "/organisation", text: "Change", visuallyHiddenText: "organisation type" }] }
+          },
+          {
+            key: { text: "Amount requested" },
+            value: { text: ("£" + application.answers.amountRequested) if application.answers.amountRequested else "Not provided" },
+            actions: { items: [{ href: baseHref + "/amount", text: "Change", visuallyHiddenText: "amount requested" }] }
+          },
+          {
+            key: { text: "Project summary" },
+            value: { text: application.answers.projectSummary or "Not provided" },
+            actions: { items: [{ href: baseHref + "/summary", text: "Change", visuallyHiddenText: "project summary" }] }
+          },
+          {
+            key: { text: "Declaration" },
+            value: { text: "Accepted" if application.answers.declarationAccepted == "yes" else "Not provided" },
+            actions: { items: [{ href: baseHref + "/declaration", text: "Change", visuallyHiddenText: "declaration" }] }
+          }
+        ]
+      }) }}
+    {% endif %}
+
+    {% if application.formKey == "apply-small-grant" %}
+      {% set checkingStatus = (application.checking.status if application.checking and application.checking.status else "not_started") %}
+
+      {% if checkingStatus != "checked" %}
+        <h2 class="govuk-heading-m govuk-!-margin-top-6">Before you can submit this form</h2>
+        <p class="govuk-body">
+          You cannot submit this form until someone else has checked it.
+        </p>
+
+        {% if checkingStatus == "awaiting_check" %}
+          <p class="govuk-body">
+            You’ve sent this form for checking. You can resend it or send it to a different person if you need to.
+          </p>
+        {% endif %}
+
+        <div class="govuk-button-group govuk-!-margin-top-4">
+          <form class="govuk-button-group__item" method="post" action="{{ baseHref }}/send-for-checking">
+            {{ govukButton({ text: "Send for checking" }) }}
+          </form>
+
+          <a class="govuk-link govuk-button-group__item" href="/runner-sign-in/applications">Save and exit</a>
+
+          {% if checkingStatus == "awaiting_check" %}
+            <span class="govuk-button-group__item govuk-body govuk-!-margin-bottom-0 govuk-!-margin-right-2">or</span>
+            <a class="govuk-link govuk-button-group__item" href="{{ baseHref }}/send-for-checking">Manage checking</a>
+          {% endif %}
+        </div>
+      {% else %}
+        <form method="post" action="{{ baseHref }}/submit" class="govuk-!-margin-top-6">
+          {{ govukButton({ text: "Submit form" }) }}
+        </form>
+      {% endif %}
+    {% else %}
+      <form method="post" action="{{ baseHref }}/submit" class="govuk-!-margin-top-6">
+        {{ govukButton({ text: "Submit form" }) }}
+      </form>
+    {% endif %}
+
+    <p class="govuk-body">
+      <a class="govuk-link" href="/runner-sign-in/applications">Save and exit</a>
+    </p>
+  </div>
+</div>
+{% endblock %}
+

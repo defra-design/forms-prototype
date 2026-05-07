@@ -1,0 +1,31 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/panel/macro.njk" import govukPanel %}
+
+{% block pageTitle %}
+Check complete – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {{ govukPanel({
+      titleText: "Check complete",
+      html: "You’ve completed your part of the form."
+    }) }}
+
+    <h2 class="govuk-heading-m govuk-!-margin-top-6">What happens next</h2>
+    <p class="govuk-body">
+      We’ll email the applicant to let them know they can now submit the form.
+    </p>
+
+    <p class="govuk-body">
+      <a class="govuk-link" href="/runner-sign-in/applicant-ready-to-submit-notification?token={{ token }}">
+        Preview the email sent to the applicant (prototype only)
+      </a>
+    </p>
+  </div>
+</div>
+{% endblock %}
+

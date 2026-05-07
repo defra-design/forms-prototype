@@ -1,0 +1,109 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+
+{% block pageTitle %}
+Check this form – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">Check this form</h1>
+
+    {% if not tokenValid %}
+      <h2 class="govuk-heading-m">This check link is invalid or has expired</h2>
+      <p class="govuk-body">Ask the applicant to generate and share a new check link.</p>
+    {% elseif not hasAccess %}
+      {% if reviewAccessError %}
+        {{ govukErrorSummary({
+          titleText: "There is a problem",
+          errorList: [
+            { text: reviewAccessError, href: "#reviewer-reference-number" }
+          ]
+        }) }}
+      {% endif %}
+
+      <p class="govuk-body">
+        You’ve been asked to check someone’s form before it can be submitted.
+      </p>
+
+      <p class="govuk-body">
+        Use the details you were sent to access the form and confirm whether the answers are correct.
+      </p>
+
+      <form class="form" action="/runner-sign-in/check/{{ token }}/access" method="post">
+        {{ govukInput({
+          label: { text: "Reference number" },
+          id: "reviewer-reference-number",
+          name: "reviewerReferenceNumber",
+          value: enteredReferenceNumber,
+          errorMessage: { text: reviewAccessError } if reviewAccessError else ""
+        }) }}
+
+        {{ govukInput({
+          label: { text: "Memorable word" },
+          id: "reviewer-memorable-word",
+          name: "reviewerMemorableWord",
+          value: enteredMemorableWord,
+          errorMessage: { text: reviewAccessError } if reviewAccessError else ""
+        }) }}
+
+        {{ govukButton({ text: "Continue" }) }}
+      </form>
+    {% else %}
+      {% if error and error.declarationError %}
+        {{ govukErrorSummary({
+          titleText: "There is a problem",
+          errorList: [
+            { text: error.declarationError, href: "#declaration-checkbox" }
+          ]
+        }) }}
+      {% endif %}
+
+      <p class="govuk-body">
+        Check the answers below. You cannot make changes.
+      </p>
+
+      {{ govukSummaryList({
+        rows: [
+          { key: { text: "Organisation name" }, value: { text: (entry.dataSnapshot.organisationName or "Not provided") } },
+          { key: { text: "Organisation type" }, value: { text: (entry.dataSnapshot.organisationType or "Not provided") } },
+          { key: { text: "Amount requested" }, value: { text: ("£" + entry.dataSnapshot.amountRequested) if entry.dataSnapshot.amountRequested else "Not provided" } },
+          { key: { text: "Project summary" }, value: { text: (entry.dataSnapshot.projectSummary or "Not provided") } },
+          { key: { text: "Declaration" }, value: { text: "Accepted" if entry.dataSnapshot.declarationAccepted == "yes" else "Not provided" } }
+        ]
+      }) }}
+
+      <form class="form" action="/runner-sign-in/check/{{ token }}/confirm" method="post">
+        <div class="govuk-form-group">
+          <fieldset class="govuk-fieldset" aria-describedby="declaration-hint">
+            <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
+              Declaration
+            </legend>
+            <div id="declaration-hint" class="govuk-hint">
+              Confirm you have checked this form and the answers are correct to the best of your knowledge.
+            </div>
+
+            <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+              <div class="govuk-checkboxes__item">
+                <input class="govuk-checkboxes__input" id="declaration-checkbox" name="declaration" type="checkbox" value="confirmed">
+                <label class="govuk-label govuk-checkboxes__label" for="declaration-checkbox">
+                  I understand and agree with this declaration
+                </label>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+
+        {{ govukButton({ text: "Confirm and submit" }) }}
+      </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+

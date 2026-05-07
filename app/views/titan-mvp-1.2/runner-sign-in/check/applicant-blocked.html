@@ -1,0 +1,35 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% block pageTitle %}
+You cannot check your own form – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">You cannot check your own form</h1>
+
+    <p class="govuk-body">
+      This link is for the person checking the form.
+    </p>
+
+    <p class="govuk-body">
+      To continue, either:
+    </p>
+
+    <ul class="govuk-list govuk-list--bullet">
+      <li>open the link in a private or incognito window</li>
+      <li>or sign out and try again</li>
+    </ul>
+
+    {{ govukButton({
+      text: "Sign out",
+      href: signOutLink
+    }) }}
+  </div>
+</div>
+{% endblock %}
+

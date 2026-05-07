@@ -1,0 +1,93 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% import "components/one-login-service-header/service-header.njk" as oneLoginHeader %}
+
+{% block pageTitle %}
+Choose a form to start – {{ serviceName }} – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({
+    text: "Back to your forms",
+    href: "/runner-sign-in/applications"
+  }) }}
+{% endblock %}
+
+{% block header %}
+  {{ oneLoginHeader.govukOneLoginServiceHeader({
+    signOutLink: "/titan-mvp-1.2/roles/sign-out",
+    homepageLink: "/runner-sign-in/applications",
+    oneLoginLinkText: "you@example.com",
+    serviceNavigationParams: {
+      serviceName: "Manage your forms",
+      navigation: [
+        { href: "/runner-sign-in/applications", text: "Forms", active: true },
+        { href: "/runner-sign-in/security", text: "Security" }
+      ]
+    }
+  }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-xl">Choose a form to start</h1>
+
+    <p class="govuk-body govuk-!-margin-bottom-6">When you access a form with your sign-in details, it will appear here.</p>
+
+    <div class="govuk-summary-card">
+      <div class="govuk-summary-card__title-wrapper">
+        <h2 class="govuk-summary-card__title">Change your contact details</h2>
+      </div>
+      <div class="govuk-summary-card__content">
+        <p class="govuk-body">Update your name and contact preferences.</p>
+        <form method="post" action="/runner-sign-in/applications/new">
+          <input type="hidden" name="formKey" value="change-contact-details">
+          {{ govukButton({ text: "Start form" }) }}
+        </form>
+      </div>
+    </div>
+
+    <div class="govuk-summary-card">
+      <div class="govuk-summary-card__title-wrapper">
+        <h2 class="govuk-summary-card__title">Report a local issue</h2>
+      </div>
+      <div class="govuk-summary-card__content">
+        <p class="govuk-body">Tell us what happened, where, and how urgent it is.</p>
+        <form method="post" action="/runner-sign-in/applications/new">
+          <input type="hidden" name="formKey" value="report-local-issue">
+          {{ govukButton({ text: "Start form" }) }}
+        </form>
+      </div>
+    </div>
+
+    <div class="govuk-summary-card">
+      <div class="govuk-summary-card__title-wrapper">
+        <h2 class="govuk-summary-card__title">Request a refund</h2>
+      </div>
+      <div class="govuk-summary-card__content">
+        <p class="govuk-body">Request a refund for a payment you’ve made.</p>
+        <form method="post" action="/runner-sign-in/applications/new">
+          <input type="hidden" name="formKey" value="request-refund">
+          {{ govukButton({ text: "Start form" }) }}
+        </form>
+      </div>
+    </div>
+
+    <div class="govuk-summary-card">
+      <div class="govuk-summary-card__title-wrapper">
+        <h2 class="govuk-summary-card__title">Apply for a small grant</h2>
+      </div>
+      <div class="govuk-summary-card__content">
+        <p class="govuk-body">Apply for a small amount of funding for a community project.</p>
+        <form method="post" action="/runner-sign-in/applications/new">
+          <input type="hidden" name="formKey" value="apply-small-grant">
+          {{ govukButton({ text: "Start form" }) }}
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

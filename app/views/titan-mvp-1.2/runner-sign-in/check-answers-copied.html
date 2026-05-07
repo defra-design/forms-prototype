@@ -1,0 +1,58 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% import "components/one-login-service-header/service-header.njk" as oneLoginHeader %}
+
+{% block pageTitle %}
+Check your answers – {{ serviceName }} – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}{% endblock %}
+
+{% block header %}
+  {{ oneLoginHeader.govukOneLoginServiceHeader({
+    signOutLink: "/titan-mvp-1.2/roles/sign-out",
+    homepageLink: "/runner-sign-in/applications",
+    oneLoginLinkText: "you@example.com",
+    productName: "Register as a unicorn breeder"
+  }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">Check your answers</h1>
+
+    {{ govukNotificationBanner({
+      titleText: "Important",
+      html: "
+        <p class='govuk-notification-banner__heading'>These are the answers from your previous submission:</p>
+        <p class='govuk-body'>
+          <strong>Form:</strong> Register as a unicorn breeder<br>
+          <strong>Submitted on:</strong> 18 April 2026<br>
+          <strong>Reference number:</strong> FL3-5H4-L8N
+        </p>
+        <p class='govuk-body'>
+          You’re completing a new form using these answers. Changing them will not affect your earlier submission.
+        </p>
+      "
+    }) }}
+
+    {{ govukSummaryList({
+      rows: [
+        { key: { text: "Business name" }, value: { text: "Unicorn Breeders Ltd" }, actions: { items: [ { href: "#", text: "Change", visuallyHiddenText: "business name" } ] } },
+        { key: { text: "Contact email" }, value: { text: "unicorn.breeder@example.com" }, actions: { items: [ { href: "#", text: "Change", visuallyHiddenText: "contact email" } ] } },
+        { key: { text: "Number of unicorns" }, value: { text: "12" }, actions: { items: [ { href: "#", text: "Change", visuallyHiddenText: "number of unicorns" } ] } }
+      ]
+    }) }}
+
+    <form class="form" action="/runner-sign-in/check-answers-copied" method="post">
+      <div class="govuk-button-group">
+        {{ govukButton({ text: "Submit" }) }}
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+

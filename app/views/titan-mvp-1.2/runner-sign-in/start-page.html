@@ -1,0 +1,46 @@
+{% extends "layouts/runner.html" %}
+
+{% block pageTitle %}
+Register as a unicorn breeder – GOV.UK
+{% endblock %}
+
+{% block header %}
+  {{ govukHeader() }}
+{% endblock %}
+
+{% block beforeContent %}{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-xl">Register as a unicorn breeder</h1>
+
+    <p class="govuk-body govuk-!-margin-bottom-6">
+      Use this service to apply to register as a unicorn breeder.
+    </p>
+
+    {{ govukButton({
+      text: "Start now",
+      href: "/runner-sign-in/why-sign-in?next=" + (next | urlencode),
+      isStartButton: true
+    }) }}
+
+    {# <h2 class="govuk-heading-m">Before you start</h2>
+
+    <p class="govuk-body">
+      You’ll get a security code to sign in. You do not need to create a password.
+    </p> #}
+
+    <h2 class="govuk-heading-m govuk-!-margin-top-6">What you’ll need</h2>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>an email address or a UK mobile phone number</li>
+      <li>access to your email inbox or mobile phone to get the security code</li>
+    </ul>
+
+    <h2 class="govuk-heading-m">Other ways to apply</h2>
+    <p class="govuk-body">
+      If you cannot use the online service, contact Defra to ask about other ways to register.
+    </p>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% import "components/one-login-service-header/service-header.njk" as oneLoginHeader %}
+
+{% set baseHref = "/runner-sign-in/forms/" + application.formKey + "/" + application.id %}
+
+{% block pageTitle %}
+Bank details – {{ formDef.formName }} – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ text: "Back", href: baseHref + "/reason" }) }}
+{% endblock %}
+
+{% block header %}
+  {{ oneLoginHeader.govukOneLoginServiceHeader({
+    signOutLink: "/titan-mvp-1.2/roles/sign-out",
+    homepageLink: "/runner-sign-in/applications",
+    oneLoginLinkText: "you@example.com",
+    productName: formDef.formName
+  }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <form method="post" action="{{ baseHref }}/bank-details" class="form">
+      <h1 class="govuk-heading-xl">Bank details</h1>
+
+      {{ govukInput({
+        id: "accountName",
+        name: "accountName",
+        label: { text: "Name on the account", classes: "govuk-label--m" },
+        value: application.answers.accountName
+      }) }}
+
+      {{ govukInput({
+        id: "sortCode",
+        name: "sortCode",
+        classes: "govuk-input--width-10",
+        label: { text: "Sort code", classes: "govuk-label--m" },
+        hint: { text: "Must be 6 digits, for example 123456." },
+        value: application.answers.sortCode
+      }) }}
+
+      {{ govukInput({
+        id: "accountNumber",
+        name: "accountNumber",
+        classes: "govuk-input--width-10",
+        label: { text: "Account number", classes: "govuk-label--m" },
+        hint: { text: "Must be 8 digits." },
+        value: application.answers.accountNumber
+      }) }}
+
+      <div class="govuk-button-group">
+        {{ govukButton({ text: "Continue" }) }}
+        <button class="govuk-button govuk-button--secondary" name="action" value="save" type="submit">
+          Save and exit
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+

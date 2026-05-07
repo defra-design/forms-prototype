@@ -1,0 +1,148 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/details/macro.njk" import govukDetails %}
+{% from "govuk/components/table/macro.njk" import govukTable %}
+{% from "govuk/components/tag/macro.njk" import govukTag %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+{% import "components/one-login-service-header/service-header.njk" as oneLoginHeader %}
+
+{% block pageTitle %}
+Your forms – {{ serviceName }} – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}{% endblock %}
+
+{% block header %}
+  {{ oneLoginHeader.govukOneLoginServiceHeader({
+    signOutLink: "/titan-mvp-1.2/roles/sign-out",
+    homepageLink: "/runner-sign-in/applications",
+    oneLoginLinkText: "you@example.com",
+    serviceNavigationParams: {
+      serviceName: "Manage your forms",
+      navigation: [
+        { href: "/runner-sign-in/applications", text: "Forms", active: true },
+        { href: "/runner-sign-in/security", text: "Security" }
+      ]
+    }
+  }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-full">
+    {% if cloned %}
+      {% set clonedHtml %}
+        <p class="govuk-notification-banner__heading">
+          Form copied
+        </p>
+      {% endset %}
+      {{ govukNotificationBanner({
+        type: "success",
+        html: clonedHtml
+      }) }}
+    {% endif %}
+
+    {% if submitted %}
+      {% set submittedHtml %}
+        <p class="govuk-notification-banner__heading">
+          Form submitted
+        </p>
+      {% endset %}
+      {{ govukNotificationBanner({
+        type: "success",
+        html: submittedHtml
+      }) }}
+    {% endif %}
+
+    {% if deleted %}
+      {% set deletedHtml %}
+        <p class="govuk-notification-banner__heading">
+          Draft deleted
+        </p>
+      {% endset %}
+      {{ govukNotificationBanner({
+        type: "success",
+        html: deletedHtml
+      }) }}
+    {% endif %}
+
+    <h1 class="govuk-heading-xl">Your forms</h1>
+
+
+
+{#
+    {{ govukDetails({
+      summaryText: "Starting, continuing and copying forms",
+      html: '
+        <p class="govuk-body"><strong>Start a new form</strong> creates a blank form.</p>
+        <p class="govuk-body"><strong>Continue</strong> lets you finish a form you’ve already started.</p>
+        <p class="govuk-body"><strong>Copy</strong> creates a new form with answers from a submitted form.</p>
+      '
+    }) }} #}
+
+    {{ govukButton({
+      text: "Start a new form",
+      href: "/runner-sign-in/choose-form"
+    }) }}
+
+    <p class="govuk-body">In‑progress forms are saved for 28 days from when you last signed in. After that time, they are deleted.</p>
+
+    {# Applications list comes from session seed + clones #}
+    {% set rows = [] %}
+    {% for application in applications %}
+      {% set statusText = application.displayStatus or application.status %}
+      {% set isSubmitted = (statusText == "Submitted") %}
+      {% set isDraft = (statusText == "Not yet started") %}
+      {% set isAwaiting = (statusText == "Awaiting check") %}
+      {% set isChecked = (statusText == "Checked") %}
+      {% set statusTagHtml = govukTag({
+        text: statusText,
+        classes: (
+          "govuk-tag--green" if isSubmitted
+          else ("govuk-tag--yellow" if isAwaiting
+          else ("govuk-tag--turquoise" if isChecked
+          else ("govuk-tag--grey" if isDraft else "govuk-tag--blue")))
+        )
+      }) %}
+      {% set lastUpdatedText = formatDate(application.updatedIso) %}
+      {% if isSubmitted and application.submittedIso %}
+        {% set lastUpdatedText = "Submitted " + formatDate(application.submittedIso) %}
+      {% endif %}
+      {% set expiryText = "" %}
+      {% if not isSubmitted and application.expiryIso %}
+        {% set expiryText = formatDate(application.expiryIso) %}
+      {% endif %}
+      {% if isSubmitted %}
+        {% set actionsHtml = '<a class="govuk-link" href="/runner-sign-in/applications/' + application.id + '/clone">Copy</a>' %}
+      {% elif statusText == "Awaiting check" %}
+        {% set actionsHtml = '<a class="govuk-link" href="/runner-sign-in/applications/' + application.id + '">Continue</a> <span class="govuk-body govuk-!-margin-left-2 govuk-!-margin-right-2">|</span> <a class="govuk-link" href="/runner-sign-in/applications/' + application.id + '/delete">Delete</a>' %}
+      {% else %}
+        {% set actionsHtml = '<a class="govuk-link" href="/runner-sign-in/applications/' + application.id + '">Continue</a> <span class="govuk-body govuk-!-margin-left-2 govuk-!-margin-right-2">|</span> <a class="govuk-link" href="/runner-sign-in/applications/' + application.id + '/delete">Delete</a>' %}
+      {% endif %}
+
+      {% set rows = (rows.push([
+        { text: application.formName },
+        { text: application.reference },
+        { html: statusTagHtml },
+        { text: lastUpdatedText },
+        { text: expiryText },
+        { html: actionsHtml }
+      ]) and rows) %}
+    {% endfor %}
+
+    {{ govukTable({
+      head: [
+        { text: "Form name" },
+        { text: "Reference number" },
+        { text: "Status" },
+        { text: "Last updated" },
+        { text: "Saved until" },
+        { text: "Actions" }
+      ],
+      rows: rows
+    }) }}
+
+
+  </div>
+</div>
+{% endblock %}

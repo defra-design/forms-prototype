@@ -1,0 +1,59 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/details/macro.njk" import govukDetails %}
+
+{% block pageTitle %}
+Enter your mobile phone number – {{ serviceName }} – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ href: "/runner-sign-in/security-code-method", text: "Back" }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% if error and error.runnerSignInPhone %}
+      {{ govukErrorSummary({
+        titleText: "There is a problem",
+        errorList: [
+          { text: error.runnerSignInPhone, href: "#runner-sign-in-phone" }
+        ]
+      }) }}
+    {% endif %}
+
+    <h1 class="govuk-heading-l">Enter your mobile phone number</h1>
+
+    <p class="govuk-body">We will send a 6 digit security code to the number you give us.</p>
+    <p class="govuk-body">You must use a UK mobile phone number.</p>
+
+    <form class="form" action="/runner-sign-in/phone" method="post" novalidate>
+      {{ govukInput({
+        label: { text: "UK mobile phone number" },
+        id: "runner-sign-in-phone",
+        name: "runnerSignInPhone",
+        type: "tel",
+        autocomplete: "tel",
+        classes: "govuk-input--width-20",
+        value: data.runnerSignInPhone,
+        errorMessage: { text: error.runnerSignInPhone } if (error and error.runnerSignInPhone) else null
+      }) }}
+
+      {{ govukButton({ text: "Continue" }) }}
+    </form>
+
+    {% set noUkHtml %}
+      <p class="govuk-body">
+        You need to <a class="govuk-link" href="/runner-sign-in/security-code-method">choose another way to get security codes</a>.
+      </p>
+    {% endset %}
+
+    {{ govukDetails({
+      summaryText: "I do not have a UK mobile phone number",
+      html: noUkHtml
+    }) }}
+  </div>
+</div>
+{% endblock %}

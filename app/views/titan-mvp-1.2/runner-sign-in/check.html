@@ -1,0 +1,114 @@
+{% extends "layouts/runner.html" %}
+{% from "components/govuk-otp-input/macro.njk" import govukOtpInput %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/details/macro.njk" import govukDetails %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+
+{% block pageTitle %}
+Check your {{ "email" if data.runnerSignInMethod == "email" else "phone" }} – {{ serviceName }} – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+  {% if data.runnerSignInMethod == "email" %}
+    {{ govukBackLink({ href: "/runner-sign-in/email", text: "Back" }) }}
+  {% else %}
+    {{ govukBackLink({ href: "/runner-sign-in/phone", text: "Back" }) }}
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% if error and error.runnerSignInCode %}
+      {{ govukErrorSummary({
+        titleText: "There is a problem",
+        errorList: [
+          { text: error.runnerSignInCode, href: "#runner-sign-in-code" }
+        ]
+      }) }}
+    {% endif %}
+
+    {% if resend %}
+      {% set resendHtml %}
+        <p class="govuk-notification-banner__heading">
+          We’ve sent you a new security code.
+        </p>
+      {% endset %}
+      {{ govukNotificationBanner({
+        type: "success",
+        html: resendHtml
+      }) }}
+    {% endif %}
+
+    {% if data.runnerSignInMethod == "email" %}
+      <h1 class="govuk-heading-l">Check your email</h1>
+      {{ govukInsetText({
+        html: "We have sent an email to: <strong>" + (data.runnerSignInEmail or "") + "</strong>"
+      }) }}
+
+      <p class="govuk-body">The email contains a 6 digit security code.</p>
+      <p class="govuk-body">
+        Your email might take a few minutes to arrive. If you do not get an email, check your spam folder.
+      </p>
+      <p class="govuk-body">The code will expire after one hour.</p>
+    {% else %}
+      <h1 class="govuk-heading-l">Check your phone</h1>
+      {{ govukInsetText({
+        text: "We have sent a code to your phone number ending with " + (phoneEnding or "")
+      }) }}
+
+      <p class="govuk-body">It might take a few minutes to arrive. The code will expire after 15 minutes.</p>
+    {% endif %}
+
+    <form class="form" action="/runner-sign-in/check" method="post" autocomplete="off" novalidate>
+      {{ govukOtpInput({
+        id: "runner-sign-in-code",
+        name: "runnerSignInCode",
+        maxLength: 6,
+        pattern: "[0-9]",
+        fieldset: {
+          legend: {
+            text: "Enter the 6 digit security code",
+            isPageHeading: false,
+            classes: "govuk-fieldset__legend--s"
+          }
+        },
+        errorMessage: { text: error.runnerSignInCode } if (error and error.runnerSignInCode) else null,
+        value: data.runnerSignInCode
+      }) }}
+
+      {{ govukButton({ text: "Continue" }) }}
+    </form>
+
+    {% if data.runnerSignInMethod == "email" %}
+      {% set problemsHtml %}
+        <p class="govuk-body">
+          We can <a class="govuk-link" href="/runner-sign-in/check?resend=1">send the code again</a> or you can
+          <a class="govuk-link" href="/runner-sign-in/email">use a different email address</a>.
+        </p>
+      {% endset %}
+    {% else %}
+      {% set problemsHtml %}
+        <p class="govuk-body">
+          We can <a class="govuk-link" href="/runner-sign-in/check?resend=1">send the code again</a> or you can
+          <a class="govuk-link" href="/runner-sign-in/phone">use a different phone number</a>.
+        </p>
+        <p class="govuk-body">
+          <a class="govuk-link" href="/runner-sign-in/choose-method">Choose another way to get security codes</a>.
+        </p>
+      {% endset %}
+    {% endif %}
+
+    {{ govukDetails({
+      summaryText: "Problems with the code?",
+      html: problemsHtml
+    }) }}
+  </div>
+</div>
+{% endblock %}
+
+{% block pageScripts %}
+  <script src="/public/javascripts/govuk-otp-input.js"></script>
+{% endblock %}

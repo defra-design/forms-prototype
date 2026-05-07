@@ -1,0 +1,56 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% import "components/one-login-service-header/service-header.njk" as oneLoginHeader %}
+
+{% set baseHref = "/runner-sign-in/forms/" + application.formKey + "/" + application.id %}
+
+{% block pageTitle %}
+Urgency – {{ formDef.formName }} – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ text: "Back", href: baseHref + "/when" }) }}
+{% endblock %}
+
+{% block header %}
+  {{ oneLoginHeader.govukOneLoginServiceHeader({
+    signOutLink: "/titan-mvp-1.2/roles/sign-out",
+    homepageLink: "/runner-sign-in/applications",
+    oneLoginLinkText: "you@example.com",
+    productName: formDef.formName
+  }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <form method="post" action="{{ baseHref }}/urgency" class="form">
+      {{ govukRadios({
+        idPrefix: "urgency",
+        name: "urgency",
+        fieldset: {
+          legend: {
+            text: "How urgent is it?",
+            classes: "govuk-fieldset__legend--l",
+            isPageHeading: true
+          }
+        },
+        items: [
+          { value: "Not urgent", text: "Not urgent", hint: { text: "No immediate risk." }, checked: application.answers.urgency == "Not urgent" },
+          { value: "Urgent", text: "Urgent", hint: { text: "Someone could be hurt, or there is serious disruption." }, checked: application.answers.urgency == "Urgent" }
+        ]
+      }) }}
+
+      <div class="govuk-button-group">
+        {{ govukButton({ text: "Continue" }) }}
+        <button class="govuk-button govuk-button--secondary" name="action" value="save" type="submit">
+          Save and exit
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+

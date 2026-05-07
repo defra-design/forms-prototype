@@ -1,0 +1,120 @@
+{% extends "layouts/runner.html" %}
+{% import "components/one-login-service-header/service-header.njk" as oneLoginHeader %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+
+{% block pageTitle %}
+Security – {{ serviceName }} – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}{% endblock %}
+
+{% block header %}
+  {{ oneLoginHeader.govukOneLoginServiceHeader({
+    signOutLink: "/titan-mvp-1.2/roles/sign-out",
+    homepageLink: "/runner-sign-in/applications",
+    oneLoginLinkText: "you@example.com",
+    serviceNavigationParams: {
+      serviceName: "Manage your forms",
+      navigation: [
+        { href: "/runner-sign-in/applications", text: "Forms" },
+        { href: "/runner-sign-in/security", text: "Security", active: true }
+      ]
+    }
+  }) }}
+{% endblock %}
+
+{% block content %}
+{% set _maskedPassword = "••••••••••••" %}
+{% set _email = data.runnerSignInEmail or "name@example.com" %}
+{% set _phone = (data.runnerSignInPhone or "") | replace(" ", "") %}
+{% set _phoneEnding = _phone | slice(-4) %}
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">Security</h1>
+
+    <div class="govuk-summary-card govuk-!-margin-bottom-6">
+      <div class="govuk-summary-card__title-wrapper">
+        <h2 class="govuk-summary-card__title">Your sign in details</h2>
+      </div>
+      <div class="govuk-summary-card__content">
+        {{ govukSummaryList({
+          rows: [
+            {
+              key: { text: "Email address" },
+              value: { text: _email },
+              actions: {
+                items: [
+                  { href: "#", text: "Change email address", visuallyHiddenText: "email address" }
+                ]
+              }
+            },
+            {
+              key: { text: "Password" },
+              value: { text: _maskedPassword },
+              actions: {
+                items: [
+                  { href: "#", text: "Change password", visuallyHiddenText: "password" }
+                ]
+              }
+            }
+          ]
+        }) }}
+      </div>
+    </div>
+
+    <div class="govuk-summary-card govuk-!-margin-bottom-6">
+      <div class="govuk-summary-card__title-wrapper">
+        <h2 class="govuk-summary-card__title">How you get security codes to sign in</h2>
+      </div>
+      <div class="govuk-summary-card__content">
+        <h3 class="govuk-heading-s govuk-!-margin-bottom-2">Your default method</h3>
+
+        {% if _phoneEnding %}
+          <p class="govuk-body">Text message to your phone number ending with 1234{{ _phoneEnding }}</p>
+          <p class="govuk-body govuk-!-margin-bottom-2">
+            <a class="govuk-link" href="#">Change phone number</a>
+          </p>
+          {# <p class="govuk-body">
+            <a class="govuk-link" href="#">Use a different default method</a>
+          </p> #}
+        {% else %}
+          <p class="govuk-body">You have not added a phone number yet.</p>
+          <p class="govuk-body">
+            <a class="govuk-link" href="/runner-sign-in/phone">Add a phone number</a>
+          </p>
+        {% endif %}
+
+        <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+
+        <h3 class="govuk-heading-s govuk-!-margin-bottom-2">Add a back-up method</h3>
+        <p class="govuk-body">
+          We recommend you add a back-up method for getting security codes.
+        </p>
+        <p class="govuk-body">}
+          This will make sure you can always sign in, even if you cannot get security codes using your default method.
+        </p>
+        <p class="govuk-body">
+          <a class="govuk-link" href="#">Add a back-up method</a>
+        </p>
+      </div>
+    </div>
+
+    <div class="govuk-summary-card">
+      <div class="govuk-summary-card__title-wrapper">
+        <h2 class="govuk-summary-card__title">Delete your sign-in details</h2>
+      </div>
+      <div class="govuk-summary-card__content">
+        <p class="govuk-body">
+
+    This will permanently delete your sign-in details. You will no longer be able to access any forms you started or submitted using this sign-in.
+        </p>
+        <p class="govuk-body">
+          <a class="govuk-link" href="#">Delete your sign-in details</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

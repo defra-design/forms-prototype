@@ -1,0 +1,79 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+
+{% block pageTitle %}
+Enter your email address – {{ serviceName }} – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ href: "/runner-sign-in/why-sign-in?next=" + (data.runnerSignInNext | urlencode), text: "Back" }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% if error and error.runnerSignInEmail %}
+      {{ govukErrorSummary({
+        titleText: "There is a problem",
+        errorList: [
+          { text: error.runnerSignInEmail, href: "#runner-sign-in-email" }
+        ]
+      }) }}
+    {% elif error and error.runnerSignInConfirmEmail %}
+      {{ govukErrorSummary({
+        titleText: "There is a problem",
+        errorList: [
+          { text: error.runnerSignInConfirmEmail, href: "#runner-sign-in-confirm-email" }
+        ]
+      }) }}
+    {% endif %}
+
+    <form class="form" action="/runner-sign-in/choose-method" method="post">
+
+      {{ govukInput({
+        label: {
+          text: "Enter your email address",
+          classes: "govuk-label--l",
+          isPageHeading: true
+        },
+        id: "runner-sign-in-email",
+        name: "runnerSignInEmail",
+        type: "email",
+        autocomplete: "email",
+        spellcheck: false,
+        value: data.runnerSignInEmail,
+        errorMessage: { text: error.runnerSignInEmail } if (error and error.runnerSignInEmail) else null
+      }) }}
+
+      {{ govukInput({
+        label: {
+          text: "Confirm email address",
+          classes: "govuk-label--m",
+          isPageHeading: false
+        },
+        id: "runner-sign-in-confirm-email",
+        name: "runnerSignInConfirmEmail",
+        type: "email",
+        autocomplete: "email",
+        spellcheck: false,
+        errorMessage: { text: error.runnerSignInConfirmEmail } if (error and error.runnerSignInConfirmEmail) else null
+      }) }}
+
+      <h2 class="govuk-heading-m govuk-!-margin-top-6">Agree to the terms and conditions</h2>
+      <p class="govuk-body">
+        By continuing, you confirm that you agree to our
+        <a class="govuk-link" target="_blank" rel="noreferrer noopener" href="/runner-sign-in/terms">terms and conditions (opens in new tab)</a>.
+      </p>
+
+      <p class="govuk-body">
+        To find out how we use your personal information, see our
+        <a class="govuk-link" target="_blank" rel="noreferrer noopener" href="/runner-sign-in/privacy">privacy notice (opens in new tab)</a>.
+      </p>
+
+      {{ govukButton({ text: "Continue" }) }}
+    </form>
+  </div>
+</div>
+{% endblock %}

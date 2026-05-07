@@ -1,0 +1,67 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% from "govuk/components/textarea/macro.njk" import govukTextarea %}
+{% import "components/one-login-service-header/service-header.njk" as oneLoginHeader %}
+
+{% set baseHref = "/runner-sign-in/forms/" + application.formKey + "/" + application.id %}
+
+{% block pageTitle %}
+Issue details – {{ formDef.formName }} – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ text: "Back", href: "/runner-sign-in/applications" }) }}
+{% endblock %}
+
+{% block header %}
+  {{ oneLoginHeader.govukOneLoginServiceHeader({
+    signOutLink: "/titan-mvp-1.2/roles/sign-out",
+    homepageLink: "/runner-sign-in/applications",
+    oneLoginLinkText: "you@example.com",
+    productName: formDef.formName
+  }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <form method="post" action="{{ baseHref }}/details" class="form">
+      {{ govukRadios({
+        idPrefix: "issueType",
+        name: "issueType",
+        fieldset: {
+          legend: {
+            text: "What type of issue are you reporting?",
+            classes: "govuk-fieldset__legend--l",
+            isPageHeading: true
+          }
+        },
+        items: [
+          { value: "Road problem", text: "Road problem", checked: application.answers.issueType == "Road problem" },
+          { value: "Street lighting", text: "Street lighting", checked: application.answers.issueType == "Street lighting" },
+          { value: "Public spaces", text: "Public spaces", checked: application.answers.issueType == "Public spaces" },
+          { value: "Something else", text: "Something else", checked: application.answers.issueType == "Something else" }
+        ]
+      }) }}
+
+      {{ govukTextarea({
+        id: "whatHappened",
+        name: "whatHappened",
+        label: { text: "Describe what happened", classes: "govuk-label--m" },
+        hint: { text: "For example, what you saw and any risks to others." },
+        value: application.answers.whatHappened
+      }) }}
+
+      <div class="govuk-button-group">
+        {{ govukButton({ text: "Continue" }) }}
+        <button class="govuk-button govuk-button--secondary" name="action" value="save" type="submit">
+          Save and exit
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+

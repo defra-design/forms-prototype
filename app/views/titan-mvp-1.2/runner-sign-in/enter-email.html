@@ -1,0 +1,62 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+
+{% block pageTitle %}
+Enter your email address – {{ serviceName }} – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ href: "/runner-sign-in/choose-method", text: "Back" }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% if error and error.runnerSignInEmail %}
+      {{ govukErrorSummary({
+        titleText: "There is a problem",
+        errorList: [
+          { text: error.runnerSignInEmail, href: "#runner-sign-in-email" }
+        ]
+      }) }}
+    {% endif %}
+
+    <h1 class="govuk-heading-l">Enter your email address</h1>
+
+    <form class="form" action="/runner-sign-in/email" method="post" novalidate>
+      {{ govukInput({
+        label: { text: "Email address" },
+        id: "runner-sign-in-email",
+        name: "runnerSignInEmail",
+        type: "email",
+        autocomplete: "email",
+        spellcheck: false,
+        value: data.runnerSignInEmail,
+        errorMessage: { text: error.runnerSignInEmail } if (error and error.runnerSignInEmail) else null
+      }) }}
+
+      {{ govukButton({ text: "Continue" }) }}
+    </form>
+
+    <p class="govuk-body">
+      <a class="govuk-link" href="/runner-sign-in/phone">Use your mobile phone number instead</a>
+    </p>
+
+    <p class="govuk-body">
+      <a class="govuk-link" href="/runner-sign-in/not-sure">I’m not sure which one I used</a>
+    </p>
+
+    <h2 class="govuk-heading-m govuk-!-margin-top-6">Before you continue</h2>
+
+    <p class="govuk-body">
+      By continuing, you confirm that you agree to the terms and conditions for this service.
+    </p>
+
+    <p class="govuk-body">
+      To find out how we use your personal information, read the privacy notice for this service.
+    </p>
+  </div>
+</div>
+{% endblock %}

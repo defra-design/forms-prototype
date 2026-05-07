@@ -1,0 +1,59 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% block pageTitle %}
+Why you need to sign in – {{ serviceName }} – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ href: "/runner-sign-in/start-page?next=" + (next | urlencode), text: "Back" }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">Sign in to use this form</h1>
+
+    <p class="govuk-body">Signing in means you can:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>save your progress and come back later</li>
+      <li>continue a form you’ve already started</li>
+      <li>reuse answers from previous submissions (if you have any)</li>
+    </ul>
+
+    {# <p class="govuk-body">
+      We’ll send you a security code to sign in. You do not need to create a password.
+    </p> #}
+
+    <h2 class="govuk-heading-m">You’ll need</h2>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>an email address or a UK mobile phone number</li>
+      <li>access to your email inbox or mobile phone to get the security code</li>
+    </ul>
+
+    {{ govukButton({
+      text: "Create your sign in",
+      href: "/runner-sign-in/choose-method?next=" + (next | urlencode)    }) }}
+
+      <div>
+
+    {{ govukButton({
+      text: "Sign in",
+      href: "/runner-sign-in/choose-method?next=" + (next | urlencode),
+      classes: "govuk-button--secondary"
+    }) }}
+    </div>
+
+    <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+    <h2 class="govuk-heading-m">Other ways to use this service</h2>
+    <p class="govuk-body">
+     You can complete this form without signing in, but you will not be able to reuse answers from previous submissions.
+    </p>
+    <p class="govuk-body">
+    <a class="govuk-link" href="/runner-v4/declaration">Continue without signing in</a>
+    </p>
+
+  </div>
+</div>
+{% endblock %}
+

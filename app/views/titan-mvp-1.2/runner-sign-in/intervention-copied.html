@@ -1,0 +1,61 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% import "components/one-login-service-header/service-header.njk" as oneLoginHeader %}
+
+{% block pageTitle %}
+Your previous submission – {{ serviceName }} – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}{% endblock %}
+
+{% block header %}
+  {{ oneLoginHeader.govukOneLoginServiceHeader({
+    signOutLink: "/titan-mvp-1.2/roles/sign-out",
+    homepageLink: "/runner-sign-in/applications",
+    oneLoginLinkText: "you@example.com",
+    productName: "Register as a unicorn breeder"
+  }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">Your previous submission</h1>
+
+    <p class="govuk-body">
+      This new form is based on a previous submission.
+    </p>
+
+    <p class="govuk-body">
+      <strong>Form:</strong> Register as a unicorn breeder<br>
+      <strong>Submitted on:</strong> 18 April 2026<br>
+      <strong>Reference number:</strong> FL3-5H4-L8N
+    </p>
+
+    <h2 class="govuk-heading-m">You need to answer new questions</h2>
+    <p class="govuk-body">
+      Since you last submitted this form, some questions have changed or need to be answered again.
+    </p>
+
+    <p class="govuk-body">Once you’ve answered these questions, you’ll be able to:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>review all your answers together</li>
+      <li>make changes if you need to</li>
+      <li>submit the form</li>
+    </ul>
+
+    <form class="form" action="/runner-sign-in/intervention-copied" method="post">
+      <div class="govuk-button-group">
+        {{ govukButton({ text: "Continue" }) }}
+        {{ govukButton({
+          text: "Save and exit",
+          classes: "govuk-button--secondary",
+          href: "/save-progress",
+          type: "button"
+        }) }}
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+

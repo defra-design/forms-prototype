@@ -1,0 +1,19 @@
+.runner-management-header {
+  .govuk-header__link--homepage {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .runner-management-header__product {
+    font-weight: 400;
+    font-size: 1.1875rem; /* close to screenshot’s secondary label */
+    line-height: 1;
+  }
+
+  .runner-management-header__signout {
+    margin-left: auto;
+    padding-top: 12px;
+  }
+}
+

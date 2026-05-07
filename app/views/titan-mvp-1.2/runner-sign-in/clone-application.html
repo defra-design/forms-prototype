@@ -1,0 +1,72 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% import "components/one-login-service-header/service-header.njk" as oneLoginHeader %}
+
+{% block pageTitle %}
+You are about to clone this application – {{ serviceName }} – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ text: "Back", href: "/runner-sign-in/applications" }) }}
+{% endblock %}
+
+{% block header %}
+  {{ oneLoginHeader.govukOneLoginServiceHeader({
+    signOutLink: "/titan-mvp-1.2/roles/sign-out",
+    homepageLink: "/runner-sign-in/applications",
+    oneLoginLinkText: "you@example.com",
+    serviceNavigationParams: {
+      serviceName: "Manage your forms",
+      navigation: [
+        { href: "/runner-sign-in/applications", text: "Forms", active: true },
+        { href: "/runner-sign-in/security", text: "Security" }
+      ]
+    }
+  }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-xl">You are about to copy answers from this form</h1>
+
+
+    {{ govukInsetText({
+      text: "This form submission will not be changed or replaced."
+    }) }}
+
+    {{ govukSummaryList({
+      rows: [
+        { key: { text: "Form name" }, value: { text: "Register as a unicorn breeder" } },
+        { key: { text: "Submitted on" }, value: { text: "18 April 2026 at 9:02am" } },
+        { key: { text: "Reference" }, value: { text: "FL3-5H4-L8N" } }
+      ]
+    }) }}
+
+    <form class="form" action="/runner-sign-in/applications/{{ application.id }}/clone" method="post">
+      {{ govukRadios({
+        idPrefix: "clone-application",
+        name: "cloneApplication",
+        fieldset: {
+          legend: {
+            text: "Do you want to copy answers from this form?",
+            classes: "govuk-fieldset__legend--m"
+          }
+        },
+        hint: {
+          text: "If you copy answers from this form, we’ll use them to start a new form"
+        },
+        items: [
+          { value: "yes", text: "Yes, copy this form" },
+          { value: "no", text: "No" }
+        ]
+      }) }}
+
+      {{ govukButton({ text: "Continue" }) }}
+    </form>
+  </div>
+</div>
+{% endblock %}

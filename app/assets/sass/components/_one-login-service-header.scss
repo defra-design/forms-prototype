@@ -1,0 +1,57 @@
+$govuk-header-link-underline-thickness: 3px;
+
+$toggle-content-spacing: 8px;
+$toggle-padding: 15px;
+$block-link-spacing: govuk-spacing(3);
+$logo-height: 30px;
+$toggle-border-height: 3px;
+
+@mixin underline-hover-focus($type) {
+  display: block;
+  @if $type == "focus" {
+    background-color: $govuk-focus-text-colour;
+    @media (forced-colors: active) {
+      background-color: linktext;
+    }
+  } @else if $type == "hover" {
+    background-color: govuk-colour("white");
+    @media (forced-colors: active) {
+      background-color: linktext;
+    }
+  }
+}
+
+@mixin link-underline-hover {
+  &:hover {
+    text-decoration: underline;
+    text-decoration-thickness: $govuk-header-link-underline-thickness;
+
+    @if $govuk-link-underline-offset {
+      text-underline-offset: $govuk-link-underline-offset;
+    }
+  }
+}
+
+.rebranded-one-login-header {
+  @include govuk-font($size: 16);
+  color: govuk-colour("white");
+  position: relative;
+  background: $govuk-brand-colour;
+}
+
+// Vendor the upstream styles so header keeps working even if node_modules changes.
+// This file is copied from @govuk-one-login/service-header dist styles.
+@import "../../../../node_modules/@govuk-one-login/service-header/dist/styles/service-header-no-imports";
+
+.one-login-product-name {
+  display: inline-block;
+  // `govuk-heading-l` carries heading margins; remove them for inline usage
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-left: govuk-spacing(2);
+  padding-left: govuk-spacing(2);
+  border-left: 1px solid rgba(255, 255, 255, 0.6);
+  color: govuk-colour("white");
+  vertical-align: middle;
+}
+

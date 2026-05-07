@@ -1,0 +1,26 @@
+{% extends "layouts/email.html" %}
+
+{% block pageTitle %}
+Email - Form checked
+{% endblock %}
+
+{% block content %}
+<div class="govuk-body">
+  <h1 class="govuk-heading-l">Your form has been checked</h1>
+
+  {% if not tokenValid %}
+    <p class="govuk-body">This link is invalid or has expired.</p>
+  {% else %}
+    <p class="govuk-body">
+      Your form ‘{{ formName }}’ has been checked{% if checkedOnText %} on {{ checkedOnText }}{% endif %}.
+    </p>
+
+    <p class="govuk-body">
+      You can now sign in and submit your form.
+    </p>
+  {% endif %}
+
+  <p class="govuk-body">From Defra</p>
+</div>
+{% endblock %}
+

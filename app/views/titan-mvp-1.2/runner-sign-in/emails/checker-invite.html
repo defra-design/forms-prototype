@@ -1,0 +1,42 @@
+{% extends "layouts/email.html" %}
+
+{% block pageTitle %}
+Email - Check a form
+{% endblock %}
+
+{% block content %}
+<div class="govuk-body">
+  <h1 class="govuk-heading-l">You have been asked to check a form</h1>
+
+  {% if not tokenValid %}
+    <p class="govuk-body">This link is invalid or has expired.</p>
+  {% else %}
+    <p class="govuk-body">
+      Someone has asked you to check their form before they can submit it.
+    </p>
+
+    <p class="govuk-body">
+      <strong>Form:</strong> {{ formName }}
+    </p>
+
+    {{ govukInsetText({
+      html: "Use this link to access the form: <a class='govuk-link' href='" ~ checkUrl ~ "'>" ~ checkUrl ~ "</a>"
+    }) }}
+
+    <p class="govuk-body">
+      You’ll also need:
+    </p>
+
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Reference number: <strong>{{ referenceNumber }}</strong></li>
+      <li>Memorable word: <strong>{{ memorableWord }}</strong></li>
+    </ul>
+
+    <p class="govuk-body">
+      Do not share this link or these details with anyone else.
+    </p>
+  {% endif %}
+  <p class="govuk-body">From Defra</p>
+</div>
+{% endblock %}
+

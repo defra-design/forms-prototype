@@ -90,6 +90,18 @@ Get your form checked – {{ serviceName }} – GOV.UK
       }) }}
     {% endif %}
 
+    {% if data.runnerV4InviteCheckerContactError %}
+      {{ govukErrorSummary({
+        titleText: "There is a problem",
+        errorList: [
+          {
+            text: data.runnerV4InviteCheckerContactError,
+            href: "#contact-by-email-confirm"
+          }
+        ]
+      }) }}
+    {% endif %}
+
     {% if not interventionStarted %}
       <div class="govuk-panel govuk-panel--confirmation prototype-panel-blue">
         <h1 class="govuk-panel__title">
@@ -218,6 +230,16 @@ Get your form checked – {{ serviceName }} – GOV.UK
             label: {
               text: "Email address"
             }
+          }) }}
+
+          {{ govukInput({
+            id: "contact-by-email-confirm",
+            name: "contactByEmailConfirm",
+            type: "email",
+            autocomplete: "email",
+            spellcheck: false,
+            value: data.runnerV4InviteCheckerEmailConfirm,
+            label: { text: "Confirm email address" }
           }) }}
         {% endset -%}
 

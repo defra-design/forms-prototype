@@ -42,7 +42,7 @@
                 "name": "beforeInputs",
                 "type": "object",
                 "required": false,
-                "description": "Content to add before all radio items within the checkboxes component.",
+                "description": "Content to add before all radio items within the radios component.",
                 "params": [
                     {
                         "name": "text",
@@ -62,7 +62,7 @@
                 "name": "afterInputs",
                 "type": "object",
                 "required": false,
-                "description": "Content to add after all radio items within the checkboxes component.",
+                "description": "Content to add after all radio items within the radios component.",
                 "params": [
                     {
                         "name": "text",
@@ -206,6 +206,6 @@
         "name": "attributes",
         "type": "object",
         "required": false,
-        "description": "HTML attributes (for example data attributes) to add to the radio input tag."
+        "description": "HTML attributes (for example data attributes) to add to the radio container."
     }
 ]

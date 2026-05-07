@@ -1,0 +1,64 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+
+{% block pageTitle %}
+Check your phone – {{ serviceName }} – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ href: "/runner-sign-in/confirm-phone", text: "Back" }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% if error and error.runnerSignInPhoneSecurityCode %}
+      {{ govukErrorSummary({
+        titleText: "There is a problem",
+        errorList: [
+          { text: error.runnerSignInPhoneSecurityCode, href: "#security-code" }
+        ]
+      }) }}
+    {% endif %}
+
+    {% if resend %}
+      {% set resendHtml %}
+        <p class="govuk-notification-banner__heading">
+          We’ve sent you a new security code.
+        </p>
+      {% endset %}
+      {{ govukNotificationBanner({
+        type: "success",
+        html: resendHtml
+      }) }}
+    {% endif %}
+
+    <h1 class="govuk-heading-l">Check your phone</h1>
+
+    <p class="govuk-body">We’ve sent you a text message with a security code.</p>
+
+    <form class="form" action="/runner-sign-in/check-phone" method="post" novalidate>
+      {{ govukInput({
+        label: { text: "Security code" },
+        id: "security-code",
+        name: "runnerSignInPhoneSecurityCode",
+        type: "text",
+        autocomplete: "one-time-code",
+        classes: "govuk-input--width-4 govuk-input--extra-letter-spacing",
+        inputmode: "numeric",
+        value: data.runnerSignInPhoneSecurityCode,
+        errorMessage: { text: error.runnerSignInPhoneSecurityCode } if (error and error.runnerSignInPhoneSecurityCode) else null
+      }) }}
+
+      {{ govukButton({ text: "Continue" }) }}
+    </form>
+
+    <p class="govuk-body">
+      <a href="/runner-sign-in/request-new-phone-code" class="govuk-link">Not received a text message?</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

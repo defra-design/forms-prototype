@@ -11,7 +11,7 @@
 
     text-align: center;
 
-    @include govuk-media-query($until: tablet) {
+    @media #{govuk-until-breakpoint(tablet)} {
       padding: govuk-spacing(if($govuk-new-typography-scale, 4, 3)) - $govuk-border-width;
 
       // This is an if-all-else-fails attempt to stop long words from
@@ -36,7 +36,7 @@
     color: govuk-colour("white");
     background: govuk-colour("green");
 
-    @include govuk-media-query($media-type: print) {
+    @media print {
       border-color: currentcolor;
       color: $govuk-print-text-colour;
       background: none;

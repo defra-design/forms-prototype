@@ -1,0 +1,33 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/details/macro.njk" import govukDetails %}
+
+{% block pageTitle %}
+Request a new security code – {{ serviceName }} – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ text: "Back", href: "/runner-sign-in/check-phone" }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">Request a new security code</h1>
+
+    <p class="govuk-body">
+      Text messages sometimes take a few minutes to arrive. If you do not receive the text message, you can request a new one.
+    </p>
+
+    {{ govukDetails({
+      summaryText: "I do not have access to the phone",
+      html: '<p class="govuk-body">If you cannot access the phone number for this account, contact the service team to get help signing in.</p>'
+    }) }}
+
+    <form class="form" action="/runner-sign-in/request-new-phone-code" method="post">
+      {{ govukButton({ text: "Request a new code" }) }}
+    </form>
+  </div>
+</div>
+{% endblock %}

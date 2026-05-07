@@ -1,0 +1,50 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+
+{% block pageTitle %}
+Choose how to get a security code – {{ serviceName }} – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ href: "/runner-sign-in/choose-method", text: "Back" }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% if error and error.runnerSignInSecurityCodeMethod %}
+      {{ govukErrorSummary({
+        titleText: "There is a problem",
+        errorList: [
+          { text: error.runnerSignInSecurityCodeMethod, href: "#runner-sign-in-security-code-method" }
+        ]
+      }) }}
+    {% endif %}
+
+    <form class="form" action="/runner-sign-in/security-code-method" method="post">
+      {{ govukRadios({
+        idPrefix: "runner-sign-in-security-code-method",
+        name: "runnerSignInSecurityCodeMethod",
+        fieldset: {
+          legend: {
+            text: "How do you want to get a security code?",
+            classes: "govuk-fieldset__legend--l",
+            isPageHeading: true
+          }
+        },
+        hint: { text: "We’ll send a 6 digit code." },
+        errorMessage: { text: error.runnerSignInSecurityCodeMethod } if (error and error.runnerSignInSecurityCodeMethod) else null,
+        items: [
+          { value: "email", text: "Email", hint: { text: "Send the code to " + (data.runnerSignInEmail or "your email address") + "" }, checked: data.runnerSignInMethod == "email" },
+          { value: "sms", text: "Text message", checked: data.runnerSignInMethod == "sms" }
+        ]
+      }) }}
+
+      {{ govukButton({ text: "Continue" }) }}
+    </form>
+  </div>
+</div>
+{% endblock %}
+

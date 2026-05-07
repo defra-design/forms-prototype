@@ -231,7 +231,28 @@ Email - Form submitted
             <h3 class="govuk-heading-s">Number of staff</h3>
             <p class="govuk-body">{{ answers.zhJMaM or "12" }}</p>
 
-            {% set reviewerToken = answers.reviewTokenV4 or data.reviewTokenV4 %}
+            <h2 class="govuk-heading-s">Details of the person who checked your form</h2>
+
+            {{ govukSummaryList({
+              classes: "govuk-!-margin-bottom-4 govuk-summary-list--no-border",
+              rows: [
+                {
+                  key: { text: "Checked by" },
+                  value: { text: checkedByContact or "Joe Vet" }
+                },
+                {
+                  key: { text: "Checked on" },
+                  value: { text: checkedOnText or "Monday, 20 April 2026 at 2:49 PM" }
+                },
+                {
+                  key: { text: "Declaration" },
+                  value: { text: checkedDeclarationText or "Agreed by the person checking the form" }
+                }
+              ]
+            }) }}
+
+
+            {# {% set reviewerToken = answers.reviewTokenV4 or data.reviewTokenV4 %}
             {% set reviewerDetailsMap = (answers.reviewerDetailsV4 or data.reviewerDetailsV4) or {} %}
             {% set reviewer = reviewerDetailsMap[reviewerToken] if reviewerToken else null %}
 
@@ -247,7 +268,7 @@ Email - Form submitted
             <p class="govuk-body">{{ (reviewer.reviewerEmail if reviewer else null) or "sam.reviewer@example.com" }}</p>
 
             <h4 class="govuk-heading-s govuk-!-margin-bottom-1">UK address</h4>
-            <p class="govuk-body">{{ (reviewer.reviewerAddress if reviewer else null) or "1 Review Street, London, SW1A 1AA" }}</p>
+            <p class="govuk-body">{{ (reviewer.reviewerAddress if reviewer else null) or "1 Review Street, London, SW1A 1AA" }}</p> #}
         </div>
     </div>
 </div>

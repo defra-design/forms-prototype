@@ -1,0 +1,50 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% import "components/one-login-service-header/service-header.njk" as oneLoginHeader %}
+
+{% set serviceName = "Your forms" %}
+{% set homepageLink = "/runner-sign-in/applications" %}
+{% set signOutLink = "/titan-mvp-1.2/roles/sign-out" %}
+{% set navigation = [
+  { href: "/runner-sign-in/applications", text: "Your applications", active: true },
+  { href: "/runner-sign-in/security", text: "Security" }
+] %}
+
+{% block pageTitle %}
+Application {{ application.reference }} – {{ serviceName }} – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ text: "Back", href: "/runner-sign-in/applications" }) }}
+{% endblock %}
+
+{% block header %}
+  {{ oneLoginHeader.govukOneLoginServiceHeader({
+    signOutLink: signOutLink,
+    homepageLink: homepageLink,
+    oneLoginLinkText: "you@example.com",
+    productName: "Forms"
+  }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">Application {{ application.reference }}</h1>
+
+    {% set lastUpdatedText = "Last updated " + formatDate(application.updatedIso) %}
+    {% if application.submittedIso %}
+      {% set lastUpdatedText = "Submitted " + formatDate(application.submittedIso) %}
+    {% endif %}
+
+    {{ govukSummaryList({
+      rows: [
+        { key: { text: "Status" }, value: { text: application.status } },
+        { key: { text: "Last updated" }, value: { text: lastUpdatedText } },
+        { key: { text: "Expiry date" }, value: { text: formatDate(application.expiryIso) } }
+      ]
+    }) }}
+  </div>
+</div>
+{% endblock %}

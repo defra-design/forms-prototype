@@ -1,0 +1,65 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% import "components/one-login-service-header/service-header.njk" as oneLoginHeader %}
+
+{% set baseHref = "/runner-sign-in/forms/" + application.formKey + "/" + application.id %}
+
+{% block pageTitle %}
+Organisation details – {{ formDef.formName }} – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ text: "Back", href: "/runner-sign-in/applications" }) }}
+{% endblock %}
+
+{% block header %}
+  {{ oneLoginHeader.govukOneLoginServiceHeader({
+    signOutLink: "/titan-mvp-1.2/roles/sign-out",
+    homepageLink: "/runner-sign-in/applications",
+    oneLoginLinkText: "you@example.com",
+    productName: formDef.formName
+  }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <form method="post" action="{{ baseHref }}/organisation" class="form">
+      {{ govukInput({
+        id: "organisationName",
+        name: "organisationName",
+        label: { text: "Organisation name", classes: "govuk-label--l", isPageHeading: true },
+        value: application.answers.organisationName
+      }) }}
+
+      {{ govukRadios({
+        idPrefix: "organisationType",
+        name: "organisationType",
+        fieldset: {
+          legend: {
+            text: "What type of organisation is it?",
+            classes: "govuk-fieldset__legend--m"
+          }
+        },
+        items: [
+          { value: "Community group", text: "Community group", checked: application.answers.organisationType == "Community group" },
+          { value: "Charity", text: "Charity", checked: application.answers.organisationType == "Charity" },
+          { value: "Small business", text: "Small business", checked: application.answers.organisationType == "Small business" },
+          { value: "Other", text: "Other", checked: application.answers.organisationType == "Other" }
+        ]
+      }) }}
+
+      <div class="govuk-button-group">
+        {{ govukButton({ text: "Continue" }) }}
+        <button class="govuk-button govuk-button--secondary" name="action" value="save" type="submit">
+          Save and exit
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+

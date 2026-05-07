@@ -1,0 +1,46 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+
+{% block pageTitle %}
+Confirm your phone number – {{ serviceName }} – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ href: "/runner-sign-in/check", text: "Back" }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% if error and error.runnerSignInConfirmPhoneNumber %}
+      {{ govukErrorSummary({
+        titleText: "There is a problem",
+        errorList: [
+          { text: error.runnerSignInConfirmPhoneNumber, href: "#runner-sign-in-confirm-phone-number" }
+        ]
+      }) }}
+    {% endif %}
+
+    <h1 class="govuk-heading-l">Enter your mobile phone number</h1>
+
+    <p class="govuk-body">We’ll send you a text message with a security code.</p>
+
+    <form class="form" action="/runner-sign-in/confirm-phone" method="post" novalidate>
+      {{ govukInput({
+        label: { text: "Mobile phone number" },
+        id: "runner-sign-in-confirm-phone-number",
+        name: "runnerSignInConfirmPhoneNumber",
+        type: "tel",
+        autocomplete: "tel",
+        classes: "govuk-input--width-20",
+        value: data.runnerSignInConfirmPhoneNumber,
+        errorMessage: { text: error.runnerSignInConfirmPhoneNumber } if (error and error.runnerSignInConfirmPhoneNumber) else null
+      }) }}
+
+      {{ govukButton({ text: "Continue" }) }}
+    </form>
+  </div>
+</div>
+{% endblock %}

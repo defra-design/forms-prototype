@@ -6,6 +6,7 @@
 // Import component styles
 @import "components/service-header";
 @import "components/govuk-otp-input";
+@import "components/one-login-service-header";
 
 // Add extra styles here
 
@@ -3762,4 +3763,18 @@ to
       color: white;
     }
   }
+}
+
+// Journey options panel (prototype-only)
+.govuk-notification-banner--journey-options {
+  border-color: #4c2c92;
+  background-color: #4c2c92;
+}
+
+.govuk-notification-banner--journey-options .govuk-notification-banner__content {
+  background: govuk-colour("white");
+}
+
+.govuk-notification-banner--journey-options .govuk-notification-banner__title {
+  color: govuk-colour("white");
 }

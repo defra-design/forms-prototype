@@ -1,0 +1,48 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% import "components/one-login-service-header/service-header.njk" as oneLoginHeader %}
+
+{% set baseHref = "/runner-sign-in/forms/" + application.formKey + "/" + application.id %}
+
+{% block pageTitle %}
+Where did it happen? – {{ formDef.formName }} – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ text: "Back", href: baseHref + "/details" }) }}
+{% endblock %}
+
+{% block header %}
+  {{ oneLoginHeader.govukOneLoginServiceHeader({
+    signOutLink: "/titan-mvp-1.2/roles/sign-out",
+    homepageLink: "/runner-sign-in/applications",
+    oneLoginLinkText: "you@example.com",
+    productName: formDef.formName
+  }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <form method="post" action="{{ baseHref }}/location" class="form">
+      {{ govukInput({
+        id: "postcodeOrPlace",
+        name: "postcodeOrPlace",
+        label: { text: "Where did it happen?", classes: "govuk-label--l", isPageHeading: true },
+        hint: { text: "Enter a postcode or a place name." },
+        value: application.answers.postcodeOrPlace
+      }) }}
+
+      <div class="govuk-button-group">
+        {{ govukButton({ text: "Continue" }) }}
+        <button class="govuk-button govuk-button--secondary" name="action" value="save" type="submit">
+          Save and exit
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+

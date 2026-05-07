@@ -1,0 +1,82 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+
+{% block pageTitle %}
+What do you want to do? – {{ serviceName }} – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ href: "/runner-sign-in/check", text: "Back" }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% if errorSummaryList and errorSummaryList.length %}
+      {{ govukErrorSummary({
+        titleText: "There is a problem",
+        errorList: errorSummaryList
+      }) }}
+    {% endif %}
+
+    {% set savedDraftRadiosHtml %}
+      {{ govukRadios({
+        idPrefix: "runner-sign-in-saved-draft",
+        name: "runnerSignInSavedDraftId",
+        classes: "govuk-radios--small",
+        fieldset: {
+          legend: {
+            text: "Choose a saved form",
+            classes: "govuk-fieldset__legend--s"
+          }
+        },
+        hint: {
+          text: "These forms have not been submitted yet."
+        },
+        errorMessage: { text: error.runnerSignInSavedDraftId } if (error and error.runnerSignInSavedDraftId) else null,
+        items: savedDraftRadioItems
+      }) }}
+    {% endset %}
+
+    <form class="form" action="/runner-sign-in/what-do-you-want-to-do" method="post">
+      {{ govukRadios({
+        idPrefix: "runner-sign-in-intent",
+        name: "runnerSignInIntent",
+        fieldset: {
+          legend: {
+            text: "What do you want to do?",
+            isPageHeading: true,
+            classes: "govuk-fieldset__legend--l"
+          }
+        },
+        errorMessage: { text: error.runnerSignInIntent } if (error and error.runnerSignInIntent) else null,
+        items: [
+          {
+            value: "new",
+            text: "Start a new form",
+            hint: {
+              text: "You can save your progress at any point"
+            },
+            checked: (data.runnerSignInIntent == "new")
+          },
+          {
+            value: "resume",
+            text: "Resume a saved form",
+            hint: {
+              text: "Continue a form you saved before"
+            },
+            checked: (data.runnerSignInIntent == "resume"),
+            conditional: {
+              html: savedDraftRadiosHtml
+            }
+          }
+        ]
+      }) }}
+
+      {{ govukButton({ text: "Continue" }) }}
+    </form>
+  </div>
+</div>
+{% endblock %}
