@@ -1,0 +1,61 @@
+{% extends "layouts/runner-sign-in-v2.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}
+Sign in to check this form – GOV.UK
+{% endblock %}
+
+{% block header %}
+  {{ v2.v2ServiceHeader("start", { showServiceNav: false }) }}
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ href: backUrl, text: "Back" }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {# <span class="govuk-caption-l">Checker{% if formName %} · {{ formName }}{% elif application and application.formName %} · {{ application.formName }}{% endif %}</span> #}
+    <h1 class="govuk-heading-l">Create a sign in or sign in to check this form</h1>
+
+    {{ govukSummaryList({
+      rows: [
+        {
+          key: { text: "Form" },
+          value: { text: formName }
+        },
+        {
+          key: { text: "Requested by" },
+          value: { text: ("applicant@example.com") }
+        }
+      ]
+    }) }}
+
+    <p class="govuk-body">You need to sign in so we can confirm who you are before you see the applicant’s answers.</p>
+
+    <p class="govuk-body">Signing in means you can also save and your progress and come back later.</p>
+
+    <h2 class="govuk-heading-m">You’ll need</h2>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>an email address</li>
+      <li>a UK mobile phone number (used to recover your sign in)</li>
+    </ul>
+
+    {{ govukButton({
+      text: "Create your sign in",
+      href: "/runner-sign-in-v2/create-sign-in/email?formKey=" + (formKey | urlencode) + "&applicationId=" + (applicationId | urlencode) + "&next=" + (next | urlencode)
+    }) }}
+
+    <div>
+      {{ govukButton({
+        text: "Sign in",
+        href: "/runner-sign-in-v2/sign-in/email?formKey=" + (formKey | urlencode) + "&applicationId=" + (applicationId | urlencode) + "&next=" + (next | urlencode),
+        classes: "govuk-button--secondary"
+      }) }}
+    </div>
+  </div>
+</div>
+{% endblock %}

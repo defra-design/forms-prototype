@@ -1,0 +1,66 @@
+{% extends "layouts/runner-sign-in-v2.html" %}
+{% from "components/govuk-otp-input/macro.njk" import govukOtpInput %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% from "govuk/components/details/macro.njk" import govukDetails %}
+
+{% block pageTitle %}Enter security code – GOV.UK{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ href: backUrl, text: "Back" }) }}
+{% endblock %}
+
+{% block header %}
+  {{ govukHeader({ serviceName: "GOV.UK", serviceUrl: "https://www.gov.uk/" }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% if error and error.runnerSignInV2Code %}
+      {{ govukErrorSummary({ titleText: "There is a problem", errorList: [{ text: error.runnerSignInV2Code, href: "#v2-code" }] }) }}
+    {% endif %}
+    <h1 class="govuk-heading-l">Check your email</h1>
+    {{ govukInsetText({ html: "We have sent an email to: <strong>" + (checkerEmail | e) + "</strong>" }) }}
+
+    <p class="govuk-body">The email contains a 6 digit security code.</p>
+    <p class="govuk-body">
+      Your email might take a few minutes to arrive. If you do not get an email, check your spam folder.
+    </p>
+    <p class="govuk-body">The code will expire after one hour.</p>
+    <form method="post" action="/runner-sign-in-v2/checker/check-email" autocomplete="off" novalidate>
+      <input type="hidden" name="token" value="{{ token }}" />
+      {% if allowApplicant %}
+        <input type="hidden" name="allowApplicant" value="1" />
+      {% endif %}
+      {{ govukOtpInput({
+        id: "v2-code",
+        name: "runnerSignInV2Code",
+        maxLength: 6,
+        pattern: "[0-9]",
+        fieldset: { legend: { text: "Enter the 6 digit security code", classes: "govuk-fieldset__legend--s" } },
+        errorMessage: { text: error.runnerSignInV2Code } if error and error.runnerSignInV2Code else false,
+        value: values.runnerSignInV2Code
+      }) }}
+      {{ govukButton({ text: "Continue" }) }}
+    </form>
+
+    {% set problemsHtml %}
+      <p class="govuk-body">
+        If you do not get an email, check your spam folder and try again.
+      </p>
+    {% endset %}
+
+    {{ govukDetails({
+      summaryText: "Problems with the code?",
+      html: problemsHtml
+    }) }}
+  </div>
+</div>
+{% endblock %}
+
+{% block pageScripts %}
+  <script src="/public/javascripts/govuk-otp-input.js"></script>
+{% endblock %}

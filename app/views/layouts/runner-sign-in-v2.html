@@ -1,0 +1,26 @@
+{#
+Runner sign-in v2 layout.
+
+This isolates footer / start-link behaviour to v2 templates, without changing
+other areas that still rely on layouts/runner.html.
+#}
+
+{% extends "layouts/runner.html" %}
+
+{% block footer %}
+  {{ govukFooter({
+    meta: {
+      items: [
+        {
+          href: "/runner-sign-in-v2/start-page",
+          text: "Start of prototype"
+        },
+        {
+          href: "/manage-prototype/clear-data",
+          text: "Clear data"
+        }
+      ]
+    }
+  }) }}
+{% endblock %}
+

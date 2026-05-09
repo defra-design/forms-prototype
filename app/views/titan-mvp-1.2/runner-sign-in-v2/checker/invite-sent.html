@@ -1,0 +1,27 @@
+{% extends "layouts/runner-sign-in-v2.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+{% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}Invite sent – GOV.UK{% endblock %}
+
+{% block beforeContent %}{% endblock %}
+
+{% block header %}{{ v2.v2ServiceHeader("") }}{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% set bannerHtml %}<h3 class="govuk-notification-banner__heading">Invite sent to {{ checkerEmail }}</h3><p class="govuk-body govuk-!-margin-bottom-0">We’ll let you know when they’ve finished checking.</p>{% endset %}
+    {{ govukNotificationBanner({ type: "success", html: bannerHtml }) }}
+
+    <h1 class="govuk-heading-l">What happens next</h1>
+    <p class="govuk-body">The checker will confirm their email, enter a security code, then review your answers.</p>
+
+    <div class="govuk-button-group">
+      {{ govukButton({ text: "Back to Manage your form", href: manageUrl }) }}
+      {{ govukButton({ text: "Save and exit", href: saveExitUrl, classes: "govuk-button--secondary" }) }}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "layouts/runner-sign-in-v2.html" %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}Get someone to check the form – GOV.UK{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ href: backUrl, text: "Back" }) }}
+{% endblock %}
+
+{% block header %}{{ v2.v2ServiceHeader("") }}{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% if error and error.runnerSignInV2CheckerEmail %}
+      {{ govukErrorSummary({ titleText: "There is a problem", errorList: [{ text: error.runnerSignInV2CheckerEmail, href: "#checker-email" }] }) }}
+    {% endif %}
+    <span class="govuk-caption-l">{{ application.formName }}</span>
+    <h1 class="govuk-heading-l">Get someone to check the form</h1>
+    <p class="govuk-body">Enter the checker’s email address. They’ll get a link to confirm their email, enter a security code, then review your answers.</p>
+    <form method="post" action="/runner-sign-in-v2/forms/{{ application.formKey }}/{{ application.id }}/checker/invite" novalidate>
+      {{ govukInput({
+        label: { text: "Checker’s email address" },
+        id: "checker-email",
+        name: "runnerSignInV2CheckerEmail",
+        type: "email",
+        autocomplete: "email",
+        spellcheck: false,
+        value: values.runnerSignInV2CheckerEmail,
+        errorMessage: { text: error.runnerSignInV2CheckerEmail } if error and error.runnerSignInV2CheckerEmail else false
+      }) }}
+      {{ govukButton({ text: "Send invite" }) }}
+    </form>
+    <p class="govuk-body govuk-!-margin-top-4">
+      <a class="govuk-link" href="/runner-sign-in-v2/emails/checker-invite-v2?formKey={{ application.formKey | urlencode }}&amp;applicationId={{ application.id | urlencode }}">View checker email (prototype only)</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

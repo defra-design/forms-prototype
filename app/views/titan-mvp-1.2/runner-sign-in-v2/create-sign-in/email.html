@@ -1,0 +1,52 @@
+{% extends "layouts/runner-sign-in-v2.html" %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}Create a sign-in: email – GOV.UK{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ href: backUrl, text: "Back" }) }}
+{% endblock %}
+
+{% block header %}{{ v2.v2ServiceHeader("") }}{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% if error and error.runnerSignInV2Email %}
+      {{ govukErrorSummary({ titleText: "There is a problem", errorList: [{ text: error.runnerSignInV2Email, href: "#v2-email" }] }) }}
+    {% endif %}
+    <form method="post" action="/runner-sign-in-v2/create-sign-in/email" novalidate>
+      <input type="hidden" name="formKey" value="{{ formKey }}" />
+      <input type="hidden" name="applicationId" value="{{ applicationId }}" />
+      <input type="hidden" name="next" value="{{ next | e }}" />
+      {{ govukInput({
+        label: { text: "Enter your email address", classes: "govuk-label--l" },
+        id: "v2-email",
+        name: "runnerSignInV2Email",
+        type: "email",
+        autocomplete: "email",
+        isPageHeading: true,
+        spellcheck: false,
+        value: values.runnerSignInV2Email,
+        errorMessage: { text: error.runnerSignInV2Email } if error and error.runnerSignInV2Email else false
+      }) }}
+      <h2 class="govuk-heading-m govuk-!-margin-top-6">Agree to the terms and conditions</h2>
+      <p class="govuk-body">
+        By continuing, you confirm that you agree to our
+        <a class="govuk-link" target="_blank" rel="noreferrer noopener" href="/runner-sign-in/terms">terms and conditions (opens in new tab)</a>.
+      </p>
+      <p class="govuk-body">
+        To find out how we use your personal information, see our
+        <a class="govuk-link" target="_blank" rel="noreferrer noopener" href="/runner-sign-in/privacy">privacy notice (opens in new tab)</a>.
+      </p>
+      {{ govukButton({ text: "Continue" }) }}
+    </form>
+
+
+  </div>
+</div>
+{% endblock %}

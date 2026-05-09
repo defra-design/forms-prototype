@@ -1,0 +1,27 @@
+{% extends "layouts/runner-sign-in-v2.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}Resume your form – GOV.UK{% endblock %}
+
+{% block beforeContent %}{% endblock %}
+
+{% block header %}{{ v2.v2ServiceHeader("") }}{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <span class="govuk-caption-l">Save and exit</span>
+    <h1 class="govuk-heading-l">Welcome back</h1>
+    <p class="govuk-body">You opened the link from your save and exit email. Sign in to resume your form.</p>
+    {{ govukButton({
+      text: "Sign in to continue",
+      href: signInUrl,
+      isStartButton: true
+    }) }}
+    <p class="govuk-body govuk-!-margin-top-4">
+      <a class="govuk-link" href="/runner-sign-in-v2/emails/save-and-exit?variant=with-sign-in&amp;formKey={{ formKey | urlencode }}&amp;applicationId={{ applicationId | urlencode }}">View the email (prototype only)</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

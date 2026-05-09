@@ -1,0 +1,119 @@
+{% extends "layouts/main.html" %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+
+{% block pageTitle %}
+Security code email – prototype
+{% endblock %}
+
+{% block head %}
+  {{ super() }}
+  <style>
+    .email-message {
+      border: 1px solid #b1b4b6;
+      padding: 20px;
+      background: #ffffff;
+    }
+
+    .email-message-meta {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .email-message-meta th,
+    .email-message-meta td {
+      padding: 8px 0;
+      border-bottom: 1px solid #b1b4b6;
+      vertical-align: top;
+      text-align: left;
+    }
+
+    .email-message-meta th {
+      width: 90px;
+      font-weight: 700;
+    }
+
+    .placeholder-no-brackets {
+      display: inline-block;
+      padding: 0 4px;
+    }
+
+  </style>
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l govuk-!-margin-top-6">
+      Your security code{% if formName %} for <strong>'{{ formName }}'</strong>{% endif %}
+    </h1>
+
+    <div class="email-message">
+      <table class="email-message-meta">
+        <tbody>
+          <tr>
+            <th scope="row">From</th>
+            <td>Forms prototype</td>
+          </tr>
+          <tr>
+            <th scope="row">To</th>
+            <td>
+              {% if toEmail %}
+                {{ toEmail }}
+              {% else %}
+                <span class="placeholder-no-brackets" style="background: #fd0;">Email address</span>
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">Subject</th>
+            <td>Your security code{% if formName %} for {{ formName }}{% endif %}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="email-message-body govuk-!-margin-top-2 govuk-!-margin-bottom-0">
+        <p class="govuk-body">
+          Use this security code to confirm your email address{% if formName %} for <strong>{{ formName }}</strong>{% endif %}.
+        </p>
+
+        {{ govukInsetText({
+          html: "<strong>" + (code | e) + "</strong>"
+        }) }}
+
+        <p class="govuk-body">The code will expire after one hour.</p>
+
+        <p class="govuk-body">
+          If you did not request this, you can ignore this email.
+        </p>
+
+        <hr class="govuk-section-break govuk-section-break--visible govuk-!-margin-bottom-4 govuk-!-margin-top-4">
+
+        <p class="govuk-body govuk-!-margin-bottom-6">Do not reply to this email - it’s an automatic message from an unmonitored account.</p>
+
+        <hr class="govuk-section-break govuk-section-break--visible govuk-!-margin-bottom-4 govuk-!-margin-top-4">
+
+        <h2 class="govuk-heading-m">Eich cod diogelwch</h2>
+
+        <p class="govuk-body">
+          Defnyddiwch y cod diogelwch hwn i gadarnhau eich cyfeiriad e-bost{% if formName %} ar gyfer <strong>{{ formName }}</strong>{% endif %}.
+        </p>
+
+        {{ govukInsetText({
+          html: "<strong>" + (code | e) + "</strong>"
+        }) }}
+
+        <p class="govuk-body">Bydd y cod yn dod i ben ar ôl un awr.</p>
+
+        <p class="govuk-body">
+          Os na wnaethoch ofyn am hyn, gallwch anwybyddu’r e-bost hwn.
+        </p>
+
+        <hr class="govuk-section-break govuk-section-break--visible govuk-!-margin-bottom-4 govuk-!-margin-top-4">
+
+        <p class="govuk-body govuk-!-margin-bottom-6">Peidiwch ag ymateb i’r e-bost hwn – mae’n neges awtomatig o gyfrif heb ei fonitro.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

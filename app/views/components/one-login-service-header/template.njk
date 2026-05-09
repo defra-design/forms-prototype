@@ -17,8 +17,8 @@ Local overrides:
 {%- from "node_modules/govuk-frontend/dist/govuk/components/service-navigation/macro.njk" import govukServiceNavigation -%}
 {%- set lngQueryString = "?lng=cy" if (params.lng === "cy") else "" -%}
 {%- set signOutLinkText = "Allgofnodi" if (params.lng === "cy") else "Sign out" -%}
-{%- set oneLoginLink = params.oneLoginLink if params.oneLoginLink else (["https://home.account.gov.uk", lngQueryString] | join) -%}
 {%- set homepageLink = params.homepageLink if params.homepageLink else "https://www.gov.uk/" -%}
+{%- set oneLoginLink = params.oneLoginLink if params.oneLoginLink else homepageLink -%}
 {%- set signOutLink = params.signOutLink if params.signOutLink else (["https://home.account.gov.uk/sign-out", lngQueryString] | join) -%}
 {%- set oneLoginLinkText = params.oneLoginLinkText if params.oneLoginLinkText else "GOV.UK One Login" -%}
 {%- set oneLoginMenuLabel = params.oneLoginMenuLabel if params.oneLoginMenuLabel else oneLoginLinkText -%}

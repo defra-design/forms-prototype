@@ -7,6 +7,7 @@ https://prototype-kit.service.gov.uk/docs/how-to-use-layouts
 {% set govukRebrand = true %}
 {% set bodyClasses = "govuk-template__body" %}
 {% set bodyAttributes = {"data-module": "edge"} %}
+{% import "components/one-login-service-header/service-header.njk" as oneLoginHeader %}
 
 {% block head %}
 {{ super() }}
@@ -43,12 +44,36 @@ https://prototype-kit.service.gov.uk/docs/how-to-use-layouts
 
 {% block header %}
 {% set _serviceStartUrl = runnerStartUrl or "/titan-mvp-1.2/runner/questions/start.html" %}
+{% set _formName = "" %}
+{% if application and application.formName %}
+  {% set _formName = application.formName %}
+{% elseif formDef and formDef.formName %}
+  {% set _formName = formDef.formName %}
+{% elseif data and data.formName %}
+  {% set _formName = data.formName %}
+{% endif %}
 
-{{ govukHeader({
-  homepageUrl: "#",
-  serviceName: "Register as a unicorn breeder",
-  serviceUrl: _serviceStartUrl
-}) }}
+{% if data and data.runnerSignInAuthed and data.runnerSignInV2ManageUrl %}
+  {{ oneLoginHeader.govukOneLoginServiceHeader({
+    signOutLink: "/titan-mvp-1.2/roles/sign-out",
+    homepageLink: data.runnerSignInV2ManageUrl,
+    oneLoginLink: data.runnerSignInV2ManageUrl,
+    oneLoginLinkText: (data.runnerSignInEmail or "you@example.com"),
+    serviceNavigationParams: {
+      serviceName: "Manage your forms",
+      navigation: [
+        { href: data.runnerSignInV2ManageUrl, text: "Forms", active: true },
+        { href: data.runnerSignInV2ManageUrl, text: "Security" }
+      ]
+    }
+  }) }}
+{% else %}
+  {{ govukHeader({
+    homepageUrl: "#",
+    serviceName: (_formName if _formName else "Register as a unicorn breeder"),
+    serviceUrl: _serviceStartUrl
+  }) }}
+{% endif %}
 {% endblock %}
 
 {% block footer %}

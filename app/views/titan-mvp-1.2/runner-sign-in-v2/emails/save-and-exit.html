@@ -1,0 +1,16 @@
+{% extends "layouts/main.html" %}
+
+{% block pageTitle %}Email: Save and exit – prototype{% endblock %}
+
+{% block content %}
+<div class="govuk-width-container govuk-!-margin-top-6">
+  <h1 class="govuk-heading-l">Save and exit email (prototype)</h1>
+  <p class="govuk-body">Variant: <strong>{{ variant }}</strong></p>
+  <div class="govuk-inset-text">
+    <p class="govuk-body"><strong>Subject:</strong> Continue your form</p>
+    <p class="govuk-body"><strong>To:</strong> {{ resumeEmail }}</p>
+    <p class="govuk-body"><strong>Link:</strong> <a class="govuk-link" href="{{ resumeUrl }}">{{ resumeUrl }}</a></p>
+  </div>
+  <p class="govuk-body"><a class="govuk-link" href="{{ manageUrl }}">Manage your form</a></p>
+</div>
+{% endblock %}

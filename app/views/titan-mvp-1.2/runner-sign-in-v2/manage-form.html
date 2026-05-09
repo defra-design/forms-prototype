@@ -1,0 +1,81 @@
+{% extends "layouts/runner-sign-in-v2.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/table/macro.njk" import govukTable %}
+{% from "govuk/components/tag/macro.njk" import govukTag %}
+{% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}Manage your form – {{ application.formName }} – GOV.UK{% endblock %}
+
+{% block beforeContent %}{% endblock %}
+
+{% block header %}{{ v2.v2ServiceHeader("forms") }}{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-full">
+    {% if query and query.submitted %}
+      {{ govukNotificationBanner({ type: "success", html: "<p class=\"govuk-notification-banner__heading\">Form submitted</p>" }) }}
+    {% endif %}
+    {% if query and query.cloned %}
+      {{ govukNotificationBanner({ type: "success", html: "<p class=\"govuk-notification-banner__heading\">Form copied</p>" }) }}
+    {% endif %}
+
+    <span class="govuk-caption-l">Manage your form</span>
+    <h1 class="govuk-heading-xl">{{ application.formName }}</h1>
+
+    {{ govukButton({
+      text: "Start a new form",
+      href: startNewUrl,
+      classes: "govuk-button--secondary"
+    }) }}
+
+    {% set rows = [] %}
+    {% for r in (tableRows or [tableRow]) %}
+      {% set statusTagHtml = govukTag({ text: r.statusText, classes: r.statusTagClasses }) %}
+      {% set rows = (rows.push([
+        { text: r.reference },
+        { html: statusTagHtml },
+        { text: r.lastUpdatedText },
+        { text: r.expiryText },
+        { html: r.actionsHtml }
+      ]), rows) %}
+    {% endfor %}
+
+    {{ govukTable({
+      head: [
+        { text: "Reference number" },
+        { text: "Status" },
+        { text: "Last updated" },
+        { text: "Saved until" },
+        { text: "Actions" }
+      ],
+      rows: rows
+    }) }}
+
+    {% if checkingRequired and tableRow.statusText != "Submitted" %}
+      {% set protoHtml %}
+        <p class="govuk-body">Jump into the checker journey for this application.</p>
+        <ul class="govuk-list govuk-list--bullet">
+          {# <li><a class="govuk-link" href="{{ checkerInviteUrl }}">Invite a checker (applicant journey)</a></li> #}
+          {% if checkerStartUrl %}
+            <li><a class="govuk-link" href="{{ checkerStartUrl }}" target="_blank" rel="noreferrer noopener">Open checker journey (opens in new tab)</a></li>
+          {% endif %}
+          {% if checkerInviteEmailPreviewUrl %}
+            <li><a class="govuk-link" href="{{ checkerInviteEmailPreviewUrl }}" target="_blank" rel="noreferrer noopener">Preview checker invite email (opens in new tab)</a></li>
+          {% endif %}
+        </ul>
+      {% endset %}
+
+      <div class="govuk-!-margin-top-8">
+        {{ govukNotificationBanner({
+          type: "information",
+          titleText: "Prototype links",
+          html: protoHtml
+        }) }}
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends "layouts/runner-sign-in-v2.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}
+Why you need to sign in – Runner sign-in v2 – GOV.UK
+{% endblock %}
+
+{% block header %}
+  {{ v2.v2ServiceHeader("start") }}
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ href: backUrl, text: "Back" }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <span class="govuk-caption-l">{{ application.formName }}</span>
+    <h1 class="govuk-heading-l">Sign in to use this form</h1>
+
+    <p class="govuk-body">Signing in means you can:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>save your progress and come back later</li>
+      <li>continue a form you’ve already started</li>
+      <li>reuse answers from previous submissions (if you have any)</li>
+    </ul>
+
+    <h2 class="govuk-heading-m">You’ll need</h2>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>an email address</li>
+      <li>a UK mobile phone number (used to recover your sign-in)</li>
+    </ul>
+
+    {{ govukButton({
+      text: "Create your sign in",
+      href: "/runner-sign-in-v2/create-sign-in/email?formKey=" + (formKey | urlencode) + "&applicationId=" + (applicationId | urlencode) + "&next=" + (next | urlencode)
+    }) }}
+
+    <div>
+      {{ govukButton({
+        text: "Sign in",
+        href: "/runner-sign-in-v2/sign-in/email?formKey=" + (formKey | urlencode) + "&applicationId=" + (applicationId | urlencode) + "&next=" + (next | urlencode),
+        classes: "govuk-button--secondary"
+      }) }}
+    </div>
+
+    <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+    <h2 class="govuk-heading-m">Other ways to use this service</h2>
+    <p class="govuk-body">
+      You can complete this form without signing in, but you will not be able to reuse answers from previous submissions.
+    </p>
+    <p class="govuk-body">
+      <a class="govuk-link" href="{{ next }}">Continue without signing in</a>
+    </p>
+  </div>
+</div>
+{% endblock %}
+

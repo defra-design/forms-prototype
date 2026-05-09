@@ -65,35 +65,30 @@ Checker invite email – prototype
           </tr>
           <tr>
             <th scope="row">Subject</th>
-            <td>
-              {% if tokenValid %}
-                Please check this form{% if formName %}: {{ formName }}{% endif %}
-              {% else %}
-                Please check this form
-              {% endif %}
-            </td>
+            <td>Please check this form{% if formName %}: {{ formName }}{% endif %}</td>
           </tr>
         </tbody>
       </table>
 
       <div class="email-message-body govuk-!-margin-top-2 govuk-!-margin-bottom-0">
-        {% if not tokenValid %}
-          <p class="govuk-body">This link is invalid or has expired.</p>
-        {% else %}
+        {% if checkerUrl %}
           <p class="govuk-body">
-            You@example.com has asked you to check their answers before they can submit a form for{% if formName %} '{{ formName }}'{% endif %}.
+            Someone has asked you to check their answers before they can submit a form{% if formName %} (<strong>{{ formName }}</strong>){% endif %}.
           </p>
+
+          {{ govukInsetText({
+            html: "<p class=\"govuk-body govuk-!-margin-bottom-0\">Open the checker journey: <a class=\"govuk-link\" href=\"" ~ checkerUrl ~ "\">" ~ checkerUrl ~ "</a></p>"
+          }) }}
 
           <p class="govuk-body">When you open the link you’ll need to:</p>
           <ul class="govuk-list govuk-list--bullet">
-            <li>create a sign in, or sign in if you already have one.</li>
-              <li>you must use the same email address this message was sent to.</li>
-            <li>confirm your email address using the security code we send you.</li>
+            <li>create a sign in, or sign in if you already have one — use the <strong>same email address this message was sent to</strong></li>
+            <li>confirm your email address using the security code we send you</li>
           </ul>
 
-          {{ govukInsetText({
-            html: "<p class=\"govuk-body govuk-!-margin-bottom-0\">Start checking the form: <a class=\"govuk-link\" href=\"" ~ checkUrl ~ "\">" ~ checkUrl ~ "</a></p>"
-          }) }}
+          <p class="govuk-body">
+            You’ll be able to review their answers. In this prototype they cannot edit the applicant’s answers for you.
+          </p>
 
           <p class="govuk-body">Do not forward this email or share the link with anyone else.</p>
 
@@ -109,7 +104,7 @@ Checker invite email – prototype
           </p>
 
           {{ govukInsetText({
-            html: "<p class=\"govuk-body govuk-!-margin-bottom-0\">Agor y daith wirio: <a class=\"govuk-link\" href=\"" ~ checkUrl ~ "\">" ~ checkUrl ~ "</a></p>"
+            html: "<p class=\"govuk-body govuk-!-margin-bottom-0\">Agor y daith wirio: <a class=\"govuk-link\" href=\"" ~ checkerUrl ~ "\">" ~ checkerUrl ~ "</a></p>"
           }) }}
 
           <p class="govuk-body">Pan fyddwch yn agor y ddolen bydd angen i chi:</p>
@@ -123,6 +118,8 @@ Checker invite email – prototype
           <hr class="govuk-section-break govuk-section-break--visible govuk-!-margin-bottom-4 govuk-!-margin-top-4">
 
           <p class="govuk-body govuk-!-margin-bottom-6">Peidiwch ag ymateb i’r e-bost hwn – mae’n neges awtomatig o gyfrif heb ei fonitro.</p>
+        {% else %}
+          <p class="govuk-body">This preview needs a valid checker link. Open it from a form that has checking enabled.</p>
         {% endif %}
       </div>
     </div>

@@ -1,0 +1,23 @@
+{% extends "layouts/runner-sign-in-v2.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}Save and exit – GOV.UK{% endblock %}
+
+{% block beforeContent %}{% endblock %}
+
+{% block header %}{{ v2.v2ServiceHeader("") }}{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <span class="govuk-caption-l">Save and exit</span>
+    <h1 class="govuk-heading-l">We’ve emailed you a link to come back</h1>
+    <p class="govuk-body">You can close this tab now. When you’re ready to continue, use the link in the email — you’ll be asked to sign in.</p>
+    <p class="govuk-body">
+      <a class="govuk-link" href="/runner-sign-in-v2/emails/save-and-exit?variant=with-sign-in&amp;formKey={{ formKey | urlencode }}&amp;applicationId={{ applicationId | urlencode }}">View the email (prototype only)</a>
+    </p>
+    {{ govukButton({ text: "Go to Manage your form", href: manageUrl, classes: "govuk-button--secondary" }) }}
+  </div>
+</div>
+{% endblock %}

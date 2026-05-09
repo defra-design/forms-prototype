@@ -1,0 +1,109 @@
+{% extends "layouts/runner-sign-in-v2.html" %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}Your form has been checked – {{ application.formName }} – GOV.UK{% endblock %}
+
+{% block header %}
+  {{ v2.v2ServiceHeader("forms", { formName: application.formName }) }}
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ href: manageUrl, text: "Back" }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% set bannerHtml %}
+      <p class="govuk-notification-banner__heading">
+        Your form has been checked and is ready to be submitted.
+      </p>
+    {% endset %}
+
+    {{ govukNotificationBanner({
+      html: bannerHtml
+    }) }}
+
+    <h2 class="govuk-heading-l">Your answers</h2>
+
+    <h2 class="govuk-heading-m">Contact details</h2>
+    <dl class="govuk-summary-list govuk-!-margin-bottom-6">
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Name</dt>
+        <dd class="govuk-summary-list__value">{{ contactName }}</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Email</dt>
+        <dd class="govuk-summary-list__value">{{ contactEmail }}</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Phone number</dt>
+        <dd class="govuk-summary-list__value">{{ phoneNumber }}</dd>
+      </div>
+    </dl>
+
+    <h2 class="govuk-heading-m">Application details</h2>
+    <dl class="govuk-summary-list govuk-!-margin-bottom-7">
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Organisation name</dt>
+        <dd class="govuk-summary-list__value">{{ organisationName }}</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Organisation type</dt>
+        <dd class="govuk-summary-list__value">{{ organisationType }}</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Amount requested</dt>
+        <dd class="govuk-summary-list__value">{{ amountRequested }}</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Project summary</dt>
+        <dd class="govuk-summary-list__value">{{ projectSummary }}</dd>
+      </div>
+    </dl>
+
+    <form class="form" action="/runner-sign-in/forms/{{ application.formKey }}/{{ application.id }}/submit" method="post">
+
+      <h2 class="govuk-heading-m">Details of the person who checked your form</h2>
+
+      {{ govukSummaryList({
+        classes: "govuk-!-margin-bottom-4",
+        rows: [
+          {
+            key: { text: "Checked by" },
+            value: { text: checkedByContact }
+          },
+          {
+            key: { text: "Checked on" },
+            value: { text: checkedOnText }
+          },
+          {
+            key: { text: "Declaration" },
+            value: { text: checkedDeclarationText }
+          }
+        ]
+      }) }}
+
+      {{ govukButton({
+        text: "Submit"
+      }) }}
+    </form>
+
+    <h2 class="govuk-heading-m">Change your answers</h2>
+    <p class="govuk-body">
+      If you change your answers, you must send the form for checking again before you can submit it.
+    </p>
+
+    <form class="form" action="/runner-sign-in/forms/{{ application.formKey }}/{{ application.id }}/send-for-checking/return-for-changes" method="post">
+      {{ govukButton({
+        text: "Change your answers",
+        classes: "govuk-button--secondary"
+      }) }}
+    </form>
+  </div>
+</div>
+{% endblock %}

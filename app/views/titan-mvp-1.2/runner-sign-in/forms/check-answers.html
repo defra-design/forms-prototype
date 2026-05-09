@@ -1,6 +1,7 @@
 {% extends "layouts/runner.html" %}
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
 {% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
 {% import "components/one-login-service-header/service-header.njk" as oneLoginHeader %}
 
@@ -31,6 +32,22 @@ Check your answers – {{ formDef.formName }} – GOV.UK
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
     <h1 class="govuk-heading-xl">Check your answers</h1>
+
+    {% if copied and application.copiedFrom %}
+      {{ govukNotificationBanner({
+        titleText: "Important",
+        html: "
+          <p class='govuk-notification-banner__heading'>These answers were copied from a previous submission:</p>
+          <p class='govuk-body'>
+            <strong>Form:</strong> " ~ (application.copiedFrom.formName or application.formName) ~ "<br>
+            <strong>Reference number:</strong> " ~ (application.copiedFrom.reference or "Not provided") ~ "
+          </p>
+          <p class='govuk-body'>
+            You’re completing a new form using these answers. Changing them will not affect the earlier submission.
+          </p>
+        "
+      }) }}
+    {% endif %}
 
     {% if application.formKey == "change-contact-details" %}
       {{ govukSummaryList({
@@ -119,6 +136,7 @@ Check your answers – {{ formDef.formName }} – GOV.UK
       }) }}
     {% elif application.formKey == "apply-small-grant" %}
       {{ govukSummaryList({
+        classes: "govuk-!-margin-bottom-9",
         rows: [
           {
             key: { text: "Organisation name" },
@@ -153,10 +171,27 @@ Check your answers – {{ formDef.formName }} – GOV.UK
       {% set checkingStatus = (application.checking.status if application.checking and application.checking.status else "not_started") %}
 
       {% if checkingStatus != "checked" %}
-        <h2 class="govuk-heading-m govuk-!-margin-top-6">Before you can submit this form</h2>
+        <h2 class="govuk-heading-m">Your form must be checked before you can submit it
+        </h2>
         <p class="govuk-body">
-          You cannot submit this form until someone else has checked it.
-        </p>
+          You’ll need their email address so we can send them a link to check your answers.</p>
+
+          <p class="govuk-body">You can submit the form once they have finished checking it.
+
+          </p>
+
+        {# <ol class="govuk-list govuk-list--number">
+          <li>
+            <p class="govuk-body">
+              On the next screen you’ll enter the details of the person checking your form.
+            </p>
+          </li>
+          <li>
+            <p class="govuk-body govuk-!-margin-bottom-0">
+              We’ll email you the details you need to access the form again while it is being checked.
+            </p>
+          </li>
+        </ol> #}
 
         {% if checkingStatus == "awaiting_check" %}
           <p class="govuk-body">
@@ -164,32 +199,49 @@ Check your answers – {{ formDef.formName }} – GOV.UK
           </p>
         {% endif %}
 
-        <div class="govuk-button-group govuk-!-margin-top-4">
-          <form class="govuk-button-group__item" method="post" action="{{ baseHref }}/send-for-checking">
-            {{ govukButton({ text: "Send for checking" }) }}
-          </form>
+        <form method="post" action="{{ baseHref }}/send-for-checking">
+          <div class="govuk-button-group">
+            {{ govukButton({
+              text: "Invite someone to check your form",
+              classes: "govuk-button--primary govuk-!-margin-top-4 govuk-!-margin-bottom-0"
+            }) }}
+            {{ govukButton({
+              text: "Save and exit",
+              classes: "govuk-button--secondary",
+              href: "/runner-sign-in/applications"
+            }) }}
+          </div>
+        </form>
 
-          <a class="govuk-link govuk-button-group__item" href="/runner-sign-in/applications">Save and exit</a>
-
-          {% if checkingStatus == "awaiting_check" %}
-            <span class="govuk-button-group__item govuk-body govuk-!-margin-bottom-0 govuk-!-margin-right-2">or</span>
-            <a class="govuk-link govuk-button-group__item" href="{{ baseHref }}/send-for-checking">Manage checking</a>
-          {% endif %}
-        </div>
+        {% if checkingStatus == "awaiting_check" %}
+          <p class="govuk-body govuk-!-margin-top-4">
+            <a class="govuk-link" href="{{ baseHref }}/send-for-checking">Manage checking</a>
+          </p>
+        {% endif %}
       {% else %}
-        <form method="post" action="{{ baseHref }}/submit" class="govuk-!-margin-top-6">
-          {{ govukButton({ text: "Submit form" }) }}
+        <form method="post" action="{{ baseHref }}/submit">
+          <div class="govuk-button-group">
+            {{ govukButton({
+              text: "Submit form",
+              classes: "govuk-button--primary govuk-!-margin-top-4 govuk-!-margin-bottom-0"
+            }) }}
+            {{ govukButton({
+              text: "Save and exit",
+              classes: "govuk-button--secondary",
+              href: "/runner-sign-in/applications"
+            }) }}
+          </div>
         </form>
       {% endif %}
     {% else %}
       <form method="post" action="{{ baseHref }}/submit" class="govuk-!-margin-top-6">
         {{ govukButton({ text: "Submit form" }) }}
       </form>
-    {% endif %}
 
-    <p class="govuk-body">
-      <a class="govuk-link" href="/runner-sign-in/applications">Save and exit</a>
-    </p>
+      <p class="govuk-body">
+        <a class="govuk-link" href="/runner-sign-in/applications">Save and exit</a>
+      </p>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

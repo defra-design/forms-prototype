@@ -2,7 +2,7 @@
 {% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
 
 {% block pageTitle %}
-Checker invite email – prototype
+Your form has been checked – email prototype
 {% endblock %}
 
 {% block head %}
@@ -43,7 +43,7 @@ Checker invite email – prototype
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
     <h1 class="govuk-heading-l govuk-!-margin-top-6">
-      Checker invite{% if formName %} for <strong>'{{ formName }}'</strong>{% endif %}
+      Your form has been checked{% if formName %} for <strong>'{{ formName }}'</strong>{% endif %}
     </h1>
 
     <div class="email-message">
@@ -65,37 +65,20 @@ Checker invite email – prototype
           </tr>
           <tr>
             <th scope="row">Subject</th>
-            <td>
-              {% if tokenValid %}
-                Please check this form{% if formName %}: {{ formName }}{% endif %}
-              {% else %}
-                Please check this form
-              {% endif %}
-            </td>
+            <td>Your form has been checked{% if formName %}: {{ formName }}{% endif %}</td>
           </tr>
         </tbody>
       </table>
 
       <div class="email-message-body govuk-!-margin-top-2 govuk-!-margin-bottom-0">
-        {% if not tokenValid %}
-          <p class="govuk-body">This link is invalid or has expired.</p>
-        {% else %}
+        {% if readyToSubmitUrl %}
           <p class="govuk-body">
-            You@example.com has asked you to check their answers before they can submit a form for{% if formName %} '{{ formName }}'{% endif %}.
+            The person checking your form has finished{% if formName %} (<strong>{{ formName }}</strong>){% endif %}. You can now review your answers and submit them.
           </p>
 
-          <p class="govuk-body">When you open the link you’ll need to:</p>
-          <ul class="govuk-list govuk-list--bullet">
-            <li>create a sign in, or sign in if you already have one.</li>
-              <li>you must use the same email address this message was sent to.</li>
-            <li>confirm your email address using the security code we send you.</li>
-          </ul>
-
           {{ govukInsetText({
-            html: "<p class=\"govuk-body govuk-!-margin-bottom-0\">Start checking the form: <a class=\"govuk-link\" href=\"" ~ checkUrl ~ "\">" ~ checkUrl ~ "</a></p>"
+            html: "<p class=\"govuk-body govuk-!-margin-bottom-0\">Submit your form: <a class=\"govuk-link\" href=\"" ~ readyToSubmitUrl ~ "\">" ~ readyToSubmitUrl ~ "</a></p>"
           }) }}
-
-          <p class="govuk-body">Do not forward this email or share the link with anyone else.</p>
 
           <hr class="govuk-section-break govuk-section-break--visible govuk-!-margin-bottom-4 govuk-!-margin-top-4">
 
@@ -103,26 +86,25 @@ Checker invite email – prototype
 
           <hr class="govuk-section-break govuk-section-break--visible govuk-!-margin-bottom-4 govuk-!-margin-top-4">
 
-          <h2 class="govuk-heading-m">Gwahoddiad i wirio ffurflen</h2>
+          <h2 class="govuk-heading-m">Mae eich ffurflen wedi'i gwirio</h2>
+
           <p class="govuk-body">
-            Mae rhywun wedi gofyn i chi wirio ei atebion cyn y gallant gyflwyno ffurflen{% if formName %} (<strong>{{ formName }}</strong>){% endif %}.
+            Mae'r person sy'n gwirio eich ffurflen wedi gorffen{% if formName %} (<strong>{{ formName }}</strong>){% endif %}. Gallwch nawr adolygu eich atebion a chyflwyno eich cais.
           </p>
 
           {{ govukInsetText({
-            html: "<p class=\"govuk-body govuk-!-margin-bottom-0\">Agor y daith wirio: <a class=\"govuk-link\" href=\"" ~ checkUrl ~ "\">" ~ checkUrl ~ "</a></p>"
+            html: "<p class=\"govuk-body govuk-!-margin-bottom-0\">Cyflwyno eich ffurflen: <a class=\"govuk-link\" href=\"" ~ readyToSubmitUrl ~ "\">" ~ readyToSubmitUrl ~ "</a></p>"
           }) }}
 
-          <p class="govuk-body">Pan fyddwch yn agor y ddolen bydd angen i chi:</p>
-          <ul class="govuk-list govuk-list--bullet">
-            <li>greu mewngofnodi, neu fewngofnodi os oes gennych un yn barod — defnyddiwch yr un cyfeiriad e-bost â’r neges hon</li>
-            <li>cadarnhau eich cyfeiriad e-bost gan ddefnyddio’r cod diogelwch y byddwn yn ei anfon atoch</li>
-          </ul>
-
-          <p class="govuk-body">Peidiwch â hail-anfon yr e-bost hwn na rhannu’r ddolen ag unrhyw un arall.</p>
+          <p class="govuk-body">
+            Os na wnaethoch ofyn i neb wirio eich ffurflen, cysylltwch â'r gwasanaeth gan ddefnyddio'r manylion ar GOV.UK.
+          </p>
 
           <hr class="govuk-section-break govuk-section-break--visible govuk-!-margin-bottom-4 govuk-!-margin-top-4">
 
           <p class="govuk-body govuk-!-margin-bottom-6">Peidiwch ag ymateb i’r e-bost hwn – mae’n neges awtomatig o gyfrif heb ei fonitro.</p>
+        {% else %}
+          <p class="govuk-body">This preview needs a submit link. Open it after completing the checker journey with a valid token.</p>
         {% endif %}
       </div>
     </div>

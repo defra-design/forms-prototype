@@ -1,0 +1,31 @@
+{% extends "layouts/runner-sign-in-v2.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}Recover my sign-in – GOV.UK{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ href: backUrl, text: "Back" }) }}
+{% endblock %}
+
+{% block header %}{{ v2.v2ServiceHeader("") }}{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <span class="govuk-caption-l">Recover my sign-in</span>
+    <h1 class="govuk-heading-l">We’ll text a security code to your mobile</h1>
+    <p class="govuk-body">We use the UK mobile number you gave us when you created your sign-in.</p>
+    {% if maskedMobile %}
+      <p class="govuk-body">Number on file ending <strong>{{ maskedMobile }}</strong></p>
+    {% endif %}
+    <form method="post" action="/runner-sign-in-v2/recover/start">
+      <input type="hidden" name="formKey" value="{{ formKey }}" />
+      <input type="hidden" name="applicationId" value="{{ applicationId }}" />
+      <input type="hidden" name="next" value="{{ next | e }}" />
+      {{ govukButton({ text: "Continue" }) }}
+    </form>
+  </div>
+</div>
+{% endblock %}

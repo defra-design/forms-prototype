@@ -1,0 +1,22 @@
+{% extends "layouts/runner-sign-in-v2.html" %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+
+{% block pageTitle %}Change answers – GOV.UK{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ href: backUrl, text: "Back" }) }}
+{% endblock %}
+
+{% block header %}
+  {{ govukHeader({ serviceName: "GOV.UK", serviceUrl: "https://www.gov.uk/" }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">Changing answers</h1>
+    <p class="govuk-body">In a live service the applicant would update their form. In this prototype, go back to the check answers page or close this window.</p>
+    <p class="govuk-body"><a class="govuk-link" href="{{ checkAnswersUrl }}">Back to check answers</a></p>
+  </div>
+</div>
+{% endblock %}

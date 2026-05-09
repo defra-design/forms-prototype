@@ -1,0 +1,55 @@
+{% extends "layouts/runner-sign-in-v2.html" %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}Sign in: email – GOV.UK{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ href: backUrl, text: "Back" }) }}
+{% endblock %}
+
+{% block header %}{{ v2.v2ServiceHeader("") }}{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% if error and error.runnerSignInV2Email %}
+      {{ govukErrorSummary({ titleText: "There is a problem", errorList: [{ text: error.runnerSignInV2Email, href: "#v2-email" }] }) }}
+    {% endif %}
+    {# <h1 class="govuk-heading-l">Enter your email address</h1>
+    <p class="govuk-body">
+      <a class="govuk-link" href="/runner-sign-in-v2/create-sign-in/email?formKey={{ formKey | urlencode }}&amp;applicationId={{ applicationId | urlencode }}&amp;next={{ next | urlencode }}">Create a sign-in</a>
+      if you have not used this service before.
+    </p>
+    <p class="govuk-body">
+      <a class="govuk-link" href="/runner-sign-in-v2/recover/start?formKey={{ formKey | urlencode }}&amp;applicationId={{ applicationId | urlencode }}&amp;next={{ next | urlencode }}">Recover my sign-in</a>
+      if you cannot access your email.
+    </p> #}
+    <form method="post" action="/runner-sign-in-v2/sign-in/email" novalidate>
+      <input type="hidden" name="formKey" value="{{ formKey }}" />
+      <input type="hidden" name="applicationId" value="{{ applicationId }}" />
+      <input type="hidden" name="next" value="{{ next | e }}" />
+      {{ govukInput({
+        label: { text: "Enter your email address to sign in to your form", classes: "govuk-label--xl" },
+        isPageHeading: true,
+        id: "v2-email",
+        name: "runnerSignInV2Email",
+        type: "email",
+        autocomplete: "email",
+        spellcheck: false,
+        value: values.runnerSignInV2Email,
+        errorMessage: { text: error.runnerSignInV2Email } if error and error.runnerSignInV2Email else false
+      }) }}
+      {{ govukButton({ text: "Continue" }) }}
+    </form>
+
+    <p class="govuk-body">
+      <a class="govuk-link" href="/runner-sign-in-v2/recover/start?formKey={{ formKey | urlencode }}&amp;applicationId={{ applicationId | urlencode }}&amp;next={{ next | urlencode }}">I've forgotten my email address</a>.
+    </p>
+
+
+</div>
+{% endblock %}

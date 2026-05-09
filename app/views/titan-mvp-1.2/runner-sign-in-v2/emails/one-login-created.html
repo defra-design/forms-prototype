@@ -1,0 +1,124 @@
+{% extends "layouts/main.html" %}
+
+{% block pageTitle %}
+Account created email – prototype
+{% endblock %}
+
+{% block head %}
+  {{ super() }}
+  <style>
+    .email-message {
+      border: 1px solid #b1b4b6;
+      padding: 20px;
+      background: #ffffff;
+    }
+
+    .email-message-meta {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .email-message-meta th,
+    .email-message-meta td {
+      padding: 8px 0;
+      border-bottom: 1px solid #b1b4b6;
+      vertical-align: top;
+      text-align: left;
+    }
+
+    .email-message-meta th {
+      width: 90px;
+      font-weight: 700;
+    }
+
+    .placeholder-no-brackets {
+      display: inline-block;
+      padding: 0 4px;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">
+      Email confirmation: successfully created a sign in for a form
+    </h1>
+
+    <div class="email-message">
+      <table class="email-message-meta">
+        <tbody>
+          <tr>
+            <th scope="row">From</th>
+            <td>Forms prototype</td>
+          </tr>
+          <tr>
+            <th scope="row">To</th>
+            <td>
+              {% if toEmail %}
+                {{ toEmail }}
+              {% else %}
+                <span class="placeholder-no-brackets" style="background: #fd0;">Email address</span>
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">Subject</th>
+            <td>Your sign in{% if formName %} for {{ formName }}{% endif %}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="email-message-body govuk-!-margin-top-2 govuk-!-margin-bottom-0">
+<h1 class="govuk-heading-l govuk-!-margin-top-6">You’ve created your sign in{% if formName %} to use <strong>'{{ formName }}'</strong>{% endif %}.
+        </h1>
+        <p class="govuk-body">You can now:</p>
+
+        <ul class="govuk-list govuk-list--bullet">
+          <li>save your progress and come back later</li>
+          <li>continue a form you’ve already started</li>
+          <li>reuse answers from previous submissions (if you have any)</li>
+        </ul>
+
+        {% if manageUrl %}
+          <p class="govuk-body">
+            Continue your form: <a href="{{ manageUrl }}" class="govuk-link">{{ manageUrl }}</a>
+          </p>
+        {% endif %}
+
+        <p class="govuk-body">If you did not create this sign in, you can ignore this email.</p>
+
+        <hr class="govuk-section-break govuk-section-break--visible govuk-!-margin-bottom-4 govuk-!-margin-top-4">
+
+        <p class="govuk-body govuk-!-margin-bottom-6">Do not reply to this email - it’s an automatic message from an unmonitored account.</p>
+
+        <hr class="govuk-section-break govuk-section-break--visible govuk-!-margin-bottom-4 govuk-!-margin-top-4">
+
+        <h1 class="govuk-heading-l govuk-!-margin-top-6">
+          Rydych wedi creu eich mewngofnodi{% if formName %} i ddefnyddio <strong>'{{ formName }}'</strong>{% endif %}.
+        </h1>
+        <p class="govuk-body">Gallwch nawr:</p>
+
+        <ul class="govuk-list govuk-list--bullet">
+          <li>arbed eich cynnydd a dod yn ôl yn nes ymlaen</li>
+          <li>parhau â ffurflen rydych eisoes wedi’i dechrau</li>
+          <li>ailddefnyddio atebion o gyflwyniadau blaenorol (os oes gennych rai)</li>
+        </ul>
+
+        {% if manageUrl %}
+          <p class="govuk-body">
+            Parhau â’ch ffurflen: <a href="{{ manageUrl }}" class="govuk-link">{{ manageUrl }}</a>
+          </p>
+        {% endif %}
+
+        <p class="govuk-body">Os nad chi greodd y mewngofnodi hwn, gallwch anwybyddu’r e-bost hwn.</p>
+
+        <hr class="govuk-section-break govuk-section-break--visible govuk-!-margin-bottom-4 govuk-!-margin-top-4">
+
+        <p class="govuk-body govuk-!-margin-bottom-6">Peidiwch ag ymateb i’r e-bost hwn – mae’n neges awtomatig o gyfrif heb ei fonitro.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

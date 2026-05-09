@@ -5,6 +5,7 @@
 {% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
 {% from "govuk/components/radios/macro.njk" import govukRadios %}
 {% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
 {% import "components/one-login-service-header/service-header.njk" as oneLoginHeader %}
 
 {% block head %}
@@ -108,7 +109,7 @@ Get this form checked – {{ formDef.formName }} – GOV.UK
     <h1 class="govuk-heading-xl">Get this form checked</h1>
 
     {{ govukWarningText({
-      text: "Someone else must check your answers before you can submit this form.",
+      text: "Your form has not been submitted yet. You need to get someone to check your answers before you can submit it.",
       iconFallbackText: "Warning"
     }) }}
 
@@ -177,7 +178,7 @@ Get this form checked – {{ formDef.formName }} – GOV.UK
             }
           },
           hint: {
-            text: "We’ll send the link, reference number and memorable word to the person checking your answers"
+            text: "We’ll send them a link and instructions to create a sign in (or sign in) so they can check your answers"
           },
           items: [
             {
@@ -267,13 +268,31 @@ Get this form checked – {{ formDef.formName }} – GOV.UK
       <div class="govuk-details__text">
 
     <h3 class="govuk-heading-s">Details the checker will need</h3>
+    {% set checkerNeedRows = [] %}
+    {% if application.checking.inviteContactMethod == "email" and application.checking.inviteEmail %}
+      {% set checkerNeedRows = (checkerNeedRows.push({
+        key: { text: "Email the invitation is sent to" },
+        value: { text: application.checking.inviteEmail }
+      }), checkerNeedRows) %}
+    {% elif application.checking.invitePhone %}
+      {% set checkerNeedRows = (checkerNeedRows.push({
+        key: { text: "Text message" },
+        value: { text: "We’ll send the invitation to " + application.checking.invitePhone + ". They’ll still need an email address to create a sign in or sign in when they open the link." }
+      }), checkerNeedRows) %}
+    {% endif %}
+    {% set checkerNeedRows = (checkerNeedRows.push({
+      key: { text: "Link to the checker journey" },
+      value: { html: "<a class='govuk-link' href='" + shareCheckUrl + "'>" + shareCheckUrl + "</a>" }
+    }), checkerNeedRows) %}
+    {% set checkerNeedRows = (checkerNeedRows.push({
+      key: { text: "Sign in" },
+      value: {
+        text: "They’ll create a sign in or sign in and confirm their email address using a security code we send them."
+      }
+    }), checkerNeedRows) %}
     {{ govukSummaryList({
       classes: "govuk-!-margin-bottom-6",
-      rows: [
-        { key: { text: "Reference number" }, value: { text: application.checking.referenceNumber } },
-        { key: { text: "Memorable word" }, value: { text: application.checking.memorableWord } },
-        { key: { text: "Check link" }, value: { html: "<a class='govuk-link' href='" + shareCheckUrl + "'>" + shareCheckUrl + "</a>" } }
-      ]
+      rows: checkerNeedRows
     }) }}
   </div>
 </details>
@@ -317,7 +336,7 @@ Get this form checked – {{ formDef.formName }} – GOV.UK
       <p class="govuk-body">You can:</p>
       <ul class="govuk-list">
         <li>
-          <a class="govuk-link" href="/runner-sign-in/checker-invite-notification?token={{ application.checking.reviewToken }}" target="_blank" rel="noreferrer noopener">
+          <a class="govuk-link" href="/runner-sign-in/checker-invite-notification?token={{ application.checking.reviewToken }}&prototype=1" target="_blank" rel="noreferrer noopener">
             View the message sent to the checker (opens in new tab)
           </a>
         </li>
