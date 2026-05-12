@@ -623,6 +623,8 @@ navigationItems: [
                     {% set previewTemplate = previewTemplate ~ "radios-preview.html" %}
                     {% elseif question.subType == "select" %}
                     {% set previewTemplate = previewTemplate ~ "autocomplete-preview.html" %}
+                    {% elseif question.subType == "autocomplete" %}
+                    {% set previewTemplate = previewTemplate ~ "autocomplete-preview.html" %}
                     {% else %}
                     {% set previewTemplate = previewTemplate ~ "list-preview.html" %}
                     {% endif %}

@@ -1,0 +1,58 @@
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/textarea/macro.njk" import govukTextarea %}
+{% import "titan-mvp-1.2/form-editor/welsh-translation/section-partials/_welsh-markdown-details-macro.html" as wmd %}
+<div class="app-scrolling-wrapper" role="region" tabindex="0"
+    aria-labelledby="welsh-section-{{ page.pageId }}-page">
+    <table class="govuk-table govuk-!-margin-bottom-9 app-translation-table"
+        aria-labelledby="welsh-section-{{ page.pageId }}-page">
+        <caption class="govuk-table__caption govuk-visually-hidden">{{ pageNumberLabel }}: optional page heading and guidance text</caption>
+        <colgroup>
+            <col class="app-translation-table__col-gutter">
+            <col class="app-translation-table__col-english">
+            <col class="app-translation-table__col-welsh">
+        </colgroup>
+        <thead class="govuk-table__head">
+            <tr class="govuk-table__row">
+                <th class="govuk-table__header app-translation-table__empty-header-cell" scope="col"></th>
+                <th class="govuk-table__header" scope="col">English content</th>
+                <th class="govuk-table__header" scope="col">Welsh content</th>
+            </tr>
+        </thead>
+        <tbody class="govuk-table__body">
+            {% if page.pageHeading %}
+            <tr class="govuk-table__row">
+                <th class="govuk-table__header" scope="row">Page heading</th>
+                <td class="govuk-table__cell govuk-!-text-break-word">{{ page.pageHeading }}</td>
+                <td class="govuk-table__cell">
+                    {{ govukInput({
+                    label: { text: "Welsh page heading — " ~ pageNumberLabel },
+                    id: "welsh_" ~ page.pageId ~ "_pageHeading",
+                    name: "welsh_" ~ page.pageId ~ "_pageHeading",
+                    value: (wp.pageHeading if wp else "") | default(""),
+                    attributes: { lang: "cy" }
+                    }) }}
+                </td>
+            </tr>
+            {% endif %}
+            {% if page.guidanceTextarea %}
+            <tr class="govuk-table__row">
+                <th class="govuk-table__header" scope="row">Guidance text</th>
+                <td class="govuk-table__cell govuk-!-text-break-word">
+                    <pre class="app-translation-table__markdown-preview">{{ page.guidanceTextarea }}</pre>
+                </td>
+                <td class="govuk-table__cell">
+                    {{ govukTextarea({
+                    label: { text: "Welsh guidance text (markdown) — " ~ pageNumberLabel },
+                    id: "welsh_" ~ page.pageId ~ "_guidanceTextarea",
+                    name: "welsh_" ~ page.pageId ~ "_guidanceTextarea",
+                    value: (wp.guidanceTextarea if wp else "") | default(""),
+                    rows: 6,
+                    attributes: { lang: "cy" }
+                    }) }}
+                    {{ wmd.welshMarkdownHelpDetails(markdownHelpPanelHtml) }}
+                </td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>

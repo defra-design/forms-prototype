@@ -1,0 +1,32 @@
+{% extends "layouts/main.html" %}
+
+{% set pageName = pageName or ("Welsh translation screenshot index — " ~ form.name) %}
+
+{% block header %}
+{% if not noMasthead %}
+{% include "titan-mvp-1.2/form-editor/welsh-translation/_welsh-translation-masthead.html" %}
+{% endif %}
+{% endblock %}
+
+{% block beforeContent %}
+{% endblock %}
+
+{% block content %}
+
+{% include "titan-mvp-1.2/form-editor/welsh-translation/section-partials/_styles.html" %}
+
+<div class="govuk-width-container">
+    <p class="govuk-body govuk-!-margin-top-4">
+        <a class="govuk-link" href="{{ welshTranslationPageHref }}">Back to full Welsh translation page</a>
+    </p>
+
+    <h1 class="govuk-heading-xl">Screenshot sections</h1>
+    <p class="govuk-body">Open one link at a time. Each page uses the same session data as the full Welsh translation screen, with only that block shown so captures stay readable.</p>
+
+    <ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-9">
+        {% for link in screenshotLinks %}
+        <li><a class="govuk-link" href="{{ link.href }}{% if noMasthead %}&noMasthead=1{% endif %}">{{ link.title }}</a></li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "layouts/main.html" %}
+{% from "components/service-header/macro.njk" import serviceHeader %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
+
+{% set pageName = pageName or ("Delete Welsh translations - " ~ form.name) %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+containerClasses: containerClasses,
+accountName: "Chris Smith",
+homepageLink: "/",
+signOutLink: "/titan-mvp-1.2/onboarding/sign-out-confirmation",
+navigationItems: [
+{ href: "/titan-mvp-1.2/library", text: "Forms library", id: "nav-library" },
+{ href: "/titan-mvp-1.2/form-overview/welsh-mocks/overview-entry.html", text: "Overview", id: "nav-overview" },
+{ href: "/titan-mvp-1.2/form-editor/welsh-mocks/listing-v2-entry.html", text: "Editor", id: "nav-editor", active: true }
+],
+activeLinkId: "nav-editor"
+}) }}
+{% endblock %}
+
+{% block beforeContent %}
+{{ govukBackLink({
+text: "Back to Welsh translations",
+href: welshTranslationPageHref
+}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-width-container">
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+            <span class="govuk-caption-xl">{{ form.name }}</span>
+            <h1 class="govuk-heading-xl">Are you sure you want to delete your Welsh translations?</h1>
+
+            <p class="govuk-body">This will delete all Welsh translations you have entered for this form.</p>
+            <p class="govuk-body">Your English form is not deleted.</p>
+
+            {{ govukWarningText({
+            text: "You cannot undo this action. You would need to enter Welsh translations again if you change your mind.",
+            iconFallbackText: "Warning"
+            }) }}
+
+            <form method="post" action="{{ welshTranslationPostHref }}" novalidate class="govuk-!-margin-top-6">
+                <input type="hidden" name="welsh_action" value="delete">
+                <div class="govuk-button-group">
+                    <button type="submit" class="govuk-button govuk-button--warning" data-module="govuk-button">
+                        Delete Welsh translations
+                    </button>
+                    <a class="govuk-button govuk-button--secondary" href="{{ welshTranslationPageHref }}">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

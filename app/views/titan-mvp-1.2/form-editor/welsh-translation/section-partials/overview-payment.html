@@ -1,0 +1,34 @@
+{% from "govuk/components/input/macro.njk" import govukInput %}
+<div class="app-scrolling-wrapper" role="region" tabindex="0" aria-label="GOV.UK Pay payment link">
+    <table class="govuk-table govuk-!-margin-bottom-9 app-translation-table">
+        <caption class="govuk-table__caption govuk-table__caption--m">GOV.UK Pay payment link</caption>
+        <colgroup>
+            <col class="app-translation-table__col-gutter">
+            <col class="app-translation-table__col-english">
+            <col class="app-translation-table__col-welsh">
+        </colgroup>
+        <thead class="govuk-table__head">
+            <tr class="govuk-table__row">
+                <th class="govuk-table__header app-translation-table__empty-header-cell" scope="col"></th>
+                <th class="govuk-table__header" scope="col">English content</th>
+                <th class="govuk-table__header" scope="col">Welsh content</th>
+            </tr>
+        </thead>
+        <tbody class="govuk-table__body">
+            <tr class="govuk-table__row">
+                <th class="govuk-table__header" scope="row">Payment link</th>
+                <td class="govuk-table__cell govuk-!-text-break-word">{{ form.payUrl or "Not set" }}</td>
+                <td class="govuk-table__cell">
+                    {{ govukInput({
+                    label: { text: "Enter Welsh GOV.UK Pay payment link" },
+                    id: "welsh_overview_payUrl",
+                    name: "welsh_overview_payUrl",
+                    value: welshOverview.payUrl | default(""),
+                    type: "url",
+                    attributes: { lang: "cy" }
+                    }) }}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

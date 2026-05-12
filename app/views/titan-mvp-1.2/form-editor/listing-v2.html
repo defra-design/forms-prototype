@@ -764,6 +764,10 @@ activeLinkId: "nav-editor"
                                                             {% set previewTemplate =
                                                             '/titan-mvp-1.2/form-editor/question-type/questions/previews/autocomplete-preview.html'
                                                             %}
+                                                            {% elif question.subType == 'autocomplete' %}
+                                                            {% set previewTemplate =
+                                                            '/titan-mvp-1.2/form-editor/question-type/questions/previews/autocomplete-preview.html'
+                                                            %}
                                                             {% else %}
                                                             {% set previewTemplate =
                                                             '/titan-mvp-1.2/form-editor/question-type/questions/previews/list-preview.html'

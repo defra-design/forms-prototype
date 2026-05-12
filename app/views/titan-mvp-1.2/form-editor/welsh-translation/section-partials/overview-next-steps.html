@@ -1,0 +1,39 @@
+{% import "titan-mvp-1.2/form-editor/welsh-translation/section-partials/_welsh-markdown-details-macro.html" as wmd %}
+<div class="govuk-!-margin-bottom-9">
+    <div class="app-scrolling-wrapper" role="region" tabindex="0" aria-label="Information about what happens next">
+        <table class="govuk-table govuk-!-margin-bottom-9 app-translation-table">
+            <caption class="govuk-table__caption govuk-table__caption--m">Information about what happens next</caption>
+            <colgroup>
+                <col class="app-translation-table__col-gutter">
+                <col class="app-translation-table__col-english">
+                <col class="app-translation-table__col-welsh">
+            </colgroup>
+            <thead class="govuk-table__head">
+                <tr class="govuk-table__row">
+                    <th class="govuk-table__header app-translation-table__empty-header-cell" scope="col"></th>
+                    <th class="govuk-table__header" scope="col">English content</th>
+                    <th class="govuk-table__header" scope="col">Welsh content</th>
+                </tr>
+            </thead>
+            <tbody class="govuk-table__body">
+                <tr class="govuk-table__row">
+                    <th class="govuk-table__header" scope="row">What happens next</th>
+                    <td class="govuk-table__cell govuk-!-text-break-word">
+                        <pre
+                            class="app-translation-table__markdown-preview">{{ form.nextSteps or "Not set" }}</pre>
+                    </td>
+                    <td class="govuk-table__cell">
+                        <div class="govuk-form-group">
+                            <label class="govuk-label" for="welsh_overview_nextSteps">Enter information
+                                about what happens next in Welsh</label>
+                            <textarea class="govuk-textarea" id="welsh_overview_nextSteps"
+                                name="welsh_overview_nextSteps" rows="12"
+                                lang="cy">{{ welshOverview.nextSteps | default("") }}</textarea>
+                            {{ wmd.welshMarkdownHelpDetails(markdownHelpPanelHtml) }}
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

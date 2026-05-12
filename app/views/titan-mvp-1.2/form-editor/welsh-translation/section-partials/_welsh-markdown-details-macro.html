@@ -1,0 +1,8 @@
+{% from "govuk/components/details/macro.njk" import govukDetails %}
+{% macro welshMarkdownHelpDetails(panelHtml) %}
+{{ govukDetails({
+summaryText: "Help with markdown",
+classes: "app-welsh-markdown-help-details govuk-!-margin-top-2",
+html: panelHtml
+}) }}
+{% endmacro %}

@@ -2142,6 +2142,8 @@ function renderWelshTranslationPage(req, res, queryFlags = {}) {
   const { overview: welshOverview, byPage: welshByPageId } =
     welshTranslationLib.indexWelshTranslations(welshTranslations);
 
+  const useHtmlSuffix = req.path.endsWith(".html");
+  const welshTranslationSuffix = useHtmlSuffix ? ".html" : "";
   res.render("titan-mvp-1.2/form-editor/welsh-translation/index", {
     form,
     formPages,
@@ -2154,6 +2156,22 @@ function renderWelshTranslationPage(req, res, queryFlags = {}) {
     showcaseLoaded: queryFlags.showcaseLoaded,
     request: req,
     pageName: `Welsh version - ${form.name}`,
+    welshTranslationConfirmHref: `/titan-mvp-1.2/form-editor/welsh-translation/confirm-delete${welshTranslationSuffix}`,
+    welshTranslationScreenshotSectionsHref: `/titan-mvp-1.2/form-editor/welsh-translation/screenshot-sections${welshTranslationSuffix}`,
+  });
+}
+
+function renderWelshTranslationConfirmDelete(req, res) {
+  const formData = req.session.data || {};
+  const form = welshTranslationLib.buildOverviewFormForSession(formData);
+  const useHtmlSuffix = req.path.endsWith(".html");
+  const welshTranslationSuffix = useHtmlSuffix ? ".html" : "";
+  res.render("titan-mvp-1.2/form-editor/welsh-translation/confirm-delete", {
+    form,
+    request: req,
+    pageName: `Delete Welsh translations - ${form.name}`,
+    welshTranslationPageHref: `/titan-mvp-1.2/form-editor/welsh-translation${welshTranslationSuffix}`,
+    welshTranslationPostHref: `/titan-mvp-1.2/form-editor/welsh-translation${welshTranslationSuffix}`,
   });
 }
 
@@ -2178,26 +2196,135 @@ router.get("/titan-mvp-1.2/form-editor/welsh-translation.html", (req, res) => {
   });
 });
 
+router.get("/titan-mvp-1.2/form-editor/welsh-translation/confirm-delete", (req, res) => {
+  renderWelshTranslationConfirmDelete(req, res);
+});
+
+router.get("/titan-mvp-1.2/form-editor/welsh-translation/confirm-delete.html", (req, res) => {
+  renderWelshTranslationConfirmDelete(req, res);
+});
+
+function welshTranslationScreenshotSharedLocals(req) {
+  const formData = req.session.data || {};
+  if (!formData.formPages || formData.formPages.length === 0) {
+    welshTranslationLib.applyWelshShowcaseSession(formData, { force: true });
+  }
+  const formPages = welshTranslationLib.cloneFormPagesWithGlobalQuestionNumbers(
+    formData.formPages || []
+  );
+  const form = welshTranslationLib.buildOverviewFormForSession(formData);
+  const welshTranslations = formData.welshTranslations || {
+    overview: {},
+    pages: [],
+    finishedAddingWelsh: "no",
+  };
+  const { overview: welshOverview, byPage: welshByPageId } =
+    welshTranslationLib.indexWelshTranslations(welshTranslations);
+  const useHtmlSuffix = req.path.endsWith(".html");
+  const welshTranslationSuffix = useHtmlSuffix ? ".html" : "";
+  return {
+    form,
+    formPages,
+    welshOverview,
+    welshByPageId,
+    welshTranslations,
+    formData,
+    request: req,
+    welshTranslationConfirmHref: `/titan-mvp-1.2/form-editor/welsh-translation/confirm-delete${welshTranslationSuffix}`,
+    welshTranslationPageHref: `/titan-mvp-1.2/form-editor/welsh-translation${welshTranslationSuffix}`,
+    screenshotSectionsHubHref: `/titan-mvp-1.2/form-editor/welsh-translation/screenshot-sections${welshTranslationSuffix}`,
+    noMasthead: req.query.noMasthead === "1",
+  };
+}
+
+router.get("/titan-mvp-1.2/form-editor/welsh-translation/screenshot-sections", (req, res) => {
+  const locals = welshTranslationScreenshotSharedLocals(req);
+  locals.pageName = `Welsh translation screenshot index — ${locals.form.name}`;
+  locals.screenshotLinks = welshTranslationLib.buildWelshTranslationScreenshotLinks(
+    req.path,
+    locals.formPages
+  );
+  res.render("titan-mvp-1.2/form-editor/welsh-translation/screenshot-sections", locals);
+});
+
+router.get("/titan-mvp-1.2/form-editor/welsh-translation/screenshot-sections.html", (req, res) => {
+  const locals = welshTranslationScreenshotSharedLocals(req);
+  locals.pageName = `Welsh translation screenshot index — ${locals.form.name}`;
+  locals.screenshotLinks = welshTranslationLib.buildWelshTranslationScreenshotLinks(
+    req.path,
+    locals.formPages
+  );
+  res.render("titan-mvp-1.2/form-editor/welsh-translation/screenshot-sections", locals);
+});
+
+router.get("/titan-mvp-1.2/form-editor/welsh-translation/screenshot-section", (req, res) => {
+  const locals = welshTranslationScreenshotSharedLocals(req);
+  const resolved = welshTranslationLib.resolveWelshTranslationScreenshotView(
+    req.query,
+    locals.formPages,
+    locals.welshByPageId
+  );
+  if (resolved.error) {
+    locals.screenshotError = resolved.error;
+    locals.pageName = `Welsh translation screenshot — ${locals.form.name}`;
+  } else {
+    Object.assign(locals, resolved);
+    locals.pageName = `${locals.screenshotSectionTitle} — ${locals.form.name}`;
+  }
+  res.render("titan-mvp-1.2/form-editor/welsh-translation/screenshot-section", locals);
+});
+
+router.get("/titan-mvp-1.2/form-editor/welsh-translation/screenshot-section.html", (req, res) => {
+  const locals = welshTranslationScreenshotSharedLocals(req);
+  const resolved = welshTranslationLib.resolveWelshTranslationScreenshotView(
+    req.query,
+    locals.formPages,
+    locals.welshByPageId
+  );
+  if (resolved.error) {
+    locals.screenshotError = resolved.error;
+    locals.pageName = `Welsh translation screenshot — ${locals.form.name}`;
+  } else {
+    Object.assign(locals, resolved);
+    locals.pageName = `${locals.screenshotSectionTitle} — ${locals.form.name}`;
+  }
+  res.render("titan-mvp-1.2/form-editor/welsh-translation/screenshot-section", locals);
+});
+
+router.get("/titan-mvp-1.2/form-editor/welsh-mocks/welsh-translation-saved-mock", (req, res) => {
+  welshTranslationLib.applyWelshShowcaseSession(req.session.data, { force: true });
+  renderWelshTranslationPage(req, res, { saved: true });
+});
+
+router.get("/titan-mvp-1.2/form-editor/welsh-mocks/welsh-translation-saved-mock.html", (req, res) => {
+  welshTranslationLib.applyWelshShowcaseSession(req.session.data, { force: true });
+  renderWelshTranslationPage(req, res, { saved: true });
+});
+
 router.post("/titan-mvp-1.2/form-editor/welsh-translation", (req, res) => {
   const formPages = req.session.data.formPages || [];
+  const suffix = req.path.endsWith(".html") ? ".html" : "";
+  const base = `/titan-mvp-1.2/form-editor/welsh-translation${suffix}`;
   if (req.body.welsh_action === "delete") {
     delete req.session.data.welshTranslations;
-    return res.redirect("/titan-mvp-1.2/form-editor/welsh-translation?deleted=1");
+    return res.redirect(`${base}?deleted=1`);
   }
   req.session.data.welshTranslations =
     welshTranslationLib.collectWelshTranslationsFromBody(req.body, formPages);
-  return res.redirect("/titan-mvp-1.2/form-editor/welsh-translation?saved=1");
+  return res.redirect(`${base}?saved=1`);
 });
 
 router.post("/titan-mvp-1.2/form-editor/welsh-translation.html", (req, res) => {
   const formPages = req.session.data.formPages || [];
+  const suffix = req.path.endsWith(".html") ? ".html" : "";
+  const base = `/titan-mvp-1.2/form-editor/welsh-translation${suffix}`;
   if (req.body.welsh_action === "delete") {
     delete req.session.data.welshTranslations;
-    return res.redirect("/titan-mvp-1.2/form-editor/welsh-translation.html?deleted=1");
+    return res.redirect(`${base}?deleted=1`);
   }
   req.session.data.welshTranslations =
     welshTranslationLib.collectWelshTranslationsFromBody(req.body, formPages);
-  return res.redirect("/titan-mvp-1.2/form-editor/welsh-translation.html?saved=1");
+  return res.redirect(`${base}?saved=1`);
 });
 
 router.get("/titan-mvp-1.2/form-editor/welsh-mocks", (req, res) => {
@@ -5353,6 +5480,44 @@ router.get(
             color: "blue",
           },
         },
+      }
+    );
+  }
+);
+
+router.get(
+  "/titan-mvp-1.2/form-overview/manage-form/make-draft-live/unfinished-welsh-translations",
+  (req, res) => {
+    const formData = req.session.data || {};
+    const useHtmlSuffix = req.path.endsWith(".html");
+    const suffix = useHtmlSuffix ? ".html" : "";
+    res.render(
+      "titan-mvp-1.2/form-overview/manage-form/make-draft-live/unfinished-welsh-translations",
+      {
+        form: {
+          name: formData.formName || "Dan's test form",
+        },
+        backHref: `/titan-mvp-1.2/form-overview/welsh-mocks/overview-entry${suffix}`,
+        welshTranslationHref: `/titan-mvp-1.2/form-editor/welsh-translation${suffix}`,
+      }
+    );
+  }
+);
+
+router.get(
+  "/titan-mvp-1.2/form-overview/manage-form/make-draft-live/unfinished-welsh-translations.html",
+  (req, res) => {
+    const formData = req.session.data || {};
+    const useHtmlSuffix = req.path.endsWith(".html");
+    const suffix = useHtmlSuffix ? ".html" : "";
+    res.render(
+      "titan-mvp-1.2/form-overview/manage-form/make-draft-live/unfinished-welsh-translations",
+      {
+        form: {
+          name: formData.formName || "Dan's test form",
+        },
+        backHref: `/titan-mvp-1.2/form-overview/welsh-mocks/overview-entry${suffix}`,
+        welshTranslationHref: `/titan-mvp-1.2/form-editor/welsh-translation${suffix}`,
       }
     );
   }

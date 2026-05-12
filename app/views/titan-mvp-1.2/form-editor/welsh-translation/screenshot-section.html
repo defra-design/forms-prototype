@@ -1,0 +1,67 @@
+{% extends "layouts/main.html" %}
+
+{% set pageName = pageName or ("Welsh translation screenshot — " ~ form.name) %}
+
+{% block header %}
+{% if not noMasthead %}
+{% include "titan-mvp-1.2/form-editor/welsh-translation/_welsh-translation-masthead.html" %}
+{% endif %}
+{% endblock %}
+
+{% block beforeContent %}
+{% endblock %}
+
+{% block content %}
+
+{% include "titan-mvp-1.2/form-editor/welsh-translation/section-partials/_styles.html" %}
+
+{% set markdownHelpPanelHtml %}{% include "titan-mvp-1.2/form-editor/welsh-translation/_markdown-help-panel.html" %}{% endset %}
+
+<div class="govuk-width-container">
+    <p class="govuk-body-s govuk-!-margin-top-4">
+        <a class="govuk-link" href="{{ screenshotSectionsHubHref }}{% if noMasthead %}?noMasthead=1{% endif %}">All screenshot sections</a>
+        <span class="govuk-visually-hidden">,</span>
+        <span aria-hidden="true"> · </span>
+        <a class="govuk-link" href="{{ welshTranslationPageHref }}">Full Welsh translation page</a>
+    </p>
+
+    {% if screenshotError %}
+    <div class="govuk-error-summary govuk-!-margin-top-6" data-module="govuk-error-summary">
+        <div role="alert">
+            <h2 class="govuk-error-summary__title">This section could not be shown</h2>
+            <div class="govuk-error-summary__body">
+                <p class="govuk-body govuk-!-margin-bottom-0">{{ screenshotError }}</p>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <h1 class="govuk-heading-l govuk-!-margin-bottom-6">{{ screenshotSectionTitle }}</h1>
+
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-full">
+            {% if kind == "intro" %}
+            {% include "titan-mvp-1.2/form-editor/welsh-translation/section-partials/intro.html" %}
+            {% elif kind == "overview-form-name" %}
+            {% include "titan-mvp-1.2/form-editor/welsh-translation/section-partials/overview-form-name.html" %}
+            {% elif kind == "overview-support" %}
+            {% include "titan-mvp-1.2/form-editor/welsh-translation/section-partials/overview-support.html" %}
+            {% elif kind == "overview-next-steps" %}
+            {% include "titan-mvp-1.2/form-editor/welsh-translation/section-partials/overview-next-steps.html" %}
+            {% elif kind == "overview-privacy" %}
+            {% include "titan-mvp-1.2/form-editor/welsh-translation/section-partials/overview-privacy.html" %}
+            {% elif kind == "overview-payment" %}
+            {% include "titan-mvp-1.2/form-editor/welsh-translation/section-partials/overview-payment.html" %}
+            {% elif kind == "footer-actions" %}
+            {% include "titan-mvp-1.2/form-editor/welsh-translation/section-partials/footer-actions.html" %}
+            {% elif kind == "page-guidance" %}
+            {% include "titan-mvp-1.2/form-editor/welsh-translation/section-partials/page-guidance.html" %}
+            {% elif kind == "page-optional" %}
+            {% include "titan-mvp-1.2/form-editor/welsh-translation/section-partials/page-optional-heading.html" %}
+            {% elif kind == "question" %}
+            {% include "titan-mvp-1.2/form-editor/welsh-translation/section-partials/question.html" %}
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% from "components/service-header/macro.njk" import serviceHeader %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+containerClasses: containerClasses,
+accountName: "Chris Smith",
+homepageLink: "/",
+signOutLink: "/titan-mvp-1.2/onboarding/sign-out-confirmation",
+navigationItems: [
+{ href: "/titan-mvp-1.2/library", text: "Forms library", id: "nav-library" },
+{ href: "/titan-mvp-1.2/form-overview/welsh-mocks/overview-entry.html", text: "Overview", id: "nav-overview" },
+{ href: "/titan-mvp-1.2/form-editor/welsh-mocks/listing-v2-entry.html", text: "Editor", id: "nav-editor", active: true }
+],
+activeLinkId: "nav-editor"
+}) }}
+
+<div class="x-govuk-masthead x-govuk-masthead--large">
+    <div class="govuk-width-container">
+        {{ govukBackLink({
+        classes: "govuk-back-link--inverse govuk-!-margin-bottom-0",
+        text: "Back to form editor",
+        href: ""
+        }) }}
+
+        <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"
+            style="border-bottom:1px solid white; margin-bottom: 0;">
+
+        <h1 class="govuk-heading-l--inverse x-govuk-masthead__title">
+            <span class="govuk-caption-l" style="color: white;">{{ form.name }}</span>
+            Add Welsh translations for your form
+        </h1>
+
+
+<div class="govuk-button-group">
+        <button class="govuk-button govuk-button--inverse" data-module="govuk-button">Save changes</button>
+
+        <button class="govuk-button govuk-button--secondary" data-module="govuk-button">Preview form in welsh</button>
+
+        <a href="{{ welshTranslationConfirmHref }}" class="govuk-link--inverse" data-module="govuk-button">Delete Welsh translations</a>
+    </div>
+
+    </div>
+</div>

@@ -1,0 +1,135 @@
+{% from "govuk/components/input/macro.njk" import govukInput %}
+<div class="govuk-!-margin-bottom-9" role="group" aria-label="Contact details for support">
+    <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Contact details for support</h2>
+
+    <div class="govuk-!-margin-bottom-6">
+        <div class="app-scrolling-wrapper" role="region" tabindex="0" aria-label="Email address and response time for support">
+            <table class="govuk-table govuk-!-margin-bottom-0 app-translation-table">
+                <caption class="govuk-table__caption govuk-table__caption--m">Email address and response time</caption>
+                <colgroup>
+                    <col class="app-translation-table__col-gutter">
+                    <col class="app-translation-table__col-english">
+                    <col class="app-translation-table__col-welsh">
+                </colgroup>
+                <thead class="govuk-table__head">
+                    <tr class="govuk-table__row">
+                        <th class="govuk-table__header app-translation-table__empty-header-cell" scope="col"></th>
+                        <th class="govuk-table__header" scope="col">English content</th>
+                        <th class="govuk-table__header" scope="col">Welsh content</th>
+                    </tr>
+                </thead>
+                <tbody class="govuk-table__body">
+                    <tr class="govuk-table__row">
+                        <th class="govuk-table__header" scope="row">Email address</th>
+                        <td class="govuk-table__cell govuk-!-text-break-word">{{ form.support.email or "Not set" }}</td>
+                        <td class="govuk-table__cell">
+                            {{ govukInput({
+                            label: { text: "Welsh support email address" },
+                            id: "welsh_overview_supportEmail",
+                            name: "welsh_overview_supportEmail",
+                            value: welshOverview.supportEmail | default(""),
+                            type: "email",
+                            autocomplete: "email",
+                            attributes: { lang: "cy" }
+                            }) }}
+                        </td>
+                    </tr>
+                    <tr class="govuk-table__row">
+                        <th class="govuk-table__header" scope="row">Response time</th>
+                        <td class="govuk-table__cell govuk-!-text-break-word">{{ form.support.responseTime or "—" }}</td>
+                        <td class="govuk-table__cell">
+                            {{ govukInput({
+                            label: { text: "Welsh response time message" },
+                            id: "welsh_overview_supportResponseTime",
+                            name: "welsh_overview_supportResponseTime",
+                            value: welshOverview.supportResponseTime | default(""),
+                            attributes: { lang: "cy" }
+                            }) }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="govuk-!-margin-bottom-6">
+        <div class="app-scrolling-wrapper" role="region" tabindex="0" aria-label="Contact link and link text for support">
+            <table class="govuk-table govuk-!-margin-bottom-0 app-translation-table">
+                <caption class="govuk-table__caption govuk-table__caption--m">Contact link for support</caption>
+                <colgroup>
+                    <col class="app-translation-table__col-gutter">
+                    <col class="app-translation-table__col-english">
+                    <col class="app-translation-table__col-welsh">
+                </colgroup>
+                <thead class="govuk-table__head">
+                    <tr class="govuk-table__row">
+                        <th class="govuk-table__header app-translation-table__empty-header-cell" scope="col"></th>
+                        <th class="govuk-table__header" scope="col">English content</th>
+                        <th class="govuk-table__header" scope="col">Welsh content</th>
+                    </tr>
+                </thead>
+                <tbody class="govuk-table__body">
+                    <tr class="govuk-table__row">
+                        <th class="govuk-table__header" scope="row">Contact link</th>
+                        <td class="govuk-table__cell govuk-!-text-break-word">{{ form.support.link or "Not set" }}</td>
+                        <td class="govuk-table__cell">
+                            {{ govukInput({
+                            label: { text: "Welsh contact link URL" },
+                            id: "welsh_overview_supportLink",
+                            name: "welsh_overview_supportLink",
+                            value: welshOverview.supportLink | default(""),
+                            type: "url",
+                            attributes: { lang: "cy" }
+                            }) }}
+                        </td>
+                    </tr>
+                    <tr class="govuk-table__row">
+                        <th class="govuk-table__header" scope="row">Link text</th>
+                        <td class="govuk-table__cell govuk-!-text-break-word">{{ form.support.linkDescription or "—" }}</td>
+                        <td class="govuk-table__cell">
+                            {{ govukInput({
+                            label: { text: "Welsh text for the contact link" },
+                            id: "welsh_overview_supportLinkDescription",
+                            name: "welsh_overview_supportLinkDescription",
+                            value: welshOverview.supportLinkDescription | default(""),
+                            attributes: { lang: "cy" }
+                            }) }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="app-scrolling-wrapper" role="region" tabindex="0" aria-label="Phone number and opening times for support">
+        <table class="govuk-table govuk-!-margin-bottom-0 app-translation-table">
+            <caption class="govuk-table__caption govuk-table__caption--m">Phone number and opening times</caption>
+            <colgroup>
+                <col class="app-translation-table__col-gutter">
+                <col class="app-translation-table__col-english">
+                <col class="app-translation-table__col-welsh">
+            </colgroup>
+            <thead class="govuk-table__head">
+                <tr class="govuk-table__row">
+                    <th class="govuk-table__header app-translation-table__empty-header-cell" scope="col"></th>
+                    <th class="govuk-table__header" scope="col">English content</th>
+                    <th class="govuk-table__header" scope="col">Welsh content</th>
+                </tr>
+            </thead>
+            <tbody class="govuk-table__body">
+                <tr class="govuk-table__row">
+                    <th class="govuk-table__header" scope="row">Phone number and opening times</th>
+                    <td class="govuk-table__cell govuk-!-text-break-word">{{ form.support.phone or "Not set" }}</td>
+                    <td class="govuk-table__cell">
+                        <div class="govuk-form-group">
+                            <label class="govuk-label" for="welsh_overview_supportPhone">Welsh phone number and opening times</label>
+                            <textarea class="govuk-textarea" id="welsh_overview_supportPhone"
+                                name="welsh_overview_supportPhone" rows="5"
+                                lang="cy">{{ welshOverview.supportPhone | default("") }}</textarea>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

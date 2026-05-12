@@ -1,0 +1,64 @@
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% import "titan-mvp-1.2/form-editor/welsh-translation/section-partials/_welsh-markdown-details-macro.html" as wmd %}
+<div class="govuk-!-margin-bottom-9">
+    <div class="app-scrolling-wrapper" role="region" tabindex="0" aria-label="Privacy information for this form">
+        {% if form.privacyNoticeForForm.mode == "inline" %}
+        <p class="govuk-body-s govuk-!-margin-bottom-2">This form adds privacy information as text on the form.</p>
+        {% else %}
+        <p class="govuk-body-s govuk-!-margin-bottom-2">This form uses a link to a privacy notice.</p>
+        {% endif %}
+        <table class="govuk-table govuk-!-margin-bottom-9 app-translation-table">
+            <caption class="govuk-table__caption govuk-table__caption--m">Privacy information for this form</caption>
+            <colgroup>
+                <col class="app-translation-table__col-gutter">
+                <col class="app-translation-table__col-english">
+                <col class="app-translation-table__col-welsh">
+            </colgroup>
+            <thead class="govuk-table__head">
+                <tr class="govuk-table__row">
+                    <th class="govuk-table__header app-translation-table__empty-header-cell" scope="col"></th>
+                    <th class="govuk-table__header" scope="col">English content</th>
+                    <th class="govuk-table__header" scope="col">Welsh content</th>
+                </tr>
+            </thead>
+            <tbody class="govuk-table__body">
+                {% if form.privacyNoticeForForm.mode == "inline" %}
+                <tr class="govuk-table__row">
+                    <th class="govuk-table__header" scope="row">Privacy text (markdown)</th>
+                    <td class="govuk-table__cell govuk-!-text-break-word">
+                        {% if form.privacyNoticeForForm.directBodyMarkdown %}
+                        <pre class="app-translation-table__markdown-preview">{{ form.privacyNoticeForForm.directBodyMarkdown }}</pre>
+                        {% else %}
+                        <p class="govuk-body govuk-!-margin-bottom-0">—</p>
+                        {% endif %}
+                    </td>
+                    <td class="govuk-table__cell">
+                        <div class="govuk-form-group">
+                            <label class="govuk-label" for="welsh_overview_privacyDirectBodyMarkdown">Welsh privacy text (markdown)</label>
+                            <textarea class="govuk-textarea" id="welsh_overview_privacyDirectBodyMarkdown"
+                                name="welsh_overview_privacyDirectBodyMarkdown" rows="12"
+                                lang="cy">{{ welshOverview.privacyDirectBodyMarkdown | default("") }}</textarea>
+                            {{ wmd.welshMarkdownHelpDetails(markdownHelpPanelHtml) }}
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr class="govuk-table__row">
+                    <th class="govuk-table__header" scope="row">Privacy notice link</th>
+                    <td class="govuk-table__cell govuk-!-text-break-word">{{ form.privacyNotice or "Not set" }}</td>
+                    <td class="govuk-table__cell">
+                        {{ govukInput({
+                        label: { text: "Welsh privacy notice URL" },
+                        id: "welsh_overview_privacyNotice",
+                        name: "welsh_overview_privacyNotice",
+                        value: welshOverview.privacyNotice | default(""),
+                        type: "url",
+                        attributes: { lang: "cy" }
+                        }) }}
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -2,7 +2,7 @@
  * Welsh translation prototype: showcase form data and POST/session helpers.
  */
 
-const WELSH_SHOWCASE_DATA_VERSION = 2;
+const WELSH_SHOWCASE_DATA_VERSION = 5;
 
 function optionText(opt) {
   return opt.label != null ? opt.label : opt.text;
@@ -22,10 +22,17 @@ function getWelshShowcaseSessionPatch() {
         "Rural Services helpline 03000 200 301 (Monday to Friday, 8:30am to 5pm, excluding bank holidays)",
       email: "ruralpayments@defra.gov.uk",
       link: "https://www.gov.uk/government/organisations/department-for-environment-food-rural-affairs",
+      linkDescription: "DEFRA organisation contact page",
+      responseTime: "We aim to respond within 5 working days.",
     },
     nextSteps:
       "We will check your return against our records. If we need anything else we will email you within **15 working days**. Keep your reference number safe — you will need it if you contact us.",
     privacyNotice: "https://www.gov.uk/government/publications/rural-payments-agency-privacy-notice",
+    privacyNoticeForForm: {
+      mode: "link",
+      directBodyMarkdown:
+        "This form collects personal data so we can process your livestock return.\n\nWe explain what we collect, why we collect it, how long we keep it, and your rights.",
+    },
     notificationEmail: "livestock-return-notifications@defra.gov.uk",
     payUrl: "https://www.payments.service.gov.uk/public/livestock-return-registration-fee",
   };
@@ -36,7 +43,7 @@ function getWelshShowcaseSessionPatch() {
       pageType: "guidance",
       guidanceOnlyHeadingInput: "Before you start",
       guidanceOnlyGuidanceTextInput:
-        "Use this return to tell us about **livestock numbers and movements** on your registered holding for the past 12 months.\n\nYou will need:\n\n- your County Parish Holding (CPH) number\n- the reference from your invitation email\n- approximate grazing and housing dates if you moved stock\n\nThis demonstration form includes every editor question type, **several pages with two or more questions**, and one page with optional heading and guidance so you can test **Welsh translations** end to end.",
+        "Use this return to tell us about **livestock numbers and movements** on your registered holding for the past 12 months.\n\nYou will need:\n\n- your County Parish Holding (CPH) number\n- the reference from your invitation email\n- approximate grazing and housing dates if you moved stock\n\nThis demonstration form includes every editor question type (including **autocomplete** lists built from one option per line), **several pages with two or more questions**, and one page with optional heading and guidance so you can test **Welsh translations** end to end.",
       conditions: [],
       order: 1,
     },
@@ -327,6 +334,32 @@ function getWelshShowcaseSessionPatch() {
       order: 15,
     },
     {
+      pageId: "p-autocomplete",
+      pageType: "question",
+      questions: [
+        {
+          questionId: "q-autocomplete-breed",
+          label: "Which cattle breed code on the tagging certificate matches this group?",
+          type: "list",
+          subType: "autocomplete",
+          hint: "Start typing the breed name. The list is built from one option per line in the editor.",
+          shortDescription: "breed code on certificate",
+          autocompleteOptionsText:
+            "Aberdeen Angus:AA\nHereford:HE\nEnglish Longhorn:EL\nShorthorn:SH\nSouth Devon:SD\nWelsh Black:WB",
+          options: [
+            { label: "Aberdeen Angus", text: "Aberdeen Angus" },
+            { label: "Hereford", text: "Hereford" },
+            { label: "English Longhorn", text: "English Longhorn" },
+            { label: "Shorthorn", text: "Shorthorn" },
+            { label: "South Devon", text: "South Devon" },
+            { label: "Welsh Black", text: "Welsh Black" },
+          ],
+        },
+      ],
+      conditions: [],
+      order: 16,
+    },
+    {
       pageId: "p-checkboxes",
       pageType: "question",
       questions: [
@@ -370,7 +403,7 @@ function getWelshShowcaseSessionPatch() {
         },
       ],
       conditions: [],
-      order: 16,
+      order: 17,
     },
     {
       pageId: "p-declaration",
@@ -386,7 +419,7 @@ function getWelshShowcaseSessionPatch() {
         },
       ],
       conditions: [],
-      order: 17,
+      order: 18,
     },
     {
       pageId: "p-payment",
@@ -402,7 +435,7 @@ function getWelshShowcaseSessionPatch() {
         },
       ],
       conditions: [],
-      order: 18,
+      order: 19,
     },
     {
       pageId: "p-exit-guidance",
@@ -411,7 +444,7 @@ function getWelshShowcaseSessionPatch() {
       guidanceOnlyGuidanceTextInput:
         "From your answers it looks as if this holding is **registered outside England** or is part of a **cross-border agreement** we cannot process in this beta form.\n\nPlease call the Rural Services helpline on **03000 200 301** and quote your CPH number. Do not continue this online return — an adviser will tell you which form to use.",
       conditions: [],
-      order: 19,
+      order: 20,
       isExitPage: true,
     },
   ];
@@ -456,8 +489,11 @@ function collectWelshTranslationsFromBody(body, formPages) {
     supportPhone: field(body, "welsh_overview_supportPhone"),
     supportEmail: field(body, "welsh_overview_supportEmail"),
     supportLink: field(body, "welsh_overview_supportLink"),
+    supportLinkDescription: field(body, "welsh_overview_supportLinkDescription"),
+    supportResponseTime: field(body, "welsh_overview_supportResponseTime"),
     nextSteps: field(body, "welsh_overview_nextSteps"),
     privacyNotice: field(body, "welsh_overview_privacyNotice"),
+    privacyDirectBodyMarkdown: field(body, "welsh_overview_privacyDirectBodyMarkdown"),
     payUrl: field(body, "welsh_overview_payUrl"),
   };
 
@@ -483,16 +519,21 @@ function collectWelshTranslationsFromBody(body, formPages) {
         declarationText: field(body, `${prefix}declarationText`),
         declarationAgreement: field(body, `${prefix}declarationAgreement`),
         paymentDescription: field(body, `${prefix}paymentDescription`),
+        autocompleteOptionsText: field(body, `${prefix}autocompleteOptionsText`),
         options: [],
       };
 
-      (q.options || []).forEach((opt, oi) => {
-        qRow.options.push({
-          index: oi,
-          text: field(body, `${prefix}opt_${oi}_text`),
-          hint: opt.hint ? field(body, `${prefix}opt_${oi}_hint`) : "",
+      const isAutocompleteList = q.type === "list" && q.subType === "autocomplete";
+
+      if (!isAutocompleteList) {
+        (q.options || []).forEach((opt, oi) => {
+          qRow.options.push({
+            index: oi,
+            text: field(body, `${prefix}opt_${oi}_text`),
+            hint: opt.hint ? field(body, `${prefix}opt_${oi}_hint`) : "",
+          });
         });
-      });
+      }
 
       row.questions.push(qRow);
     });
@@ -521,6 +562,10 @@ function buildOverviewFormForSession(formData) {
     .replace(/(^-|-$)/g, "");
   const previewUrl = `https://forms-runner.prototype.cdp-int.defra.cloud/preview/draft/${urlFriendlyName}`;
 
+  const d = formData.formDetails || {};
+  const s = d.support || {};
+  const privacy = d.privacyNoticeForForm || {};
+
   return {
     name: formData.formName || "Form name",
     status: {
@@ -528,24 +573,30 @@ function buildOverviewFormForSession(formData) {
       color: statusColor,
     },
     previewUrl,
-    createdAt: formData.formDetails?.createdAt || new Date().toISOString(),
-    updatedAt: formData.formDetails?.lastUpdated || new Date().toISOString(),
+    createdAt: d.createdAt || new Date().toISOString(),
+    updatedAt: d.lastUpdated || new Date().toISOString(),
     organisation: {
-      name: formData.formDetails?.organisation || "Not set",
+      name: d.organisation || "Not set",
     },
     team: {
-      name: formData.formDetails?.teamName || "Not set",
-      email: formData.formDetails?.email || "Not set",
+      name: d.teamName || "Not set",
+      email: d.email || "Not set",
     },
     support: {
-      phone: formData.formDetails?.support?.phone,
-      email: formData.formDetails?.support?.email,
-      link: formData.formDetails?.support?.link,
+      phone: s.phone,
+      email: s.email,
+      link: s.link,
+      linkDescription: s.linkDescription,
+      responseTime: s.responseTime,
     },
-    nextSteps: formData.formDetails?.nextSteps,
-    privacyNotice: formData.formDetails?.privacyNotice,
-    notificationEmail: formData.formDetails?.notificationEmail,
-    payUrl: formData.formDetails?.payUrl,
+    nextSteps: d.nextSteps,
+    privacyNotice: d.privacyNotice,
+    privacyNoticeForForm: {
+      mode: privacy.mode === "inline" ? "inline" : "link",
+      directBodyMarkdown: privacy.directBodyMarkdown,
+    },
+    notificationEmail: d.notificationEmail,
+    payUrl: d.payUrl,
   };
 }
 
@@ -584,6 +635,217 @@ function cloneFormPagesWithGlobalQuestionNumbers(formPages) {
   return pages;
 }
 
+const WELSH_SCREENSHOT_OVERVIEW_KINDS = [
+  "intro",
+  "overview-form-name",
+  "overview-support",
+  "overview-next-steps",
+  "overview-privacy",
+  "overview-payment",
+];
+
+const WELSH_SCREENSHOT_OVERVIEW_TITLES = {
+  intro: "Conditions and live form notice",
+  "overview-form-name": "Form name",
+  "overview-support": "Contact details for support",
+  "overview-next-steps": "What happens next",
+  "overview-privacy": "Privacy information",
+  "overview-payment": "GOV.UK Pay payment link",
+  "footer-actions": "Footer actions (save, preview, delete)",
+};
+
+/**
+ * @param {string} reqPath Express req.path (used to match .html suffix)
+ * @param {object[]} formPages
+ * @returns {{ title: string, href: string }[]}
+ */
+function buildWelshTranslationScreenshotLinks(reqPath, formPages) {
+  const useHtmlSuffix = reqPath.endsWith(".html");
+  const qs = useHtmlSuffix ? ".html" : "";
+  const sectionBase = `/titan-mvp-1.2/form-editor/welsh-translation/screenshot-section${qs}`;
+
+  const kindUrl = (kind, extra = {}) => {
+    const params = new URLSearchParams({ kind });
+    if (extra.pageId) params.set("pageId", extra.pageId);
+    if (extra.questionId) params.set("questionId", extra.questionId);
+    return `${sectionBase}?${params.toString()}`;
+  };
+
+  const links = WELSH_SCREENSHOT_OVERVIEW_KINDS.map((kind) => ({
+    title: WELSH_SCREENSHOT_OVERVIEW_TITLES[kind],
+    href: kindUrl(kind),
+  }));
+
+  (formPages || []).forEach((page, idx) => {
+    const pageNum = idx + 1;
+    const label = `Page ${pageNum}`;
+    const pid = page.pageId;
+    if (page.pageType === "guidance") {
+      links.push({
+        title: `${label} — guidance page`,
+        href: kindUrl("page-guidance", { pageId: pid }),
+      });
+      return;
+    }
+    if (page.pageHeading || page.guidanceTextarea) {
+      links.push({
+        title: `${label} — optional heading and guidance`,
+        href: kindUrl("page-optional", { pageId: pid }),
+      });
+    }
+    (page.questions || []).forEach((q, qix) => {
+      const short = (q.label || q.type || "Question").slice(0, 72);
+      links.push({
+        title: `${label}, question ${qix + 1} — ${short}`,
+        href: kindUrl("question", { pageId: pid, questionId: q.questionId }),
+      });
+    });
+  });
+
+  links.push({
+    title: WELSH_SCREENSHOT_OVERVIEW_TITLES["footer-actions"],
+    href: kindUrl("footer-actions"),
+  });
+
+  return links;
+}
+
+/**
+ * @returns {object} view locals including screenshotSectionTitle, or { error: string }
+ */
+function firstQueryString(value) {
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+  if (Array.isArray(value)) {
+    return firstQueryString(value[0]);
+  }
+  const s = String(value).trim();
+  return s === "" ? undefined : s;
+}
+
+function normalizeWelshScreenshotQuery(reqQuery) {
+  if (!reqQuery || typeof reqQuery !== "object") {
+    return { kind: undefined, pageId: undefined, questionId: undefined };
+  }
+  return {
+    kind: firstQueryString(reqQuery.kind),
+    pageId: firstQueryString(reqQuery.pageId),
+    questionId: firstQueryString(reqQuery.questionId),
+  };
+}
+
+function resolveWelshTranslationScreenshotView(reqQuery, formPages, welshByPageId) {
+  const q = normalizeWelshScreenshotQuery(reqQuery);
+  const kind = q.kind;
+  const pageId = q.pageId;
+  const questionId = q.questionId;
+  const invalid = { error: "Missing or invalid screenshot section." };
+
+  if (!kind) {
+    return {
+      error:
+        "Open the screenshot hub and pick a section, or use ?kind=intro and other query parameters.",
+    };
+  }
+
+  if (WELSH_SCREENSHOT_OVERVIEW_TITLES[kind]) {
+    return {
+      kind,
+      screenshotSectionTitle: WELSH_SCREENSHOT_OVERVIEW_TITLES[kind],
+    };
+  }
+
+  const pages = formPages || [];
+
+  if (kind === "page-guidance") {
+    const page = pages.find((p) => p.pageId === pageId && p.pageType === "guidance");
+    if (!page || !pageId) {
+      return {
+        error:
+          "That guidance page was not found. Load the showcase or ensure your session includes the same form pages as this link.",
+      };
+    }
+    const pageNumberLabel = `Page ${pages.indexOf(page) + 1}`;
+    const wp = welshByPageId[page.pageId] || null;
+    return {
+      kind,
+      page,
+      wp,
+      pageNumberLabel,
+      screenshotSectionTitle: `${pageNumberLabel} — guidance page`,
+    };
+  }
+
+  if (kind === "page-optional") {
+    const page = pages.find((p) => p.pageId === pageId && p.pageType !== "guidance");
+    if (!page || !pageId) {
+      return {
+        error:
+          "That page was not found in the current session. Load the showcase or open the screenshot hub from the Welsh translation page.",
+      };
+    }
+    if (!(page.pageHeading || page.guidanceTextarea)) {
+      return { error: "This page has no optional heading or guidance to translate." };
+    }
+    const pageNumberLabel = `Page ${pages.indexOf(page) + 1}`;
+    const wp = welshByPageId[page.pageId] || null;
+    return {
+      kind,
+      page,
+      wp,
+      pageNumberLabel,
+      screenshotSectionTitle: `${pageNumberLabel} — optional heading and guidance`,
+    };
+  }
+
+  if (kind === "question") {
+    const page = pages.find((p) => p.pageId === pageId);
+    if (!page || !questionId) {
+      return {
+        error:
+          "That question is not in the current form (or the session has no form pages). Load the showcase or open the full Welsh translation page first.",
+      };
+    }
+    const question = (page.questions || []).find((item) => item.questionId === questionId);
+    if (!question) {
+      return {
+        error:
+          "That question was not found on the selected page. Your session form may differ from the link — open the screenshot hub from the Welsh translation page to refresh links.",
+      };
+    }
+    const pageNumberLabel = `Page ${pages.indexOf(page) + 1}`;
+    const questionNumOnPage = page.questions.findIndex((q) => q.questionId === questionId) + 1;
+    const questionSectionLabel = `${pageNumberLabel}, question ${questionNumOnPage}`;
+    const wp = welshByPageId[page.pageId] || null;
+    const wq = wp && wp.questionsById ? wp.questionsById[question.questionId] : null;
+    const questionSectionId = `welsh-section-${page.pageId}-q-${question.questionId}`;
+    const isAutocompleteQuestion = question.type === "list" && question.subType === "autocomplete";
+    const isListQuestion =
+      question.type === "list" &&
+      !isAutocompleteQuestion &&
+      question.options &&
+      question.options.length > 0;
+    return {
+      kind: "question",
+      page,
+      question,
+      wp,
+      wq,
+      pageNumberLabel,
+      questionNumOnPage,
+      questionSectionLabel,
+      questionSectionId,
+      isAutocompleteQuestion,
+      isListQuestion,
+      isFirstQuestionOnPage: true,
+      screenshotSectionTitle: `${questionSectionLabel} — ${(question.label || "").slice(0, 80)}`,
+    };
+  }
+
+  return invalid;
+}
+
 module.exports = {
   getWelshShowcaseSessionPatch,
   applyWelshShowcaseSession,
@@ -592,4 +854,6 @@ module.exports = {
   indexWelshTranslations,
   optionText,
   cloneFormPagesWithGlobalQuestionNumbers,
+  buildWelshTranslationScreenshotLinks,
+  resolveWelshTranslationScreenshotView,
 };
