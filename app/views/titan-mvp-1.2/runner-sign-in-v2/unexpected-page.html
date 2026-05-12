@@ -1,0 +1,62 @@
+{% extends "layouts/runner-sign-in-v2.html" %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}
+{{ page.title }} - Runner sign-in v2 - GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({
+    href: page.backHref or "/runner-sign-in-v2/unexpected-journeys",
+    text: "Back"
+  }) }}
+{% endblock %}
+
+{% block header %}
+  {{ v2.v2ServiceHeader("") }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% if page.caption %}
+      <span class="govuk-caption-l">{{ page.caption }}</span>
+    {% endif %}
+    <h1 class="govuk-heading-l">{{ page.title }}</h1>
+
+    {% if page.insetHtml %}
+      {{ govukInsetText({ html: page.insetHtml }) }}
+    {% endif %}
+
+    {% for paragraph in page.paragraphs %}
+      <p class="govuk-body">{{ paragraph }}</p>
+    {% endfor %}
+
+    {% if page.bullets %}
+      <ul class="govuk-list govuk-list--bullet">
+        {% for bullet in page.bullets %}
+          <li>{{ bullet }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    {% if page.buttonText %}
+      {{ govukButton({
+        text: page.buttonText,
+        href: page.buttonHref or "/runner-sign-in-v2/start-page"
+      }) }}
+    {% endif %}
+
+    {% if page.secondaryLinks %}
+      <p class="govuk-body">
+        {% for link in page.secondaryLinks %}
+          <a class="govuk-link" href="{{ link.href }}">{{ link.text }}</a>{% if not loop.last %}<br>{% endif %}
+        {% endfor %}
+      </p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

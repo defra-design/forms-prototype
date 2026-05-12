@@ -1,0 +1,49 @@
+{% extends "layouts/main.html" %}
+{% from "components/service-header/macro.njk" import serviceHeader %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+
+{% set pageName = "Welsh translation mocks" %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+accountName: "Chris Smith",
+homepageLink: "/",
+signOutLink: "/titan-mvp-1.2/onboarding/sign-out-confirmation",
+navigationItems: [
+{ href: "/titan-mvp-1.2/library", text: "Forms library", id: "nav-library" },
+{ href: "/titan-mvp-1.2/form-overview/welsh-mocks/overview-entry.html", text: "Overview", id: "nav-overview" },
+{ href: "/titan-mvp-1.2/form-editor/welsh-mocks/listing-v2-entry.html", text: "Editor", id: "nav-editor" }
+],
+activeLinkId: ""
+}) }}
+{% endblock %}
+
+{% block beforeContent %}
+{{ govukBackLink({
+text: "Back to forms library",
+href: "/titan-mvp-1.2/library"
+}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-width-container">
+    <span class="govuk-caption-xl">Prototype only</span>
+    <h1 class="govuk-heading-xl">Welsh translation entry mocks</h1>
+
+    <p class="govuk-body">These pages copy the editor and overview patterns without changing the real
+        <code>listing-v2</code> or form overview templates. Use them to demo the Welsh translation journey.</p>
+
+    <ul class="govuk-list govuk-list--bullet">
+        <li><a class="govuk-link" href="/titan-mvp-1.2/form-editor/welsh-mocks/listing-v2-entry.html">Mock form editor
+                masthead (listing-v2 style)</a> — includes “Add Welsh version”.</li>
+        <li><a class="govuk-link" href="/titan-mvp-1.2/form-overview/welsh-mocks/overview-entry.html">Mock form overview
+                (manage form panel)</a> — includes “Add Welsh version”.</li>
+        <li><a class="govuk-link" href="/titan-mvp-1.2/form-editor/welsh-translation/load-showcase">Load showcase form into
+                session</a> then open the Welsh page.</li>
+        <li><a class="govuk-link" href="/titan-mvp-1.2/form-editor/welsh-translation.html">Welsh translation page</a></li>
+    </ul>
+</div>
+{% endblock %}

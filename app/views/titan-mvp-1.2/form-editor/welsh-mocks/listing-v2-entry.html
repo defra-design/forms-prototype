@@ -1,0 +1,75 @@
+{% extends "layouts/main.html" %}
+{% from "components/service-header/macro.njk" import serviceHeader %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+
+{% set pageName = "Add and edit your pages (mock) - " + form.name %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+containerClasses: containerClasses,
+accountName: "Chris Smith",
+homepageLink: "/",
+signOutLink: "/titan-mvp-1.2/onboarding/sign-out-confirmation",
+navigationItems: [
+{ href: "/titan-mvp-1.2/library", text: "Forms library", id: "nav-library" },
+{ href: "/titan-mvp-1.2/form-overview/welsh-mocks/overview-entry.html", text: "Overview", id: "nav-overview" },
+{ href: "/titan-mvp-1.2/form-editor/welsh-mocks/listing-v2-entry.html", text: "Editor", id: "nav-editor", active: true }
+],
+activeLinkId: "nav-editor"
+}) }}
+
+<div class="x-govuk-masthead x-govuk-masthead--large">
+    <div class="govuk-width-container">
+        {{ govukBackLink({
+        classes: "govuk-back-link--inverse govuk-!-margin-bottom-0",
+        text: "Back to overview (mock)",
+        href: "/titan-mvp-1.2/form-overview/welsh-mocks/overview-entry.html"
+        }) }}
+
+        <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"
+            style="border-bottom:1px solid white; margin-bottom: 0;">
+
+        <h1 class="govuk-heading-l--inverse x-govuk-masthead__title">
+            <span class="govuk-caption-l" style="color: white;">Prototype mock · {{ form.name }}</span>
+            Add and edit pages
+        </h1>
+
+        <div class="govuk-button-group">
+            <a href="/titan-mvp-1.2/form-editor/page-type.html" role="button" draggable="false"
+                class="govuk-button govuk-button--inverse" data-module="govuk-button">
+                Add new page
+            </a>
+
+            <a href="#" class="govuk-link govuk-link--inverse" style="display: inline-block;">
+                Preview form
+            </a>
+
+            <a href="/titan-mvp-1.2/form-editor/welsh-translation.html" class="govuk-link govuk-link--inverse"
+                style="display: inline-block; margin-left: 15px;">
+                Add Welsh version
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="govuk-width-container govuk-!-margin-top-6">
+    {{ govukNotificationBanner({
+    type: "information",
+    titleText: "Mock page",
+    html: "<p class='govuk-body'>This is a <strong>standalone copy</strong> of the listing-v2 masthead for Welsh translation demos. The real <code>listing-v2</code> template is unchanged.</p>"
+    }) }}
+
+    <p class="govuk-body">
+        <a class="govuk-link" href="/titan-mvp-1.2/form-editor/listing-v2.html">Open the real form editor (listing-v2)</a>
+    </p>
+    <p class="govuk-body">
+        <a class="govuk-link" href="/titan-mvp-1.2/form-editor/welsh-mocks/index.html">Welsh mocks index</a>
+    </p>
+</div>
+{% endblock %}

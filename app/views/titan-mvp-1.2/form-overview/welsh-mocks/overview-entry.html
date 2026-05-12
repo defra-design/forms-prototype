@@ -1,0 +1,105 @@
+{% extends "layouts/main.html" %}
+{% from "components/service-header/macro.njk" import serviceHeader %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+
+{% set pageName = "Form overview (mock) - " + form.name %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+accountName: "Chris Smith",
+homepageLink: "/",
+signOutLink: "/titan-mvp-1.2/onboarding/sign-out-confirmation",
+navigationItems: [
+{ href: "/titan-mvp-1.2/library", text: "Forms library", id: "nav-library" },
+{ href: "/titan-mvp-1.2/form-overview/welsh-mocks/overview-entry.html", text: "Overview", id: "nav-overview", active: true },
+{ href: "/titan-mvp-1.2/form-editor/welsh-mocks/listing-v2-entry.html", text: "Editor", id: "nav-editor" }
+],
+activeLinkId: "nav-overview"
+}) }}
+{% endblock %}
+
+{% block beforeContent %}
+{{ govukBackLink({
+text: "Back to forms library",
+href: "/titan-mvp-1.2/library"
+}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        <span class="govuk-caption-l">Prototype mock</span>
+        <h1 class="govuk-heading-xl">{{ form.name }}</h1>
+
+        {{ govukNotificationBanner({
+        type: "information",
+        titleText: "Mock overview",
+        html: "<p class='govuk-body'>This page is a <strong>standalone copy</strong> of the overview layout for Welsh translation demos. The real form overview templates are unchanged.</p>"
+        }) }}
+
+        <p class="govuk-body">
+            <a class="govuk-link" href="/titan-mvp-1.2/form-overview/index/">Open the real form overview index</a>
+        </p>
+        <p class="govuk-body">
+            <a class="govuk-link" href="/titan-mvp-1.2/form-editor/welsh-mocks/index.html">Welsh mocks index</a>
+        </p>
+    </div>
+
+    <div class="govuk-grid-column-one-third-from-desktop">
+        <div style="background-color: #f3f2f1; padding: 15px;">
+            <h2 class="govuk-heading-m">Manage form</h2>
+
+            <a href="/titan-mvp-1.2/form-overview/manage-form/migrate-confirmation"
+                class="gem-c-button govuk-button gem-c-button--secondary" style="width: 100%; margin-bottom: 15px;">Edit
+                draft (new
+                editor)</a>
+
+            <a href="/titan-mvp-1.2/form-editor/listing-v2.html"
+                class="gem-c-button govuk-button gem-c-button-publishing--secondary-quiet"
+                style="width: 100%; margin-bottom: 15px;">Edit draft</a>
+
+            <a href="/titan-mvp-1.2/form-editor/welsh-translation.html"
+                class="gem-c-button govuk-button gem-c-button--secondary"
+                style="width: 100%; margin-bottom: 15px;">Add Welsh version</a>
+
+            <a href="/titan-mvp-1.2/form-overview/manage-form/make-draft-live/passed-validation">
+                <button type="submit" class="govuk-button" data-module="govuk-button"
+                    style="width: 100%; margin-bottom: 15px;">
+                    Make draft live
+                </button>
+            </a>
+
+            <a href="/titan-mvp-1.2/form-overview/manage-form/delete-draft" class="govuk-link">Delete draft</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .gem-c-button {
+        margin-bottom: 0;
+    }
+
+    .gem-c-button--secondary {
+        padding: 8px 10px;
+        border-color: #00823b;
+        color: #00823b !important;
+        background-color: #fff;
+        box-shadow: none;
+    }
+
+    .gem-c-button--secondary:before {
+        content: none;
+    }
+
+    .gem-c-button--secondary:hover {
+        border-color: rgb(0, 104.5, 47.4269230769);
+        color: rgb(0, 104.5, 47.4269230769) !important;
+        background-color: #f3f2f1;
+        text-decoration: none;
+    }
+</style>
+{% endblock %}

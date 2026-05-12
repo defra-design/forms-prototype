@@ -6,6 +6,7 @@ const lists = require("../../routes/lists");
 const sections = require("../../routes/sections");
 const terms = require("../../data/dictionary.json");
 const express = require("express");
+const welshTranslationLib = require("../../lib/titan-mvp-1.2/welsh-translation.js");
 
 // Public base URL for links you share externally (e.g. review links in emails).
 const PUBLIC_BASE_URL = "https://forms-prototype-d9d9fb55cd01.herokuapp.com";
@@ -2120,6 +2121,133 @@ router.get("/titan-mvp-1.2/form-editor/listing-v2.html", function (req, res) {
       name: formData.formName || "Employee Onboarding",
     },
     data: formData,
+    request: req,
+  });
+});
+
+function renderWelshTranslationPage(req, res, queryFlags = {}) {
+  if (queryFlags.showcaseLoaded) {
+    welshTranslationLib.applyWelshShowcaseSession(req.session.data);
+  }
+  const formData = req.session.data || {};
+  const formPages = welshTranslationLib.cloneFormPagesWithGlobalQuestionNumbers(
+    formData.formPages || []
+  );
+  const form = welshTranslationLib.buildOverviewFormForSession(formData);
+  const welshTranslations = formData.welshTranslations || {
+    overview: {},
+    pages: [],
+    finishedAddingWelsh: "no",
+  };
+  const { overview: welshOverview, byPage: welshByPageId } =
+    welshTranslationLib.indexWelshTranslations(welshTranslations);
+
+  res.render("titan-mvp-1.2/form-editor/welsh-translation/index", {
+    form,
+    formPages,
+    welshOverview,
+    welshByPageId,
+    welshTranslations,
+    formData,
+    saved: queryFlags.saved,
+    deleted: queryFlags.deleted,
+    showcaseLoaded: queryFlags.showcaseLoaded,
+    request: req,
+    pageName: `Welsh version - ${form.name}`,
+  });
+}
+
+router.get("/titan-mvp-1.2/form-editor/welsh-translation/load-showcase", (req, res) => {
+  welshTranslationLib.applyWelshShowcaseSession(req.session.data, { force: true });
+  res.redirect("/titan-mvp-1.2/form-editor/welsh-translation?showcase=1");
+});
+
+router.get("/titan-mvp-1.2/form-editor/welsh-translation", (req, res) => {
+  renderWelshTranslationPage(req, res, {
+    saved: req.query.saved === "1",
+    deleted: req.query.deleted === "1",
+    showcaseLoaded: req.query.showcase === "1",
+  });
+});
+
+router.get("/titan-mvp-1.2/form-editor/welsh-translation.html", (req, res) => {
+  renderWelshTranslationPage(req, res, {
+    saved: req.query.saved === "1",
+    deleted: req.query.deleted === "1",
+    showcaseLoaded: req.query.showcase === "1",
+  });
+});
+
+router.post("/titan-mvp-1.2/form-editor/welsh-translation", (req, res) => {
+  const formPages = req.session.data.formPages || [];
+  if (req.body.welsh_action === "delete") {
+    delete req.session.data.welshTranslations;
+    return res.redirect("/titan-mvp-1.2/form-editor/welsh-translation?deleted=1");
+  }
+  req.session.data.welshTranslations =
+    welshTranslationLib.collectWelshTranslationsFromBody(req.body, formPages);
+  return res.redirect("/titan-mvp-1.2/form-editor/welsh-translation?saved=1");
+});
+
+router.post("/titan-mvp-1.2/form-editor/welsh-translation.html", (req, res) => {
+  const formPages = req.session.data.formPages || [];
+  if (req.body.welsh_action === "delete") {
+    delete req.session.data.welshTranslations;
+    return res.redirect("/titan-mvp-1.2/form-editor/welsh-translation.html?deleted=1");
+  }
+  req.session.data.welshTranslations =
+    welshTranslationLib.collectWelshTranslationsFromBody(req.body, formPages);
+  return res.redirect("/titan-mvp-1.2/form-editor/welsh-translation.html?saved=1");
+});
+
+router.get("/titan-mvp-1.2/form-editor/welsh-mocks", (req, res) => {
+  res.render("titan-mvp-1.2/form-editor/welsh-mocks/index", {
+    request: req,
+    pageName: "Welsh translation mocks",
+  });
+});
+
+router.get("/titan-mvp-1.2/form-editor/welsh-mocks/index.html", (req, res) => {
+  res.render("titan-mvp-1.2/form-editor/welsh-mocks/index", {
+    request: req,
+    pageName: "Welsh translation mocks",
+  });
+});
+
+router.get("/titan-mvp-1.2/form-editor/welsh-mocks/listing-v2-entry", (req, res) => {
+  const formData = req.session.data || {};
+  res.render("titan-mvp-1.2/form-editor/welsh-mocks/listing-v2-entry", {
+    form: { name: formData.formName || "Employee Onboarding" },
+    data: formData,
+    request: req,
+  });
+});
+
+router.get("/titan-mvp-1.2/form-editor/welsh-mocks/listing-v2-entry.html", (req, res) => {
+  const formData = req.session.data || {};
+  res.render("titan-mvp-1.2/form-editor/welsh-mocks/listing-v2-entry", {
+    form: { name: formData.formName || "Employee Onboarding" },
+    data: formData,
+    request: req,
+  });
+});
+
+router.get("/titan-mvp-1.2/form-overview/welsh-mocks/overview-entry", (req, res) => {
+  const formData = req.session.data || {};
+  const form = welshTranslationLib.buildOverviewFormForSession(formData);
+  res.render("titan-mvp-1.2/form-overview/welsh-mocks/overview-entry", {
+    form,
+    pageName: `Form overview (mock) - ${form.name}`,
+    request: req,
+  });
+});
+
+router.get("/titan-mvp-1.2/form-overview/welsh-mocks/overview-entry.html", (req, res) => {
+  const formData = req.session.data || {};
+  const form = welshTranslationLib.buildOverviewFormForSession(formData);
+  res.render("titan-mvp-1.2/form-overview/welsh-mocks/overview-entry", {
+    form,
+    pageName: `Form overview (mock) - ${form.name}`,
     request: req,
   });
 });
@@ -18710,6 +18838,174 @@ router.get("/runner-sign-in-v2/start-page", function (req, res) {
     applicationId,
     manageUrl,
     seedApplications,
+  });
+});
+
+const RUNNER_SIGN_IN_V2_UNEXPECTED_PAGES = {
+  "email-already-has-sign-in": {
+    title: "You already have a sign-in for this form",
+    caption: "Create a sign-in",
+    journey: "Email already has a sign-in",
+    paragraphs: [
+      "Sign in using this email address to continue your form.",
+      "If you want to use a different email address, go back and enter it.",
+    ],
+    buttonText: "Sign in",
+    buttonHref: "/runner-sign-in-v2/sign-in/email",
+    secondaryLinks: [
+      { text: "Use a different email address", href: "/runner-sign-in-v2/create-sign-in/email" },
+    ],
+  },
+  "no-sign-in-found": {
+    title: "We cannot find a sign-in for that email address",
+    caption: "Sign in",
+    journey: "No sign-in found for an email address",
+    paragraphs: [
+      "Check the email address and try again.",
+      "If you have not used this form before, you can create a sign-in.",
+    ],
+    buttonText: "Try again",
+    buttonHref: "/runner-sign-in-v2/sign-in/email",
+    secondaryLinks: [
+      { text: "Create a sign-in", href: "/runner-sign-in-v2/create-sign-in/email" },
+    ],
+  },
+  "uk-mobile-needed": {
+    title: "You need a UK mobile phone number to create a sign-in",
+    caption: "Create a sign-in",
+    journey: "No UK mobile phone number",
+    paragraphs: [
+      "We use this number to send a security code if you need to recover your sign-in.",
+      "You can continue without creating a sign-in if the form lets you save and return another way.",
+    ],
+    buttonText: "Enter a UK mobile phone number",
+    buttonHref: "/runner-sign-in-v2/create-sign-in/mobile",
+    secondaryLinks: [
+      { text: "Continue without creating a sign-in", href: "/runner-sign-in-v2/start-page" },
+    ],
+  },
+  "security-code-expired": {
+    title: "Your security code has expired",
+    caption: "Security code",
+    journey: "Security code problems",
+    insetHtml: "The security code was sent to: <strong>you@example.com</strong>",
+    paragraphs: [
+      "Security codes expire after 15 minutes.",
+      "Ask us to send a new code, then enter it on the next page.",
+    ],
+    buttonText: "Send a new security code",
+    buttonHref: "/runner-sign-in-v2/create-sign-in/check-email?resend=1",
+  },
+  "wrong-security-code-too-many-times": {
+    title: "You entered the wrong security code too many times",
+    caption: "Security code",
+    journey: "Security code problems",
+    paragraphs: [
+      "You need to wait before you can enter another security code.",
+      "This helps keep your form secure.",
+    ],
+    buttonText: "Back to the form start page",
+    buttonHref: "/runner-sign-in-v2/start-page",
+  },
+  "too-many-security-codes": {
+    title: "You asked us to send too many security codes",
+    caption: "Security code",
+    journey: "Security code problems",
+    paragraphs: [
+      "You need to wait before you can ask for another security code.",
+      "If you already have a code, check it is the latest one we sent you.",
+    ],
+    buttonText: "Back to the form start page",
+    buttonHref: "/runner-sign-in-v2/start-page",
+  },
+  "cannot-recover-online": {
+    title: "We cannot recover your sign-in online",
+    caption: "Recover my sign-in",
+    journey: "Cannot recover a sign-in online",
+    paragraphs: [
+      "You can start a new form.",
+      "Contact the service if you need access to a form you have already saved.",
+    ],
+    buttonText: "Start a new form",
+    buttonHref: "/runner-sign-in-v2/start-page",
+    secondaryLinks: [
+      { text: "Contact the service", href: "#" },
+    ],
+  },
+  "save-link-expired": {
+    title: "Your link to return to this form has expired",
+    caption: "Save and return",
+    journey: "Expired save or review links",
+    paragraphs: [
+      "For security, links to return to a saved form only work for a limited time.",
+      "Go to the form start page and sign in again.",
+    ],
+    buttonText: "Go to the form start page",
+    buttonHref: "/runner-sign-in-v2/start-page",
+  },
+  "review-link-expired": {
+    title: "This review link has expired",
+    caption: "Check a form",
+    journey: "Expired save or review links",
+    paragraphs: [
+      "The applicant needs to send you a new invite before you can check their form.",
+    ],
+    buttonText: "Back to GOV.UK",
+    buttonHref: "https://www.gov.uk",
+  },
+  "service-unavailable": {
+    title: "Sorry, the service is unavailable",
+    caption: "Technical error",
+    journey: "Technical errors",
+    paragraphs: [
+      "You will be able to use the service later.",
+      "We have not saved any information you entered on the previous page.",
+    ],
+  },
+  "page-not-found": {
+    title: "Page not found",
+    caption: "Technical error",
+    journey: "Technical errors",
+    paragraphs: [
+      "If you typed the web address, check it is correct.",
+      "If you pasted the web address, check you copied the whole address.",
+    ],
+    buttonText: "Go to the form start page",
+    buttonHref: "/runner-sign-in-v2/start-page",
+  },
+  "problem-with-service": {
+    title: "Sorry, there is a problem with the service",
+    caption: "Technical error",
+    journey: "Technical errors",
+    paragraphs: [
+      "Try again later.",
+      "We have not saved any information you entered on the previous page.",
+    ],
+    buttonText: "Back to the form start page",
+    buttonHref: "/runner-sign-in-v2/start-page",
+  },
+};
+
+router.get("/runner-sign-in-v2/unexpected-journeys", function (req, res) {
+  const data = ensureRunnerSignInSession(req);
+  return res.render("titan-mvp-1.2/runner-sign-in-v2/unexpected-journeys", {
+    data,
+    unexpectedPages: Object.keys(RUNNER_SIGN_IN_V2_UNEXPECTED_PAGES).map((slug) => ({
+      slug,
+      href: `/runner-sign-in-v2/unexpected-journeys/${slug}`,
+      ...RUNNER_SIGN_IN_V2_UNEXPECTED_PAGES[slug],
+    })),
+  });
+});
+
+router.get("/runner-sign-in-v2/unexpected-journeys/:slug", function (req, res) {
+  const data = ensureRunnerSignInSession(req);
+  const page = RUNNER_SIGN_IN_V2_UNEXPECTED_PAGES[String(req.params.slug || "")];
+  if (!page) return res.redirect("/runner-sign-in-v2/unexpected-journeys");
+
+  return res.render("titan-mvp-1.2/runner-sign-in-v2/unexpected-page", {
+    data,
+    page,
   });
 });
 

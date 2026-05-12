@@ -1,0 +1,792 @@
+{% extends "layouts/main.html" %}
+{% from "components/service-header/macro.njk" import serviceHeader %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/textarea/macro.njk" import govukTextarea %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% from "govuk/components/details/macro.njk" import govukDetails %}
+{% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
+
+{% set pageName = pageName or ("Welsh version - " ~ form.name) %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+containerClasses: containerClasses,
+accountName: "Chris Smith",
+homepageLink: "/",
+signOutLink: "/titan-mvp-1.2/onboarding/sign-out-confirmation",
+navigationItems: [
+{ href: "/titan-mvp-1.2/library", text: "Forms library", id: "nav-library" },
+{ href: "/titan-mvp-1.2/form-overview/welsh-mocks/overview-entry.html", text: "Overview", id: "nav-overview" },
+{ href: "/titan-mvp-1.2/form-editor/welsh-mocks/listing-v2-entry.html", text: "Editor", id: "nav-editor", active: true }
+],
+activeLinkId: "nav-editor"
+}) }}
+
+<div class="x-govuk-masthead x-govuk-masthead--large">
+    <div class="govuk-width-container">
+        {{ govukBackLink({
+        classes: "govuk-back-link--inverse govuk-!-margin-bottom-0",
+        text: "Back to form editor",
+        href: ""
+        }) }}
+
+        <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"
+            style="border-bottom:1px solid white; margin-bottom: 0;">
+
+        <h1 class="govuk-heading-l--inverse x-govuk-masthead__title">
+            <span class="govuk-caption-l" style="color: white;">{{ form.name }}</span>
+            Add Welsh translations for your form
+        </h1>
+
+
+<div class="govuk-button-group">
+        <button class="govuk-button govuk-button--inverse" data-module="govuk-button">Save changes</button>
+
+        <button class="govuk-button govuk-button--secondary" data-module="govuk-button">Preview form in welsh</button>
+
+        <a href="/titan-mvp-1.2/form-editor/welsh-translation/load-showcase" class="govuk-link--inverse" data-module="govuk-button">Delete Welsh translations</a>
+    </div>
+
+        {# <p class="govuk-body" style="color: white; margin-bottom: 10px;">
+            <a href="#" class="govuk-link govuk-link--inverse">Download questions as CSV</a>
+            <span class="govuk-visually-hidden"> (not implemented in this prototype)</span>
+            <span style="color: white;"> &middot; </span>
+            <a href="#" class="govuk-link govuk-link--inverse">Preview this form in Welsh</a>
+            <span class="govuk-visually-hidden"> (not implemented in this prototype)</span>
+        </p>
+        <p class="govuk-body-s" style="color: #f3f2f1; margin-bottom: 0;">
+            <a href="/titan-mvp-1.2/form-editor/welsh-translation/load-showcase" class="govuk-link govuk-link--inverse">Load showcase form</a>
+            (all question types for testing translations)
+        </p> #}
+    </div>
+</div>
+{% endblock %}
+
+{% block beforeContent %}
+{% endblock %}
+
+{% block content %}
+
+<style>
+    .app-scrolling-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        outline: none;
+    }
+
+    .app-scrolling-wrapper:focus {
+        outline: 3px solid #fd0;
+        outline-offset: 0;
+    }
+
+    .app-translation-table {
+        table-layout: fixed;
+        width: 100%;
+        min-width: 36rem;
+    }
+
+    .app-translation-table .govuk-table__header,
+    .app-translation-table .govuk-table__cell {
+        vertical-align: top;
+    }
+
+    .app-translation-table__col-gutter {
+        width: 11rem;
+    }
+
+    .app-translation-table__empty-header-cell {
+        width: 11rem;
+    }
+
+    .app-welsh-page__questions {
+        margin-top: 1.5rem;
+    }
+
+    .app-welsh-markdown-help-details .govuk-details__text {
+        border-left: none;
+        padding-left: 0;
+    }
+
+    .app-welsh-markdown-help pre {
+        overflow-x: auto;
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+
+
+    .app-translation-table__markdown-preview {
+        white-space: pre-wrap;
+        font-family: inherit;
+        margin: 0;
+        font-size: inherit;
+    }
+
+    .app-translation-table .govuk-table__cell:has(.app-welsh-markdown-help-details) .govuk-form-group {
+        margin-bottom: 0;
+    }
+
+    .app-welsh-markdown-help-details {
+        margin-bottom: 0;
+    }
+</style>
+
+{% set markdownHelpPanelHtml %}{% include "titan-mvp-1.2/form-editor/welsh-translation/_markdown-help-panel.html" %}{% endset %}
+
+{% macro welshMarkdownHelpDetails(panelHtml) %}
+{{ govukDetails({
+summaryText: "Help with markdown",
+classes: "app-welsh-markdown-help-details govuk-!-margin-top-2",
+html: panelHtml
+}) }}
+{% endmacro %}
+
+
+    {# {% if saved %}
+    {{ govukNotificationBanner({
+    type: "success",
+    titleText: "Saved",
+    html: "<p class=\"govuk-notification-banner__heading\">Your Welsh translations have been saved in this session.</p>"
+    }) }}
+    {% endif %}
+    {% if deleted %}
+    {{ govukNotificationBanner({
+    type: "success",
+    titleText: "Deleted",
+    html: "<p class=\"govuk-notification-banner__heading\">Welsh translations were removed from this session.</p>"
+    }) }}
+    {% endif %}
+    {% if showcaseLoaded %}
+    {{ govukNotificationBanner({
+    type: "success",
+    titleText: "Showcase loaded",
+    html: "<p class=\"govuk-notification-banner__heading\">A demonstration form with every editor preview type is now in your session.</p>"
+    }) }}
+    {% endif %} #}
+
+    <form method="post" action="{{ request.path }}" novalidate>
+
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full">
+
+                <div class="govuk-grid-row">
+                    <div class="govuk-grid-column-two-thirds">
+
+                {{ govukWarningText({
+                text: "If you change make changes to the form name, support contacts, or what happens next, your changes are saved as a draft.
+They will only appear on the live form once you make the form live.",
+                classes: "govuk-!-margin-bottom-6",
+                iconFallbackText: "Warning"
+                }) }}
+                </div>
+                </div>
+
+                <div class="app-scrolling-wrapper" role="region" tabindex="0" aria-label="Form name">
+                    <table class="govuk-table govuk-!-margin-bottom-9 app-translation-table">
+                        <caption class="govuk-table__caption govuk-table__caption--m">Form name</caption>
+                        <colgroup>
+                            <col class="app-translation-table__col-gutter">
+                            <col class="app-translation-table__col-english">
+                            <col class="app-translation-table__col-welsh">
+                        </colgroup>
+                        <thead class="govuk-table__head">
+                            <tr class="govuk-table__row">
+                                <th class="govuk-table__header app-translation-table__empty-header-cell" scope="col"></th>
+                                <th class="govuk-table__header" scope="col">English content</th>
+                                <th class="govuk-table__header" scope="col">Welsh content</th>
+                            </tr>
+                        </thead>
+                        <tbody class="govuk-table__body">
+                            <tr class="govuk-table__row">
+                                <th class="govuk-table__header" scope="row">Form name</th>
+                                <td class="govuk-table__cell govuk-!-text-break-word">{{ form.name }}</td>
+                                <td class="govuk-table__cell">
+                                    {{ govukInput({
+                                    label: { text: "Enter your Welsh form name" },
+                                    id: "welsh_overview_formName",
+                                    name: "welsh_overview_formName",
+                                    value: welshOverview.formName | default(""),
+                                    attributes: { lang: "cy" }
+                                    }) }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="govuk-!-margin-bottom-9">
+                    <div class="app-scrolling-wrapper" role="region" tabindex="0" aria-label="Contact details for support">
+                        <table class="govuk-table govuk-!-margin-bottom-9 app-translation-table">
+                            <caption class="govuk-table__caption govuk-table__caption--m">Contact details for support
+                            </caption>
+                            <colgroup>
+                                <col class="app-translation-table__col-gutter">
+                                <col class="app-translation-table__col-english">
+                                <col class="app-translation-table__col-welsh">
+                            </colgroup>
+                            <thead class="govuk-table__head">
+                                <tr class="govuk-table__row">
+                                    <th class="govuk-table__header app-translation-table__empty-header-cell" scope="col">
+                                    </th>
+                                    <th class="govuk-table__header" scope="col">English content</th>
+                                    <th class="govuk-table__header" scope="col">Welsh content</th>
+                                </tr>
+                            </thead>
+                            <tbody class="govuk-table__body">
+                                <tr class="govuk-table__row">
+                                    <th class="govuk-table__header" scope="row">Email</th>
+                                    <td class="govuk-table__cell govuk-!-text-break-word">{{ form.support.email or "Not set" }}</td>
+                                    <td class="govuk-table__cell">
+                                        {{ govukInput({
+                                        label: { text: "Enter email address for Welsh support" },
+                                        id: "welsh_overview_supportEmail",
+                                        name: "welsh_overview_supportEmail",
+                                        value: welshOverview.supportEmail | default(""),
+                                        type: "email",
+                                        autocomplete: "email",
+                                        attributes: { lang: "cy" }
+                                        }) }}
+                                    </td>
+                                </tr>
+                                <tr class="govuk-table__row">
+                                    <th class="govuk-table__header" scope="row">Phone number and opening times</th>
+                                    <td class="govuk-table__cell govuk-!-text-break-word">{{ form.support.phone or "Not set" }}</td>
+                                    <td class="govuk-table__cell">
+                                        <div class="govuk-form-group">
+                                            <label class="govuk-label" for="welsh_overview_supportPhone">Enter phone
+                                                information for Welsh support</label>
+                                            <textarea class="govuk-textarea" id="welsh_overview_supportPhone"
+                                                name="welsh_overview_supportPhone" rows="5"
+                                                lang="cy">{{ welshOverview.supportPhone | default("") }}</textarea>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="govuk-table__row">
+                                    <th class="govuk-table__header" scope="row">Online contact link</th>
+                                    <td class="govuk-table__cell govuk-!-text-break-word">{{ form.support.link or "Not set" }}</td>
+                                    <td class="govuk-table__cell">
+                                        {{ govukInput({
+                                        label: { text: "Enter an online contact link for Welsh support" },
+                                        id: "welsh_overview_supportLink",
+                                        name: "welsh_overview_supportLink",
+                                        value: welshOverview.supportLink | default(""),
+                                        type: "url",
+                                        attributes: { lang: "cy" }
+                                        }) }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="govuk-!-margin-bottom-9">
+                    <div class="app-scrolling-wrapper" role="region" tabindex="0" aria-label="Information about what happens next">
+                        <table class="govuk-table govuk-!-margin-bottom-9 app-translation-table">
+                            <caption class="govuk-table__caption govuk-table__caption--m">Information about what happens next</caption>
+                            <colgroup>
+                                <col class="app-translation-table__col-gutter">
+                                <col class="app-translation-table__col-english">
+                                <col class="app-translation-table__col-welsh">
+                            </colgroup>
+                            <thead class="govuk-table__head">
+                                <tr class="govuk-table__row">
+                                    <th class="govuk-table__header app-translation-table__empty-header-cell" scope="col"></th>
+                                    <th class="govuk-table__header" scope="col">English content</th>
+                                    <th class="govuk-table__header" scope="col">Welsh content</th>
+                                </tr>
+                            </thead>
+                            <tbody class="govuk-table__body">
+                                <tr class="govuk-table__row">
+                                    <th class="govuk-table__header" scope="row">What happens next</th>
+                                    <td class="govuk-table__cell govuk-!-text-break-word">
+                                        <pre
+                                            class="app-translation-table__markdown-preview">{{ form.nextSteps or "Not set" }}</pre>
+                                    </td>
+                                    <td class="govuk-table__cell">
+                                        <div class="govuk-form-group">
+                                            <label class="govuk-label" for="welsh_overview_nextSteps">Enter information
+                                                about what happens next in Welsh</label>
+                                            <textarea class="govuk-textarea" id="welsh_overview_nextSteps"
+                                                name="welsh_overview_nextSteps" rows="12"
+                                                lang="cy">{{ welshOverview.nextSteps | default("") }}</textarea>
+                                            {{ welshMarkdownHelpDetails(markdownHelpPanelHtml) }}
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="govuk-!-margin-bottom-9">
+                    <div class="app-scrolling-wrapper" role="region" tabindex="0" aria-label="Link to privacy information for this form">
+                        <table class="govuk-table govuk-!-margin-bottom-9 app-translation-table">
+                            <caption class="govuk-table__caption govuk-table__caption--m">Link to privacy information for this form</caption>
+                            <colgroup>
+                                <col class="app-translation-table__col-gutter">
+                                <col class="app-translation-table__col-english">
+                                <col class="app-translation-table__col-welsh">
+                            </colgroup>
+                            <thead class="govuk-table__head">
+                                <tr class="govuk-table__row">
+                                    <th class="govuk-table__header app-translation-table__empty-header-cell" scope="col"></th>
+                                    <th class="govuk-table__header" scope="col">English content</th>
+                                    <th class="govuk-table__header" scope="col">Welsh content</th>
+                                </tr>
+                            </thead>
+                            <tbody class="govuk-table__body">
+                                <tr class="govuk-table__row">
+                                    <th class="govuk-table__header" scope="row">Privacy notice URL</th>
+                                    <td class="govuk-table__cell govuk-!-text-break-word">{{ form.privacyNotice or "Not set" }}</td>
+                                    <td class="govuk-table__cell">
+                                        {{ govukInput({
+                                        label: { text: "Enter link to your Welsh privacy information" },
+                                        id: "welsh_overview_privacyNotice",
+                                        name: "welsh_overview_privacyNotice",
+                                        value: welshOverview.privacyNotice | default(""),
+                                        type: "url",
+                                        attributes: { lang: "cy" }
+                                        }) }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="app-scrolling-wrapper" role="region" tabindex="0" aria-label="GOV.UK Pay payment link">
+                    <table class="govuk-table govuk-!-margin-bottom-9 app-translation-table">
+                        <caption class="govuk-table__caption govuk-table__caption--m">GOV.UK Pay payment link</caption>
+                        <colgroup>
+                            <col class="app-translation-table__col-gutter">
+                            <col class="app-translation-table__col-english">
+                            <col class="app-translation-table__col-welsh">
+                        </colgroup>
+                        <thead class="govuk-table__head">
+                            <tr class="govuk-table__row">
+                                <th class="govuk-table__header app-translation-table__empty-header-cell" scope="col"></th>
+                                <th class="govuk-table__header" scope="col">English content</th>
+                                <th class="govuk-table__header" scope="col">Welsh content</th>
+                            </tr>
+                        </thead>
+                        <tbody class="govuk-table__body">
+                            <tr class="govuk-table__row">
+                                <th class="govuk-table__header" scope="row">Payment link</th>
+                                <td class="govuk-table__cell govuk-!-text-break-word">{{ form.payUrl or "Not set" }}</td>
+                                <td class="govuk-table__cell">
+                                    {{ govukInput({
+                                    label: { text: "Enter Welsh GOV.UK Pay payment link" },
+                                    id: "welsh_overview_payUrl",
+                                    name: "welsh_overview_payUrl",
+                                    value: welshOverview.payUrl | default(""),
+                                    type: "url",
+                                    attributes: { lang: "cy" }
+                                    }) }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                {# <div class="govuk-inset-text govuk-!-margin-bottom-9">
+                    <p class="govuk-body govuk-!-margin-bottom-2"><strong>How this lines up with the editor</strong></p>
+                    <ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-0">
+                        <li><strong>Most question pages</strong> only contain <strong>questions</strong> — you will not see a page heading or page guidance block unless those exist for that page in the editor.</li>
+                        <li><strong>Guidance pages</strong> use a <strong>page heading</strong> and <strong>guidance text</strong> (Markdown), like “Edit guidance page”.</li>
+                        <li><strong>Optional page heading and guidance text</strong> on a question page only appear when you add them above the questions in the editor (this showcase includes one example).</li>
+                        <li><strong>Mark as Exit page</strong> is an editor setting only — it is not a separate string to translate. If the page is an exit page, your Welsh guidance text should still make it clear that users cannot continue the form.</li>
+                    </ul>
+                </div> #}
+
+                {% for page in formPages %}
+                {% set wp = welshByPageId[page.pageId] if welshByPageId[page.pageId] else null %}
+                {% set pageNum = loop.index %}
+                {% set pageNumberLabel = "Page " ~ pageNum %}
+
+                {% if page.pageType == "guidance" %}
+                <section class="govuk-!-margin-bottom-9" aria-labelledby="welsh-section-{{ page.pageId }}-page">
+                    <h2 class="govuk-heading-m govuk-!-margin-bottom-4" id="welsh-section-{{ page.pageId }}-page">{{ pageNumberLabel }}</h2>
+                    <div class="app-scrolling-wrapper" role="region" tabindex="0"
+                        aria-labelledby="welsh-section-{{ page.pageId }}-page">
+                        <table class="govuk-table govuk-!-margin-bottom-9 app-translation-table"
+                            aria-labelledby="welsh-section-{{ page.pageId }}-page">
+                            <caption class="govuk-table__caption govuk-visually-hidden">{{ pageNumberLabel }}: page heading and guidance text</caption>
+                            <colgroup>
+                                <col class="app-translation-table__col-gutter">
+                                <col class="app-translation-table__col-english">
+                                <col class="app-translation-table__col-welsh">
+                            </colgroup>
+                            <thead class="govuk-table__head">
+                                <tr class="govuk-table__row">
+                                    <th class="govuk-table__header app-translation-table__empty-header-cell" scope="col"></th>
+                                    <th class="govuk-table__header" scope="col">English content</th>
+                                    <th class="govuk-table__header" scope="col">Welsh content</th>
+                                </tr>
+                            </thead>
+                            <tbody class="govuk-table__body">
+                                <tr class="govuk-table__row">
+                                    <th class="govuk-table__header" scope="row">Page heading</th>
+                                    <td class="govuk-table__cell govuk-!-text-break-word">{{ page.guidanceOnlyHeadingInput }}</td>
+                                    <td class="govuk-table__cell">
+                                        {{ govukInput({
+                                        label: { text: "Welsh translation of page heading", classes: "govuk-visually-hidden" },
+                                        id: "welsh_" ~ page.pageId ~ "_guidanceOnlyHeading",
+                                        name: "welsh_" ~ page.pageId ~ "_guidanceOnlyHeading",
+                                        value: (wp.guidanceOnlyHeadingInput if wp else "") | default(""),
+                                        attributes: { lang: "cy" }
+                                        }) }}
+                                    </td>
+                                </tr>
+                                <tr class="govuk-table__row">
+                                    <th class="govuk-table__header" scope="row">Guidance text</th>
+                                    <td class="govuk-table__cell govuk-!-text-break-word">
+                                        <pre
+                                            class="app-translation-table__markdown-preview">{{ page.guidanceOnlyGuidanceTextInput }}</pre>
+                                    </td>
+                                    <td class="govuk-table__cell">
+                                        {{ govukTextarea({
+                                        label: { text: "Welsh translation of guidance text", classes: "govuk-visually-hidden" },
+                                        id: "welsh_" ~ page.pageId ~ "_guidanceOnlyBody",
+                                        name: "welsh_" ~ page.pageId ~ "_guidanceOnlyBody",
+                                        value: (wp.guidanceOnlyGuidanceTextInput if wp else "") | default(""),
+                                        rows: 12,
+                                        attributes: { lang: "cy" }
+                                        }) }}
+                                        {{ welshMarkdownHelpDetails(markdownHelpPanelHtml) }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    {# {% if page.isExitPage %}
+                    <p class="govuk-body-s govuk-!-margin-top-2 govuk-!-margin-bottom-0">Marked as an <strong>exit page</strong> in the editor — runners cannot continue past this page. Check your Welsh guidance text still communicates that clearly.</p>
+                    {% endif %} #}
+                </section>
+                {% else %}
+                <section class="govuk-!-margin-bottom-9" aria-labelledby="welsh-section-{{ page.pageId }}-page">
+                    <h2 class="govuk-heading-m govuk-!-margin-bottom-4" id="welsh-section-{{ page.pageId }}-page">{{ pageNumberLabel }}</h2>
+
+                {% if page.pageHeading or page.guidanceTextarea %}
+                <div class="app-scrolling-wrapper" role="region" tabindex="0"
+                    aria-labelledby="welsh-section-{{ page.pageId }}-page">
+                    <table class="govuk-table govuk-!-margin-bottom-9 app-translation-table"
+                        aria-labelledby="welsh-section-{{ page.pageId }}-page">
+                        <caption class="govuk-table__caption govuk-visually-hidden">{{ pageNumberLabel }}: optional page heading and guidance text</caption>
+                        <colgroup>
+                            <col class="app-translation-table__col-gutter">
+                            <col class="app-translation-table__col-english">
+                            <col class="app-translation-table__col-welsh">
+                        </colgroup>
+                        <thead class="govuk-table__head">
+                            <tr class="govuk-table__row">
+                                <th class="govuk-table__header app-translation-table__empty-header-cell" scope="col"></th>
+                                <th class="govuk-table__header" scope="col">English content</th>
+                                <th class="govuk-table__header" scope="col">Welsh content</th>
+                            </tr>
+                        </thead>
+                        <tbody class="govuk-table__body">
+                            {% if page.pageHeading %}
+                            <tr class="govuk-table__row">
+                                <th class="govuk-table__header" scope="row">Page heading</th>
+                                <td class="govuk-table__cell govuk-!-text-break-word">{{ page.pageHeading }}</td>
+                                <td class="govuk-table__cell">
+                                    {{ govukInput({
+                                    label: { text: "Welsh translation of page heading", classes: "govuk-visually-hidden" },
+                                    id: "welsh_" ~ page.pageId ~ "_pageHeading",
+                                    name: "welsh_" ~ page.pageId ~ "_pageHeading",
+                                    value: (wp.pageHeading if wp else "") | default(""),
+                                    attributes: { lang: "cy" }
+                                    }) }}
+                                </td>
+                            </tr>
+                            {% endif %}
+                            {% if page.guidanceTextarea %}
+                            <tr class="govuk-table__row">
+                                <th class="govuk-table__header" scope="row">Guidance text</th>
+                                <td class="govuk-table__cell govuk-!-text-break-word">
+                                    <pre class="app-translation-table__markdown-preview">{{ page.guidanceTextarea }}</pre>
+                                </td>
+                                <td class="govuk-table__cell">
+                                    {{ govukTextarea({
+                                    label: { text: "Welsh translation of guidance text", classes: "govuk-visually-hidden" },
+                                    id: "welsh_" ~ page.pageId ~ "_guidanceTextarea",
+                                    name: "welsh_" ~ page.pageId ~ "_guidanceTextarea",
+                                    value: (wp.guidanceTextarea if wp else "") | default(""),
+                                    rows: 6,
+                                    attributes: { lang: "cy" }
+                                    }) }}
+                                    {{ welshMarkdownHelpDetails(markdownHelpPanelHtml) }}
+                                </td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+
+                {% if page.questions and (page.questions | length) > 0 %}
+                <div class="app-welsh-page__questions" role="group" aria-label="Questions on {{ pageNumberLabel }}">
+                {% endif %}
+                {% for question in page.questions %}
+                {% set wq = wp.questionsById[question.questionId] if wp else null %}
+                {% set questionNumOnPage = loop.index %}
+                {% set questionSectionLabel = pageNumberLabel ~ ", question " ~ questionNumOnPage %}
+                {% set isListQuestion = question.type == "list" and question.options and (question.options | length) > 0 %}
+                {% set questionSectionId = "welsh-section-" ~ page.pageId ~ "-q-" ~ question.questionId %}
+
+                <h3 class="govuk-heading-s {% if not loop.first %}govuk-!-margin-top-8{% endif %} govuk-!-margin-bottom-2" id="{{ questionSectionId }}">
+                    <span class="govuk-visually-hidden">{{ pageNumberLabel }}, </span>Question {{ questionNumOnPage }}
+                </h3>
+                <div class="app-scrolling-wrapper" role="region" tabindex="0" aria-labelledby="{{ questionSectionId }}">
+                    <table class="govuk-table govuk-!-margin-bottom-9 app-translation-table" aria-labelledby="{{ questionSectionId }}">
+                        <caption class="govuk-table__caption govuk-visually-hidden">{{ questionSectionLabel }}: question text, hint, and other fields</caption>
+                        <colgroup>
+                            <col class="app-translation-table__col-gutter">
+                            <col class="app-translation-table__col-english">
+                            <col class="app-translation-table__col-welsh">
+                        </colgroup>
+                        <thead class="govuk-table__head">
+                            <tr class="govuk-table__row">
+                                <th class="govuk-table__header app-translation-table__empty-header-cell" scope="col"></th>
+                                <th class="govuk-table__header" scope="col">English content</th>
+                                <th class="govuk-table__header" scope="col">Welsh content</th>
+                            </tr>
+                        </thead>
+                        <tbody class="govuk-table__body">
+                            <tr class="govuk-table__row">
+                                <th class="govuk-table__header" scope="row">Question text</th>
+                                <td class="govuk-table__cell govuk-!-text-break-word">{{ question.label }}</td>
+                                <td class="govuk-table__cell">
+                                    <div class="govuk-form-group">
+                                        <label class="govuk-label"
+                                            for="welsh_{{ page.pageId }}_q_{{ question.questionId }}_label">Enter Welsh question text <span
+                                                class="govuk-visually-hidden">for {{ pageNumberLabel }}, question {{ questionNumOnPage }}</span></label>
+                                        <input class="govuk-input" lang="cy" type="text"
+                                            id="welsh_{{ page.pageId }}_q_{{ question.questionId }}_label"
+                                            name="welsh_{{ page.pageId }}_q_{{ question.questionId }}_label"
+                                            value="{{ (wq.label if wq else '') | default('') | e }}">
+                                    </div>
+                                </td>
+                            </tr>
+                            {% if question.type != "payment" and question.type != "declaration" %}
+                            <tr class="govuk-table__row">
+                                <th class="govuk-table__header" scope="row">Hint</th>
+                                <td class="govuk-table__cell govuk-!-text-break-word">{{ question.hint or "—" }}</td>
+                                <td class="govuk-table__cell">
+                                    <div class="govuk-form-group">
+                                        <label class="govuk-label"
+                                            for="welsh_{{ page.pageId }}_q_{{ question.questionId }}_hint">Enter Welsh hint text <span
+                                                class="govuk-visually-hidden">for {{ pageNumberLabel }}, question {{ questionNumOnPage }}</span></label>
+                                        <textarea class="govuk-textarea" rows="3" lang="cy"
+                                            id="welsh_{{ page.pageId }}_q_{{ question.questionId }}_hint"
+                                            name="welsh_{{ page.pageId }}_q_{{ question.questionId }}_hint">{{ (wq.hint if wq else "") | default("") }}</textarea>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="govuk-table__row">
+                                <th class="govuk-table__header" scope="row">Short description</th>
+                                <td class="govuk-table__cell govuk-!-text-break-word">{{ question.shortDescription or "—" }}</td>
+                                <td class="govuk-table__cell">
+                                    {{ govukInput({
+                                    label: { text: "Enter Welsh short description" },
+                                    id: "welsh_" ~ page.pageId ~ "_q_" ~ question.questionId ~ "_shortDescription",
+                                    name: "welsh_" ~ page.pageId ~ "_q_" ~ question.questionId ~ "_shortDescription",
+                                    value: (wq.shortDescription if wq else "") | default(""),
+                                    attributes: { lang: "cy" }
+                                    }) }}
+                                </td>
+                            </tr>
+                            {% endif %}
+                            {% if question.type == "declaration" %}
+                            <tr class="govuk-table__row">
+                                <th class="govuk-table__header" scope="row">Declaration body</th>
+                                <td class="govuk-table__cell govuk-!-text-break-word">
+                                    <pre class="app-translation-table__markdown-preview">{{ question.declarationText }}</pre>
+                                </td>
+                                <td class="govuk-table__cell">
+                                    <div class="govuk-form-group">
+                                        <label class="govuk-label"
+                                            for="welsh_{{ page.pageId }}_q_{{ question.questionId }}_declarationText">Enter your Welsh declaration</label>
+                                        <textarea class="govuk-textarea" rows="12" lang="cy"
+                                            id="welsh_{{ page.pageId }}_q_{{ question.questionId }}_declarationText"
+                                            name="welsh_{{ page.pageId }}_q_{{ question.questionId }}_declarationText">{{ (wq.declarationText if wq else "") | default("") }}</textarea>
+                                        {{ welshMarkdownHelpDetails(markdownHelpPanelHtml) }}
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="govuk-table__row">
+                                <th class="govuk-table__header" scope="row">Agreement checkbox</th>
+                                <td class="govuk-table__cell govuk-!-text-break-word">I understand and agree</td>
+                                <td class="govuk-table__cell">
+                                    {{ govukInput({
+                                    label: { text: "Enter Welsh agreement checkbox label" },
+                                    id: "welsh_" ~ page.pageId ~ "_q_" ~ question.questionId ~ "_declarationAgreement",
+                                    name: "welsh_" ~ page.pageId ~ "_q_" ~ question.questionId ~ "_declarationAgreement",
+                                    value: (wq.declarationAgreement if wq else "") | default(""),
+                                    attributes: { lang: "cy" }
+                                    }) }}
+                                </td>
+                            </tr>
+                            {% endif %}
+                            {% if question.type == "payment" %}
+                            <tr class="govuk-table__row">
+                                <th class="govuk-table__header" scope="row">Payment description</th>
+                                <td class="govuk-table__cell govuk-!-text-break-word">{{ question.paymentDescription }}</td>
+                                <td class="govuk-table__cell">
+                                    {{ govukTextarea({
+                                    label: { text: "Enter Welsh payment description" },
+                                    id: "welsh_" ~ page.pageId ~ "_q_" ~ question.questionId ~ "_paymentDescription",
+                                    name: "welsh_" ~ page.pageId ~ "_q_" ~ question.questionId ~ "_paymentDescription",
+                                    value: (wq.paymentDescription if wq else "") | default(""),
+                                    rows: 4,
+                                    attributes: { lang: "cy" }
+                                    }) }}
+                                </td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+
+
+
+                {% if isListQuestion %}
+                {% set optsCaptionId = "opts-caption-" ~ page.pageId ~ "-" ~ question.questionId %}
+                <div class="app-scrolling-wrapper govuk-!-margin-top-6" role="region" tabindex="0"
+                    aria-labelledby="{{ questionSectionId }}">
+                    <fieldset class="govuk-fieldset" aria-describedby="{{ optsCaptionId }}">
+                        <table class="govuk-table govuk-!-margin-bottom-9 app-translation-table"
+                            aria-labelledby="{{ questionSectionId }}">
+                            <caption class="govuk-table__caption govuk-visually-hidden" id="{{ optsCaptionId }}">{{ questionSectionLabel }}: answer options</caption>
+                            <colgroup>
+                                <col class="app-translation-table__col-gutter">
+                                <col class="app-translation-table__col-english">
+                                <col class="app-translation-table__col-welsh">
+                            </colgroup>
+                            <thead class="govuk-table__head">
+                                <tr class="govuk-table__row">
+                                    <th class="govuk-table__header app-translation-table__empty-header-cell" scope="col"></th>
+                                    <th class="govuk-table__header" scope="col">English content</th>
+                                    <th class="govuk-table__header" scope="col">Welsh content</th>
+                                </tr>
+                            </thead>
+                            <tbody class="govuk-table__body">
+                                {% for opt in question.options %}
+                                {% set wopt = wq.options[loop.index0] if wq and wq.options and wq.options[loop.index0] else null %}
+                                <tr class="govuk-table__row">
+                                    <th class="govuk-table__header" scope="row">Option {{ loop.index }}</th>
+                                    <td class="govuk-table__cell govuk-!-text-break-word">
+                                        {{ opt.label or opt.text }}
+                                        {% if opt.hint %}
+                                        <p class="govuk-body-s govuk-hint govuk-!-margin-bottom-0">{{ opt.hint }}</p>
+                                        {% endif %}
+                                    </td>
+                                    <td class="govuk-table__cell">
+                                        <div class="govuk-form-group">
+                                            <label class="govuk-label" lang="cy"
+                                                for="welsh_{{ page.pageId }}_q_{{ question.questionId }}_opt_{{ loop.index0 }}_text">Enter Welsh option {{ loop.index }} <span
+                                                    class="govuk-visually-hidden">for {{ pageNumberLabel }}, question {{ questionNumOnPage }}</span></label>
+                                            <input class="govuk-input" type="text" lang="cy"
+                                                id="welsh_{{ page.pageId }}_q_{{ question.questionId }}_opt_{{ loop.index0 }}_text"
+                                                name="welsh_{{ page.pageId }}_q_{{ question.questionId }}_opt_{{ loop.index0 }}_text"
+                                                value="{{ (wopt.text if wopt else '') | default('') | e }}">
+                                        </div>
+                                        {% if opt.hint %}
+                                        <div class="govuk-form-group">
+                                            <label class="govuk-label" lang="cy"
+                                                for="welsh_{{ page.pageId }}_q_{{ question.questionId }}_opt_{{ loop.index0 }}_hint">Enter Welsh hint for option {{ loop.index }} <span
+                                                    class="govuk-visually-hidden">for {{ pageNumberLabel }}, question {{ questionNumOnPage }}</span></label>
+                                            <input class="govuk-input" type="text" lang="cy"
+                                                id="welsh_{{ page.pageId }}_q_{{ question.questionId }}_opt_{{ loop.index0 }}_hint"
+                                                name="welsh_{{ page.pageId }}_q_{{ question.questionId }}_opt_{{ loop.index0 }}_hint"
+                                                value="{{ (wopt.hint if wopt else '') | default('') | e }}">
+                                        </div>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </fieldset>
+                </div>
+                {% elif question.options and question.options | length > 0 %}
+                {% set optsCaptionSimpleId = "opts-caption-simple-" ~ page.pageId ~ "-" ~ question.questionId %}
+                <div class="app-scrolling-wrapper govuk-!-margin-top-6" role="region" tabindex="0"
+                    aria-labelledby="{{ questionSectionId }}">
+                    <fieldset class="govuk-fieldset" aria-describedby="{{ optsCaptionSimpleId }}">
+                        <table class="govuk-table govuk-!-margin-bottom-9 app-translation-table"
+                            aria-labelledby="{{ questionSectionId }}">
+                            <caption class="govuk-table__caption govuk-visually-hidden" id="{{ optsCaptionSimpleId }}">{{ questionSectionLabel }}: answer options</caption>
+                            <colgroup>
+                                <col class="app-translation-table__col-gutter">
+                                <col class="app-translation-table__col-english">
+                                <col class="app-translation-table__col-welsh">
+                            </colgroup>
+                            <thead class="govuk-table__head">
+                                <tr class="govuk-table__row">
+                                    <th class="govuk-table__header app-translation-table__empty-header-cell" scope="col"></th>
+                                    <th class="govuk-table__header" scope="col">English content</th>
+                                    <th class="govuk-table__header" scope="col">Welsh content</th>
+                                </tr>
+                            </thead>
+                            <tbody class="govuk-table__body">
+                                {% for opt in question.options %}
+                                {% set wopt = wq.options[loop.index0] if wq and wq.options and wq.options[loop.index0] else null %}
+                                <tr class="govuk-table__row">
+                                    <th class="govuk-table__header" scope="row">Option {{ loop.index }}</th>
+                                    <td class="govuk-table__cell">{{ opt.label or opt.text }}</td>
+                                    <td class="govuk-table__cell">
+                                        <div class="govuk-form-group">
+                                            <label class="govuk-label" lang="cy"
+                                                for="welsh_{{ page.pageId }}_q_{{ question.questionId }}_opt_{{ loop.index0 }}_text">Enter Welsh option {{ loop.index }} <span
+                                                    class="govuk-visually-hidden">for {{ pageNumberLabel }}, question {{ questionNumOnPage }}</span></label>
+                                            <input class="govuk-input" type="text" lang="cy"
+                                                id="welsh_{{ page.pageId }}_q_{{ question.questionId }}_opt_{{ loop.index0 }}_text"
+                                                name="welsh_{{ page.pageId }}_q_{{ question.questionId }}_opt_{{ loop.index0 }}_text"
+                                                value="{{ (wopt.text if wopt else '') | default('') | e }}">
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </fieldset>
+                </div>
+                {% endif %}
+
+                {% endfor %}
+                {% if page.questions and (page.questions | length) > 0 %}
+                </div>
+                {% endif %}
+                </section>
+                {% endif %}
+                {% endfor %}
+
+                {% if formPages | length == 0 %}
+                <div class="govuk-inset-text govuk-!-margin-top-6">
+                    <p class="govuk-body">There are no pages in this form yet. Add pages in the editor, or
+                        <a href="/titan-mvp-1.2/form-editor/welsh-translation/load-showcase" class="govuk-link">load the showcase form</a>.</p>
+                </div>
+                {% endif %}
+
+
+                <div class="govuk-button-group">
+                    <button class="govuk-button govuk-button" data-module="govuk-button">Save changes</button>
+
+                    <button class="govuk-button govuk-button--secondary" data-module="govuk-button">Preview form in welsh</button>
+
+                    <a href="/titan-mvp-1.2/form-editor/welsh-translation/load-showcase" class="govuk-link--destructive" data-module="govuk-button">Delete Welsh translations</a>
+                </div>
+            </div>
+        </div>
+
+
+
+    </form>
+</div>
+{% endblock %}
