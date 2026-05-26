@@ -1,0 +1,36 @@
+{% extends "layouts/main.html" %}
+{% set pageName = "Form overview states" %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        <h1 class="govuk-heading-xl">Form overview – example states</h1>
+        <p class="govuk-body">Static pages demonstrating form status and manage actions. Each page shows one current
+            version (live or not live) and optionally a draft.</p>
+
+        <h2 class="govuk-heading-m">Real states</h2>
+        <ul class="govuk-list">
+            <li>
+                <a class="govuk-link" href="/titan-mvp-1.2/form-overview/states/live-no-draft">Live, no draft</a>
+            </li>
+            <li>
+                <a class="govuk-link" href="/titan-mvp-1.2/form-overview/states/live-with-draft">Live with draft</a>
+            </li>
+            <li>
+                <a class="govuk-link" href="/titan-mvp-1.2/form-overview/states/not-live-no-draft">Not live, no draft</a>
+            </li>
+            <li>
+                <a class="govuk-link" href="/titan-mvp-1.2/form-overview/states/not-live-with-draft">Not live with draft</a>
+            </li>
+        </ul>
+
+        <h2 class="govuk-heading-m govuk-!-margin-top-6">Reference</h2>
+        <ul class="govuk-list">
+            <li>
+                <a class="govuk-link" href="/titan-mvp-1.2/form-overview/states/draft-live-not-live">Draft, live and not
+                    live (all sections)</a> — UI reference only; not a real combined state
+            </li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

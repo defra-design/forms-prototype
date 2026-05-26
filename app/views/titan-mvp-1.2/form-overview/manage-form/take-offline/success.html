@@ -1,0 +1,61 @@
+{% extends "layouts/main.html" %}
+
+{% from "components/service-header/macro.njk" import serviceHeader %}
+{% from "govuk/components/panel/macro.njk" import govukPanel %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+accountName: "Chris Smith",
+homepageLink: "/",
+signOutLink: "/titan-mvp-1.2/onboarding/sign-out-confirmation",
+navigationItems: [
+{
+href: "/titan-mvp-1.2/library",
+text: "Forms library",
+id: "nav-library"
+},
+{
+href: actions.continue,
+text: "Overview",
+id: "nav-overview",
+active: true
+},
+{
+href: "/titan-mvp-1.2/form-editor/listing",
+text: "Editor",
+id: "nav-editor"
+}],
+activeLinkId: "nav-overview"
+}) }}
+{% endblock %}
+
+{% set pageName = "Form taken offline – " + form.name %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        {{ govukPanel({
+        titleText: "Form taken offline"
+        }) }}
+
+        <p class="govuk-body govuk-!-margin-top-6">
+            <strong>{{ form.name }}</strong> is no longer live. Users who visit the form will see a service unavailable
+            page.
+        </p>
+
+        {% if hasDraft %}
+        <p class="govuk-body">Your draft has not been published. You can continue editing it or make it live when you
+            are ready.</p>
+        {% else %}
+        <p class="govuk-body">You can make the form live again at any time from the form overview.</p>
+        {% endif %}
+
+        <p class="govuk-body govuk-!-margin-top-6">
+            <a href="{{ actions.continue }}" class="govuk-button" data-module="govuk-button">Return to form overview</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

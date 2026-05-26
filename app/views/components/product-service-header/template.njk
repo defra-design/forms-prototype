@@ -1,4 +1,5 @@
 {%- from "govuk/components/tag/macro.njk" import govukTag -%}
+{%- from "components/notification-badge/macro.njk" import notificationBadge -%}
 {% set govukRebrand = true %}
 {#
 Component options:
@@ -30,6 +31,10 @@ Component options:
   - signOutLink (string): Option to overwrite the default signed out page. Defaults to "/titan-mvp-1.2/roles/sign-out"
   - homepageLink (string): Option to overwrite the default GOV.UK link. Defaults to "/index.html"
   - containerClasses (string): Classes that can be added to the inner container, useful if you want to make the header full width (optional)
+  - showMessages (boolean): Show a Messages link in the account menu (optional)
+  - messagesLink (string): URL for the Messages link (optional, defaults to "/titan-mvp-1.2/messages")
+  - messagesNotificationCount (string): Number for the MoJ notification badge on Messages (optional)
+  - messagesNotificationVisuallyHiddenText (string): Screen reader context for the badge, e.g. "unread" (optional)
 #}
 {% set govukRebrand = true %}
 
@@ -37,6 +42,7 @@ Component options:
 {%- set homepageLink = params.homepageLink if params.homepageLink else "/index.html" -%}
 {%- set signOutLink = params.signOutLink if params.signOutLink else "/titan-mvp-1.2/roles/sign-out" -%}
 {%- set signInLink = params.signInLink if params.signInLink else "/titan-mvp-1.2/onboarding/sign-in" -%}
+{%- set messagesLink = params.messagesLink if params.messagesLink else "/titan-mvp-1.2/messages" -%}
 {%- macro littlePersonIcon(modifier="default") -%}
   {%- set class = "focus" if modifier == "focus" else "default" %}
   {%- set backgroundColour = "black" if modifier == "focus" else "white" %}
@@ -114,6 +120,18 @@ Component options:
               Manage users
             </a>
           </li>
+          {%- if params.showMessages %}
+          <li class="one-login-header__nav__list-item">
+            <a class="one-login-header__nav__link" href="{{ messagesLink }}">
+              Messages{%- if params.messagesNotificationCount -%}
+              {{- notificationBadge({
+                text: params.messagesNotificationCount,
+                visuallyHiddenText: params.messagesNotificationVisuallyHiddenText if params.messagesNotificationVisuallyHiddenText else "unread"
+              }) -}}
+              {%- endif -%}
+            </a>
+          </li>
+          {%- endif %}
           <li class="one-login-header__nav__list-item">
             <!-- REPLACE SIGN OUT URL PLACEHOLDER WITH SIGN OUT PAGE FOR YOUR SERVICE -->
             <a class="one-login-header__nav__link" href="{{ signOutLink }}">

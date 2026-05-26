@@ -1,0 +1,114 @@
+{% extends "titan-mvp-1.2/form-overview/includes/_base-live-overview.html" %}
+{% set pageName = "Form overview – Not live with draft" %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        <h1 class="govuk-heading-xl">Employee Onboarding</h1>
+
+        <h2 class="govuk-heading-m">Draft</h2>
+        <dl class="govuk-summary-list">
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">Status</dt>
+                <dd class="govuk-summary-list__value">
+                    <strong class="govuk-tag govuk-tag--yellow">Draft</strong>
+                </dd>
+            </div>
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">Created</dt>
+                <dd class="govuk-summary-list__value">16 May 2024, 9:00am by Alex Patel</dd>
+            </div>
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">Updated</dt>
+                <dd class="govuk-summary-list__value">16 May 2024, 3:15pm by Chris Smith</dd>
+            </div>
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">Preview link</dt>
+                <dd class="govuk-summary-list__value" style="padding-right:0!important;">
+                    <a href="https://preview.example.gov.uk/onboarding-draft" class="govuk-link"
+                        rel="noreferrer noopener" target="_blank">https://preview.example.gov.uk/onboarding-draft (opens
+                        in new tab)</a>
+                </dd>
+            </div>
+        </dl>
+
+        <h2 class="govuk-heading-m govuk-!-margin-top-6">Not live form</h2>
+        <dl class="govuk-summary-list">
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">Status</dt>
+                <dd class="govuk-summary-list__value">
+                    <strong class="govuk-tag govuk-tag--grey">Not live</strong>
+                </dd>
+            </div>
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">Taken offline</dt>
+                <dd class="govuk-summary-list__value">15 May 2024, 11:30am by Alex Patel</dd>
+            </div>
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">Preview link</dt>
+                <dd class="govuk-summary-list__value" style="padding-right:0!important;">
+                    <a href="https://preview.example.gov.uk/onboarding" class="govuk-link" rel="noreferrer noopener"
+                        target="_blank">https://preview.example.gov.uk/onboarding (opens in new tab)</a>
+                </dd>
+            </div>
+        </dl>
+
+        {% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
+
+        {{ govukWarningText({
+        text: "Settings shown below are from the not live version of the form. They will update when you make the draft or current version live.",
+        iconFallbackText: "Warning"
+        }) }}
+
+        {% include "titan-mvp-1.2/form-overview/states/includes/_form-settings-sections.html" %}
+    </div>
+
+    <div class="govuk-grid-column-one-third-from-desktop">
+        <div style="background-color: #f3f2f1; padding: 15px;">
+            <h2 class="govuk-heading-m">Manage form</h2>
+
+            <a href="/titan-mvp-1.2/form-editor/listing"
+                class="gem-c-button govuk-button gem-c-button-publishing--secondary-quiet"
+                style="width: 100%; margin-bottom: 15px;">Edit draft</a>
+
+            <a href="/titan-mvp-1.2/form-overview/manage-form/make-draft-live/passed-validation">
+                <button type="button" class="govuk-button" data-module="govuk-button"
+                    style="width: 100%; margin-bottom: 15px;">
+                    Make draft live
+                </button>
+            </a>
+
+            <a href="/titan-mvp-1.2/form-overview/manage-form/make-draft-live/passed-validation">
+                <button type="button" class="govuk-button govuk-button--inverse" data-module="govuk-button"
+                    style="width: 100%; margin-bottom: 15px;">
+                    Make form live
+                </button>
+            </a>
+        </div>
+
+        {% set items = [
+        {
+        label: { text: "Draft created from not live form" },
+        datetime: { timestamp: "2024-05-16T09:00:00.000Z", type: "datetime" },
+        byline: { text: "Alex Patel" }
+        },
+        {
+        label: { text: "Form taken offline" },
+        datetime: { timestamp: "2024-05-15T11:30:00.000Z", type: "datetime" },
+        byline: { text: "Alex Patel" }
+        },
+        {
+        label: { text: "Draft published and made live" },
+        datetime: { timestamp: "2024-05-01T16:20:00.000Z", type: "datetime" },
+        byline: { text: "Emily Wong" }
+        },
+        {
+        label: { text: "Form made live" },
+        datetime: { timestamp: "2024-05-08T14:45:00.000Z", type: "datetime" },
+        byline: { text: "Emily Wong" }
+        }
+        ] %}
+        {% include "titan-mvp-1.2/form-overview/states/includes/_history.html" %}
+    </div>
+</div>
+{% endblock %}

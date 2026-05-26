@@ -1,0 +1,138 @@
+{% extends "titan-mvp-1.2/form-overview/includes/_base-live-overview.html" %}
+{% set pageName = "Form overview – Draft, live and not live (reference)" %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        <h1 class="govuk-heading-xl">Employee Onboarding</h1>
+
+        {% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+
+        {% set bannerHtml %}
+        <p class="govuk-body govuk-!-margin-bottom-0">
+            <strong>For demonstration only.</strong> A form has one current version, which is either live or not live.
+            When a draft exists, you will see the draft plus either the live form or the not live form — not all three
+            at once.
+        </p>
+        {% endset %}
+
+        {{ govukNotificationBanner({
+        type: "important",
+        titleText: "Important",
+        html: bannerHtml
+        }) }}
+
+        <h2 class="govuk-heading-m govuk-!-margin-top-6">Draft</h2>
+        <dl class="govuk-summary-list">
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">Status</dt>
+                <dd class="govuk-summary-list__value">
+                    <strong class="govuk-tag govuk-tag--yellow">Draft</strong>
+                </dd>
+            </div>
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">Created</dt>
+                <dd class="govuk-summary-list__value">12 May 2024, 9:00am by Alex Patel</dd>
+            </div>
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">Updated</dt>
+                <dd class="govuk-summary-list__value">12 May 2024, 4:30pm by Chris Smith</dd>
+            </div>
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">Preview link</dt>
+                <dd class="govuk-summary-list__value" style="padding-right:0!important;">
+                    <a href="https://preview.example.gov.uk/onboarding-draft" class="govuk-link"
+                        rel="noreferrer noopener" target="_blank">https://preview.example.gov.uk/onboarding-draft (opens
+                        in new tab)</a>
+                </dd>
+            </div>
+        </dl>
+
+        <h2 class="govuk-heading-m govuk-!-margin-top-6">Live form</h2>
+        <p class="govuk-body">Shown when the current version is live.</p>
+        <dl class="govuk-summary-list">
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">Status</dt>
+                <dd class="govuk-summary-list__value">
+                    <strong class="govuk-tag govuk-tag--green">Live</strong>
+                </dd>
+            </div>
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">Went live</dt>
+                <dd class="govuk-summary-list__value">8 May 2024, 2:45pm by Emily Wong</dd>
+            </div>
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">Preview link</dt>
+                <dd class="govuk-summary-list__value" style="padding-right:0!important;">
+                    <a href="https://preview.example.gov.uk/onboarding" class="govuk-link" rel="noreferrer noopener"
+                        target="_blank">https://preview.example.gov.uk/onboarding (opens in new tab)</a>
+                </dd>
+            </div>
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">Live link</dt>
+                <dd class="govuk-summary-list__value" style="padding-right:0!important;">
+                    <a href="https://live.example.gov.uk/onboarding" class="govuk-link" rel="noreferrer noopener"
+                        target="_blank">https://live.example.gov.uk/onboarding (opens in new tab)</a>
+                </dd>
+            </div>
+        </dl>
+
+        <h2 class="govuk-heading-m govuk-!-margin-top-6">Not live form</h2>
+        <p class="govuk-body">Shown when the current version is not live.</p>
+        <dl class="govuk-summary-list">
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">Status</dt>
+                <dd class="govuk-summary-list__value">
+                    <strong class="govuk-tag govuk-tag--grey">Not live</strong>
+                </dd>
+            </div>
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">Taken offline</dt>
+                <dd class="govuk-summary-list__value">15 May 2024, 11:30am by Alex Patel</dd>
+            </div>
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">Preview link</dt>
+                <dd class="govuk-summary-list__value" style="padding-right:0!important;">
+                    <a href="https://preview.example.gov.uk/onboarding" class="govuk-link" rel="noreferrer noopener"
+                        target="_blank">https://preview.example.gov.uk/onboarding (opens in new tab)</a>
+                </dd>
+            </div>
+        </dl>
+
+        {% include "titan-mvp-1.2/form-overview/states/includes/_form-settings-sections.html" %}
+    </div>
+
+    <div class="govuk-grid-column-one-third-from-desktop">
+        <div style="background-color: #f3f2f1; padding: 15px;">
+            <h2 class="govuk-heading-m">Manage form</h2>
+            <p class="govuk-body-s">Actions depend on whether the form is live or not live, and whether a draft exists.
+                See the individual state pages.</p>
+            <ul class="govuk-list govuk-!-margin-bottom-0">
+                <li><a class="govuk-link" href="/titan-mvp-1.2/form-overview/states/live-with-draft">Live with
+                        draft</a></li>
+                <li><a class="govuk-link" href="/titan-mvp-1.2/form-overview/states/not-live-with-draft">Not live
+                        with draft</a></li>
+            </ul>
+        </div>
+
+        {% set items = [
+        {
+        label: { text: "Draft created from live form" },
+        datetime: { timestamp: "2024-05-12T09:00:00.000Z", type: "datetime" },
+        byline: { text: "Alex Patel" }
+        },
+        {
+        label: { text: "Form taken offline" },
+        datetime: { timestamp: "2024-05-15T11:30:00.000Z", type: "datetime" },
+        byline: { text: "Alex Patel" }
+        },
+        {
+        label: { text: "Form made live" },
+        datetime: { timestamp: "2024-05-08T14:45:00.000Z", type: "datetime" },
+        byline: { text: "Emily Wong" }
+        }
+        ] %}
+        {% include "titan-mvp-1.2/form-overview/states/includes/_history.html" %}
+    </div>
+</div>
+{% endblock %}

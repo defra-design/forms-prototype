@@ -5972,6 +5972,66 @@ router.post(
   }
 );
 
+const TAKE_OFFLINE_STATE_PAGES = {
+  "live-no-draft": {
+    cancel: "/titan-mvp-1.2/form-overview/states/live-no-draft",
+    overview: "/titan-mvp-1.2/form-overview/states/not-live-no-draft",
+    hasDraft: false,
+  },
+  "live-with-draft": {
+    cancel: "/titan-mvp-1.2/form-overview/states/live-with-draft",
+    overview: "/titan-mvp-1.2/form-overview/states/not-live-with-draft",
+    hasDraft: true,
+  },
+};
+
+function getTakeOfflineState(from) {
+  return TAKE_OFFLINE_STATE_PAGES[from] || TAKE_OFFLINE_STATE_PAGES["live-no-draft"];
+}
+
+router.get(
+  "/titan-mvp-1.2/form-overview/manage-form/take-offline/confirm",
+  (req, res) => {
+    const from = String(req.query.from || "live-no-draft");
+    const state = getTakeOfflineState(from);
+
+    res.render(
+      "titan-mvp-1.2/form-overview/manage-form/take-offline/confirm",
+      {
+        form: {
+          name: "Employee Onboarding",
+          liveUrl: "https://live.example.gov.uk/onboarding",
+        },
+        actions: {
+          cancel: state.cancel,
+          continue: `/titan-mvp-1.2/form-overview/manage-form/take-offline/success?from=${encodeURIComponent(from)}`,
+        },
+      }
+    );
+  }
+);
+
+router.get(
+  "/titan-mvp-1.2/form-overview/manage-form/take-offline/success",
+  (req, res) => {
+    const from = String(req.query.from || "live-no-draft");
+    const state = getTakeOfflineState(from);
+
+    res.render(
+      "titan-mvp-1.2/form-overview/manage-form/take-offline/success",
+      {
+        form: {
+          name: "Employee Onboarding",
+        },
+        hasDraft: state.hasDraft,
+        actions: {
+          continue: state.overview,
+        },
+      }
+    );
+  }
+);
+
 // Remove form-level condition
 router.post(
   "/titan-mvp-1.2/form-editor/conditions-manager/remove",
@@ -7874,6 +7934,11 @@ router.get("/titan-mvp-1.2/roles/admin-panel/download", (req, res) => {
 router.post("/titan-mvp-1.2/roles/admin-panel/download", (req, res) => {
   // Redirect back to admin panel with success flag
   res.redirect("/titan-mvp-1.2/roles/admin-panel?success=true");
+});
+
+// Messages page (GET) – prototype demo for notification badge
+router.get("/titan-mvp-1.2/messages", function (req, res) {
+  res.render("titan-mvp-1.2/messages.html");
 });
 
 // Manage users page (GET)

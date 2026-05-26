@@ -1,0 +1,12 @@
+{# History timeline — pass `items` array to mojTimeline #}
+{% from "moj/components/timeline/macro.njk" import mojTimeline %}
+
+<hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+<h2 class="govuk-heading-m">History</h2>
+<div id="timeline-container">
+    {{ mojTimeline({ items: items }) }}
+    <a href="/titan-mvp-1.2/form-overview/form-history"
+        class="govuk-link govuk-link--no-visited-state govuk-!-margin-top-2">
+        View full history<span class="govuk-visually-hidden">, opens in a new page</span>
+    </a>
+</div>

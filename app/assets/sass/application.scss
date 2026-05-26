@@ -786,6 +786,11 @@ html body *:focus[style*="color"] * {
   }
 }
 
+// MoJ notification badge in account navigation (Manage users)
+.one-login-header__nav__link .moj-notification-badge {
+  vertical-align: middle;
+}
+
 // Remove border and extra space from first or only navigation item
 .one-login-header__nav__list-item {
   @include govuk-media-query($until: tablet) {

@@ -1,0 +1,14 @@
+{#
+  MoJ notification badge – markup aligned with the current design system:
+  https://design-patterns.service.justice.gov.uk/components/notification-badge/
+
+  Uses the official moj-notification-badge class (styles from @ministryofjustice/frontend).
+#}
+{% macro notificationBadge(params) %}
+{%- if params.text -%}
+<span class="moj-notification-badge">
+  <span aria-hidden="true">{{ params.text }}</span>
+  <span class="govuk-visually-hidden">({{ params.text }}{% if params.visuallyHiddenText %} {{ params.visuallyHiddenText }}{% endif %})</span>
+</span>
+{%- endif -%}
+{% endmacro %}

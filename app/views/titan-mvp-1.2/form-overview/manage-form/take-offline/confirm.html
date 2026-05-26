@@ -1,0 +1,87 @@
+{% extends "layouts/main.html" %}
+
+{% from "components/service-header/macro.njk" import serviceHeader %}
+{% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+accountName: "Chris Smith",
+homepageLink: "/",
+signOutLink: "/titan-mvp-1.2/onboarding/sign-out-confirmation",
+navigationItems: [
+{
+href: "/titan-mvp-1.2/library",
+text: "Forms library",
+id: "nav-library"
+},
+{
+href: actions.cancel,
+text: "Overview",
+id: "nav-overview",
+active: true
+},
+{
+href: "/titan-mvp-1.2/form-editor/listing",
+text: "Editor",
+id: "nav-editor"
+}],
+activeLinkId: "nav-overview"
+}) }}
+{% endblock %}
+
+{% set pageName = "Take form offline – " + form.name %}
+
+{% block beforeContent %}
+{{ govukBackLink({
+text: "Back to form overview",
+href: actions.cancel
+}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        <span class="govuk-caption-xl">{{ form.name }}</span>
+        <h1 class="govuk-heading-xl">Are you sure you want to take this form offline?</h1>
+
+        {# <p class="govuk-body">Users will no longer be able to submit the form. They will see a
+            <a href="https://design-system.service.gov.uk/patterns/service-unavailable-pages/no-replacement-service/"
+                class="govuk-link" rel="noreferrer noopener" target="_blank">service unavailable page (opens in new
+                tab)</a>.
+        </p> #}
+
+        <p class="govuk-body">Check the live form before you take it offline.</p>
+        <dl class="govuk-summary-list govuk-!-margin-bottom-6">
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">Link to the live form that will be taken offline</dt>
+                <dd class="govuk-summary-list__value">
+                    <a href="{{ form.liveUrl }}" class="govuk-link" rel="noreferrer noopener" target="_blank">View live
+                        form (opens in new tab)<span class="govuk-visually-hidden">, {{ form.liveUrl }} (opens in new tab)</span></a>
+                    <p class="govuk-body-s govuk-!-margin-top-2 govuk-!-margin-bottom-0">{{ form.liveUrl }}</p>
+                </dd>
+            </div>
+        </dl>
+
+        {{ govukWarningText({
+        text: "You will no longer receive form submissions while the form is not live.",
+        iconFallbackText: "Warning"
+        }) }}
+
+        <div class="govuk-button-group">
+            <a href="{{ actions.continue }}">
+                <button type="button" class="govuk-button govuk-button--warning" data-module="govuk-button">
+                    Take form offline
+                </button>
+            </a>
+            <a href="{{ actions.cancel }}">
+                <button type="button" class="govuk-button govuk-button--secondary" data-module="govuk-button">
+                    Cancel
+                </button>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
