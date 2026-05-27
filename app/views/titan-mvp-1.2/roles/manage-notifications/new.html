@@ -62,7 +62,7 @@ activeLinkId: "admin-tools"
       {{ govukInput({
         id: "activity",
         name: "activity",
-        label: { text: "Title", classes: "govuk-label--m" },
+        label: { text: "Subject", classes: "govuk-label--m" },
         value: data.values.activity,
         errorMessage: data.errors.activity if data.errors and data.errors.activity
       }) }}
@@ -85,8 +85,8 @@ activeLinkId: "admin-tools"
         id: "message",
         name: "message",
         maxlength: 1000,
-        label: { text: "Content", classes: "govuk-label--m" },
-        hint: { text: "Enter the notification content using markdown" },
+        label: { text: "Message", classes: "govuk-label--m" },
+        hint: { text: "Enter the notification message using markdown" },
         value: data.values.message,
         errorMessage: data.errors.message if data.errors and data.errors.message,
         spellcheck: true
