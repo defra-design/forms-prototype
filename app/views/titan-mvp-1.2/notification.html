@@ -56,18 +56,11 @@ id: "nav-library"
     }) }}
     {% endif %}
 
-    <h1 class="govuk-heading-xl">{{ data.notification.activity }}</h1>
-
-    <dl class="govuk-summary-list govuk-!-margin-bottom-6">
-      <div class="govuk-summary-list__row">
-        <dt class="govuk-summary-list__key">Date</dt>
-        <dd class="govuk-summary-list__value">{{ data.notification.date }}</dd>
-      </div>
-      <div class="govuk-summary-list__row">
-        <dt class="govuk-summary-list__key">Type</dt>
-        <dd class="govuk-summary-list__value">{{ notificationTypeTag(data.notification.noteType) }}</dd>
-      </div>
-    </dl>
+    <div class="govuk-!-margin-bottom-6">
+      <p class="govuk-!-margin-bottom-2">{{ notificationTypeTag(data.notification.noteType) }}</p>
+      <span class="govuk-caption-xl">{{ data.notification.date }}</span>
+      <h1 class="govuk-heading-xl govuk-!-margin-bottom-0">{{ data.notification.activity }}</h1>
+    </div>
 
     <div class="govuk-!-margin-bottom-6">
       {% for block in data.notificationMessageBlocks %}
@@ -84,6 +77,17 @@ id: "nav-library"
         {% endif %}
       {% endfor %}
     </div>
+
+    {# <dl class="govuk-summary-list govuk-!-margin-bottom-6">
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Date</dt>
+        <dd class="govuk-summary-list__value">{{ data.notification.date }}</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Type</dt>
+        <dd class="govuk-summary-list__value">{{ notificationTypeTag(data.notification.noteType) }}</dd>
+      </div>
+    </dl> #}
 
     {% if not data.notification.read %}
     <form method="post" action="/titan-mvp-1.2/notifications/{{ data.notification.id }}/mark-as-read" class="govuk-!-margin-bottom-6">
