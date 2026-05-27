@@ -59,14 +59,6 @@ activeLinkId: "admin-tools"
 
     <form method="post" action="{% if data.mode == 'edit' %}/titan-mvp-1.2/roles/manage-notifications/{{ data.id }}/edit{% else %}/titan-mvp-1.2/roles/manage-notifications/new{% endif %}">
 
-      {{ govukInput({
-        id: "activity",
-        name: "activity",
-        label: { text: "Subject", classes: "govuk-label--m" },
-        value: data.values.activity,
-        errorMessage: data.errors.activity if data.errors and data.errors.activity
-      }) }}
-
       {{ govukSelect({
         id: "noteType",
         name: "noteType",
@@ -80,6 +72,16 @@ activeLinkId: "admin-tools"
         value: data.values.noteType,
         errorMessage: data.errors.noteType if data.errors and data.errors.noteType
       }) }}
+
+      {{ govukInput({
+        id: "activity",
+        name: "activity",
+        label: { text: "Subject", classes: "govuk-label--m" },
+        value: data.values.activity,
+        errorMessage: data.errors.activity if data.errors and data.errors.activity
+      }) }}
+
+
 
       {{ govukCharacterCount({
         id: "message",
