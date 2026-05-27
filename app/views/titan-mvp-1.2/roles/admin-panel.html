@@ -16,6 +16,9 @@ containerClasses: containerClasses,
 accountName: "Chris Smith ",
 homepageLink: "/",
 signOutLink: "/onboarding/sign-out-confirmation",
+showMessages: isSystemAdmin,
+messagesNotificationCount: data.unreadCount,
+messagesNotificationVisuallyHiddenText: "unread",
 navigationItems: [
 { href: "/titan-mvp-1.2/roles/my-account.html", text: "My account", id: "my-account" },
 { href: "/titan-mvp-1.2/roles/manage-users.html", text: "Manage users", id: "manage-users" },
@@ -93,6 +96,13 @@ activeLinkId: "admin-tools"
         <div class="govuk-!-margin-bottom-8">
             <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Developer tools</h2>
             <p class="govuk-body">Access development and debugging tools for system administrators.</p>
+
+            <ul class="govuk-list">
+              <li><a class="govuk-link" href="/titan-mvp-1.2/metrics/v8.html">Form metrics</a></li>
+              {% if isSystemAdmin %}
+              <li><a class="govuk-link" href="/titan-mvp-1.2/roles/manage-notifications">Manage notifications</a></li>
+              {% endif %}
+            </ul>
         </div>
     </div>
 </div>

@@ -7903,6 +7903,14 @@ router.get("/titan-mvp-1.2/email/welcome-preview", function (req, res) {
 router.get("/titan-mvp-1.2/roles/admin-panel", function (req, res) {
   if (!req.session.data) req.session.data = {};
   if (!req.session.data.users) req.session.data.users = [];
+  if (typeof req.session.data.isSystemAdmin !== "boolean") {
+    // Prototype default: treat the signed-in admin as a system admin
+    req.session.data.isSystemAdmin = true;
+  }
+
+  if (req.query.systemAdmin === "true") req.session.data.isSystemAdmin = true;
+  if (req.query.systemAdmin === "false") req.session.data.isSystemAdmin = false;
+
   // Add semantic name and lowercase role to each user
   const usersWithNames = req.session.data.users.map((user) => ({
     ...user,
@@ -7913,6 +7921,9 @@ router.get("/titan-mvp-1.2/roles/admin-panel", function (req, res) {
   const successMessage = req.session.data.successMessage;
   delete req.session.data.successMessage;
 
+  const messages = getMessagesInbox(req);
+  const unreadCount = messages.filter((m) => !m.read).length;
+
   // Check if there's a success message to show from query parameter
   const showSuccessMessage = req.query.success === 'true';
 
@@ -7920,10 +7931,389 @@ router.get("/titan-mvp-1.2/roles/admin-panel", function (req, res) {
     data: {
       users: usersWithNames,
       successMessage: successMessage,
+      unreadCount,
     },
     showSuccessMessage: showSuccessMessage,
+    isSystemAdmin: req.session.data.isSystemAdmin,
   });
 });
+
+function requireSystemAdmin(req, res, next) {
+  if (!req.session.data) req.session.data = {};
+  if (typeof req.session.data.isSystemAdmin !== "boolean") {
+    // Prototype default for testing: system admin enabled
+    req.session.data.isSystemAdmin = true;
+  }
+  if (req.session.data.isSystemAdmin) return next();
+  return res
+    .status(403)
+    .render("titan-mvp-1.2/roles/manage-notifications/not-authorised.html");
+}
+
+function formatDisplayDate(date) {
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date);
+}
+
+function formatDisplayDateTime(date) {
+  const d = date instanceof Date ? date : new Date(date);
+  const datePart = formatDisplayDate(d);
+  const timePart = new Intl.DateTimeFormat("en-GB", {
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(d);
+  return datePart + " at " + timePart;
+}
+
+function getAdminNotificationsStore(req) {
+  if (!req.session.data) req.session.data = {};
+  const store = req.session.data.adminNotificationsStore;
+  if (Array.isArray(store) && store.length) return store;
+
+  // Seed from the demo notifications so admins can see a history.
+  const seeded = (messagesDemoSeed || []).map((n, index) => {
+    const createdAt = new Date();
+    createdAt.setDate(createdAt.getDate() - (messagesDemoSeed.length - index));
+    return {
+      id: String(n.id),
+      activity: n.activity,
+      noteType: n.noteType,
+      message: n.message,
+      status: "sent",
+      createdAt: createdAt.toISOString(),
+      createdBy: "System admin",
+      updatedAt: createdAt.toISOString(),
+      sentAt: createdAt.toISOString(),
+      sentBy: "System admin",
+      recalledAt: null,
+      recalledBy: null,
+    };
+  });
+
+  req.session.data.adminNotificationsStore = seeded;
+  return req.session.data.adminNotificationsStore;
+}
+
+function isValidStatus(status) {
+  return status === "draft" || status === "sent" || status === "recalled";
+}
+
+function getNotificationStatusLabel(status) {
+  if (status === "draft") return "Draft";
+  if (status === "sent") return "Sent";
+  if (status === "recalled") return "Recalled";
+  return "Unknown";
+}
+
+// Manage notifications (system admins only)
+router.get(
+  "/titan-mvp-1.2/roles/manage-notifications",
+  requireSystemAdmin,
+  function (req, res) {
+    const messages = getMessagesInbox(req);
+    const unreadCount = messages.filter((m) => !m.read).length;
+
+    const store = getAdminNotificationsStore(req);
+    const successMessage = req.session.data.manageNotificationsSuccessMessage;
+    delete req.session.data.manageNotificationsSuccessMessage;
+
+    res.render("titan-mvp-1.2/roles/manage-notifications/index.html", {
+      data: {
+        notifications: store
+          .slice()
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+          .map((n) => ({
+            ...n,
+            statusLabel: getNotificationStatusLabel(n.status),
+            createdAtDisplay: formatDisplayDateTime(n.createdAt),
+            sentAtDisplay: n.sentAt ? formatDisplayDateTime(n.sentAt) : "",
+            preview:
+              String(n.message || "")
+                .trim()
+                .slice(0, 120) + (String(n.message || "").trim().length > 120 ? "…" : ""),
+          })),
+        unreadCount,
+        successMessage,
+      },
+    });
+  }
+);
+
+router.get(
+  "/titan-mvp-1.2/roles/manage-notifications/new",
+  requireSystemAdmin,
+  function (req, res) {
+    const messages = getMessagesInbox(req);
+    const unreadCount = messages.filter((m) => !m.read).length;
+    res.render("titan-mvp-1.2/roles/manage-notifications/new.html", {
+      data: {
+        unreadCount,
+        mode: "new",
+        values: req.session.data.manageNotificationsDraft || {},
+      },
+    });
+  }
+);
+
+function validateNotificationForm({ activity, noteType, message }) {
+  const errors = {};
+  if (!activity) errors.activity = "Enter a title";
+  if (!noteType) errors.noteType = "Select a type";
+  if (!message) errors.message = "Enter the notification content";
+  if (message && message.length > NOTIFICATION_MESSAGE_MAX_LENGTH) {
+    errors.message =
+      "Notification content must be " +
+      NOTIFICATION_MESSAGE_MAX_LENGTH +
+      " characters or fewer";
+  }
+  return errors;
+}
+
+router.post(
+  "/titan-mvp-1.2/roles/manage-notifications/new",
+  requireSystemAdmin,
+  function (req, res) {
+    const store = getAdminNotificationsStore(req);
+    const messages = getMessagesInbox(req);
+    const unreadCount = messages.filter((m) => !m.read).length;
+
+    const activity = String(req.body.activity || "").trim();
+    const noteType = String(req.body.noteType || "").trim();
+    const message = String(req.body.message || "").trim();
+    const action = String(req.body.action || "").trim();
+
+    req.session.data.manageNotificationsDraft = { activity, noteType, message };
+
+    const errors = validateNotificationForm({ activity, noteType, message });
+    if (Object.keys(errors).length) {
+      return res.render("titan-mvp-1.2/roles/manage-notifications/new.html", {
+        data: {
+          unreadCount,
+          mode: "new",
+          values: req.session.data.manageNotificationsDraft,
+          errors,
+        },
+      });
+    }
+
+    const maxId = store.reduce((acc, n) => {
+      const asNumber = Number(String(n.id));
+      return Number.isFinite(asNumber) ? Math.max(acc, asNumber) : acc;
+    }, 0);
+
+    const now = new Date().toISOString();
+    const createdBy = "System admin";
+
+    const newItem = {
+      id: String(maxId + 1),
+      activity,
+      noteType,
+      message,
+      status: action === "save-draft" ? "draft" : "sent",
+      createdAt: now,
+      createdBy,
+      updatedAt: now,
+      sentAt: action === "save-draft" ? null : now,
+      sentBy: action === "save-draft" ? null : createdBy,
+      recalledAt: null,
+      recalledBy: null,
+    };
+
+    store.unshift(newItem);
+
+    if (newItem.status === "sent") {
+      messages.unshift({
+        id: newItem.id,
+        date: formatDisplayDate(new Date()),
+        noteType: newItem.noteType,
+        activity: newItem.activity,
+        activityHref: "/titan-mvp-1.2/notifications",
+        message: newItem.message,
+        read: false,
+      });
+      req.session.data.manageNotificationsSuccessMessage =
+        "Notification sent";
+    } else {
+      req.session.data.manageNotificationsSuccessMessage =
+        "Draft saved";
+    }
+
+    delete req.session.data.manageNotificationsDraft;
+    return res.redirect("/titan-mvp-1.2/roles/manage-notifications");
+  }
+);
+
+router.get(
+  "/titan-mvp-1.2/roles/manage-notifications/:id/edit",
+  requireSystemAdmin,
+  function (req, res) {
+    const store = getAdminNotificationsStore(req);
+    const id = String(req.params.id || "");
+    const item = store.find((n) => String(n.id) === id);
+    if (!item || !isValidStatus(item.status) || item.status !== "draft") {
+      return res.redirect("/titan-mvp-1.2/roles/manage-notifications");
+    }
+
+    const messages = getMessagesInbox(req);
+    const unreadCount = messages.filter((m) => !m.read).length;
+
+    res.render("titan-mvp-1.2/roles/manage-notifications/new.html", {
+      data: {
+        unreadCount,
+        mode: "edit",
+        id: item.id,
+        values: {
+          activity: item.activity,
+          noteType: item.noteType,
+          message: item.message,
+        },
+      },
+    });
+  }
+);
+
+router.post(
+  "/titan-mvp-1.2/roles/manage-notifications/:id/edit",
+  requireSystemAdmin,
+  function (req, res) {
+    const store = getAdminNotificationsStore(req);
+    const messages = getMessagesInbox(req);
+    const unreadCount = messages.filter((m) => !m.read).length;
+
+    const id = String(req.params.id || "");
+    const item = store.find((n) => String(n.id) === id);
+    if (!item || item.status !== "draft") {
+      return res.redirect("/titan-mvp-1.2/roles/manage-notifications");
+    }
+
+    const activity = String(req.body.activity || "").trim();
+    const noteType = String(req.body.noteType || "").trim();
+    const message = String(req.body.message || "").trim();
+    const action = String(req.body.action || "").trim();
+
+    const errors = validateNotificationForm({ activity, noteType, message });
+    if (Object.keys(errors).length) {
+      return res.render("titan-mvp-1.2/roles/manage-notifications/new.html", {
+        data: {
+          unreadCount,
+          mode: "edit",
+          id,
+          values: { activity, noteType, message },
+          errors,
+        },
+      });
+    }
+
+    const now = new Date().toISOString();
+    item.activity = activity;
+    item.noteType = noteType;
+    item.message = message;
+    item.updatedAt = now;
+
+    if (action === "send") {
+      item.status = "sent";
+      item.sentAt = now;
+      item.sentBy = "System admin";
+
+      messages.unshift({
+        id: item.id,
+        date: formatDisplayDate(new Date()),
+        noteType: item.noteType,
+        activity: item.activity,
+        activityHref: "/titan-mvp-1.2/notifications",
+        message: item.message,
+        read: false,
+      });
+
+      req.session.data.manageNotificationsSuccessMessage =
+        "Notification sent";
+    } else {
+      req.session.data.manageNotificationsSuccessMessage =
+        "Draft updated";
+    }
+
+    return res.redirect("/titan-mvp-1.2/roles/manage-notifications");
+  }
+);
+
+router.post(
+  "/titan-mvp-1.2/roles/manage-notifications/:id/delete",
+  requireSystemAdmin,
+  function (req, res) {
+    const store = getAdminNotificationsStore(req);
+    const id = String(req.params.id || "");
+    const index = store.findIndex((n) => String(n.id) === id);
+    if (index >= 0 && store[index].status === "draft") {
+      store.splice(index, 1);
+      req.session.data.manageNotificationsSuccessMessage = "Draft deleted";
+    }
+    return res.redirect("/titan-mvp-1.2/roles/manage-notifications");
+  }
+);
+
+router.post(
+  "/titan-mvp-1.2/roles/manage-notifications/:id/recall",
+  requireSystemAdmin,
+  function (req, res) {
+    const store = getAdminNotificationsStore(req);
+    const messages = getMessagesInbox(req);
+    const id = String(req.params.id || "");
+    const item = store.find((n) => String(n.id) === id);
+    if (item && item.status === "sent") {
+      const now = new Date().toISOString();
+      item.status = "recalled";
+      item.recalledAt = now;
+      item.recalledBy = "System admin";
+      // Remove from form-creator inbox
+      req.session.data.messagesInbox = messages.filter(
+        (m) => String(m.id) !== String(id)
+      );
+      req.session.data.manageNotificationsSuccessMessage =
+        "Notification recalled";
+    }
+    return res.redirect("/titan-mvp-1.2/roles/manage-notifications");
+  }
+);
+
+router.post(
+  "/titan-mvp-1.2/roles/manage-notifications/:id/resend",
+  requireSystemAdmin,
+  function (req, res) {
+    const store = getAdminNotificationsStore(req);
+    const messages = getMessagesInbox(req);
+    const id = String(req.params.id || "");
+    const item = store.find((n) => String(n.id) === id);
+
+    if (item && item.status === "recalled") {
+      const now = new Date().toISOString();
+      item.status = "sent";
+      item.sentAt = now;
+      item.sentBy = "System admin";
+      item.updatedAt = now;
+
+      // Add back to form-creator inbox (unread)
+      const alreadyInInbox = messages.some((m) => String(m.id) === String(id));
+      if (!alreadyInInbox) {
+        messages.unshift({
+          id: item.id,
+          date: formatDisplayDate(new Date()),
+          noteType: item.noteType,
+          activity: item.activity,
+          activityHref: "/titan-mvp-1.2/notifications",
+          message: item.message,
+          read: false,
+        });
+      }
+
+      req.session.data.manageNotificationsSuccessMessage = "Notification resent";
+    }
+
+    return res.redirect("/titan-mvp-1.2/roles/manage-notifications");
+  }
+);
 
 // Admin panel download route (GET and POST)
 router.get("/titan-mvp-1.2/roles/admin-panel/download", (req, res) => {
@@ -7936,9 +8326,290 @@ router.post("/titan-mvp-1.2/roles/admin-panel/download", (req, res) => {
   res.redirect("/titan-mvp-1.2/roles/admin-panel?success=true");
 });
 
-// Messages page (GET) – prototype demo for notification badge
+// Notifications inbox – prototype demo for MoJ notification badge (onward journey)
+const messagesDemoSeed = require("../../data/messages-demo.json");
+const NOTIFICATION_MESSAGE_MAX_LENGTH = 1000;
+
+function seedMessagesInbox() {
+  return messagesDemoSeed.map((message) => ({
+    ...message,
+    read: false,
+  }));
+}
+
+function getMessagesInbox(req) {
+  if (!req.session.data) req.session.data = {};
+  const inbox = req.session.data.messagesInbox;
+  // Re-seed when session has an outdated message shape
+  const needsReseed =
+    !inbox ||
+    !inbox.length ||
+    inbox.some(
+      (message) =>
+        !message.activity || !message.noteType || !message.message
+    );
+  if (needsReseed) {
+    req.session.data.messagesInbox = seedMessagesInbox();
+  }
+  return req.session.data.messagesInbox;
+}
+
+function sortMessagesByDate(messages) {
+  return messages.slice().sort(function (a, b) {
+    return new Date(b.date) - new Date(a.date);
+  });
+}
+
+function getNotificationMessage(notification) {
+  const message = String(notification.message || "").trim();
+  if (!message) {
+    const noteType = String(notification.noteType || "").toLowerCase();
+    if (noteType === "feature") {
+      return "A new feature has been added to Form Designer.";
+    }
+    if (noteType === "fix") {
+      return "A fix has been applied to improve reliability and user experience.";
+    }
+    return "An improvement has been made to Form Designer.";
+  }
+  if (message.length <= NOTIFICATION_MESSAGE_MAX_LENGTH) {
+    return message;
+  }
+  return message.slice(0, NOTIFICATION_MESSAGE_MAX_LENGTH - 1) + "…";
+}
+
+function parseNotificationMessageBlocks(message) {
+  const lines = String(message || "")
+    .replace(/\r\n/g, "\n")
+    .split("\n");
+
+  const blocks = [];
+  let paragraphLines = [];
+  let listItems = [];
+
+  function isHeadingCandidate(text, nextNonEmptyLine) {
+    const t = String(text || "").trim();
+    if (!t) return false;
+    // Avoid treating normal sentences as headings
+    if (t.endsWith(".")) return false;
+    if (t.length > 70) return false;
+    // Must be followed by some content
+    if (!String(nextNonEmptyLine || "").trim()) return false;
+    // Common heading shapes in the examples
+    if (/[?:]$/.test(t)) return true; // "What do users need to know?"
+    // Title-style line (no punctuation, not starting lowercase)
+    if (/^[a-z]/.test(t)) return false;
+    return !/[.!]$/.test(t);
+  }
+
+  function flushParagraph() {
+    const text = paragraphLines.join("\n").trim();
+    if (text) blocks.push({ type: "paragraph", text });
+    paragraphLines = [];
+  }
+
+  function flushList() {
+    if (listItems.length) blocks.push({ type: "list", items: listItems.slice() });
+    listItems = [];
+  }
+
+  for (let i = 0; i < lines.length; i += 1) {
+    const line = String(lines[i]);
+    const trimmed = line.trim();
+
+    if (!trimmed) {
+      flushParagraph();
+      flushList();
+      continue;
+    }
+
+    if (trimmed.startsWith("- ")) {
+      flushParagraph();
+      listItems.push(trimmed.slice(2).trim());
+      continue;
+    }
+
+    // Look ahead to the next non-empty line to decide if this is a heading
+    let nextNonEmpty = "";
+    for (let j = i + 1; j < lines.length; j += 1) {
+      const candidate = String(lines[j]).trim();
+      if (candidate) {
+        nextNonEmpty = candidate;
+        break;
+      }
+    }
+
+    if (isHeadingCandidate(trimmed, nextNonEmpty)) {
+      flushParagraph();
+      flushList();
+      blocks.push({ type: "heading", text: trimmed.replace(/:$/, "") });
+      continue;
+    }
+
+    flushList();
+    paragraphLines.push(line);
+  }
+
+  flushParagraph();
+  flushList();
+
+  return blocks;
+}
+
+function escapeHtml(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function formatInlineHtml(text) {
+  let html = escapeHtml(text);
+
+  // Preserve single line breaks inside paragraphs
+  html = html.replace(/\n/g, "<br>");
+
+  // Emphasis: **bold** or *bold*
+  html = html
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.+?)\*/g, "<strong>$1</strong>");
+
+  // Linkify http(s) URLs
+  html = html.replace(
+    /(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/g,
+    '<a class="govuk-link" href="$1">$1</a>'
+  );
+
+  return html;
+}
+
+// New terminology + URLs (keep old /messages routes as redirects)
+router.get("/titan-mvp-1.2/notifications", function (req, res) {
+  const messages = getMessagesInbox(req);
+  const unreadNotifications = sortMessagesByDate(
+    messages.filter((message) => !message.read)
+  );
+  const readNotifications = sortMessagesByDate(
+    messages.filter((message) => message.read)
+  );
+  const unreadCount = unreadNotifications.length;
+  const successMessage = req.session.data.messagesSuccessMessage;
+  delete req.session.data.messagesSuccessMessage;
+
+  res.render("titan-mvp-1.2/notifications.html", {
+    data: {
+      unreadNotifications,
+      readNotifications,
+      unreadCount,
+      successMessage,
+    },
+  });
+});
+
+router.post("/titan-mvp-1.2/notifications", function (req, res) {
+  const messages = getMessagesInbox(req);
+  const selected = [].concat(req.body.selected || []);
+  let markedCount = 0;
+
+  selected.forEach((id) => {
+    const message = messages.find((item) => item.id === id);
+    if (message && !message.read) {
+      message.read = true;
+      markedCount += 1;
+    }
+  });
+
+  if (markedCount > 0) {
+    req.session.data.messagesSuccessMessage =
+      markedCount +
+      " notification" +
+      (markedCount === 1 ? "" : "s") +
+      " marked as read";
+  }
+
+  res.redirect("/titan-mvp-1.2/notifications");
+});
+
+router.get("/titan-mvp-1.2/notifications/reset", function (req, res) {
+  if (!req.session.data) req.session.data = {};
+  req.session.data.messagesInbox = seedMessagesInbox();
+  delete req.session.data.messagesSuccessMessage;
+  res.redirect("/titan-mvp-1.2/notifications");
+});
+
+router.get("/titan-mvp-1.2/notifications/:id", function (req, res) {
+  const messages = getMessagesInbox(req);
+  const id = String(req.params.id || "");
+  const notification = messages.find((m) => String(m.id) === id);
+
+  if (!notification) {
+    req.session.data.messagesSuccessMessage =
+      "This notification is no longer available";
+    return res.redirect("/titan-mvp-1.2/notifications");
+  }
+
+  const unreadCount = messages.filter((m) => !m.read).length;
+
+  const notificationMessage = getNotificationMessage(notification);
+  const notificationMessageBlocks = parseNotificationMessageBlocks(
+    notificationMessage
+  ).map((block) => {
+    if (block.type === "list") {
+      return {
+        ...block,
+        itemsHtml: block.items.map((item) => formatInlineHtml(item)),
+      };
+    }
+    if (block.type === "paragraph") {
+      return {
+        ...block,
+        html: formatInlineHtml(block.text),
+      };
+    }
+    return block;
+  });
+
+  const successMessage = req.session.data.notificationDetailSuccessMessage;
+  delete req.session.data.notificationDetailSuccessMessage;
+
+  res.render("titan-mvp-1.2/notification.html", {
+    data: {
+      notification,
+      notificationMessage,
+      notificationMessageBlocks,
+      successMessage,
+      unreadCount,
+    },
+  });
+});
+
+router.post("/titan-mvp-1.2/notifications/:id/mark-as-read", function (req, res) {
+  const messages = getMessagesInbox(req);
+  const id = String(req.params.id || "");
+  const notification = messages.find((m) => String(m.id) === id);
+
+  if (notification && !notification.read) {
+    notification.read = true;
+    req.session.data.notificationDetailSuccessMessage =
+      "Notification marked as read";
+  }
+
+  res.redirect("/titan-mvp-1.2/notifications/" + encodeURIComponent(id));
+});
+
+// Backwards-compatible URLs
 router.get("/titan-mvp-1.2/messages", function (req, res) {
-  res.render("titan-mvp-1.2/messages.html");
+  res.redirect("/titan-mvp-1.2/notifications");
+});
+
+router.post("/titan-mvp-1.2/messages", function (req, res) {
+  res.redirect(307, "/titan-mvp-1.2/notifications");
+});
+
+router.get("/titan-mvp-1.2/messages/reset", function (req, res) {
+  res.redirect("/titan-mvp-1.2/notifications/reset");
 });
 
 // Manage users page (GET)

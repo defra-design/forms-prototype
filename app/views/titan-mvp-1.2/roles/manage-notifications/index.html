@@ -1,0 +1,114 @@
+{% extends "layouts/main.html" %}
+{% from "components/service-header/admin/macro.njk" import serviceHeader %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/tag/macro.njk" import govukTag %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+
+{% set pageName = "Manage notifications" %}
+
+{% macro notificationTypeTag(noteType) %}
+{% if noteType == "feature" %}
+{{ govukTag({ text: "New feature", classes: "govuk-tag--green" }) }}
+{% elif noteType == "fix" %}
+{{ govukTag({ text: "Bug fix", classes: "govuk-tag--red" }) }}
+{% else %}
+{{ govukTag({ text: "Improvement", classes: "govuk-tag--blue" }) }}
+{% endif %}
+{% endmacro %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+accountName: "Chris Smith ",
+homepageLink: "/",
+signOutLink: "/onboarding/sign-out-confirmation",
+showMessages: true,
+messagesNotificationCount: data.unreadCount,
+messagesNotificationVisuallyHiddenText: "unread",
+navigationItems: [
+{ href: "/titan-mvp-1.2/roles/my-account.html", text: "My account", id: "my-account" },
+{ href: "/titan-mvp-1.2/roles/manage-users.html", text: "Manage users", id: "manage-users" },
+{ href: "/titan-mvp-1.2/roles/admin-panel", text: "Admin tools", id: "admin-tools" }
+],
+activeLinkId: "admin-tools"
+}) }}
+{% endblock %}
+
+{% block beforeContent %}
+{{ govukBackLink({
+  text: "Back to admin tools",
+  href: "/titan-mvp-1.2/roles/admin-panel"
+}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-full">
+
+    {% if data.successMessage %}
+    {{ govukNotificationBanner({
+      type: "success",
+      html: "<p class=\"govuk-notification-banner__heading\">" + data.successMessage + "</p>"
+    }) }}
+    {% endif %}
+
+    <h1 class="govuk-heading-xl">Manage notifications</h1>
+
+    <div class="govuk-button-group govuk-!-margin-bottom-6">
+      {{ govukButton({ text: "Create notification", href: "/titan-mvp-1.2/roles/manage-notifications/new" }) }}
+      <a class="govuk-link" href="/titan-mvp-1.2/notifications">View notifications inbox</a>
+    </div>
+
+    <table class="govuk-table">
+      <caption class="govuk-table__caption govuk-visually-hidden">Notifications</caption>
+      <thead class="govuk-table__head">
+        <tr class="govuk-table__row">
+          <th class="govuk-table__header" scope="col">Created</th>
+          <th class="govuk-table__header" scope="col">Created by</th>
+          <th class="govuk-table__header" scope="col">Type</th>
+          <th class="govuk-table__header" scope="col">Notification</th>
+          <th class="govuk-table__header" scope="col">Status</th>
+          <th class="govuk-table__header" scope="col">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="govuk-table__body">
+        {% for n in data.notifications %}
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell">{{ n.createdAtDisplay }}</td>
+          <td class="govuk-table__cell">{{ n.createdBy }}</td>
+          <td class="govuk-table__cell">{{ notificationTypeTag(n.noteType) }}</td>
+          <td class="govuk-table__cell">
+            <a class="govuk-link" href="/titan-mvp-1.2/notifications/{{ n.id }}">{{ n.activity }}</a>
+            <div class="govuk-hint govuk-!-margin-top-1 govuk-!-margin-bottom-0">{{ n.preview }}</div>
+          </td>
+          <td class="govuk-table__cell">{{ n.statusLabel }}</td>
+          <td class="govuk-table__cell">
+            {% if n.status == "draft" %}
+              <a class="govuk-link" href="/titan-mvp-1.2/roles/manage-notifications/{{ n.id }}/edit">Edit</a>
+              <form method="post" action="/titan-mvp-1.2/roles/manage-notifications/{{ n.id }}/delete" class="govuk-!-margin-top-2">
+                <a class="govuk-link" href="#" onclick="this.closest('form').submit(); return false;">Delete</a>
+              </form>
+            {% elif n.status == "sent" %}
+              <form method="post" action="/titan-mvp-1.2/roles/manage-notifications/{{ n.id }}/recall">
+                <a class="govuk-link" href="#" onclick="this.closest('form').submit(); return false;">Recall</a>
+              </form>
+            {% elif n.status == "recalled" %}
+              <form method="post" action="/titan-mvp-1.2/roles/manage-notifications/{{ n.id }}/resend">
+                <a class="govuk-link" href="#" onclick="this.closest('form').submit(); return false;">Resend</a>
+              </form>
+            {% else %}
+              <span class="govuk-hint">No actions</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+  </div>
+</div>
+{% endblock %}
+

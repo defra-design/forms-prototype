@@ -1,0 +1,130 @@
+{% extends "layouts/main.html" %}
+{% from "components/service-header/admin/macro.njk" import serviceHeader %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/select/macro.njk" import govukSelect %}
+{% from "govuk/components/character-count/macro.njk" import govukCharacterCount %}
+{% from "govuk/components/details/macro.njk" import govukDetails %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% set pageName = "Create notification" %}
+
+{% set errorItems = [] %}
+{% if data.errors %}
+  {% if data.errors.activity %}{% set errorItems = (errorItems.push({ text: data.errors.activity, href: "#activity" }), errorItems) %}{% endif %}
+  {% if data.errors.noteType %}{% set errorItems = (errorItems.push({ text: data.errors.noteType, href: "#noteType" }), errorItems) %}{% endif %}
+  {% if data.errors.message %}{% set errorItems = (errorItems.push({ text: data.errors.message, href: "#message" }), errorItems) %}{% endif %}
+{% endif %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+accountName: "Chris Smith ",
+homepageLink: "/",
+signOutLink: "/onboarding/sign-out-confirmation",
+showMessages: true,
+messagesNotificationCount: data.unreadCount,
+messagesNotificationVisuallyHiddenText: "unread",
+navigationItems: [
+{ href: "/titan-mvp-1.2/roles/my-account.html", text: "My account", id: "my-account" },
+{ href: "/titan-mvp-1.2/roles/manage-users.html", text: "Manage users", id: "manage-users" },
+{ href: "/titan-mvp-1.2/roles/admin-panel", text: "Admin tools", id: "admin-tools" }
+],
+activeLinkId: "admin-tools"
+}) }}
+{% endblock %}
+
+{% block beforeContent %}
+{{ govukBackLink({
+  text: "Back to manage notifications",
+  href: "/titan-mvp-1.2/roles/manage-notifications"
+}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+
+    {% if errorItems.length %}
+      {{ govukErrorSummary({
+        titleText: "There is a problem",
+        errorList: errorItems
+      }) }}
+    {% endif %}
+
+    <h1 class="govuk-heading-xl">{% if data.mode == "edit" %}Edit draft{% else %}Create notification{% endif %}</h1>
+
+    <form method="post" action="{% if data.mode == 'edit' %}/titan-mvp-1.2/roles/manage-notifications/{{ data.id }}/edit{% else %}/titan-mvp-1.2/roles/manage-notifications/new{% endif %}">
+
+      {{ govukInput({
+        id: "activity",
+        name: "activity",
+        label: { text: "Title", classes: "govuk-label--m" },
+        value: data.values.activity,
+        errorMessage: data.errors.activity if data.errors and data.errors.activity
+      }) }}
+
+      {{ govukSelect({
+        id: "noteType",
+        name: "noteType",
+        label: { text: "Type", classes: "govuk-label--m" },
+        items: [
+          { value: "", text: "Select a type" },
+          { value: "feature", text: "New feature" },
+          { value: "fix", text: "Bug fix" },
+          { value: "improvement", text: "Improvement" }
+        ],
+        value: data.values.noteType,
+        errorMessage: data.errors.noteType if data.errors and data.errors.noteType
+      }) }}
+
+      {{ govukCharacterCount({
+        id: "message",
+        name: "message",
+        maxlength: 1000,
+        label: { text: "Content", classes: "govuk-label--m" },
+        hint: { text: "Enter the notification content using markdown" },
+        value: data.values.message,
+        errorMessage: data.errors.message if data.errors and data.errors.message,
+        spellcheck: true
+      }) }}
+
+      {{ govukDetails({
+        summaryText: "Help with markdown",
+        html: "<p class=\"govuk-body\">Use blank lines to separate paragraphs.</p>" +
+          "<p class=\"govuk-body\">Bullet points</p>" +
+          "<ul class=\"govuk-list govuk-list--bullet\">" +
+            "<li>Use <code>- </code> at the start of a line</li>" +
+          "</ul>" +
+          "<p class=\"govuk-body\">Emphasis</p>" +
+          "<ul class=\"govuk-list govuk-list--bullet\">" +
+            "<li>Use <code>*asterisks*</code> (or <code>**double asterisks**</code>)</li>" +
+          "</ul>" +
+          "<p class=\"govuk-body\">Links</p>" +
+          "<ul class=\"govuk-list govuk-list--bullet\">" +
+            "<li>Links starting with <code>http://</code> or <code>https://</code> will be clickable when viewed</li>" +
+          "</ul>"
+      }) }}
+
+      <div class="govuk-button-group">
+        {{ govukButton({
+          text: "Send notification",
+          name: "action",
+          value: "send"
+        }) }}
+        {{ govukButton({
+          text: "Save draft",
+          classes: "govuk-button--secondary",
+          name: "action",
+          value: "save-draft"
+        }) }}
+      </div>
+
+    </form>
+  </div>
+</div>
+{% endblock %}
+
