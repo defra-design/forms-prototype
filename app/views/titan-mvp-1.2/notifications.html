@@ -7,9 +7,9 @@
 {% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
 
 {% set pageName = "Notifications" %}
-{% set showUnreadTabFirst = data.unreadMessages.length > 0 %}
+{% set showUnreadTabFirst = data.unreadNotifications.length > 0 %}
 
-{% macro messageTypeTag(noteType) %}
+{% macro notificationTypeTag(noteType) %}
 {% if noteType == "feature" %}
 {{ govukTag({ text: "New feature", classes: "govuk-tag--green" }) }}
 {% elif noteType == "fix" %}
@@ -26,6 +26,7 @@ productName: "Form Designer",
 serviceName: "",
 accountName: "Chris Smith",
 showMessages: true,
+messagesLink: "/titan-mvp-1.2/notifications",
 messagesNotificationCount: data.unreadCount if data.unreadCount > 0 else "",
 messagesNotificationVisuallyHiddenText: "unread",
 homepageLink: "/",
@@ -52,7 +53,7 @@ id: "nav-library"
 
     <h1 class="govuk-heading-xl">Notifications</h1>
 
-    {% if data.unreadMessages.length > 0 or data.readMessages.length > 0 %}
+    {% if data.unreadNotifications.length > 0 or data.readNotifications.length > 0 %}
 
     <form method="post" action="/titan-mvp-1.2/notifications" id="notifications-form">
 
@@ -60,19 +61,19 @@ id: "nav-library"
         <h2 class="govuk-tabs__title">Release notes</h2>
         <ul class="govuk-tabs__list">
           <li class="govuk-tabs__list-item {{ 'govuk-tabs__list-item--selected' if showUnreadTabFirst else '' }}">
-            <a class="govuk-tabs__tab" href="#messages-unread">Unread{% if data.unreadCount > 0 %}
+            <a class="govuk-tabs__tab" href="#notifications-unread">Unread{% if data.unreadCount > 0 %}
               {{ mojNotificationBadge({
                 text: data.unreadCount,
                 visuallyHiddenText: "unread"
               }) }}{% endif %}</a>
           </li>
           <li class="govuk-tabs__list-item {{ 'govuk-tabs__list-item--selected' if not showUnreadTabFirst else '' }}">
-            <a class="govuk-tabs__tab" href="#messages-read">Read</a>
+            <a class="govuk-tabs__tab" href="#notifications-read">Read</a>
           </li>
         </ul>
 
-        <div class="govuk-tabs__panel {{ 'govuk-tabs__panel--hidden' if not showUnreadTabFirst else '' }}" id="messages-unread">
-          {% if data.unreadMessages.length > 0 %}
+        <div class="govuk-tabs__panel {{ 'govuk-tabs__panel--hidden' if not showUnreadTabFirst else '' }}" id="notifications-unread">
+          {% if data.unreadNotifications.length > 0 %}
           <p class="govuk-body">Showing <strong>{{ data.unreadCount }}</strong> new release note{% if data.unreadCount !== 1 %}s{% endif %} for Form Designer</p>
 
           <table class="govuk-table" data-module="moj-multi-select"
@@ -88,21 +89,21 @@ id: "nav-library"
               </tr>
             </thead>
             <tbody class="govuk-table__body">
-              {% for message in data.unreadMessages %}
+              {% for notification in data.unreadNotifications %}
               <tr class="govuk-table__row">
                 <td class="govuk-table__cell">
                   <div class="govuk-checkboxes__item govuk-checkboxes--small moj-multi-select__checkbox">
-                    <input type="checkbox" class="govuk-checkboxes__input" id="notification-{{ message.id }}"
-                      name="selected" value="{{ message.id }}">
-                    <label class="govuk-label govuk-checkboxes__label" for="notification-{{ message.id }}">
-                      <span class="govuk-visually-hidden">Select {{ message.activity }}</span>
+                    <input type="checkbox" class="govuk-checkboxes__input" id="notification-{{ notification.id }}"
+                      name="selected" value="{{ notification.id }}">
+                    <label class="govuk-label govuk-checkboxes__label" for="notification-{{ notification.id }}">
+                      <span class="govuk-visually-hidden">Select {{ notification.activity }}</span>
                     </label>
                   </div>
                 </td>
-                <td class="govuk-table__cell">{{ message.date }}</td>
-                <td class="govuk-table__cell">{{ messageTypeTag(message.noteType) }}</td>
+                <td class="govuk-table__cell">{{ notification.date }}</td>
+                <td class="govuk-table__cell">{{ notificationTypeTag(notification.noteType) }}</td>
                 <td class="govuk-table__cell">
-                  <a class="govuk-link" href="{{ message.activityHref }}">{{ message.activity }}</a>
+                  <a class="govuk-link" href="/titan-mvp-1.2/notifications/{{ notification.id }}">{{ notification.activity }}</a>
                 </td>
               </tr>
               {% endfor %}
@@ -114,12 +115,12 @@ id: "nav-library"
             <button type="button" class="govuk-link govuk-body app-messages-clear-selection">Clear selection</button>
           </div>
           {% else %}
-          <p class="govuk-body">You have no unread release notes. Switch to the Read tab to see earlier updates.</p>
+          <p class="govuk-body">You have no unread notifications. Switch to the Read tab to see earlier updates.</p>
           {% endif %}
         </div>
 
-        <div class="govuk-tabs__panel {{ 'govuk-tabs__panel--hidden' if showUnreadTabFirst else '' }}" id="messages-read">
-          {% if data.readMessages.length > 0 %}
+        <div class="govuk-tabs__panel {{ 'govuk-tabs__panel--hidden' if showUnreadTabFirst else '' }}" id="notifications-read">
+          {% if data.readNotifications.length > 0 %}
           <table class="govuk-table">
             <caption class="govuk-table__caption govuk-visually-hidden">Read release notes</caption>
             <thead class="govuk-table__head">
@@ -130,19 +131,19 @@ id: "nav-library"
               </tr>
             </thead>
             <tbody class="govuk-table__body">
-              {% for message in data.readMessages %}
+              {% for notification in data.readNotifications %}
               <tr class="govuk-table__row">
-                <td class="govuk-table__cell">{{ message.date }}</td>
-                <td class="govuk-table__cell">{{ messageTypeTag(message.noteType) }}</td>
+                <td class="govuk-table__cell">{{ notification.date }}</td>
+                <td class="govuk-table__cell">{{ notificationTypeTag(notification.noteType) }}</td>
                 <td class="govuk-table__cell">
-                  <a class="govuk-link" href="{{ message.activityHref }}">{{ message.activity }}</a>
+                  <a class="govuk-link" href="/titan-mvp-1.2/notifications/{{ notification.id }}">{{ notification.activity }}</a>
                 </td>
               </tr>
               {% endfor %}
             </tbody>
           </table>
           {% else %}
-          <p class="govuk-body">You have not read any release notes yet.</p>
+          <p class="govuk-body">You have not read any notifications yet.</p>
           {% endif %}
         </div>
       </div>
@@ -154,7 +155,7 @@ id: "nav-library"
     </form>
 
     {% else %}
-    <p class="govuk-body">You have no release notes yet.</p>
+    <p class="govuk-body">You have no notifications yet.</p>
     {{ govukInsetText({
       text: "When Form Designer has new features, fixes or improvements, a notification badge appears next to Notifications in the account menu."
     }) }}
@@ -166,7 +167,7 @@ id: "nav-library"
   </div>
 </div>
 
-{% if data.unreadMessages.length > 0 %}
+{% if data.unreadNotifications.length > 0 %}
 <script>
   (function () {
     var clearButton = document.querySelector(".app-messages-clear-selection");

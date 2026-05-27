@@ -1,0 +1,96 @@
+{% extends "layouts/main.html" %}
+{% from "components/service-header/macro.njk" import serviceHeader %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/tag/macro.njk" import govukTag %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+
+{% set pageName = "Notification" %}
+
+{% macro notificationTypeTag(noteType) %}
+{% if noteType == "feature" %}
+{{ govukTag({ text: "New feature", classes: "govuk-tag--green" }) }}
+{% elif noteType == "fix" %}
+{{ govukTag({ text: "Bug fix", classes: "govuk-tag--red" }) }}
+{% else %}
+{{ govukTag({ text: "Improvement", classes: "govuk-tag--blue" }) }}
+{% endif %}
+{% endmacro %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+accountName: "Chris Smith",
+showMessages: true,
+messagesLink: "/titan-mvp-1.2/notifications",
+messagesNotificationCount: data.unreadCount if data.unreadCount > 0 else "",
+messagesNotificationVisuallyHiddenText: "unread",
+homepageLink: "/",
+signOutLink: "/titan-mvp-1.2/onboarding/sign-out-confirmation",
+navigationItems: [
+{
+href: "/titan-mvp-1.2/library",
+text: "Forms library",
+id: "nav-library"
+}]
+}) }}
+{% endblock %}
+
+{% block beforeContent %}
+{{ govukBackLink({
+  text: "Back to notifications",
+  href: "/titan-mvp-1.2/notifications"
+}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+
+    {% if data.successMessage %}
+    {{ govukNotificationBanner({
+      type: "success",
+      html: "<p class=\"govuk-notification-banner__heading\">" + data.successMessage + "</p>"
+    }) }}
+    {% endif %}
+
+    <h1 class="govuk-heading-xl">{{ data.notification.activity }}</h1>
+
+    <dl class="govuk-summary-list govuk-!-margin-bottom-6">
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Date</dt>
+        <dd class="govuk-summary-list__value">{{ data.notification.date }}</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Type</dt>
+        <dd class="govuk-summary-list__value">{{ notificationTypeTag(data.notification.noteType) }}</dd>
+      </div>
+    </dl>
+
+    <div class="govuk-!-margin-bottom-6">
+      {% for block in data.notificationMessageBlocks %}
+        {% if block.type == "list" %}
+          <ul class="govuk-list govuk-list--bullet">
+            {% for item in block.itemsHtml %}
+            <li>{{ item | safe }}</li>
+            {% endfor %}
+          </ul>
+        {% elif block.type == "heading" %}
+          <h2 class="govuk-heading-m">{{ block.text }}</h2>
+        {% else %}
+          <p class="govuk-body">{{ block.html | safe }}</p>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    {% if not data.notification.read %}
+    <form method="post" action="/titan-mvp-1.2/notifications/{{ data.notification.id }}/mark-as-read" class="govuk-!-margin-bottom-6">
+      {{ govukButton({ text: "Mark as read" }) }}
+    </form>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

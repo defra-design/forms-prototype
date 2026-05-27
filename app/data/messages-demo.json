@@ -1,0 +1,90 @@
+[
+  {
+    "id": "1",
+    "date": "27 May 2026",
+    "noteType": "feature",
+    "activity": "Map country restrictions",
+    "activityHref": "/titan-mvp-1.2/notifications",
+    "message": "You can restrict which UK countries users can select on the map.\n\nFor example, you can allow locations in England only, while excluding Scotland, Wales, or Northern Ireland."
+  },
+  {
+    "id": "2",
+    "date": "27 May 2026",
+    "noteType": "feature",
+    "activity": "Map: select allowable geometry types",
+    "activityHref": "/titan-mvp-1.2/notifications",
+    "message": "You can choose what type of location users can draw on the map:\n\n- a pin (single point)\n- a shape (area)\n- a line\n\nYou can allow one type or any combination of these."
+  },
+  {
+    "id": "3",
+    "date": "27 May 2026",
+    "noteType": "feature",
+    "activity": "Map: minimum, maximum, or exact entries",
+    "activityHref": "/titan-mvp-1.2/notifications",
+    "message": "You can control how many locations a user must add:\n\n- set an exact number\n- or define a minimum and maximum range"
+  },
+  {
+    "id": "4",
+    "date": "27 May 2026",
+    "noteType": "improvement",
+    "activity": "Improvements to internal metrics",
+    "activityHref": "/titan-mvp-1.2/notifications",
+    "message": "We are developing a metrics dashboard to better understand usage and performance.\n\nThis is currently available to internal team members only."
+  },
+  {
+    "id": "5",
+    "date": "27 May 2026",
+    "noteType": "feature",
+    "activity": "New features released to production",
+    "activityHref": "/titan-mvp-1.2/notifications",
+    "message": "Happy to announce that we've released following features to production:\n\n- Map country restrictions\n- Map: select allowable geometry types\n- Map: minimum, maximum, or exact entries\n- Improvements to internal metrics\n- Accessibility improvement"
+  },
+  {
+    "id": "6",
+    "date": "26 May 2026",
+    "noteType": "fix",
+    "activity": "Known issue: editing checkbox questions may error",
+    "activityHref": "/titan-mvp-1.2/notifications",
+    "message": "We’re aware of a minor issue in Forms Designer affecting checkbox questions, where saving edits to questions may result in an error.\n\nWe’re currently testing a fix and expect this to be resolved soon.\n\nThis issue only affects the Forms Designer. Public form submissions are working normal."
+  },
+  {
+    "id": "7",
+    "date": "26 May 2026",
+    "noteType": "fix",
+    "activity": "Issue resolved: checkbox edit errors fixed",
+    "activityHref": "/titan-mvp-1.2/notifications",
+    "message": "This has been resolved."
+  },
+  {
+    "id": "8",
+    "date": "26 May 2026",
+    "noteType": "improvement",
+    "activity": "Stability improvements (draft changes by the team)",
+    "activityHref": "/titan-mvp-1.2/notifications",
+    "message": "We've made some improvements to a handful of forms to improve their stability in production. For these forms only, one of our team has made some non-structural changes to the draft form.\n\nIf you see \"Jignesh Nayi\" has modified your form, this is expected.\n\nYou shouldn't notice any difference as a result of this change, but please shout if you experience any issues as usual."
+  },
+  {
+    "id": "9",
+    "date": "25 May 2026",
+    "noteType": "feature",
+    "activity": "New features launched",
+    "activityHref": "/titan-mvp-1.2/notifications",
+    "message": "Announce that we've launched new features!\n\n- Map V2 is live - Draw shapes and lines etc\n- Allow re-use Save and Exit link\n- Reminders for Save and exit expiry\n- Submissions email to include repeater items\n- Internal admin tools for diagnostics"
+  },
+  {
+    "id": "10",
+    "date": "25 May 2026",
+    "noteType": "fix",
+    "activity": "Investigating: file upload submissions issue",
+    "activityHref": "/titan-mvp-1.2/notifications",
+    "message": "We are aware of an issue affecting some form submissions with file uploads. We're currently investigating the cause for this, although we believe this to be limited to a subset of forms.\n\nIf your users have any issues submitting their form and they want to keep their progress, they can use the \"Save and exit\" feature come back to the submission at a later date."
+  },
+  {
+    "id": "11",
+    "date": "24 May 2026",
+    "noteType": "fix",
+    "activity": "Resolved: file upload submissions issue",
+    "activityHref": "/titan-mvp-1.2/notifications",
+    "message": "This issue is now resolved in production.\n\nWhat was the issue?\nA subset of users who uploaded files were unable to submit their forms. We traced this to an issue where users had bulk-uploaded multiple files for a given question.\n\nWhat did we do?\nWe released an update to prevent new users from experiencing issues uploading files. The final fix was then deployed, allowing affected users returning via \"Save and exit\" to successfully submit their in-progress forms.\n\nWhat do users need to know?\n- Form recovery: users can load their forms and attempt to submit again.\n- Re-uploading files: if a user used multiple upload, they may need to re-upload those specific files.\n- Guided process: the form will flag affected files and prompt a re-upload.\n\nThis affected a subset of users, so you likely only need to contact customers who opened a support query."
+  }
+]

@@ -786,9 +786,51 @@ html body *:focus[style*="color"] * {
   }
 }
 
-// MoJ notification badge in account navigation (Manage users)
-.one-login-header__nav__link .moj-notification-badge {
-  vertical-align: middle;
+// MoJ notification badge in account navigation (Messages link)
+.one-login-header__nav__link--with-notification-badge {
+  display: inline-flex;
+  align-items: center;
+  column-gap: govuk-spacing(1);
+
+  // Underline on hover only under link text, not the badge (MoJ pattern)
+  &:link:hover,
+  &:visited:hover {
+    text-decoration: none;
+  }
+
+  &:hover .one-login-header__nav__link-text {
+    text-decoration: underline;
+    text-decoration-thickness: 3px;
+
+    @if $govuk-link-underline-offset {
+      text-underline-offset: $govuk-link-underline-offset;
+    }
+  }
+}
+
+.one-login-header__nav__link--with-notification-badge .moj-notification-badge {
+  margin: 0;
+  flex-shrink: 0;
+}
+
+// Messages / notifications inbox – "Clear selection" as text link beside button
+.app-messages-clear-selection {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  text-decoration: underline;
+  font-weight: 400;
+  color: govuk-colour("blue");
+
+  &:hover {
+    color: govuk-shade(govuk-colour("blue"), 40%);
+  }
+
+  &:focus {
+    @include govuk-focused-text;
+  }
 }
 
 // Remove border and extra space from first or only navigation item

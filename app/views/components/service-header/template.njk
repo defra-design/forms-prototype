@@ -1,5 +1,5 @@
 {%- from "govuk/components/tag/macro.njk" import govukTag -%}
-{%- from "components/notification-badge/macro.njk" import notificationBadge -%}
+{%- from "components/notification-badge/macro.njk" import mojNotificationBadge -%}
 {% set govukRebrand = true %}
 {#
 Component options:
@@ -35,8 +35,8 @@ Component options:
   - navigationInverse (boolean): Whether to use inverse styling for navigation (optional, defaults to false)
   - supportLink (string): URL for the support link (optional, defaults to "/titan-mvp-1.2/product-pages/support")
   - showSupportLink (boolean): Whether to show the support link (optional, defaults to true)
-  - showMessages (boolean): Show a Messages link in the account menu (optional)
-  - messagesLink (string): URL for the Messages link (optional, defaults to "/titan-mvp-1.2/messages")
+  - showMessages (boolean): Show a Notifications link in the account menu (optional)
+  - messagesLink (string): URL for the Notifications link (optional, defaults to "/titan-mvp-1.2/notifications")
   - messagesNotificationCount (string): Number for the MoJ notification badge on Messages (optional)
   - messagesNotificationVisuallyHiddenText (string): Screen reader context for the badge, e.g. "unread" (optional)
 #}
@@ -46,7 +46,7 @@ Component options:
 {%- set homepageLink = params.homepageLink if params.homepageLink else "/index.html" -%}
 {%- set signOutLink = params.signOutLink if params.signOutLink else "/titan-mvp-1.2/roles/sign-out" -%}
 {%- set signInLink = params.signInLink if params.signInLink else "/titan-mvp-1.2/onboarding/sign-in" -%}
-{%- set messagesLink = params.messagesLink if params.messagesLink else "/titan-mvp-1.2/messages" -%}
+{%- set messagesLink = params.messagesLink if params.messagesLink else "/titan-mvp-1.2/notifications" -%}
 {%- macro littlePersonIcon(modifier="default") -%}
   {%- set class = "focus" if modifier == "focus" else "default" %}
   {%- set backgroundColour = "black" if modifier == "focus" else "white" %}
@@ -125,15 +125,13 @@ Component options:
             </a>
           </li>
           {%- if params.showMessages %}
+          {%- set messagesBadgeCount = params.messagesNotificationCount if params.messagesNotificationCount else "5" -%}
+          {%- set messagesBadgeHiddenText = params.messagesNotificationVisuallyHiddenText if params.messagesNotificationVisuallyHiddenText else "unread" -%}
           <li class="one-login-header__nav__list-item">
-            <a class="one-login-header__nav__link" href="{{ messagesLink }}">
-              Messages{%- if params.messagesNotificationCount -%}
-              {{- notificationBadge({
-                text: params.messagesNotificationCount,
-                visuallyHiddenText: params.messagesNotificationVisuallyHiddenText if params.messagesNotificationVisuallyHiddenText else "unread"
-              }) -}}
-              {%- endif -%}
-            </a>
+            <a class="one-login-header__nav__link one-login-header__nav__link--with-notification-badge" href="{{ messagesLink }}"><span class="one-login-header__nav__link-text">Notifications</span>{{- mojNotificationBadge({
+              text: messagesBadgeCount,
+              visuallyHiddenText: messagesBadgeHiddenText
+            }) -}}</a>
           </li>
           {%- endif %}
           <li class="one-login-header__nav__list-item">
