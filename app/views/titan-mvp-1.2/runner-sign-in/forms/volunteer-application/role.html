@@ -1,18 +1,17 @@
 {% extends "layouts/runner.html" %}
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
-{% from "govuk/components/input/macro.njk" import govukInput %}
 {% from "govuk/components/radios/macro.njk" import govukRadios %}
 {% import "components/one-login-service-header/service-header.njk" as oneLoginHeader %}
 
 {% set baseHref = "/runner-sign-in/forms/" + application.formKey + "/" + application.id %}
 
 {% block pageTitle %}
-Organisation details – {{ formDef.formName }} – GOV.UK
+Volunteer role – {{ formDef.formName }} – GOV.UK
 {% endblock %}
 
 {% block beforeContent %}
-  {{ govukBackLink({ text: "Back", href: backHref or "/runner-sign-in/applications" }) }}
+  {{ govukBackLink({ text: "Back", href: backHref or (baseHref + "/details") }) }}
 {% endblock %}
 
 {% block header %}
@@ -27,28 +26,22 @@ Organisation details – {{ formDef.formName }} – GOV.UK
 {% block content %}
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
-    <form method="post" action="{{ baseHref }}/organisation" class="form">
-      {{ govukInput({
-        id: "organisationName",
-        name: "organisationName",
-        label: { text: "Organisation name", classes: "govuk-label--l", isPageHeading: true },
-        value: application.answers.organisationName
-      }) }}
-
+    <form method="post" action="{{ baseHref }}/role" class="form">
       {{ govukRadios({
-        idPrefix: "organisationType",
-        name: "organisationType",
+        idPrefix: "volunteerRole",
+        name: "volunteerRole",
         fieldset: {
           legend: {
-            text: "What type of organisation is it?",
-            classes: "govuk-fieldset__legend--m"
+            text: "Which volunteer role are you applying for?",
+            classes: "govuk-fieldset__legend--l",
+            isPageHeading: true
           }
         },
         items: [
-          { value: "Community group", text: "Community group", checked: application.answers.organisationType == "Community group" },
-          { value: "Charity", text: "Charity", checked: application.answers.organisationType == "Charity" },
-          { value: "Small business", text: "Small business", checked: application.answers.organisationType == "Small business" },
-          { value: "Other", text: "Other", checked: application.answers.organisationType == "Other" }
+          { value: "Gardening", text: "Gardening", checked: application.answers.volunteerRole == "Gardening" },
+          { value: "Events", text: "Events", checked: application.answers.volunteerRole == "Events" },
+          { value: "Administration", text: "Administration", checked: application.answers.volunteerRole == "Administration" },
+          { value: "Other", text: "Other", checked: application.answers.volunteerRole == "Other" }
         ]
       }) }}
 
@@ -62,4 +55,3 @@ Organisation details – {{ formDef.formName }} – GOV.UK
   </div>
 </div>
 {% endblock %}
-

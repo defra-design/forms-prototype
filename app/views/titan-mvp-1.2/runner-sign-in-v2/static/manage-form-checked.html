@@ -1,0 +1,63 @@
+{% extends "layouts/runner-sign-in-v2.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/table/macro.njk" import govukTable %}
+{% from "govuk/components/tag/macro.njk" import govukTag %}
+{% import "components/one-login-service-header/service-header.njk" as oneLoginHeader %}
+
+{% block pageTitle %}Manage your form – Apply for a small grant – GOV.UK{% endblock %}
+
+{% block beforeContent %}{% endblock %}
+
+{% block header %}
+  {{ oneLoginHeader.govukOneLoginServiceHeader({
+    signOutLink: "#",
+    homepageLink: "#",
+    oneLoginLinkText: "you@example.com",
+    serviceNavigationParams: {
+      serviceName: "Apply for a small grant",
+      navigation: [
+        { href: "#", text: "Forms", active: true },
+        { href: "#", text: "Security" }
+      ]
+    }
+  }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-full">
+    <span class="govuk-caption-l">Manage your form</span>
+    <h1 class="govuk-heading-xl">Apply for a small grant</h1>
+
+    {{ govukButton({
+      text: "Start a new form",
+      href: "#",
+      classes: "govuk-button--secondary"
+    }) }}
+
+    {% set statusTagHtml = govukTag({ text: "Checked", classes: "govuk-tag--turquoise" }) %}
+    {% set actionsHtml %}
+      <a class="govuk-link" href="#">Review and submit</a>
+      <span class="govuk-body govuk-!-margin-left-2 govuk-!-margin-right-2">|</span>
+      <a class="govuk-link" href="#">Delete</a>
+    {% endset %}
+
+    {{ govukTable({
+      head: [
+        { text: "Reference number" },
+        { text: "Status" },
+        { text: "Last updated" },
+        { text: "Saved until" },
+        { text: "Actions" }
+      ],
+      rows: [[
+        { text: "P7D-2K9-Q4M" },
+        { html: statusTagHtml },
+        { text: "Last updated 6 May 2026 at 14:20" },
+        { text: "6 June 2026" },
+        { html: actionsHtml }
+      ]]
+    }) }}
+  </div>
+</div>
+{% endblock %}

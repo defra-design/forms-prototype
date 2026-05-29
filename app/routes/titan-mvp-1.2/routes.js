@@ -15722,6 +15722,27 @@ function getRunnerSignInFormsCatalog() {
         },
       ],
     },
+    "volunteer-application": {
+      formKey: "volunteer-application",
+      formName: "Apply to volunteer",
+      steps: [
+        {
+          id: "details",
+          template: "titan-mvp-1.2/runner-sign-in/forms/volunteer-application/details",
+          fields: ["fullName", "email"],
+        },
+        {
+          id: "role",
+          template: "titan-mvp-1.2/runner-sign-in/forms/volunteer-application/role",
+          fields: ["volunteerRole"],
+        },
+        {
+          id: "declaration",
+          template: "titan-mvp-1.2/runner-sign-in/forms/volunteer-application/declaration",
+          fields: ["declarationAccepted"],
+        },
+      ],
+    },
     "apply-small-grant": {
       formKey: "apply-small-grant",
       formName: "Apply for a small grant",
@@ -15887,6 +15908,21 @@ function seedRunnerSignInApplicationsPrototype() {
       submittedIso: "2026-04-18T09:02:00+01:00",
       expiryIso: "2026-05-18T23:59:00+01:00",
     },
+    {
+      id: "app-1721152526408",
+      formKey: "volunteer-application",
+      formName: "Apply to volunteer",
+      reference: "FL3-5H4-L8N",
+      status: "Submitted",
+      answers: {
+        fullName: "Alex Taylor",
+        email: "alex.taylor@example.com",
+        volunteerRole: "Gardening",
+        declarationAccepted: "yes",
+      },
+      submittedIso: "2026-04-18T09:02:00+01:00",
+      expiryIso: "2026-05-18T23:59:00+01:00",
+    },
   ];
 }
 
@@ -15940,6 +15976,27 @@ function ensureRunnerSignInChecking(application) {
   return application;
 }
 
+function runnerSignInQueryIsCopied(query) {
+  return Boolean(query && (query.copied === "1" || query.copied === "true"));
+}
+
+function runnerSignInApplicationIsCopied(application) {
+  return Boolean(application && application.copiedFrom);
+}
+
+function runnerSignInIsCopiedJourney(query, application) {
+  return runnerSignInQueryIsCopied(query) || runnerSignInApplicationIsCopied(application);
+}
+
+function runnerSignInCheckAnswersUrl(application, query) {
+  const base = `/runner-sign-in/forms/${encodeURIComponent(application.formKey)}/${encodeURIComponent(application.id)}/check-answers`;
+  return runnerSignInIsCopiedJourney(query, application) ? `${base}?copied=1` : base;
+}
+
+function runnerSignInCopiedQuerySuffix(query, application) {
+  return runnerSignInIsCopiedJourney(query, application) ? "?copied=1" : "";
+}
+
 function ensureRunnerSignInApplications(req) {
   const data = ensureRunnerSignInSession(req);
   if (!Array.isArray(data.runnerSignInApplications)) {
@@ -15962,6 +16019,17 @@ function formatRunnerSignInDate(iso) {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
   return d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+}
+
+function formatRunnerSignInSubmittedDateTime(iso) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const date = formatRunnerSignInDate(iso);
+  const minutes = String(d.getMinutes()).padStart(2, "0");
+  const rawHours = d.getHours();
+  const ampm = rawHours >= 12 ? "pm" : "am";
+  const hours12 = rawHours % 12 || 12;
+  return `${date} at ${hours12}:${minutes}${ampm}`;
 }
 
 router.get("/runner-sign-in", function (req, res) {
@@ -16538,12 +16606,13 @@ router.get("/runner-sign-in/forms/:formKey/:id/check-answers", function (req, re
     }
   }
 
-  const copied = req.query && (req.query.copied === "1" || req.query.copied === "true");
+  const copied = runnerSignInIsCopiedJourney(req.query, application);
   return res.render("titan-mvp-1.2/runner-sign-in/forms/check-answers", {
     data,
     application,
     formDef,
     copied,
+    copiedQuerySuffix: runnerSignInCopiedQuerySuffix(req.query, application),
   });
 });
 
@@ -16624,7 +16693,7 @@ router.post("/runner-sign-in/forms/:formKey/:id/send-for-checking", function (re
 
   ensureRunnerSignInChecking(application);
   if (!application.checking || !application.checking.required) {
-    return res.redirect(`/runner-sign-in/forms/${encodeURIComponent(application.formKey)}/${encodeURIComponent(application.id)}/check-answers`);
+    return res.redirect(runnerSignInCheckAnswersUrl(application, req.query));
   }
 
   return res.redirect(`/runner-sign-in/forms/${encodeURIComponent(application.formKey)}/${encodeURIComponent(application.id)}/send-for-checking`);
@@ -16647,7 +16716,7 @@ router.get("/runner-sign-in/forms/:formKey/:id/send-for-checking", function (req
 
   ensureRunnerSignInChecking(application);
   if (!application.checking || !application.checking.required) {
-    return res.redirect(`/runner-sign-in/forms/${encodeURIComponent(application.formKey)}/${encodeURIComponent(application.id)}/check-answers`);
+    return res.redirect(runnerSignInCheckAnswersUrl(application, req.query));
   }
 
   // Ensure token + details exist once checking is started
@@ -16737,7 +16806,7 @@ router.post("/runner-sign-in/forms/:formKey/:id/send-for-checking/contact-detail
 
   ensureRunnerSignInChecking(application);
   if (!application.checking || !application.checking.required) {
-    return res.redirect(`/runner-sign-in/forms/${encodeURIComponent(application.formKey)}/${encodeURIComponent(application.id)}/check-answers`);
+    return res.redirect(runnerSignInCheckAnswersUrl(application, req.query));
   }
 
   if (!application.checking.reviewToken) application.checking.reviewToken = createRunnerSignInReviewToken();
@@ -16798,7 +16867,7 @@ router.post("/runner-sign-in/forms/:formKey/:id/send-for-checking/resend", funct
 
   ensureRunnerSignInChecking(application);
   if (!application.checking || !application.checking.required) {
-    return res.redirect(`/runner-sign-in/forms/${encodeURIComponent(application.formKey)}/${encodeURIComponent(application.id)}/check-answers`);
+    return res.redirect(runnerSignInCheckAnswersUrl(application, req.query));
   }
 
   const RESEND_COOLDOWN_SECONDS = 30;
@@ -17066,12 +17135,17 @@ router.get("/runner-sign-in/forms/:formKey/:id/:step", function (req, res) {
 
   application.step = stepDef.id;
 
+  const copied = runnerSignInIsCopiedJourney(req.query, application);
+  const copiedQuerySuffix = runnerSignInCopiedQuerySuffix(req.query, application);
+
   return res.render(stepDef.template, {
     data,
     application,
     formDef,
     stepDef,
-    backHref: "/runner-sign-in/applications",
+    copied,
+    copiedQuerySuffix,
+    backHref: copied ? runnerSignInCheckAnswersUrl(application, req.query) : "/runner-sign-in/applications",
   });
 });
 
@@ -17135,9 +17209,13 @@ router.post("/runner-sign-in/forms/:formKey/:id/:step", function (req, res) {
     return res.redirect("/runner-sign-in/applications");
   }
 
+  if (runnerSignInIsCopiedJourney(req.query, application)) {
+    return res.redirect(runnerSignInCheckAnswersUrl(application, req.query));
+  }
+
   const nextStepId = getRunnerSignInNextStepId(formDef, stepDef.id);
   if (!nextStepId) {
-    return res.redirect(`/runner-sign-in/forms/${encodeURIComponent(application.formKey)}/${encodeURIComponent(application.id)}/check-answers`);
+    return res.redirect(runnerSignInCheckAnswersUrl(application, req.query));
   }
 
   application.step = nextStepId;
@@ -17159,6 +17237,9 @@ router.get("/runner-sign-in/applications/:id/clone", function (req, res) {
     data,
     application,
     formatDate: formatRunnerSignInDate,
+    submittedOnText: application.submittedIso
+      ? formatRunnerSignInSubmittedDateTime(application.submittedIso)
+      : "Not provided",
   });
 });
 
@@ -17242,6 +17323,15 @@ router.post("/runner-sign-in/applications/:id/clone", function (req, res) {
   };
 
   ensureRunnerSignInChecking(cloned);
+  if (cloned.checking && cloned.checking.required) {
+    cloned.checking.status = "not_started";
+    delete cloned.checking.checkedAtIso;
+    delete cloned.checking.checkedBy;
+    delete cloned.checking.reviewToken;
+    delete cloned.checking.inviteEmail;
+    delete cloned.checking.invitePhone;
+    delete cloned.checking.invitedAtIso;
+  }
 
   applications.unshift(cloned);
   data.runnerSignInApplications = applications;
@@ -19708,6 +19798,9 @@ router.get("/runner-sign-in-v2/start-page", function (req, res) {
   const awaitingCheckExample = applications.find(
     (a) => a && a.status !== "Submitted" && a.checking && a.checking.required && String(a.checking.status) === "awaiting_check"
   );
+  const copyJourneySubmittedExample = applications.find(
+    (a) => a && a.status === "Submitted" && a.formKey === "volunteer-application"
+  );
   const submittedExample = applications.find((a) => a && a.status === "Submitted");
   const filler = applications.filter((a) => a && a.id && a.status !== "Submitted");
 
@@ -19733,12 +19826,23 @@ router.get("/runner-sign-in-v2/start-page", function (req, res) {
     highlight:
       Boolean(a.checking && a.checking.required && String(a.checking.status) === "awaiting_check"),
   }));
+  const copyJourneyApp = copyJourneySubmittedExample
+    ? {
+        id: copyJourneySubmittedExample.id,
+        formKey: copyJourneySubmittedExample.formKey,
+        formName: copyJourneySubmittedExample.formName,
+        reference: copyJourneySubmittedExample.reference,
+        hint: "Submitted",
+      }
+    : null;
+
   return res.render("titan-mvp-1.2/runner-sign-in-v2/start-page", {
     data,
     formKey,
     applicationId,
     manageUrl,
     seedApplications,
+    copyJourneyApp,
   });
 });
 
@@ -20403,6 +20507,10 @@ router.post("/runner-sign-in-v2/recover/check-new-email", function (req, res) {
   return res.redirect(next || manageUrl);
 });
 
+router.get("/runner-sign-in-v2/static/manage-form-checked", function (req, res) {
+  return res.render("titan-mvp-1.2/runner-sign-in-v2/static/manage-form-checked");
+});
+
 router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/manage", function (req, res) {
   const data = ensureRunnerSignInSession(req);
   if (!data.runnerSignInAuthed) {
@@ -20533,7 +20641,7 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/manage", function (
     application.status === "Submitted"
       ? "#"
       : `/runner-sign-in/forms/${encodeURIComponent(application.formKey)}/${encodeURIComponent(application.id)}/${encodeURIComponent(resumeStepId || "name")}`;
-  const checkAnswersUrl = `/runner-sign-in/forms/${encodeURIComponent(application.formKey)}/${encodeURIComponent(application.id)}/check-answers`;
+  const checkAnswersUrl = runnerSignInCheckAnswersUrl(application, req.query);
   const cloneUrl = `/runner-sign-in/applications/${encodeURIComponent(application.id)}/clone`;
   const saveExitWithSignInUrl = `/runner-sign-in-v2/save-and-exit/with-sign-in/confirm-email?formKey=${encodeURIComponent(application.formKey)}&applicationId=${encodeURIComponent(application.id)}`;
   const saveExitWithoutSignInUrl = `/runner-sign-in-v2/save-and-exit/without-sign-in/create-sign-in?formKey=${encodeURIComponent(application.formKey)}&applicationId=${encodeURIComponent(application.id)}`;

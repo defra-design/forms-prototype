@@ -40,9 +40,9 @@ You are about to clone this application – {{ serviceName }} – GOV.UK
 
     {{ govukSummaryList({
       rows: [
-        { key: { text: "Form name" }, value: { text: "Register as a unicorn breeder" } },
-        { key: { text: "Submitted on" }, value: { text: "18 April 2026 at 9:02am" } },
-        { key: { text: "Reference" }, value: { text: "FL3-5H4-L8N" } }
+        { key: { text: "Form name" }, value: { text: application.formName } },
+        { key: { text: "Submitted on" }, value: { text: submittedOnText } },
+        { key: { text: "Reference" }, value: { text: application.reference } }
       ]
     }) }}
 

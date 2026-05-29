@@ -176,22 +176,23 @@ Start – Runner sign-in v2 – GOV.UK
 
     <h2 class="govuk-heading-m">1) Copy a form I’ve submitted previously</h2>
     <p class="govuk-body">
+      Uses <strong>Apply to volunteer</strong> (no checker required).<br>
       <strong>Button</strong>: opens the <strong>Manage your form</strong> hub (where you’ll see <strong>Copy</strong>).<br>
       <strong>Link</strong>: opens the form’s <strong>start page</strong>.
     </p>
-    {% if submittedApp %}
+    {% if copyJourneyApp %}
       {{ govukButton({
         text: "Form manager page (submitted example)",
         classes: "govuk-button--secondary",
-        href: "/runner-sign-in-v2/forms/" + (submittedApp.formKey | urlencode) + "/" + (submittedApp.id | urlencode) + "/manage"
+        href: "/runner-sign-in-v2/forms/" + (copyJourneyApp.formKey | urlencode) + "/" + (copyJourneyApp.id | urlencode) + "/manage"
       }) }}
       <p class="govuk-body">
-        <a class="govuk-link" href="/runner-sign-in-v2/forms/{{ submittedApp.formKey | urlencode }}/{{ submittedApp.id | urlencode }}/start-page">Open start page</a>
-        <span class="govuk-!-margin-left-1">for {{ submittedApp.formName }} — {{ submittedApp.reference }}</span>
+        <a class="govuk-link" href="/runner-sign-in-v2/forms/{{ copyJourneyApp.formKey | urlencode }}/{{ copyJourneyApp.id | urlencode }}/start-page">Open start page</a>
+        <span class="govuk-!-margin-left-1">for {{ copyJourneyApp.formName }} — {{ copyJourneyApp.reference }}</span>
         <span class="govuk-!-margin-left-2">{{ govukTag({ text: "Submitted", classes: "govuk-tag--green" }) }}</span>
       </p>
     {% else %}
-      {{ govukInsetText({ text: "No submitted example found. Use “Reset seeded examples” to restore the default set." }) }}
+      {{ govukInsetText({ text: "No copy journey example found. Use “Clear cache and reset examples” to restore the default set." }) }}
     {% endif %}
 
     <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
@@ -237,6 +238,16 @@ Start – Runner sign-in v2 – GOV.UK
     {% else %}
       {{ govukInsetText({ text: "No awaiting-check example found. Use “Reset seeded examples” to restore the default set." }) }}
     {% endif %}
+
+    <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+
+    <h2 class="govuk-heading-m">Research preview: manage page after check</h2>
+    <p class="govuk-body">
+      Static page for participants — no sign-in or checker simulation required.
+    </p>
+    <p class="govuk-body">
+      <a class="govuk-link" href="/runner-sign-in-v2/static/manage-form-checked">Manage your form (checked)</a>
+    </p>
 
     <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
 

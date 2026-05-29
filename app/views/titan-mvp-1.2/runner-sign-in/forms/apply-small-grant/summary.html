@@ -11,7 +11,7 @@ Project summary – {{ formDef.formName }} – GOV.UK
 {% endblock %}
 
 {% block beforeContent %}
-  {{ govukBackLink({ text: "Back", href: baseHref + "/amount" }) }}
+  {{ govukBackLink({ text: "Back", href: backHref or (baseHref + "/amount") }) }}
 {% endblock %}
 
 {% block header %}

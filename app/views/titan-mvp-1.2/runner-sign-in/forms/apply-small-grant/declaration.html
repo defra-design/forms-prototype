@@ -11,7 +11,7 @@ Declaration – {{ formDef.formName }} – GOV.UK
 {% endblock %}
 
 {% block beforeContent %}
-  {{ govukBackLink({ text: "Back", href: baseHref + "/summary" }) }}
+  {{ govukBackLink({ text: "Back", href: backHref or (baseHref + "/summary") }) }}
 {% endblock %}
 
 {% block header %}

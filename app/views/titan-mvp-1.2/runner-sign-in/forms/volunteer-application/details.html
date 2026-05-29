@@ -2,13 +2,12 @@
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/input/macro.njk" import govukInput %}
-{% from "govuk/components/radios/macro.njk" import govukRadios %}
 {% import "components/one-login-service-header/service-header.njk" as oneLoginHeader %}
 
 {% set baseHref = "/runner-sign-in/forms/" + application.formKey + "/" + application.id %}
 
 {% block pageTitle %}
-Organisation details – {{ formDef.formName }} – GOV.UK
+Your details – {{ formDef.formName }} – GOV.UK
 {% endblock %}
 
 {% block beforeContent %}
@@ -27,29 +26,21 @@ Organisation details – {{ formDef.formName }} – GOV.UK
 {% block content %}
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
-    <form method="post" action="{{ baseHref }}/organisation" class="form">
+    <form method="post" action="{{ baseHref }}/details" class="form">
       {{ govukInput({
-        id: "organisationName",
-        name: "organisationName",
-        label: { text: "Organisation name", classes: "govuk-label--l", isPageHeading: true },
-        value: application.answers.organisationName
+        id: "fullName",
+        name: "fullName",
+        label: { text: "What is your full name?", classes: "govuk-label--l", isPageHeading: true },
+        value: application.answers.fullName
       }) }}
 
-      {{ govukRadios({
-        idPrefix: "organisationType",
-        name: "organisationType",
-        fieldset: {
-          legend: {
-            text: "What type of organisation is it?",
-            classes: "govuk-fieldset__legend--m"
-          }
-        },
-        items: [
-          { value: "Community group", text: "Community group", checked: application.answers.organisationType == "Community group" },
-          { value: "Charity", text: "Charity", checked: application.answers.organisationType == "Charity" },
-          { value: "Small business", text: "Small business", checked: application.answers.organisationType == "Small business" },
-          { value: "Other", text: "Other", checked: application.answers.organisationType == "Other" }
-        ]
+      {{ govukInput({
+        id: "email",
+        name: "email",
+        type: "email",
+        autocomplete: "email",
+        label: { text: "What is your email address?", classes: "govuk-label--m" },
+        value: application.answers.email
       }) }}
 
       <div class="govuk-button-group">
@@ -62,4 +53,3 @@ Organisation details – {{ formDef.formName }} – GOV.UK
   </div>
 </div>
 {% endblock %}
-

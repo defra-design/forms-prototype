@@ -6,6 +6,7 @@
 {% import "components/one-login-service-header/service-header.njk" as oneLoginHeader %}
 
 {% set baseHref = "/runner-sign-in/forms/" + application.formKey + "/" + application.id %}
+{% set copiedSuffix = copiedQuerySuffix | default("") %}
 {% set lastStepId = (formDef.steps | last).id if formDef.steps else "" %}
 
 {% block pageTitle %}
@@ -55,22 +56,22 @@ Check your answers – {{ formDef.formName }} – GOV.UK
           {
             key: { text: "Full name" },
             value: { text: application.answers.fullName or "Not provided" },
-            actions: { items: [{ href: baseHref + "/name", text: "Change", visuallyHiddenText: "full name" }] }
+            actions: { items: [{ href: baseHref + "/name" + copiedSuffix, text: "Change", visuallyHiddenText: "full name" }] }
           },
           {
             key: { text: "Email address" },
             value: { text: application.answers.email or "Not provided" },
-            actions: { items: [{ href: baseHref + "/contact", text: "Change", visuallyHiddenText: "email address" }] }
+            actions: { items: [{ href: baseHref + "/contact" + copiedSuffix, text: "Change", visuallyHiddenText: "email address" }] }
           },
           {
             key: { text: "Mobile phone number" },
             value: { text: application.answers.phone or "Not provided" },
-            actions: { items: [{ href: baseHref + "/contact", text: "Change", visuallyHiddenText: "mobile phone number" }] }
+            actions: { items: [{ href: baseHref + "/contact" + copiedSuffix, text: "Change", visuallyHiddenText: "mobile phone number" }] }
           },
           {
             key: { text: "Preferred contact method" },
             value: { text: application.answers.preferredContactMethod or "Not provided" },
-            actions: { items: [{ href: baseHref + "/preference", text: "Change", visuallyHiddenText: "preferred contact method" }] }
+            actions: { items: [{ href: baseHref + "/preference" + copiedSuffix, text: "Change", visuallyHiddenText: "preferred contact method" }] }
           }
         ]
       }) }}
@@ -80,27 +81,27 @@ Check your answers – {{ formDef.formName }} – GOV.UK
           {
             key: { text: "Issue type" },
             value: { text: application.answers.issueType or "Not provided" },
-            actions: { items: [{ href: baseHref + "/details", text: "Change", visuallyHiddenText: "issue type" }] }
+            actions: { items: [{ href: baseHref + "/details" + copiedSuffix, text: "Change", visuallyHiddenText: "issue type" }] }
           },
           {
             key: { text: "What happened" },
             value: { text: application.answers.whatHappened or "Not provided" },
-            actions: { items: [{ href: baseHref + "/details", text: "Change", visuallyHiddenText: "what happened" }] }
+            actions: { items: [{ href: baseHref + "/details" + copiedSuffix, text: "Change", visuallyHiddenText: "what happened" }] }
           },
           {
             key: { text: "Postcode or place" },
             value: { text: application.answers.postcodeOrPlace or "Not provided" },
-            actions: { items: [{ href: baseHref + "/location", text: "Change", visuallyHiddenText: "postcode or place" }] }
+            actions: { items: [{ href: baseHref + "/location" + copiedSuffix, text: "Change", visuallyHiddenText: "postcode or place" }] }
           },
           {
             key: { text: "When did it happen?" },
             value: { text: application.answers.whenHappened or "Not provided" },
-            actions: { items: [{ href: baseHref + "/when", text: "Change", visuallyHiddenText: "when it happened" }] }
+            actions: { items: [{ href: baseHref + "/when" + copiedSuffix, text: "Change", visuallyHiddenText: "when it happened" }] }
           },
           {
             key: { text: "Urgency" },
             value: { text: application.answers.urgency or "Not provided" },
-            actions: { items: [{ href: baseHref + "/urgency", text: "Change", visuallyHiddenText: "urgency" }] }
+            actions: { items: [{ href: baseHref + "/urgency" + copiedSuffix, text: "Change", visuallyHiddenText: "urgency" }] }
           }
         ]
       }) }}
@@ -110,27 +111,52 @@ Check your answers – {{ formDef.formName }} – GOV.UK
           {
             key: { text: "Payment reference" },
             value: { text: application.answers.paymentReference or "Not provided" },
-            actions: { items: [{ href: baseHref + "/reference", text: "Change", visuallyHiddenText: "payment reference" }] }
+            actions: { items: [{ href: baseHref + "/reference" + copiedSuffix, text: "Change", visuallyHiddenText: "payment reference" }] }
           },
           {
             key: { text: "Reason for refund" },
             value: { text: application.answers.refundReason or "Not provided" },
-            actions: { items: [{ href: baseHref + "/reason", text: "Change", visuallyHiddenText: "reason for refund" }] }
+            actions: { items: [{ href: baseHref + "/reason" + copiedSuffix, text: "Change", visuallyHiddenText: "reason for refund" }] }
           },
           {
             key: { text: "Account name" },
             value: { text: application.answers.accountName or "Not provided" },
-            actions: { items: [{ href: baseHref + "/bank-details", text: "Change", visuallyHiddenText: "account name" }] }
+            actions: { items: [{ href: baseHref + "/bank-details" + copiedSuffix, text: "Change", visuallyHiddenText: "account name" }] }
           },
           {
             key: { text: "Sort code" },
             value: { text: application.answers.sortCode or "Not provided" },
-            actions: { items: [{ href: baseHref + "/bank-details", text: "Change", visuallyHiddenText: "sort code" }] }
+            actions: { items: [{ href: baseHref + "/bank-details" + copiedSuffix, text: "Change", visuallyHiddenText: "sort code" }] }
           },
           {
             key: { text: "Account number" },
             value: { text: application.answers.accountNumber or "Not provided" },
-            actions: { items: [{ href: baseHref + "/bank-details", text: "Change", visuallyHiddenText: "account number" }] }
+            actions: { items: [{ href: baseHref + "/bank-details" + copiedSuffix, text: "Change", visuallyHiddenText: "account number" }] }
+          }
+        ]
+      }) }}
+    {% elif application.formKey == "volunteer-application" %}
+      {{ govukSummaryList({
+        rows: [
+          {
+            key: { text: "Full name" },
+            value: { text: application.answers.fullName or "Not provided" },
+            actions: { items: [{ href: baseHref + "/details" + copiedSuffix, text: "Change", visuallyHiddenText: "full name" }] }
+          },
+          {
+            key: { text: "Email address" },
+            value: { text: application.answers.email or "Not provided" },
+            actions: { items: [{ href: baseHref + "/details" + copiedSuffix, text: "Change", visuallyHiddenText: "email address" }] }
+          },
+          {
+            key: { text: "Volunteer role" },
+            value: { text: application.answers.volunteerRole or "Not provided" },
+            actions: { items: [{ href: baseHref + "/role" + copiedSuffix, text: "Change", visuallyHiddenText: "volunteer role" }] }
+          },
+          {
+            key: { text: "Declaration" },
+            value: { text: "Accepted" if application.answers.declarationAccepted == "yes" else "Not provided" },
+            actions: { items: [{ href: baseHref + "/declaration" + copiedSuffix, text: "Change", visuallyHiddenText: "declaration" }] }
           }
         ]
       }) }}
@@ -141,27 +167,27 @@ Check your answers – {{ formDef.formName }} – GOV.UK
           {
             key: { text: "Organisation name" },
             value: { text: application.answers.organisationName or "Not provided" },
-            actions: { items: [{ href: baseHref + "/organisation", text: "Change", visuallyHiddenText: "organisation name" }] }
+            actions: { items: [{ href: baseHref + "/organisation" + copiedSuffix, text: "Change", visuallyHiddenText: "organisation name" }] }
           },
           {
             key: { text: "Organisation type" },
             value: { text: application.answers.organisationType or "Not provided" },
-            actions: { items: [{ href: baseHref + "/organisation", text: "Change", visuallyHiddenText: "organisation type" }] }
+            actions: { items: [{ href: baseHref + "/organisation" + copiedSuffix, text: "Change", visuallyHiddenText: "organisation type" }] }
           },
           {
             key: { text: "Amount requested" },
             value: { text: ("£" + application.answers.amountRequested) if application.answers.amountRequested else "Not provided" },
-            actions: { items: [{ href: baseHref + "/amount", text: "Change", visuallyHiddenText: "amount requested" }] }
+            actions: { items: [{ href: baseHref + "/amount" + copiedSuffix, text: "Change", visuallyHiddenText: "amount requested" }] }
           },
           {
             key: { text: "Project summary" },
             value: { text: application.answers.projectSummary or "Not provided" },
-            actions: { items: [{ href: baseHref + "/summary", text: "Change", visuallyHiddenText: "project summary" }] }
+            actions: { items: [{ href: baseHref + "/summary" + copiedSuffix, text: "Change", visuallyHiddenText: "project summary" }] }
           },
           {
             key: { text: "Declaration" },
             value: { text: "Accepted" if application.answers.declarationAccepted == "yes" else "Not provided" },
-            actions: { items: [{ href: baseHref + "/declaration", text: "Change", visuallyHiddenText: "declaration" }] }
+            actions: { items: [{ href: baseHref + "/declaration" + copiedSuffix, text: "Change", visuallyHiddenText: "declaration" }] }
           }
         ]
       }) }}
