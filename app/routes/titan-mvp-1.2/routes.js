@@ -16,6 +16,8 @@ const PUBLIC_BASE_URL = "https://forms-prototype-d9d9fb55cd01.herokuapp.com";
 const RUNNER_V4_REVIEW_TOKEN_INPROGRESS = "UR-V4-INPROGRESS";
 const RUNNER_V4_REVIEW_TOKEN_CHECKED = "UR-V4-CHECKED";
 const RUNNER_V3_REVIEW_TOKEN = "UR-V3-DEMO";
+const RUNNER_SIGN_IN_V2_STATIC_CHECKED_APP_ID = "app-research-checked-grant";
+const RUNNER_SIGN_IN_V2_STATIC_CHECKED_REVIEW_TOKEN = "RSI-STATIC-CHECKED";
 
 // Add middleware to make terms available to all templates
 router.use((req, res, next) => {
@@ -19595,6 +19597,77 @@ function setRunnerSignInV2ManageFocus(req, formKey, applicationId) {
   }
 }
 
+function runnerSignInV2EnsureStaticCheckedExample(req) {
+  const data = ensureRunnerSignInSession(req);
+  data.runnerSignInV2PrototypeMode = true;
+  applyRunnerSignInV2EmailAuth(req, "you@example.com", "07700 900000");
+
+  const formKey = "apply-small-grant";
+  const checkedAtIso = "2026-05-06T12:00:00+01:00";
+  const answers = {
+    organisationName: "Riverside Community Garden",
+    organisationType: "Community group",
+    amountRequested: "1500",
+    projectSummary: "Buy tools and build raised beds for a volunteer-run garden.",
+    declarationAccepted: "yes",
+    contactName: "Alex Morgan",
+    contactEmail: "applicant@example.com",
+    phoneNumber: "07700 900123",
+  };
+
+  const application = {
+    id: RUNNER_SIGN_IN_V2_STATIC_CHECKED_APP_ID,
+    formKey,
+    formName: "Apply for a small grant",
+    reference: "P7D-2K9-Q4M",
+    status: "Draft",
+    step: "declaration",
+    answers,
+    updatedIso: "2026-05-06T14:20:00+01:00",
+    expiryIso: "2026-06-06T23:59:00+01:00",
+    submittedIso: undefined,
+    checking: {
+      required: true,
+      status: "checked",
+      reviewToken: RUNNER_SIGN_IN_V2_STATIC_CHECKED_REVIEW_TOKEN,
+      checkedAtIso,
+      checkedBy: "checker@example.com",
+      referenceNumber: "CHK-482-91K",
+      memorableWord: "golden meadow",
+    },
+  };
+
+  const applications = ensureRunnerSignInApplications(req);
+  const idx = applications.findIndex((a) => a && a.id === RUNNER_SIGN_IN_V2_STATIC_CHECKED_APP_ID);
+  if (idx >= 0) {
+    applications[idx] = application;
+  } else {
+    applications.unshift(application);
+  }
+  data.runnerSignInApplications = applications;
+
+  const reviewStore = ensureReviewStore(req);
+  reviewStore.set(RUNNER_SIGN_IN_V2_STATIC_CHECKED_REVIEW_TOKEN, {
+    applicationId: application.id,
+    referenceNumber: normalizeRunnerV5ReferenceNumber(application.checking.referenceNumber),
+    memorableWord: normalizeRunnerSignInMemorableWord(application.checking.memorableWord),
+    formKey: application.formKey,
+    formName: application.formName,
+    dataSnapshot: { ...answers },
+    reviewDeclarationComplete: true,
+    reviewedAtIso: checkedAtIso,
+    checkedBy: application.checking.checkedBy,
+    expires: Date.now() + 10 * 365 * 24 * 60 * 60 * 1000,
+    checkerInviteEmail: application.checking.checkedBy,
+    checkerV2: true,
+    checkerV2EmailConfirmed: true,
+    checkerV2CodeOk: true,
+  });
+
+  setRunnerSignInV2ManageFocus(req, formKey, application.id);
+  return application;
+}
+
 function applyRunnerSignInV2EmailAuth(req, email, recoveryMobile) {
   const data = ensureRunnerSignInSession(req);
   data.runnerSignInEmail = String(email || "").trim();
@@ -20508,7 +20581,25 @@ router.post("/runner-sign-in-v2/recover/check-new-email", function (req, res) {
 });
 
 router.get("/runner-sign-in-v2/static/manage-form-checked", function (req, res) {
-  return res.render("titan-mvp-1.2/runner-sign-in-v2/static/manage-form-checked");
+  const data = ensureRunnerSignInSession(req);
+  const application = runnerSignInV2EnsureStaticCheckedExample(req);
+  const formKey = application.formKey;
+  const applicationId = application.id;
+  const staticManageUrl = "/runner-sign-in-v2/static/manage-form-checked";
+  const reviewSubmitUrl = `/runner-sign-in-v2/forms/${encodeURIComponent(formKey)}/${encodeURIComponent(applicationId)}/ready-to-submit`;
+  const deleteUrl = `/runner-sign-in/applications/${encodeURIComponent(applicationId)}/delete`;
+  const startNewUrl = `/runner-sign-in-v2/forms/${encodeURIComponent(formKey)}/${encodeURIComponent(applicationId)}/start-new`;
+
+  return res.render("titan-mvp-1.2/runner-sign-in-v2/static/manage-form-checked", {
+    data,
+    application,
+    staticManageUrl,
+    reviewSubmitUrl,
+    deleteUrl,
+    startNewUrl,
+    lastUpdatedText: formatRunnerSignInLastUpdated(application.updatedIso),
+    expiryText: formatRunnerSignInDate(application.expiryIso),
+  });
 });
 
 router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/manage", function (req, res) {
@@ -20758,7 +20849,10 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/ready-to-submit", f
   return res.render("titan-mvp-1.2/runner-sign-in-v2/ready-to-submit", {
     data,
     application,
-    manageUrl: runnerSignInV2ManagePath(application.formKey, application.id),
+    manageUrl:
+      application.id === RUNNER_SIGN_IN_V2_STATIC_CHECKED_APP_ID
+        ? "/runner-sign-in-v2/static/manage-form-checked"
+        : runnerSignInV2ManagePath(application.formKey, application.id),
     contactName: display.contactName,
     contactEmail: display.contactEmail,
     phoneNumber: display.phoneNumber,
