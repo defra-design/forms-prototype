@@ -79,10 +79,10 @@ activeLinkId: "nav-editor"
                         <form id="s" action="/titan-mvp-1.2/question-configuration-save" method="post" autocomplete="off">
 
                           <div class="govuk-form-group">
-                            <label class="govuk-label govuk-label--m" for="question-label-input-phone">
+                            <label class="govuk-label govuk-label--m" for="question-label-input-declaration">
                               {{ commonTerms.form_editor.question_settings.question }}
                             </label>
-                            <input class="govuk-input" id="question-label-input-phone" name="questionLabelInputPhone"
+                            <input class="govuk-input" id="question-label-input-declaration" name="questionLabelInputDeclaration"
                               type="text" value="">
                           </div>
 
@@ -92,12 +92,12 @@ activeLinkId: "nav-editor"
                           text: commonTerms.form_editor.question_settings.hint,
                           classes: "govuk-label--m"
                           },
-                          id: "hint-text-input-phone",
-                          name: "hintTextInputPhone",
-                          value: data['hint-text-input-phone'],
+                          id: "hint-text-input-declaration",
+                          name: "hintTextInputDeclaration",
+                          value: data['hint-text-input-declaration'],
                           classes: "govuk-textarea",
                           rows: 3,
-                          describedBy: "hint-text-input-phone"
+                          describedBy: "hint-text-input-declaration"
                           }) }}
 
                           <!-- Make Optional Checkbox -->
@@ -114,14 +114,14 @@ activeLinkId: "nav-editor"
                           </div>
 
                           <div class="govuk-form-group">
-                            <label class="govuk-label govuk-label--m" for="short-description-input-phone">
+                            <label class="govuk-label govuk-label--m" for="short-description-input-declaration">
                               {{ commonTerms.form_editor.question_settings.separate_content.short_description.title }}
                             </label>
                             <div id="short-description-hint" class="govuk-hint">
-                              {{ commonTerms.form_editor.question_settings.separate_content.short_description.hints.phone }}
+                              {{ commonTerms.form_editor.question_settings.separate_content.short_description.hints.declaration }}
                             </div>
                             <div class="short-description-input-row">
-                              <input class="govuk-input" id="short-description-input-phone" name="questionShortDescription"
+                              <input class="govuk-input" id="short-description-input-declaration" name="questionShortDescription"
                                 type="text" autocomplete="off" aria-autocomplete="none"
                                 data-1p-ignore="true" data-lpignore="true" data-bwignore="true" data-form-type="other"
                                 readonly aria-describedby="short-description-hint">
@@ -165,86 +165,20 @@ activeLinkId: "nav-editor"
                             
                             {{ govukInput({
                             label: {
-                            text: "When the answer is empty",
+                            text: "When the declaration is not confirmed",
                             classes: "govuk-label--s"
                             },
-                            id: "error-empty-input-phone",
-                            name: "errorEmptyInputPhone",
-                            value: "Enter [short description]",
+                            id: "error-confirm-input-declaration",
+                            name: "errorConfirmInputDeclaration",
+                            value: "You must confirm you understand and agree with the [short description] to continue",
                             classes: "govuk-!-width-full",
                             attributes: {
-                              "data-apply-template": "Enter [short description]"
-                            }
-                            }) }}
-
-                            {{ govukInput({
-                            label: {
-                            text: "When the answer is in the wrong format",
-                            classes: "govuk-label--s"
-                            },
-                            id: "error-format-input-phone",
-                            name: "errorFormatInputPhone",
-                            value: "[Short description] must be in the correct format",
-                            classes: "govuk-!-width-full",
-                            attributes: {
-                              "data-apply-template": "[Short description] must be in the correct format"
+                              "data-apply-template": "You must confirm you understand and agree with the [short description] to continue"
                             }
                             }) }}
                           </fieldset>
 
-                          <!-- Answer limits section -->
-                          <div class="answer-limits-group govuk-!-margin-top-6">
-                            <h2 class="govuk-heading-m govuk-!-margin-bottom-3">
-                              {{ commonTerms.form_editor.question_settings.separate_content.answer_limits_section.heading }}
-                            </h2>
-                            <p class="govuk-body govuk-!-margin-bottom-4">
-                              {{ commonTerms.form_editor.question_settings.separate_content.answer_limits_section.intro }}
-                            </p>
-                            <details class="govuk-details govuk-!-margin-bottom-0" data-module="govuk-details">
-                              <summary class="govuk-details__summary">
-                                <span class="govuk-details__summary-text">
-                                  {{ commonTerms.form_editor.question_settings.answer_limits.title }}
-                                </span>
-                              </summary>
-                              <div class="govuk-details__text">
-<!-- Default Content for Question 1 -->
-                              <div id="question-1-content" class="question-content" style="margin-top: 10px;">
-                                {{ govukTextarea({
-                                label: {
-                                text: commonTerms.form_editor.question_settings.answer_limits.classes.title,
-                                classes: "govuk-label--m",
-                                isPageHeading: false
-                                },
-                                hint: {
-                                text: commonTerms.form_editor.question_settings.answer_limits.classes.hint
-                                },
-                                id: "classes",
-                                rows: "1",
-                                name: "classes",
-                                spellcheck: false
-                                }) }}
-
-                                {{ govukTextarea({
-                                label: {
-                                text: commonTerms.form_editor.question_settings.answer_limits.regex.title,
-                                classes: "govuk-label--m",
-                                isPageHeading: false
-                                },
-                                hint: {
-                                text: commonTerms.form_editor.question_settings.answer_limits.regex.hint
-                                },
-                                id: "regex",
-                                rows: "3",
-                                name: "regex",
-                                spellcheck: false
-                                }) }}
-                              </div>
-                              </div>
-                            </details>
-                          </div>
-                          <!-- End answer limits section -->
-
-                          <!-- Section Break -->
+                                                    <!-- Section Break -->
                           <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
 
                           <!-- Question Settings Summary List -->
@@ -257,7 +191,7 @@ activeLinkId: "nav-editor"
                           "text": "Type of information"
                           },
                           "value": {
-                          "html": commonTerms.form_editor.information_type.phone.title
+                          "html": commonTerms.form_editor.information_type.declaration.title
                           },
                           "actions": {
                           "items": [
@@ -324,7 +258,7 @@ activeLinkId: "nav-editor"
                   Preview this page in a new tab
                 </a>
               </p>
-              {% include "/titan-mvp-1.2/form-editor/question-type/phone/previews/edit.html" %}
+              {% include "/titan-mvp-1.2/form-editor/question-type/declaration/previews/edit.html" %}
             </div>
 
             <div class="govuk-tabs__panel" id="error-messages">
@@ -338,13 +272,8 @@ activeLinkId: "nav-editor"
                 <div class="govuk-error-summary__body">
                   <ul class="govuk-list govuk-error-summary__list">
                     <li>
-                      <a href="#phone-number-input">
-                        <span id="error-empty-preview">Enter [short description]</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#phone-number-input">
-                        <span id="error-format-preview">[Short description] must be in the correct format</span>
+                      <a href="#declaration-checkbox">
+                        <span id="error-confirm-preview">You must confirm you understand and agree with the [short description] to continue</span>
                       </a>
                     </li>
                   
@@ -383,9 +312,9 @@ activeLinkId: "nav-editor"
                   <dt class="govuk-summary-list__key">
                     <span id="cya-short-description-preview">[Short description]</span>
                   </dt>
-                  <dd class="govuk-summary-list__value">01632 960 211</dd>
+                  <dd class="govuk-summary-list__value">Confirmed</dd>
                   <dd class="govuk-summary-list__actions">
-                    <a class="govuk-link" href="#">Change<span class="govuk-visually-hidden"> phone number</span></a>
+                    <a class="govuk-link" href="#">Change<span class="govuk-visually-hidden"> declaration</span></a>
                   </dd>
                 </div>
               </dl>
@@ -404,9 +333,9 @@ activeLinkId: "nav-editor"
           // DOM Elements
           const domElements = {
             // Existing elements
-            questionLabelInputPhone: document.getElementById('question-label-input-phone'),
+            questionLabelInputDeclaration: document.getElementById('question-label-input-declaration'),
             questionLabelLegend: document.getElementById('question-label-legend'),
-            hintTextInputPhone: document.getElementById('hint-text-input-phone'),
+            hintTextInputDeclaration: document.getElementById('hint-text-input-declaration'),
             hintTextOutput: document.getElementById('hint-text-output'),
             makeOptionalCheckbox: document.getElementById('make-optional'),
 
@@ -422,15 +351,15 @@ activeLinkId: "nav-editor"
 
           function initializeEventListeners() {
             // Update question label
-            if (domElements.questionLabelInputPhone && domElements.questionLabelLegend) {
-              domElements.questionLabelInputPhone.addEventListener('input', updateQuestionLabel);
+            if (domElements.questionLabelInputDeclaration && domElements.questionLabelLegend) {
+              domElements.questionLabelInputDeclaration.addEventListener('input', updateQuestionLabel);
             }
 
             // Update hint text and handle placeholder
-            if (domElements.hintTextInputPhone && domElements.hintTextOutput) {
-              domElements.hintTextInputPhone.addEventListener('input', updateHintText);
-              domElements.hintTextInputPhone.addEventListener('focus', showPlaceholderHint);
-              domElements.hintTextInputPhone.addEventListener('blur', clearPlaceholderHint);
+            if (domElements.hintTextInputDeclaration && domElements.hintTextOutput) {
+              domElements.hintTextInputDeclaration.addEventListener('input', updateHintText);
+              domElements.hintTextInputDeclaration.addEventListener('focus', showPlaceholderHint);
+              domElements.hintTextInputDeclaration.addEventListener('blur', clearPlaceholderHint);
             }
 
             // Update page heading and handle placeholder
@@ -461,19 +390,19 @@ activeLinkId: "nav-editor"
 
 
             // Apply focus/blur highlighting
-            applyHighlightOnFocus(domElements.questionLabelInputPhone, domElements.questionLabelLegend);
-            applyHighlightOnFocus(domElements.hintTextInputPhone, domElements.hintTextOutput);
+            applyHighlightOnFocus(domElements.questionLabelInputDeclaration, domElements.questionLabelLegend);
+            applyHighlightOnFocus(domElements.hintTextInputDeclaration, domElements.hintTextOutput);
             applyHighlightOnFocus(domElements.pageHeadingInputPhone, domElements.dynamicHeading);
             applyHighlightOnFocus(domElements.guidancePhone, domElements.guidanceParagraph);
           }
           function updateQuestionLabel() {
             const suffix = domElements.makeOptionalCheckbox.checked ? ' (optional)' : '';
-            domElements.questionLabelLegend.textContent = domElements.questionLabelInputPhone.value || 'Question';
+            domElements.questionLabelLegend.textContent = domElements.questionLabelInputDeclaration.value || 'Question';
             domElements.questionLabelLegend.textContent += suffix;
           }
 
           function updateHintText() {
-            domElements.hintTextOutput.textContent = domElements.hintTextInputPhone.value;
+            domElements.hintTextOutput.textContent = domElements.hintTextInputDeclaration.value;
           }
 
           function updatePageHeading() {
@@ -502,13 +431,13 @@ activeLinkId: "nav-editor"
 
           // Placeholder handling for hint text
           function showPlaceholderHint() {
-            if (!domElements.hintTextInputPhone.value) {
+            if (!domElements.hintTextInputDeclaration.value) {
               domElements.hintTextOutput.textContent = 'Hint text';
             }
           }
 
           function clearPlaceholderHint() {
-            if (!domElements.hintTextInputPhone.value) {
+            if (!domElements.hintTextInputDeclaration.value) {
               domElements.hintTextOutput.textContent = '';
             }
           }
@@ -564,15 +493,14 @@ activeLinkId: "nav-editor"
       
       <script>
         document.addEventListener('DOMContentLoaded', function () {
-          const shortDescriptionInput = document.getElementById('short-description-input-phone');
+          const shortDescriptionInput = document.getElementById('short-description-input-declaration');
           const applyToErrorsButton = document.getElementById('apply-short-description-to-errors');
           const cyaShortDescriptionPreview = document.getElementById('cya-short-description-preview');
           const placeholderShortDescriptionDisplay = '[Short description]';
           const limitPlaceholders = [];
 
           const errorFields = [
-            { input: document.getElementById('error-empty-input-phone'), preview: document.getElementById('error-empty-preview') },
-            { input: document.getElementById('error-format-input-phone'), preview: document.getElementById('error-format-preview') }
+            { input: document.getElementById('error-confirm-input-declaration'), preview: document.getElementById('error-confirm-preview') }
           ];
 
           function capitalizeFirstLetter(text) {

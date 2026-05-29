@@ -303,11 +303,37 @@
         "short_description": {
           "title": "Short description",
           "hint": "Like 'phone number'. Shown on check your answers.",
+          "hints": {
+            "phone": "Like 'phone number'. Shown on check your answers.",
+            "email": "Like 'email address'. Shown on check your answers.",
+            "shorttext": "Like 'licence period'. Shown on check your answers.",
+            "textarea": "Like 'description of the work'. Shown on check your answers.",
+            "numbers": "Like 'number of employees'. Shown on check your answers.",
+            "date": "Like 'date of birth'. Shown on check your answers.",
+            "date-mmyy": "Like 'expiry date'. Shown on check your answers.",
+            "address": "Like 'home address'. Shown on check your answers.",
+            "fileupload": "Like 'proof of identity'. Shown on check your answers.",
+            "yesno": "Like 'you have a licence'. Shown on check your answers.",
+            "declaration": "Like 'terms and conditions'. Shown on check your answers.",
+            "checkboxes": "Like 'types of licence'. Shown on check your answers.",
+            "radios-nf": "Like 'licence type'. Shown on check your answers.",
+            "autocomplete-nf": "Like 'country of birth'. Shown on check your answers.",
+            "precise-location": "Like 'site location'. Shown on check your answers.",
+            "location-user-choice": "Like 'property location'. Shown on check your answers."
+          },
           "apply_to_errors": "Apply to error messages"
         },
+        "answer_limits_section": {
+          "heading": "Answer limits (optional)",
+          "intro": "If you set answer limits you must add error messages for them."
+        },
         "error_messages": {
-          "legend": "Error messages (optional)",
+          "legend": "Error messages",
           "hint": "Use 'Apply to error messages' to fill these from your short description, or type your own wording.",
+          "when_limits_set": {
+            "legend": "Error messages for answer limits (optional)",
+            "hint": "These messages are only shown to users when you set a matching limit above."
+          },
           "empty": {
             "label": "When the answer is empty",
             "hint": "Defaults to something like 'Enter phone number'"
