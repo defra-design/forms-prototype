@@ -299,6 +299,24 @@
         "title": "Short description",
         "hint": "Enter a short description for this question like 'fave animal'. Short descriptions are used in error messages and on the check your answers page."
       },
+      "separate_content": {
+        "short_description": {
+          "title": "Short description",
+          "hint": "Enter a short label for this question like 'phone number'. This is shown on the check your answers page."
+        },
+        "error_messages": {
+          "legend": "Error messages",
+          "hint": "Write the messages shown when someone gets this question wrong. These are separate from the short description.",
+          "empty": {
+            "label": "When the answer is empty",
+            "hint": "For example, 'Enter a phone number'"
+          },
+          "format": {
+            "label": "When the answer is in the wrong format",
+            "hint": "For example, 'Enter a phone number in the correct format, like 01632 960 211'"
+          }
+        }
+      },
       "answer_limits": {
         "title": "Set answer limits (optional)",
         "min_length": {
