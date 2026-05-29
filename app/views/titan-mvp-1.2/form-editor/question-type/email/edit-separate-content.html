@@ -1,0 +1,751 @@
+{% extends "layouts/main.html" %}
+{% from "components/service-header/macro.njk" import serviceHeader %}
+{% set pageName %}Edit page {{ pageNumber }}: question {{ questionNumber }} - {{ form.name }}{% endset %}
+{% set headingPlaceholder = "Page heading" %}
+{% set guidancePlaceholder = "" %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+containerClasses: containerClasses,
+accountName: "Chris Smith",
+homepageLink: "/",
+signOutLink: "/onboarding/sign-out-confirmation",
+navigationItems: [
+{ href: "/titan-mvp-1/library.html", text: "Forms library", id: "nav-library" },
+{ href: "/cph-overview/draft/complete-clean.html", text: "Overview", id: "nav-overview" },
+{ href: "/titan-mvp-1/form-editor/listing", text: "Editor", id: "nav-editor" } ],
+activeLinkId: "nav-editor"
+}) }}
+
+<div class="x-govuk-masthead x-govuk-masthead--large">
+  <div class="govuk-width-container">
+    {{ govukBackLink({ classes: "govuk-back-link--inverse govuk-!-margin-bottom-0", text:
+    commonTerms.form_editor.information_type.back, href: "/titan-mvp-1/form-editor/listing.html" }) }}
+
+    <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"
+      style="border-bottom: 1px solid white; margin-bottom: 0" />
+
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-full-from-desktop">
+        <h1 class="x-govuk-masthead__title">
+          {{ form.name }}
+        </h1>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-full">
+    <div class="govuk-grid-row">
+      <!-- Left Column for Form Controls -->
+      <div class="govuk-grid-column-one-half-from-desktop" id="container" style="flex: 1 1 75%; overflow-y: auto">
+        <div class="govuk-summary-card govuk-!-margin-top-0" style="border-left: 10px solid #008938">
+          <div class="govuk-summary-card__content govuk-!-padding-top-0" style="background-color: #f3f2f1">
+            <dl class="govuk-summary-list">
+              <div class="govuk-summary-list__row">
+                <dd class="govuk-summary-list__value">
+                  <!-- Dynamic Summary List -->
+                  <!-- Question Settings Container -->
+                  <div class="govuk-grid-row" id="page-settings-container-1">
+                    <div id="question-1">
+                      <div class="govuk-summary-card__content" style="margin-bottom: 0">
+                        <!-- Sub Navigation for Question -->
+                        <nav class="moj-sub-navigation govuk-!-padding-top-0 govuk-!-margin-bottom-2 "
+                          aria-label="Sub navigation">
+                          <ul class="moj-sub-navigation__list" id="nav-list2">
+                            <li class="moj-sub-navigation__item">
+                              <a class="moj-sub-navigation__link" aria-current="page"
+                                href="#question-1-information-type">Question #</a>
+                            </li>
+                          </ul>
+                        </nav>
+
+                        <div class="govuk-summary-card__title-wrapper govuk-!-padding-top-0"></div>
+
+                        <span class="govuk-caption-l">Page #</span>
+                        <h2 class="govuk-heading-l">Edit question #</h2>
+
+                        {{ govukTag({
+                          text: "Concept: separate short description and error messages",
+                          classes: "govuk-tag--purple govuk-!-margin-bottom-4"
+                        }) }}
+
+                        <form id="s" action="/titan-mvp-1.2/question-configuration-save" method="post" autocomplete="off">
+
+                          <div class="govuk-form-group">
+                            <label class="govuk-label govuk-label--m" for="question-label-input-email">
+                              {{ commonTerms.form_editor.question_settings.question }}
+                            </label>
+                            <input class="govuk-input" id="question-label-input-email" name="questionLabelInputEmail"
+                              type="text" value="">
+                          </div>
+
+                          <!-- Hint Text Input -->
+                          {{ govukTextarea({
+                          label: {
+                          text: commonTerms.form_editor.question_settings.hint,
+                          classes: "govuk-label--m"
+                          },
+                          id: "hint-text-input-email",
+                          name: "hintTextInputEmail",
+                          value: data['hint-text-input-email'],
+                          classes: "govuk-textarea",
+                          rows: 3,
+                          describedBy: "hint-text-input-email"
+                          }) }}
+
+                          <!-- Make Optional Checkbox -->
+                          <div class="govuk-form-group">
+                            <div class="govuk-checkboxes--small">
+                              <div class="govuk-checkboxes__item">
+                                <input class="govuk-checkboxes__input" id="make-optional" name="makeOptional"
+                                  type="checkbox" value="optional">
+                                <label class="govuk-label govuk-checkboxes__label" for="make-optional">
+                                  {{ commonTerms.form_editor.question_settings.optional }}
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div class="govuk-form-group">
+                            <label class="govuk-label govuk-label--m" for="short-description-input-email">
+                              {{ commonTerms.form_editor.question_settings.separate_content.short_description.title }}
+                            </label>
+                            <div id="short-description-hint" class="govuk-hint">
+                              {{ commonTerms.form_editor.question_settings.separate_content.short_description.hints.email }}
+                            </div>
+                            <div class="short-description-input-row">
+                              <input class="govuk-input" id="short-description-input-email" name="questionShortDescription"
+                                type="text" autocomplete="off" aria-autocomplete="none"
+                                data-1p-ignore="true" data-lpignore="true" data-bwignore="true" data-form-type="other"
+                                readonly aria-describedby="short-description-hint">
+                              {{ govukButton({
+                              text: commonTerms.form_editor.question_settings.separate_content.short_description.apply_to_errors,
+                              type: "button",
+                              classes: "govuk-button--inverse govuk-!-margin-bottom-0",
+                              id: "apply-short-description-to-errors"
+                              }) }}
+                            </div>
+                          </div>
+
+                          <fieldset class="govuk-fieldset govuk-!-margin-top-6">
+                            <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
+                              {{ commonTerms.form_editor.question_settings.separate_content.error_messages.legend }}
+                            </legend>
+                            <div class="govuk-hint">
+                              {{ commonTerms.form_editor.question_settings.separate_content.error_messages.hint }}
+                            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            
+                            
+                            
+                            {{ govukInput({
+                            label: {
+                            text: "When the answer is empty",
+                            classes: "govuk-label--s"
+                            },
+                            id: "error-empty-input-email",
+                            name: "errorEmptyInputEmail",
+                            value: "Enter [short description]",
+                            classes: "govuk-!-width-full",
+                            attributes: {
+                              "data-apply-template": "Enter [short description]"
+                            }
+                            }) }}
+
+                            {{ govukInput({
+                            label: {
+                            text: "When the answer is in the wrong format",
+                            classes: "govuk-label--s"
+                            },
+                            id: "error-format-input-email",
+                            name: "errorFormatInputEmail",
+                            value: "[Short description] must be in the correct format",
+                            classes: "govuk-!-width-full",
+                            attributes: {
+                              "data-apply-template": "[Short description] must be in the correct format"
+                            }
+                            }) }}
+                          </fieldset>
+
+                          <!-- Answer limits section -->
+                          <div class="answer-limits-group govuk-!-margin-top-6">
+                            <h2 class="govuk-heading-m govuk-!-margin-bottom-3">
+                              {{ commonTerms.form_editor.question_settings.separate_content.answer_limits_section.heading }}
+                            </h2>
+                            <p class="govuk-body govuk-!-margin-bottom-4">
+                              {{ commonTerms.form_editor.question_settings.separate_content.answer_limits_section.intro }}
+                            </p>
+                            <details class="govuk-details govuk-!-margin-bottom-0" data-module="govuk-details">
+                              <summary class="govuk-details__summary">
+                                <span class="govuk-details__summary-text">
+                                  {{ commonTerms.form_editor.question_settings.answer_limits.title }}
+                                </span>
+                              </summary>
+                              <div class="govuk-details__text">
+<!-- Default Content for Question 1 -->
+                              <div id="question-1-content" class="question-content" style="margin-top: 10px;">
+                                {{ govukTextarea({
+                                label: {
+                                text: commonTerms.form_editor.question_settings.answer_limits.classes.title,
+                                classes: "govuk-label--m",
+                                isPageHeading: false
+                                },
+                                hint: {
+                                text: commonTerms.form_editor.question_settings.answer_limits.classes.hint
+                                },
+                                id: "classes",
+                                rows: "1",
+                                name: "classes",
+                                spellcheck: false
+                                }) }}
+                              </div>
+                              </div>
+                            </details>
+                          </div>
+                          <!-- End answer limits section -->
+
+                          <!-- Section Break -->
+                          <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+
+                          <!-- Question Settings Summary List -->
+                          <h2 class="govuk-heading-m">{{ commonTerms.form_editor.question_settings.title }}</h2>
+
+                          {{ govukSummaryList({
+                          "rows": [
+                          {
+                          "key": {
+                          "text": "Type of information"
+                          },
+                          "value": {
+                          "html": commonTerms.form_editor.information_type.email.title
+                          },
+                          "actions": {
+                          "items": [
+                          {
+                          "href": "/redesigntest/templates/1-question/information-type.html",
+                          "text": commonTerms.form_editor.common.edit,
+                          "visuallyHiddenText": " type"
+                          }
+                          ]
+                          }
+                          }
+                          ]
+                          }) }}
+
+                          <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+
+                          <!-- Submit Button -->
+                          <div class="moj-button-action">
+                            {{ govukButton({
+                            text: commonTerms.form_editor.common.continue,
+                            type: 'submit'
+                            }) }}
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Right Column for Preview -->
+      <div class="govuk-grid-column-one-half-from-desktop" id="second-container"
+        style="outline: solid 1px #008938; height: 100%; position: sticky; top: 0; padding: 20px; box-shadow: 5px 10px #008938;">
+        <!-- Before content -->
+        <div id="before-content" style=" background-color:  #cce2d8;">
+          <p class="govuk-body-s" style="margin-bottom: 0; color: #005a30; padding: 2px 8px 3px;
+    text-align: center;"> Previews
+          </p>
+        </div>
+
+        <div class="preview-panel-tabs">
+          <div class="govuk-tabs" data-module="govuk-tabs" id="question-preview-tabs">
+            <h2 class="govuk-tabs__title">Contents</h2>
+            <ul class="govuk-tabs__list">
+              <li class="govuk-tabs__list-item govuk-tabs__list-item--selected">
+                <a class="govuk-tabs__tab" href="#page-preview">Page preview</a>
+              </li>
+              <li class="govuk-tabs__list-item">
+                <a class="govuk-tabs__tab" href="#error-messages">Error messages</a>
+              </li>
+              <li class="govuk-tabs__list-item">
+                <a class="govuk-tabs__tab" href="#check-your-answers">Check your answers</a>
+              </li>
+            </ul>
+
+            <div class="govuk-tabs__panel" id="page-preview">
+              <p class="govuk-body-s govuk-!-margin-bottom-4">
+                <a href="#" class="govuk-link govuk-link--no-visited-state" rel="noreferrer noopener" target="_blank">
+                  Preview this page in a new tab
+                </a>
+              </p>
+              {% include "/titan-mvp-1.2/form-editor/question-type/email/previews/edit.html" %}
+            </div>
+
+            <div class="govuk-tabs__panel" id="error-messages">
+              <p class="govuk-body-s govuk-!-margin-bottom-4">
+                <a href="#" class="govuk-link govuk-link--no-visited-state" rel="noreferrer noopener" target="_blank">
+                  Preview error messages in a new tab
+                </a>
+              </p>
+              <div class="govuk-error-summary" data-disable-auto-focus="true">
+                <h2 class="govuk-error-summary__title">There is a problem</h2>
+                <div class="govuk-error-summary__body">
+                  <ul class="govuk-list govuk-error-summary__list">
+                    <li>
+                      <a href="#email">
+                        <span id="error-empty-preview">Enter [short description]</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="#email">
+                        <span id="error-format-preview">[Short description] must be in the correct format</span>
+                      </a>
+                    </li>
+                  
+                  
+                  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="govuk-tabs__panel" id="check-your-answers">
+              <p class="govuk-body-s govuk-!-margin-bottom-4">
+                Preview of how the short description appears on the check your answers page
+              </p>
+              <h2 class="govuk-heading-l">Check your answers before sending your form</h2>
+              <dl class="govuk-summary-list govuk-!-margin-bottom-9">
+                <div class="govuk-summary-list__row">
+                  <dt class="govuk-summary-list__key">
+                    <span id="cya-short-description-preview">[Short description]</span>
+                  </dt>
+                  <dd class="govuk-summary-list__value">name@example.com</dd>
+                  <dd class="govuk-summary-list__actions">
+                    <a class="govuk-link" href="#">Change<span class="govuk-visually-hidden"> email address</span></a>
+                  </dd>
+                </div>
+              </dl>
+              <button type="button" class="govuk-button" data-module="govuk-button" disabled>Accept and send</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+
+      <!-- JavaScript code -->
+      <!-- JavaScript code -->
+      <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          // DOM Elements
+          const domElements = {
+            // Existing elements
+            questionLabelInputEmail: document.getElementById('question-label-input-email'),
+            questionLabelLegend: document.getElementById('question-label-legend'),
+            hintTextInputEmail: document.getElementById('hint-text-input-email'),
+            hintTextOutput: document.getElementById('hint-text-output'),
+            makeOptionalCheckbox: document.getElementById('make-optional'),
+
+            // New elements for page heading and guidance text
+            pageHeadingInputPhone: document.getElementById('page-heading-input-phone'),
+            dynamicHeading: document.getElementById('dynamic-heading'),
+            guidancePhone: document.getElementById('guidance-phone'),
+            guidanceParagraph: document.getElementById('guidance-paragraph')
+          };
+
+          // Initialize event listeners
+          initializeEventListeners();
+
+          function initializeEventListeners() {
+            // Update question label
+            if (domElements.questionLabelInputEmail && domElements.questionLabelLegend) {
+              domElements.questionLabelInputEmail.addEventListener('input', updateQuestionLabel);
+            }
+
+            // Update hint text and handle placeholder
+            if (domElements.hintTextInputEmail && domElements.hintTextOutput) {
+              domElements.hintTextInputEmail.addEventListener('input', updateHintText);
+              domElements.hintTextInputEmail.addEventListener('focus', showPlaceholderHint);
+              domElements.hintTextInputEmail.addEventListener('blur', clearPlaceholderHint);
+            }
+
+            // Update page heading and handle placeholder
+            if (domElements.pageHeadingInputPhone && domElements.dynamicHeading) {
+              domElements.pageHeadingInputPhone.addEventListener('input', updatePageHeading);
+              domElements.pageHeadingInputPhone.addEventListener('focus', showPlaceholderHeading);
+
+              domElements.pageHeadingInputPhone.addEventListener('blur', clearPlaceholderHeading);
+            }
+
+            // Update optional label
+            if (domElements.makeOptionalCheckbox) {
+              domElements.makeOptionalCheckbox.addEventListener('change', updateQuestionLabel);
+            }
+
+            // Update page heading
+            if (domElements.pageHeadingInputPhone && domElements.dynamicHeading) {
+              domElements.pageHeadingInputPhone.addEventListener('input', updatePageHeading);
+            }
+
+            // Update guidance text and handle placeholder
+            if (domElements.guidancePhone && domElements.guidanceParagraph) {
+              domElements.guidancePhone.addEventListener('input', updateGuidanceText);
+              domElements.guidancePhone.addEventListener('focus', showPlaceholderGuidance);
+              domElements.guidancePhone.addEventListener('blur', clearPlaceholderGuidance);
+            }
+
+
+
+            // Apply focus/blur highlighting
+            applyHighlightOnFocus(domElements.questionLabelInputEmail, domElements.questionLabelLegend);
+            applyHighlightOnFocus(domElements.hintTextInputEmail, domElements.hintTextOutput);
+            applyHighlightOnFocus(domElements.pageHeadingInputPhone, domElements.dynamicHeading);
+            applyHighlightOnFocus(domElements.guidancePhone, domElements.guidanceParagraph);
+          }
+          function updateQuestionLabel() {
+            const suffix = domElements.makeOptionalCheckbox.checked ? ' (optional)' : '';
+            domElements.questionLabelLegend.textContent = domElements.questionLabelInputEmail.value || 'Question';
+            domElements.questionLabelLegend.textContent += suffix;
+          }
+
+          function updateHintText() {
+            domElements.hintTextOutput.textContent = domElements.hintTextInputEmail.value;
+          }
+
+          function updatePageHeading() {
+            domElements.dynamicHeading.textContent = domElements.pageHeadingInputPhone.value;
+          }
+
+          function updateGuidanceText() {
+            domElements.guidanceParagraph.textContent = domElements.guidancePhone.value;
+          }
+
+          function applyHighlightOnFocus(inputElement, targetElement) {
+            if (inputElement && targetElement) {
+              inputElement.addEventListener('focus', function () {
+                targetElement.classList.add('highlight');
+              });
+              inputElement.addEventListener('blur', function () {
+                targetElement.classList.remove('highlight');
+              });
+
+              // If the input is already focused
+              if (document.activeElement === inputElement) {
+                targetElement.classList.add('highlight');
+              }
+            }
+          }
+
+          // Placeholder handling for hint text
+          function showPlaceholderHint() {
+            if (!domElements.hintTextInputEmail.value) {
+              domElements.hintTextOutput.textContent = 'Hint text';
+            }
+          }
+
+          function clearPlaceholderHint() {
+            if (!domElements.hintTextInputEmail.value) {
+              domElements.hintTextOutput.textContent = '';
+            }
+          }
+
+          // Placeholder handling for page heading
+          function showPlaceholderHeading() {
+            if (!domElements.pageHeadingInputPhone.value) {
+              domElements.dynamicHeading.textContent = 'Page heading';
+            }
+          }
+
+          function clearPlaceholderHeading() {
+            if (!domElements.pageHeadingInputPhone.value) {
+              domElements.dynamicHeading.textContent = '';
+            }
+          }
+
+          // Placeholder handling for guidance text
+          function showPlaceholderGuidance() {
+            if (!domElements.guidancePhone.value) {
+              domElements.guidanceParagraph.textContent = 'Guidance text';
+            }
+          }
+
+          function clearPlaceholderGuidance() {
+            if (!domElements.guidancePhone.value) {
+              domElements.guidanceParagraph.textContent = '';
+            }
+          }
+        });
+      </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
+      
+      
+      <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          const shortDescriptionInput = document.getElementById('short-description-input-email');
+          const applyToErrorsButton = document.getElementById('apply-short-description-to-errors');
+          const cyaShortDescriptionPreview = document.getElementById('cya-short-description-preview');
+          const placeholderShortDescriptionDisplay = '[Short description]';
+          const limitPlaceholders = [];
+
+          const errorFields = [
+            { input: document.getElementById('error-empty-input-email'), preview: document.getElementById('error-empty-preview') },
+            { input: document.getElementById('error-format-input-email'), preview: document.getElementById('error-format-preview') }
+          ];
+
+          function capitalizeFirstLetter(text) {
+            if (!text) return text;
+            return text.charAt(0).toUpperCase() + text.slice(1);
+          }
+
+          function getShortDescriptionValue() {
+            return shortDescriptionInput?.value.trim() || '';
+          }
+
+          function getShortDescriptionForApply() {
+            return getShortDescriptionValue() || 'short description';
+          }
+
+          function applyTemplate(template, shortDescription) {
+            if (!template) return '';
+            const lower = (shortDescription || 'short description').toLowerCase();
+            const cap = lower.charAt(0).toUpperCase() + lower.slice(1);
+            return template
+              .replace(/\[Short description\]/g, cap)
+              .replace(/\[short description\]/g, lower)
+              .replace(/\[short description is true\]/g, lower);
+          }
+
+          function substituteLimitPlaceholders(text) {
+            if (!text || !limitPlaceholders.length) return text;
+            let result = text;
+            limitPlaceholders.forEach(function (limit) {
+              const input = document.getElementById(limit.inputId);
+              const value = input?.value.trim() || limit.placeholder;
+              result = result.split(limit.placeholder).join(value);
+            });
+            return result;
+          }
+
+          function applyErrorsFromShortDescription() {
+            errorFields.forEach(function (field) {
+              if (!field.input) return;
+              const template = field.input.getAttribute('data-apply-template') || field.input.value;
+              field.input.value = applyTemplate(template, getShortDescriptionForApply());
+            });
+            updateErrorPreviews();
+          }
+
+          function updateShortDescriptionPreview() {
+            if (!cyaShortDescriptionPreview) return;
+            const value = getShortDescriptionValue();
+            cyaShortDescriptionPreview.textContent = value
+              ? capitalizeFirstLetter(value)
+              : placeholderShortDescriptionDisplay;
+          }
+
+          function updateErrorPreviews() {
+            errorFields.forEach(function (field) {
+              if (!field.preview || !field.input) return;
+              const template = field.input.getAttribute('data-apply-template') || '';
+              const value = field.input.value.trim();
+              const message = substituteLimitPlaceholders(value || template);
+              field.preview.textContent = message;
+            });
+            
+          }
+
+          
+
+          function applyHighlightOnFocus(inputElement, targetElement) {
+            if (!inputElement || !targetElement) return;
+
+            inputElement.addEventListener('focus', function () {
+              targetElement.classList.add('highlight');
+            });
+            inputElement.addEventListener('blur', function () {
+              targetElement.classList.remove('highlight');
+            });
+
+            if (document.activeElement === inputElement) {
+              targetElement.classList.add('highlight');
+            }
+          }
+
+          function wireLimitInputs() {
+            limitPlaceholders.forEach(function (limit) {
+              const input = document.getElementById(limit.inputId);
+              if (!input) return;
+
+              input.addEventListener('input', function () {
+                updateErrorPreviews();
+              });
+
+              const relatedPreview = errorFields.find(function (field) {
+                const template = field.input?.getAttribute('data-apply-template') || '';
+                return template.includes(limit.placeholder);
+              });
+
+              if (relatedPreview?.preview) {
+                applyHighlightOnFocus(input, relatedPreview.preview);
+              }
+            });
+          }
+
+          if (shortDescriptionInput) {
+            shortDescriptionInput.addEventListener('focus', function () {
+              shortDescriptionInput.removeAttribute('readonly');
+            }, { once: true });
+
+            shortDescriptionInput.addEventListener('input', function () {
+              updateShortDescriptionPreview();
+              
+            });
+            applyHighlightOnFocus(shortDescriptionInput, cyaShortDescriptionPreview);
+          }
+
+          if (applyToErrorsButton) {
+            applyToErrorsButton.addEventListener('click', applyErrorsFromShortDescription);
+          }
+
+          errorFields.forEach(function (field) {
+            if (field.input) {
+              field.input.addEventListener('input', updateErrorPreviews);
+              if (field.preview) {
+                applyHighlightOnFocus(field.input, field.preview);
+              }
+            }
+          });
+
+          wireLimitInputs();
+          updateShortDescriptionPreview();
+          updateErrorPreviews();
+        });
+      </script>
+
+      <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          window.scrollTo(0, 0);
+        });
+
+      </script>
+
+      <!-- CSS for Highlighting -->
+      <style>
+        .highlight {
+          background-color: #ffe5cc;
+          border-bottom: 2px solid #ffb266;
+        }
+
+        #before-content {
+          position: absolute;
+          top: 0;
+          left: 10 !important;
+          right: 0;
+          width: 100%;
+          padding: 10px !important;
+          box-sizing: border-box;
+          z-index: 1;
+          border-bottom: 1px solid #008938;
+          padding-left: 10px;
+        }
+
+        #second-container {
+          padding: 0;
+          box-sizing: border-box;
+          overflow: visible;
+        }
+
+        .preview-panel-tabs {
+          margin-top: 60px;
+          padding: 0 20px 20px;
+          position: relative;
+          z-index: 2;
+        }
+
+        .preview-panel-tabs .govuk-tabs__panel {
+          min-height: 200px;
+        }
+
+        .short-description-input-row {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 15px;
+          align-items: center;
+        }
+
+        .short-description-input-row .govuk-input {
+          flex: 1 1 12rem;
+          min-width: 0;
+        }
+      </style>
+    </div>
+  </div>
+  {% endblock %}
