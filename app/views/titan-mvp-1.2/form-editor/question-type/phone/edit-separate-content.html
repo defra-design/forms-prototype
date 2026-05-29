@@ -76,7 +76,7 @@ activeLinkId: "nav-editor"
                           classes: "govuk-tag--purple govuk-!-margin-bottom-4"
                         }) }}
 
-                        <form id="s" action="/titan-mvp-1.2/question-configuration-save" method="post">
+                        <form id="s" action="/titan-mvp-1.2/question-configuration-save" method="post" autocomplete="off">
 
                           <div class="govuk-form-group">
                             <label class="govuk-label govuk-label--m" for="question-label-input-phone">
@@ -113,19 +113,26 @@ activeLinkId: "nav-editor"
                             </div>
                           </div>
 
-                          {{ govukInput({
-                          label: {
-                          text: commonTerms.form_editor.question_settings.separate_content.short_description.title,
-                          classes: "govuk-label--m",
-                          isPageHeading: false
-                          },
-                          hint: {
-                          text: commonTerms.form_editor.question_settings.separate_content.short_description.hint
-                          },
-                          id: "short-description-input-phone",
-                          name: "shortDescriptionInputPhone",
-                          value: "phone number"
-                          }) }}
+                          <div class="govuk-form-group">
+                            <label class="govuk-label govuk-label--m" for="short-description-input-phone">
+                              {{ commonTerms.form_editor.question_settings.separate_content.short_description.title }}
+                            </label>
+                            <div id="short-description-hint" class="govuk-hint">
+                              {{ commonTerms.form_editor.question_settings.separate_content.short_description.hint }}
+                            </div>
+                            <div class="short-description-input-row">
+                              <input class="govuk-input" id="short-description-input-phone" name="questionShortDescription"
+                                type="text" autocomplete="off" aria-autocomplete="none"
+                                data-1p-ignore="true" data-lpignore="true" data-bwignore="true" data-form-type="other"
+                                readonly aria-describedby="short-description-hint">
+                              {{ govukButton({
+                              text: commonTerms.form_editor.question_settings.separate_content.short_description.apply_to_errors,
+                              type: "button",
+                              classes: "govuk-button--inverse govuk-!-margin-bottom-0",
+                              id: "apply-short-description-to-errors"
+                              }) }}
+                            </div>
+                          </div>
 
                           <fieldset class="govuk-fieldset govuk-!-margin-top-6">
                             <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
@@ -145,7 +152,7 @@ activeLinkId: "nav-editor"
                             },
                             id: "error-empty-input-phone",
                             name: "errorEmptyInputPhone",
-                            value: "Enter a phone number",
+                            value: "Enter [short description]",
                             classes: "govuk-!-width-full"
                             }) }}
 
@@ -159,7 +166,7 @@ activeLinkId: "nav-editor"
                             },
                             id: "error-format-input-phone",
                             name: "errorFormatInputPhone",
-                            value: "Enter a phone number in the correct format, like 01632 960 211",
+                            value: "[Short description] must be in the correct format",
                             classes: "govuk-!-width-full"
                             }) }}
                           </fieldset>
@@ -302,12 +309,12 @@ activeLinkId: "nav-editor"
                   <ul class="govuk-list govuk-error-summary__list">
                     <li>
                       <a href="#phone-number-input">
-                        <span id="error-empty-preview">Enter a phone number</span>
+                        <span id="error-empty-preview">Enter [short description]</span>
                       </a>
                     </li>
                     <li>
                       <a href="#phone-number-input">
-                        <span id="error-format-preview">Enter a phone number in the correct format, like 01632 960 211</span>
+                        <span id="error-format-preview">[Short description] must be in the correct format</span>
                       </a>
                     </li>
                   </ul>
@@ -323,7 +330,7 @@ activeLinkId: "nav-editor"
               <dl class="govuk-summary-list govuk-!-margin-bottom-9">
                 <div class="govuk-summary-list__row">
                   <dt class="govuk-summary-list__key">
-                    <span id="cya-short-description-preview">Phone number</span>
+                    <span id="cya-short-description-preview">[Short description]</span>
                   </dt>
                   <dd class="govuk-summary-list__value">01632 960 211</dd>
                   <dd class="govuk-summary-list__actions">
@@ -486,48 +493,84 @@ activeLinkId: "nav-editor"
       <script>
         document.addEventListener('DOMContentLoaded', function () {
           const shortDescriptionInput = document.getElementById('short-description-input-phone');
+          const applyToErrorsButton = document.getElementById('apply-short-description-to-errors');
           const cyaShortDescriptionPreview = document.getElementById('cya-short-description-preview');
           const errorEmptyInput = document.getElementById('error-empty-input-phone');
           const errorFormatInput = document.getElementById('error-format-input-phone');
           const errorEmptyPreview = document.getElementById('error-empty-preview');
           const errorFormatPreview = document.getElementById('error-format-preview');
 
-          const defaultShortDescription = 'Phone number';
-          const defaultErrorEmpty = 'Enter a phone number';
-          const defaultErrorFormat = 'Enter a phone number in the correct format, like 01632 960 211';
+          const placeholderShortDescription = '[short description]';
+          const placeholderShortDescriptionDisplay = '[Short description]';
 
           function capitalizeFirstLetter(text) {
             if (!text) return text;
             return text.charAt(0).toUpperCase() + text.slice(1);
           }
 
+          function getShortDescriptionValue() {
+            return shortDescriptionInput?.value.trim() || '';
+          }
+
+          function getShortDescriptionForApply() {
+            return getShortDescriptionValue() || 'short description';
+          }
+
+          function buildDefaultEmptyError(shortDescription) {
+            return 'Enter ' + shortDescription.toLowerCase();
+          }
+
+          function buildDefaultFormatError(shortDescription) {
+            return capitalizeFirstLetter(shortDescription) + ' must be in the correct format';
+          }
+
+          function buildPlaceholderEmptyError() {
+            return 'Enter ' + placeholderShortDescription;
+          }
+
+          function buildPlaceholderFormatError() {
+            return placeholderShortDescriptionDisplay + ' must be in the correct format';
+          }
+
+          function applyErrorsFromShortDescription() {
+            const shortDescription = getShortDescriptionForApply();
+            if (errorEmptyInput) {
+              errorEmptyInput.value = buildDefaultEmptyError(shortDescription);
+            }
+            if (errorFormatInput) {
+              errorFormatInput.value = buildDefaultFormatError(shortDescription);
+            }
+            updateErrorPreviews();
+          }
+
           function updateShortDescriptionPreview() {
             if (!cyaShortDescriptionPreview) return;
-            const value = shortDescriptionInput?.value.trim() || defaultShortDescription;
-            cyaShortDescriptionPreview.textContent = capitalizeFirstLetter(value);
+            const value = getShortDescriptionValue();
+            cyaShortDescriptionPreview.textContent = value
+              ? capitalizeFirstLetter(value)
+              : placeholderShortDescriptionDisplay;
           }
 
           function updateErrorPreviews() {
+            const shortDescription = getShortDescriptionValue();
             if (errorEmptyPreview) {
-              errorEmptyPreview.textContent = errorEmptyInput?.value.trim() || defaultErrorEmpty;
+              errorEmptyPreview.textContent = errorEmptyInput?.value.trim()
+                || (shortDescription
+                  ? buildDefaultEmptyError(shortDescription)
+                  : buildPlaceholderEmptyError());
             }
             if (errorFormatPreview) {
-              errorFormatPreview.textContent = errorFormatInput?.value.trim() || defaultErrorFormat;
+              errorFormatPreview.textContent = errorFormatInput?.value.trim()
+                || (shortDescription
+                  ? buildDefaultFormatError(shortDescription)
+                  : buildPlaceholderFormatError());
             }
           }
 
-          function activatePreviewTab(tabId) {
-            const tabLink = document.querySelector('#question-preview-tabs a[href="#' + tabId + '"]');
-            if (tabLink) {
-              tabLink.click();
-            }
-          }
-
-          function applyHighlightOnFocus(inputElement, targetElement, tabId) {
+          function applyHighlightOnFocus(inputElement, targetElement) {
             if (!inputElement || !targetElement) return;
 
             inputElement.addEventListener('focus', function () {
-              if (tabId) activatePreviewTab(tabId);
               targetElement.classList.add('highlight');
             });
             inputElement.addEventListener('blur', function () {
@@ -540,18 +583,26 @@ activeLinkId: "nav-editor"
           }
 
           if (shortDescriptionInput) {
+            shortDescriptionInput.addEventListener('focus', function () {
+              shortDescriptionInput.removeAttribute('readonly');
+            }, { once: true });
+
             shortDescriptionInput.addEventListener('input', updateShortDescriptionPreview);
-            applyHighlightOnFocus(shortDescriptionInput, cyaShortDescriptionPreview, 'check-your-answers');
+            applyHighlightOnFocus(shortDescriptionInput, cyaShortDescriptionPreview);
+          }
+
+          if (applyToErrorsButton) {
+            applyToErrorsButton.addEventListener('click', applyErrorsFromShortDescription);
           }
 
           if (errorEmptyInput) {
             errorEmptyInput.addEventListener('input', updateErrorPreviews);
-            applyHighlightOnFocus(errorEmptyInput, errorEmptyPreview, 'error-messages');
+            applyHighlightOnFocus(errorEmptyInput, errorEmptyPreview);
           }
 
           if (errorFormatInput) {
             errorFormatInput.addEventListener('input', updateErrorPreviews);
-            applyHighlightOnFocus(errorFormatInput, errorFormatPreview, 'error-messages');
+            applyHighlightOnFocus(errorFormatInput, errorFormatPreview);
           }
 
           updateShortDescriptionPreview();
@@ -601,6 +652,18 @@ activeLinkId: "nav-editor"
 
         .preview-panel-tabs .govuk-tabs__panel {
           min-height: 200px;
+        }
+
+        .short-description-input-row {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 15px;
+          align-items: center;
+        }
+
+        .short-description-input-row .govuk-input {
+          flex: 1 1 12rem;
+          min-width: 0;
         }
       </style>
     </div>

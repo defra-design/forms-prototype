@@ -302,18 +302,19 @@
       "separate_content": {
         "short_description": {
           "title": "Short description",
-          "hint": "Enter a short label for this question like 'phone number'. This is shown on the check your answers page."
+          "hint": "Like 'phone number'. Shown on check your answers.",
+          "apply_to_errors": "Apply to error messages"
         },
         "error_messages": {
-          "legend": "Error messages",
-          "hint": "Write the messages shown when someone gets this question wrong. These are separate from the short description.",
+          "legend": "Error messages (optional)",
+          "hint": "Use 'Apply to error messages' to fill these from your short description, or type your own wording.",
           "empty": {
             "label": "When the answer is empty",
-            "hint": "For example, 'Enter a phone number'"
+            "hint": "Defaults to something like 'Enter phone number'"
           },
           "format": {
             "label": "When the answer is in the wrong format",
-            "hint": "For example, 'Enter a phone number in the correct format, like 01632 960 211'"
+            "hint": "Defaults to something like 'Phone number must be in the correct format'"
           }
         }
       },
