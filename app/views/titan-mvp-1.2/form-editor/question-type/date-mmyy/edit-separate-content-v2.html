@@ -72,17 +72,17 @@ activeLinkId: "nav-editor"
                         <h2 class="govuk-heading-l">Edit question #</h2>
 
                         {{ govukTag({
-                          text: "Concept: separate short description and error messages",
+                          text: commonTerms.form_editor.question_settings.separate_content_v2.concept_tag,
                           classes: "govuk-tag--purple govuk-!-margin-bottom-4"
                         }) }}
 
                         <form id="s" action="/titan-mvp-1.2/question-configuration-save" method="post" autocomplete="off">
 
                           <div class="govuk-form-group">
-                            <label class="govuk-label govuk-label--m" for="question-label-input-checkboxes">
+                            <label class="govuk-label govuk-label--m" for="question-label-input-date-mmyy">
                               {{ commonTerms.form_editor.question_settings.question }}
                             </label>
-                            <input class="govuk-input" id="question-label-input-checkboxes" name="questionLabelInputCheckboxes"
+                            <input class="govuk-input" id="question-label-input-date-mmyy" name="questionLabelInputDateMmyy"
                               type="text" value="">
                           </div>
 
@@ -92,12 +92,12 @@ activeLinkId: "nav-editor"
                           text: commonTerms.form_editor.question_settings.hint,
                           classes: "govuk-label--m"
                           },
-                          id: "hint-text-input-checkboxes",
-                          name: "hintTextInputCheckboxes",
-                          value: data['hint-text-input-checkboxes'],
+                          id: "hint-text-input-date-mmyy",
+                          name: "hintTextInputDateMmyy",
+                          value: data['hint-text-input-date-mmyy'],
                           classes: "govuk-textarea",
                           rows: 3,
-                          describedBy: "hint-text-input-checkboxes"
+                          describedBy: "hint-text-input-date-mmyy"
                           }) }}
 
                           <!-- Make Optional Checkbox -->
@@ -114,74 +114,30 @@ activeLinkId: "nav-editor"
                           </div>
 
                           <div class="govuk-form-group">
-                            <label class="govuk-label govuk-label--m" for="short-description-input-checkboxes">
-                              {{ commonTerms.form_editor.question_settings.separate_content.short_description.title }}
+                            <label class="govuk-label govuk-label--m" for="short-description-input-date-mmyy">
+                              {{ commonTerms.form_editor.question_settings.separate_content_v2.short_description.title }}
                             </label>
                             <div id="short-description-hint" class="govuk-hint">
-                              {{ commonTerms.form_editor.question_settings.separate_content.short_description.hints.checkboxess.phones.phones.phones.phones.phone }}
+                              {{ commonTerms.form_editor.question_settings.separate_content_v2.short_description.hints.date-mmyy }}
                             </div>
-                            <div class="short-description-input-row">
-                              <input class="govuk-input" id="short-description-input-checkboxes" name="questionShortDescription"
-                                type="text" autocomplete="off" aria-autocomplete="none"
-                                data-1p-ignore="true" data-lpignore="true" data-bwignore="true" data-form-type="other"
-                                readonly aria-describedby="short-description-hint">
-                              {{ govukButton({
-                              text: commonTerms.form_editor.question_settings.separate_content.short_description.apply_to_errors,
-                              type: "button",
-                              classes: "govuk-button--inverse govuk-!-margin-bottom-0",
-                              id: "apply-short-description-to-errors"
-                              }) }}
-                            </div>
+                            <input class="govuk-input" id="short-description-input-date-mmyy" name="questionShortDescription"
+                              type="text" autocomplete="off" aria-autocomplete="none"
+                              data-1p-ignore="true" data-lpignore="true" data-bwignore="true" data-form-type="other"
+                              aria-describedby="short-description-hint">
                           </div>
 
-                          <fieldset class="govuk-fieldset govuk-!-margin-top-6">
-                            <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
-                              {{ commonTerms.form_editor.question_settings.separate_content.error_messages.legend }}
-                            </legend>
-                            <div class="govuk-hint">
-                              {{ commonTerms.form_editor.question_settings.separate_content.error_messages.hint }}
+                          <div class="govuk-form-group">
+                            <label class="govuk-label govuk-label--m" for="error-description-input-date-mmyy">
+                              {{ commonTerms.form_editor.question_settings.separate_content_v2.error_description.title }}
+                            </label>
+                            <div id="error-description-hint" class="govuk-hint">
+                              {{ commonTerms.form_editor.question_settings.separate_content_v2.error_description.hint }}
                             </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            {{ govukInput({
-                            label: {
-                            text: "When nothing is selected",
-                            classes: "govuk-label--s"
-                            },
-                            id: "error-empty-input-checkboxes",
-                            name: "errorEmptyInputCheckboxes",
-                            value: "Select [short description]",
-                            classes: "govuk-!-width-full",
-                            attributes: {
-                              "data-apply-template": "Select [short description]"
-                            }
-                            }) }}
-                          </fieldset>
+                            <input class="govuk-input" id="error-description-input-date-mmyy" name="questionErrorDescription"
+                              type="text" autocomplete="off" aria-autocomplete="none"
+                              data-1p-ignore="true" data-lpignore="true" data-bwignore="true" data-form-type="other"
+                              aria-describedby="error-description-hint">
+                          </div>
 
                                                     <!-- Section Break -->
                           <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
@@ -196,7 +152,7 @@ activeLinkId: "nav-editor"
                           "text": "Type of information"
                           },
                           "value": {
-                          "html": commonTerms.form_editor.information_type.list.types.checkboxes.title
+                          "html": commonTerms.form_editor.information_type.date.types.partial
                           },
                           "actions": {
                           "items": [
@@ -263,7 +219,7 @@ activeLinkId: "nav-editor"
                   Preview this page in a new tab
                 </a>
               </p>
-              {% include "/titan-mvp-1.2/form-editor/question-type/checkboxes/previews/edit.html" %}
+              {% include "/titan-mvp-1.2/form-editor/question-type/date-mmyy/previews/edit.html" %}
             </div>
 
             <div class="govuk-tabs__panel" id="error-messages">
@@ -277,10 +233,28 @@ activeLinkId: "nav-editor"
                 <div class="govuk-error-summary__body">
                   <ul class="govuk-list govuk-error-summary__list">
                     <li>
-                      <a href="#listPreview-option0">
-                        <span id="error-empty-preview">Select <span id="error-empty-description-preview">[short description]</span></span>
+                      <a href="#date-input">
+                        <span id="error-empty-preview">Enter <span id="error-empty-description-preview">[short description]</span></span>
                       </a>
                     </li>
+                    <li>
+                      <a href="#date-input">
+                        <span id="error-month-preview"><span id="error-month-description-preview">[Short description]</span> must include a month</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="#date-input">
+                        <span id="error-year-preview"><span id="error-year-description-preview">[Short description]</span> must include a year</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="#date-input">
+                        <span id="error-real-date-preview"><span id="error-real-date-description-preview">[Short description]</span> must be a real date</span>
+                      </a>
+                    </li>
+                  
+                  
+                  
                   
                   
                   
@@ -322,9 +296,9 @@ activeLinkId: "nav-editor"
                   <dt class="govuk-summary-list__key">
                     <span id="cya-short-description-preview">[Short description]</span>
                   </dt>
-                  <dd class="govuk-summary-list__value">Option A, Option B</dd>
+                  <dd class="govuk-summary-list__value">3 2024</dd>
                   <dd class="govuk-summary-list__actions">
-                    <a class="govuk-link" href="#">Change<span class="govuk-visually-hidden"> options</span></a>
+                    <a class="govuk-link" href="#">Change<span class="govuk-visually-hidden"> date</span></a>
                   </dd>
                 </div>
               </dl>
@@ -343,9 +317,9 @@ activeLinkId: "nav-editor"
           // DOM Elements
           const domElements = {
             // Existing elements
-            questionLabelInputCheckboxes: document.getElementById('question-label-input-checkboxes'),
+            questionLabelInputDateMmyy: document.getElementById('question-label-input-date-mmyy'),
             questionLabelLegend: document.getElementById('question-label-legend'),
-            hintTextInputCheckboxes: document.getElementById('hint-text-input-checkboxes'),
+            hintTextInputDateMmyy: document.getElementById('hint-text-input-date-mmyy'),
             hintTextOutput: document.getElementById('hint-text-output'),
             makeOptionalCheckbox: document.getElementById('make-optional'),
 
@@ -361,15 +335,15 @@ activeLinkId: "nav-editor"
 
           function initializeEventListeners() {
             // Update question label
-            if (domElements.questionLabelInputCheckboxes && domElements.questionLabelLegend) {
-              domElements.questionLabelInputCheckboxes.addEventListener('input', updateQuestionLabel);
+            if (domElements.questionLabelInputDateMmyy && domElements.questionLabelLegend) {
+              domElements.questionLabelInputDateMmyy.addEventListener('input', updateQuestionLabel);
             }
 
             // Update hint text and handle placeholder
-            if (domElements.hintTextInputCheckboxes && domElements.hintTextOutput) {
-              domElements.hintTextInputCheckboxes.addEventListener('input', updateHintText);
-              domElements.hintTextInputCheckboxes.addEventListener('focus', showPlaceholderHint);
-              domElements.hintTextInputCheckboxes.addEventListener('blur', clearPlaceholderHint);
+            if (domElements.hintTextInputDateMmyy && domElements.hintTextOutput) {
+              domElements.hintTextInputDateMmyy.addEventListener('input', updateHintText);
+              domElements.hintTextInputDateMmyy.addEventListener('focus', showPlaceholderHint);
+              domElements.hintTextInputDateMmyy.addEventListener('blur', clearPlaceholderHint);
             }
 
             // Update page heading and handle placeholder
@@ -400,19 +374,19 @@ activeLinkId: "nav-editor"
 
 
             // Apply focus/blur highlighting
-            applyHighlightOnFocus(domElements.questionLabelInputCheckboxes, domElements.questionLabelLegend);
-            applyHighlightOnFocus(domElements.hintTextInputCheckboxes, domElements.hintTextOutput);
+            applyHighlightOnFocus(domElements.questionLabelInputDateMmyy, domElements.questionLabelLegend);
+            applyHighlightOnFocus(domElements.hintTextInputDateMmyy, domElements.hintTextOutput);
             applyHighlightOnFocus(domElements.pageHeadingInputPhone, domElements.dynamicHeading);
             applyHighlightOnFocus(domElements.guidancePhone, domElements.guidanceParagraph);
           }
           function updateQuestionLabel() {
             const suffix = domElements.makeOptionalCheckbox.checked ? ' (optional)' : '';
-            domElements.questionLabelLegend.textContent = domElements.questionLabelInputCheckboxes.value || 'Question';
+            domElements.questionLabelLegend.textContent = domElements.questionLabelInputDateMmyy.value || 'Question';
             domElements.questionLabelLegend.textContent += suffix;
           }
 
           function updateHintText() {
-            domElements.hintTextOutput.textContent = domElements.hintTextInputCheckboxes.value;
+            domElements.hintTextOutput.textContent = domElements.hintTextInputDateMmyy.value;
           }
 
           function updatePageHeading() {
@@ -450,13 +424,13 @@ activeLinkId: "nav-editor"
 
           // Placeholder handling for hint text
           function showPlaceholderHint() {
-            if (!domElements.hintTextInputCheckboxes.value) {
+            if (!domElements.hintTextInputDateMmyy.value) {
               domElements.hintTextOutput.textContent = 'Hint text';
             }
           }
 
           function clearPlaceholderHint() {
-            if (!domElements.hintTextInputCheckboxes.value) {
+            if (!domElements.hintTextInputDateMmyy.value) {
               domElements.hintTextOutput.textContent = '';
             }
           }
@@ -515,16 +489,23 @@ activeLinkId: "nav-editor"
       
       
       
+      
+      
+      
       <script>
         document.addEventListener('DOMContentLoaded', function () {
-          const shortDescriptionInput = document.getElementById('short-description-input-checkboxes');
-          const applyToErrorsButton = document.getElementById('apply-short-description-to-errors');
+          const shortDescriptionInput = document.getElementById('short-description-input-date-mmyy');
+          const errorDescriptionInput = document.getElementById('error-description-input-date-mmyy');
           const cyaShortDescriptionPreview = document.getElementById('cya-short-description-preview');
           const placeholderShortDescriptionDisplay = '[Short description]';
           const limitPlaceholders = [];
+          const applyUsesShort = true;
 
-          const errorFields = [
-            { input: document.getElementById('error-empty-input-checkboxes'), preview: document.getElementById('error-empty-preview'), descriptionPreview: document.getElementById('error-empty-description-preview'), descriptionPlaceholder: "[short description]" }
+          const errorPreviews = [
+            { preview: document.getElementById('error-empty-preview'), descriptionPreview: document.getElementById('error-empty-description-preview'), template: "Enter [short description]", descriptionPlaceholder: "[short description]" },
+            { preview: document.getElementById('error-month-preview'), descriptionPreview: document.getElementById('error-month-description-preview'), template: "[Short description] must include a month", descriptionPlaceholder: "[Short description]" },
+            { preview: document.getElementById('error-year-preview'), descriptionPreview: document.getElementById('error-year-description-preview'), template: "[Short description] must include a year", descriptionPlaceholder: "[Short description]" },
+            { preview: document.getElementById('error-real-date-preview'), descriptionPreview: document.getElementById('error-real-date-description-preview'), template: "[Short description] must be a real date", descriptionPlaceholder: "[Short description]" }
           ];
 
           function capitalizeFirstLetter(text) {
@@ -536,13 +517,19 @@ activeLinkId: "nav-editor"
             return shortDescriptionInput?.value.trim() || '';
           }
 
-          function getShortDescriptionForApply() {
+          function getErrorDescriptionValue() {
+            return errorDescriptionInput?.value.trim() || '';
+          }
+
+          function getDescriptionForErrors() {
+            const errorDescription = getErrorDescriptionValue();
+            if (errorDescription) return errorDescription;
             return getShortDescriptionValue() || 'short description';
           }
 
-          function applyTemplate(template, shortDescription) {
+          function applyTemplate(template, description) {
             if (!template) return '';
-            const lower = (shortDescription || 'short description').toLowerCase();
+            const lower = (description || 'short description').toLowerCase();
             const cap = lower.charAt(0).toUpperCase() + lower.slice(1);
             return template
               .replace(/\[Short description\]/g, cap)
@@ -559,15 +546,6 @@ activeLinkId: "nav-editor"
               result = result.split(limit.placeholder).join(value);
             });
             return result;
-          }
-
-          function applyErrorsFromShortDescription() {
-            errorFields.forEach(function (field) {
-              if (!field.input) return;
-              const template = field.input.getAttribute('data-apply-template') || field.input.value;
-              field.input.value = applyTemplate(template, getShortDescriptionForApply());
-            });
-            updateErrorPreviews();
           }
 
           function updateShortDescriptionPreview() {
@@ -598,24 +576,18 @@ activeLinkId: "nav-editor"
           }
 
           function updateErrorPreviews() {
-            errorFields.forEach(function (field) {
-              if (!field.input) return;
-              const template = field.input.getAttribute('data-apply-template') || '';
-              const value = field.input.value.trim();
-
+            const description = getDescriptionForErrors();
+            errorPreviews.forEach(function (field) {
               if (field.descriptionPreview && field.descriptionPlaceholder) {
-                field.descriptionPreview.textContent = formatDescriptionText(field.descriptionPlaceholder, getShortDescriptionForApply());
-              } else if (field.preview) {
-                const message = substituteLimitPlaceholders(value || template);
-                field.preview.textContent = message;
+                field.descriptionPreview.textContent = applyUsesShort
+                  ? formatDescriptionText(field.descriptionPlaceholder, description)
+                  : field.descriptionPlaceholder;
+              } else if (field.preview && !field.descriptionPlaceholder) {
+                field.preview.textContent = substituteLimitPlaceholders(field.template);
               }
-
               updateLimitSpans(field.preview);
             });
-            
           }
-
-          
 
           function showPreviewTab(panelId) {
             const tabLink = document.querySelector('#question-preview-tabs .govuk-tabs__tab[href="#' + panelId + '"]');
@@ -655,13 +627,10 @@ activeLinkId: "nav-editor"
               const input = document.getElementById(limit.inputId);
               if (!input) return;
 
-              input.addEventListener('input', function () {
-                updateErrorPreviews();
-              });
+              input.addEventListener('input', updateErrorPreviews);
 
-              const relatedPreview = errorFields.find(function (field) {
-                const template = field.input?.getAttribute('data-apply-template') || '';
-                return template.includes(limit.placeholder);
+              const relatedPreview = errorPreviews.find(function (field) {
+                return field.template.includes(limit.placeholder);
               });
 
               if (relatedPreview?.preview) {
@@ -671,30 +640,22 @@ activeLinkId: "nav-editor"
             });
           }
 
-          if (shortDescriptionInput) {
-            shortDescriptionInput.addEventListener('focus', function () {
-              shortDescriptionInput.removeAttribute('readonly');
-            }, { once: true });
+          const errorDescriptionHighlightTargets = errorPreviews
+            .map(function (field) { return field.descriptionPreview; })
+            .filter(Boolean);
 
+          if (shortDescriptionInput) {
             shortDescriptionInput.addEventListener('input', function () {
               updateShortDescriptionPreview();
-              
+              updateErrorPreviews();
             });
             applyHighlightOnFocus(shortDescriptionInput, cyaShortDescriptionPreview, 'check-your-answers');
           }
 
-          if (applyToErrorsButton) {
-            applyToErrorsButton.addEventListener('click', applyErrorsFromShortDescription);
+          if (errorDescriptionInput) {
+            errorDescriptionInput.addEventListener('input', updateErrorPreviews);
+            applyHighlightOnFocus(errorDescriptionInput, errorDescriptionHighlightTargets, 'error-messages');
           }
-
-          errorFields.forEach(function (field) {
-            if (field.input) {
-              field.input.addEventListener('input', updateErrorPreviews);
-              if (field.descriptionPreview || field.preview) {
-                applyHighlightOnFocus(field.input, field.descriptionPreview || field.preview, 'error-messages');
-              }
-            }
-          });
 
           wireLimitInputs();
           updateShortDescriptionPreview();
@@ -748,18 +709,6 @@ activeLinkId: "nav-editor"
 
         .preview-panel-tabs .govuk-tabs__panel {
           min-height: 200px;
-        }
-
-        .short-description-input-row {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 15px;
-          align-items: center;
-        }
-
-        .short-description-input-row .govuk-input {
-          flex: 1 1 12rem;
-          min-width: 0;
         }
       </style>
     </div>

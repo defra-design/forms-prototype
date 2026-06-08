@@ -118,7 +118,7 @@ activeLinkId: "nav-editor"
                               {{ commonTerms.form_editor.question_settings.separate_content.short_description.title }}
                             </label>
                             <div id="short-description-hint" class="govuk-hint">
-                              {{ commonTerms.form_editor.question_settings.separate_content.short_description.hints.precise-location }}
+                              {{ commonTerms.form_editor.question_settings.separate_content.short_description.hints.precise-locations.phones.phones.phones.phones.phone }}
                             </div>
                             <div class="short-description-input-row">
                               <input class="govuk-input" id="short-description-input-precise-location" name="questionShortDescription"
@@ -160,6 +160,11 @@ activeLinkId: "nav-editor"
 
 
 
+                            
+                            
+                            
+                            
+                            
                             
                             
                             
@@ -287,14 +292,19 @@ activeLinkId: "nav-editor"
                   <ul class="govuk-list govuk-error-summary__list">
                     <li>
                       <a href="#easting">
-                        <span id="error-easting-preview">Enter easting for [short description]</span>
+                        <span id="error-easting-preview">Enter easting for <span id="error-easting-description-preview">[short description]</span></span>
                       </a>
                     </li>
                     <li>
                       <a href="#easting">
-                        <span id="error-northing-preview">Enter northing for [short description]</span>
+                        <span id="error-northing-preview">Enter northing for <span id="error-northing-description-preview">[short description]</span></span>
                       </a>
                     </li>
+                  
+                  
+                  
+                  
+                  
                   
                   
                   
@@ -432,9 +442,17 @@ activeLinkId: "nav-editor"
             domElements.guidanceParagraph.textContent = domElements.guidancePhone.value;
           }
 
+          function showPreviewTab(panelId) {
+            const tabLink = document.querySelector('#question-preview-tabs .govuk-tabs__tab[href="#' + panelId + '"]');
+            if (tabLink) {
+              tabLink.click();
+            }
+          }
+
           function applyHighlightOnFocus(inputElement, targetElement) {
             if (inputElement && targetElement) {
               inputElement.addEventListener('focus', function () {
+                showPreviewTab('page-preview');
                 targetElement.classList.add('highlight');
               });
               inputElement.addEventListener('blur', function () {
@@ -443,6 +461,7 @@ activeLinkId: "nav-editor"
 
               // If the input is already focused
               if (document.activeElement === inputElement) {
+                showPreviewTab('page-preview');
                 targetElement.classList.add('highlight');
               }
             }
@@ -510,6 +529,11 @@ activeLinkId: "nav-editor"
       
       
       
+      
+      
+      
+      
+      
       <script>
         document.addEventListener('DOMContentLoaded', function () {
           const shortDescriptionInput = document.getElementById('short-description-input-precise-location');
@@ -519,8 +543,8 @@ activeLinkId: "nav-editor"
           const limitPlaceholders = [];
 
           const errorFields = [
-            { input: document.getElementById('error-easting-input-precise-location'), preview: document.getElementById('error-easting-preview') },
-            { input: document.getElementById('error-northing-input-precise-location'), preview: document.getElementById('error-northing-preview') }
+            { input: document.getElementById('error-easting-input-precise-location'), preview: document.getElementById('error-easting-preview'), descriptionPreview: document.getElementById('error-easting-description-preview'), descriptionPlaceholder: "[short description]" },
+            { input: document.getElementById('error-northing-input-precise-location'), preview: document.getElementById('error-northing-preview'), descriptionPreview: document.getElementById('error-northing-description-preview'), descriptionPlaceholder: "[short description]" }
           ];
 
           function capitalizeFirstLetter(text) {
@@ -574,31 +598,75 @@ activeLinkId: "nav-editor"
               : placeholderShortDescriptionDisplay;
           }
 
+          function formatDescriptionText(placeholder, description) {
+            const lower = (description || 'short description').toLowerCase();
+            const cap = lower.charAt(0).toUpperCase() + lower.slice(1);
+            if (placeholder === '[Short description]') return cap;
+            if (placeholder === '[short description is true]') return lower;
+            return lower;
+          }
+
+          function updateLimitSpans(container) {
+            if (!container) return;
+            container.querySelectorAll('[data-limit-placeholder]').forEach(function (el) {
+              const placeholder = el.getAttribute('data-limit-placeholder');
+              const limit = limitPlaceholders.find(function (l) { return l.placeholder === placeholder; });
+              if (!limit) return;
+              const input = document.getElementById(limit.inputId);
+              el.textContent = input?.value.trim() || placeholder;
+            });
+          }
+
           function updateErrorPreviews() {
             errorFields.forEach(function (field) {
-              if (!field.preview || !field.input) return;
+              if (!field.input) return;
               const template = field.input.getAttribute('data-apply-template') || '';
               const value = field.input.value.trim();
-              const message = substituteLimitPlaceholders(value || template);
-              field.preview.textContent = message;
+
+              if (field.descriptionPreview && field.descriptionPlaceholder) {
+                field.descriptionPreview.textContent = formatDescriptionText(field.descriptionPlaceholder, getShortDescriptionForApply());
+              } else if (field.preview) {
+                const message = substituteLimitPlaceholders(value || template);
+                field.preview.textContent = message;
+              }
+
+              updateLimitSpans(field.preview);
             });
             
           }
 
           
 
-          function applyHighlightOnFocus(inputElement, targetElement) {
-            if (!inputElement || !targetElement) return;
+          function showPreviewTab(panelId) {
+            const tabLink = document.querySelector('#question-preview-tabs .govuk-tabs__tab[href="#' + panelId + '"]');
+            if (tabLink) {
+              tabLink.click();
+            }
+          }
+
+          function applyHighlightOnFocus(inputElement, targetElements, tabPanelId) {
+            if (!inputElement || !targetElements) return;
+            const targets = targetElements.length !== undefined
+              ? Array.from(targetElements)
+              : [targetElements];
 
             inputElement.addEventListener('focus', function () {
-              targetElement.classList.add('highlight');
+              if (tabPanelId) showPreviewTab(tabPanelId);
+              targets.forEach(function (target) {
+                if (target) target.classList.add('highlight');
+              });
             });
             inputElement.addEventListener('blur', function () {
-              targetElement.classList.remove('highlight');
+              targets.forEach(function (target) {
+                if (target) target.classList.remove('highlight');
+              });
             });
 
             if (document.activeElement === inputElement) {
-              targetElement.classList.add('highlight');
+              if (tabPanelId) showPreviewTab(tabPanelId);
+              targets.forEach(function (target) {
+                if (target) target.classList.add('highlight');
+              });
             }
           }
 
@@ -617,7 +685,8 @@ activeLinkId: "nav-editor"
               });
 
               if (relatedPreview?.preview) {
-                applyHighlightOnFocus(input, relatedPreview.preview);
+                const limitSpan = relatedPreview.preview.querySelector('[data-limit-placeholder="' + limit.placeholder + '"]');
+                applyHighlightOnFocus(input, limitSpan || relatedPreview.preview, 'error-messages');
               }
             });
           }
@@ -631,7 +700,7 @@ activeLinkId: "nav-editor"
               updateShortDescriptionPreview();
               
             });
-            applyHighlightOnFocus(shortDescriptionInput, cyaShortDescriptionPreview);
+            applyHighlightOnFocus(shortDescriptionInput, cyaShortDescriptionPreview, 'check-your-answers');
           }
 
           if (applyToErrorsButton) {
@@ -641,8 +710,8 @@ activeLinkId: "nav-editor"
           errorFields.forEach(function (field) {
             if (field.input) {
               field.input.addEventListener('input', updateErrorPreviews);
-              if (field.preview) {
-                applyHighlightOnFocus(field.input, field.preview);
+              if (field.descriptionPreview || field.preview) {
+                applyHighlightOnFocus(field.input, field.descriptionPreview || field.preview, 'error-messages');
               }
             }
           });
@@ -665,6 +734,10 @@ activeLinkId: "nav-editor"
         .highlight {
           background-color: #ffe5cc;
           border-bottom: 2px solid #ffb266;
+        }
+
+        #error-messages .highlight {
+          color: #0b0c0c;
         }
 
         #before-content {
