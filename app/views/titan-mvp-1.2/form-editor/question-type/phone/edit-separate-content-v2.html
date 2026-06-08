@@ -72,7 +72,7 @@ activeLinkId: "nav-editor"
                         <h2 class="govuk-heading-l">Edit question #</h2>
 
                         {{ govukTag({
-                          text: "Concept: separate short description and error messages",
+                          text: commonTerms.form_editor.question_settings.separate_content_v2.concept_tag,
                           classes: "govuk-tag--purple govuk-!-margin-bottom-4"
                         }) }}
 
@@ -115,103 +115,38 @@ activeLinkId: "nav-editor"
 
                           <div class="govuk-form-group">
                             <label class="govuk-label govuk-label--m" for="short-description-input-phone">
-                              {{ commonTerms.form_editor.question_settings.separate_content.short_description.title }}
+                              {{ commonTerms.form_editor.question_settings.separate_content_v2.short_description.title }}
                             </label>
                             <div id="short-description-hint" class="govuk-hint">
-                              {{ commonTerms.form_editor.question_settings.separate_content.short_description.hints.phones.phones.phones.phones.phones.phone }}
+                              {{ commonTerms.form_editor.question_settings.separate_content_v2.short_description.hints.phone }}
                             </div>
-                            <div class="short-description-input-row">
-                              <input class="govuk-input" id="short-description-input-phone" name="questionShortDescription"
-                                type="text" autocomplete="off" aria-autocomplete="none"
-                                data-1p-ignore="true" data-lpignore="true" data-bwignore="true" data-form-type="other"
-                                readonly aria-describedby="short-description-hint">
-                              {{ govukButton({
-                              text: commonTerms.form_editor.question_settings.separate_content.short_description.apply_to_errors,
-                              type: "button",
-                              classes: "govuk-button--inverse govuk-!-margin-bottom-0",
-                              id: "apply-short-description-to-errors"
-                              }) }}
-                            </div>
+                            <input class="govuk-input" id="short-description-input-phone" name="questionShortDescription"
+                              type="text" autocomplete="off" aria-autocomplete="none"
+                              data-1p-ignore="true" data-lpignore="true" data-bwignore="true" data-form-type="other"
+                              aria-describedby="short-description-hint">
                           </div>
 
-                          <fieldset class="govuk-fieldset govuk-!-margin-top-6">
-                            <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
-                              {{ commonTerms.form_editor.question_settings.separate_content.error_messages.legend }}
-                            </legend>
-                            <div class="govuk-hint">
-                              {{ commonTerms.form_editor.question_settings.separate_content.error_messages.hint }}
+                          <div class="govuk-form-group">
+                            <label class="govuk-label govuk-label--m" for="error-description-input-phone">
+                              {{ commonTerms.form_editor.question_settings.separate_content_v2.error_description.title }}
+                            </label>
+                            <div id="error-description-hint" class="govuk-hint">
+                              {{ commonTerms.form_editor.question_settings.separate_content_v2.error_description.hint }}
                             </div>
+                            <input class="govuk-input" id="error-description-input-phone" name="questionErrorDescription"
+                              type="text" autocomplete="off" aria-autocomplete="none"
+                              data-1p-ignore="true" data-lpignore="true" data-bwignore="true" data-form-type="other"
+                              aria-describedby="error-description-hint">
+                          </div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            {{ govukInput({
-                            label: {
-                            text: "When the answer is empty",
-                            classes: "govuk-label--s"
-                            },
-                            id: "error-empty-input-phone",
-                            name: "errorEmptyInputPhone",
-                            value: "Enter [short description]",
-                            classes: "govuk-!-width-full",
-                            attributes: {
-                              "data-apply-template": "Enter [short description]"
-                            }
-                            }) }}
-
-                            {{ govukInput({
-                            label: {
-                            text: "When the answer is in the wrong format",
-                            classes: "govuk-label--s"
-                            },
-                            id: "error-format-input-phone",
-                            name: "errorFormatInputPhone",
-                            value: "[Short description] must be in the correct format",
-                            classes: "govuk-!-width-full",
-                            attributes: {
-                              "data-apply-template": "[Short description] must be in the correct format"
-                            }
-                            }) }}
-                          </fieldset>
-
-                          <!-- Answer limits section -->
-                          <div class="answer-limits-group govuk-!-margin-top-6">
-                            <h2 class="govuk-heading-m govuk-!-margin-bottom-3">
-                              {{ commonTerms.form_editor.question_settings.separate_content.answer_limits_section.heading }}
-                            </h2>
-                            <p class="govuk-body govuk-!-margin-bottom-4">
-                              {{ commonTerms.form_editor.question_settings.separate_content.answer_limits_section.intro }}
-                            </p>
-                            <details class="govuk-details govuk-!-margin-bottom-0" data-module="govuk-details">
-                              <summary class="govuk-details__summary">
-                                <span class="govuk-details__summary-text">
-                                  {{ commonTerms.form_editor.question_settings.answer_limits.title }}
-                                </span>
-                              </summary>
-                              <div class="govuk-details__text">
+                          <!-- Answer limits -->
+                          <details class="govuk-details" data-module="govuk-details">
+                            <summary class="govuk-details__summary">
+                              <span class="govuk-details__summary-text">
+                                {{ commonTerms.form_editor.question_settings.answer_limits.title }}
+                              </span>
+                            </summary>
+                            <div class="govuk-details__text">
 <!-- Default Content for Question 1 -->
                               <div id="question-1-content" class="question-content" style="margin-top: 10px;">
                                 {{ govukTextarea({
@@ -245,9 +180,7 @@ activeLinkId: "nav-editor"
                                 }) }}
                               </div>
                               </div>
-                            </details>
-                          </div>
-                          <!-- End answer limits section -->
+                          </details>
 
                           <!-- Section Break -->
                           <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
@@ -352,6 +285,9 @@ activeLinkId: "nav-editor"
                         <span id="error-format-preview"><span id="error-format-description-preview">[Short description]</span> must be in the correct format</span>
                       </a>
                     </li>
+                  
+                  
+                  
                   
                   
                   
@@ -586,17 +522,21 @@ activeLinkId: "nav-editor"
       
       
       
+      
+      
+      
       <script>
         document.addEventListener('DOMContentLoaded', function () {
           const shortDescriptionInput = document.getElementById('short-description-input-phone');
-          const applyToErrorsButton = document.getElementById('apply-short-description-to-errors');
+          const errorDescriptionInput = document.getElementById('error-description-input-phone');
           const cyaShortDescriptionPreview = document.getElementById('cya-short-description-preview');
           const placeholderShortDescriptionDisplay = '[Short description]';
           const limitPlaceholders = [];
+          const applyUsesShort = true;
 
-          const errorFields = [
-            { input: document.getElementById('error-empty-input-phone'), preview: document.getElementById('error-empty-preview'), descriptionPreview: document.getElementById('error-empty-description-preview'), descriptionPlaceholder: "[short description]" },
-            { input: document.getElementById('error-format-input-phone'), preview: document.getElementById('error-format-preview'), descriptionPreview: document.getElementById('error-format-description-preview'), descriptionPlaceholder: "[Short description]" }
+          const errorPreviews = [
+            { preview: document.getElementById('error-empty-preview'), descriptionPreview: document.getElementById('error-empty-description-preview'), template: "Enter [short description]", descriptionPlaceholder: "[short description]" },
+            { preview: document.getElementById('error-format-preview'), descriptionPreview: document.getElementById('error-format-description-preview'), template: "[Short description] must be in the correct format", descriptionPlaceholder: "[Short description]" }
           ];
 
           function capitalizeFirstLetter(text) {
@@ -608,13 +548,19 @@ activeLinkId: "nav-editor"
             return shortDescriptionInput?.value.trim() || '';
           }
 
-          function getShortDescriptionForApply() {
+          function getErrorDescriptionValue() {
+            return errorDescriptionInput?.value.trim() || '';
+          }
+
+          function getDescriptionForErrors() {
+            const errorDescription = getErrorDescriptionValue();
+            if (errorDescription) return errorDescription;
             return getShortDescriptionValue() || 'short description';
           }
 
-          function applyTemplate(template, shortDescription) {
+          function applyTemplate(template, description) {
             if (!template) return '';
-            const lower = (shortDescription || 'short description').toLowerCase();
+            const lower = (description || 'short description').toLowerCase();
             const cap = lower.charAt(0).toUpperCase() + lower.slice(1);
             return template
               .replace(/\[Short description\]/g, cap)
@@ -631,15 +577,6 @@ activeLinkId: "nav-editor"
               result = result.split(limit.placeholder).join(value);
             });
             return result;
-          }
-
-          function applyErrorsFromShortDescription() {
-            errorFields.forEach(function (field) {
-              if (!field.input) return;
-              const template = field.input.getAttribute('data-apply-template') || field.input.value;
-              field.input.value = applyTemplate(template, getShortDescriptionForApply());
-            });
-            updateErrorPreviews();
           }
 
           function updateShortDescriptionPreview() {
@@ -670,24 +607,18 @@ activeLinkId: "nav-editor"
           }
 
           function updateErrorPreviews() {
-            errorFields.forEach(function (field) {
-              if (!field.input) return;
-              const template = field.input.getAttribute('data-apply-template') || '';
-              const value = field.input.value.trim();
-
+            const description = getDescriptionForErrors();
+            errorPreviews.forEach(function (field) {
               if (field.descriptionPreview && field.descriptionPlaceholder) {
-                field.descriptionPreview.textContent = formatDescriptionText(field.descriptionPlaceholder, getShortDescriptionForApply());
-              } else if (field.preview) {
-                const message = substituteLimitPlaceholders(value || template);
-                field.preview.textContent = message;
+                field.descriptionPreview.textContent = applyUsesShort
+                  ? formatDescriptionText(field.descriptionPlaceholder, description)
+                  : field.descriptionPlaceholder;
+              } else if (field.preview && !field.descriptionPlaceholder) {
+                field.preview.textContent = substituteLimitPlaceholders(field.template);
               }
-
               updateLimitSpans(field.preview);
             });
-            
           }
-
-          
 
           function showPreviewTab(panelId) {
             const tabLink = document.querySelector('#question-preview-tabs .govuk-tabs__tab[href="#' + panelId + '"]');
@@ -727,13 +658,10 @@ activeLinkId: "nav-editor"
               const input = document.getElementById(limit.inputId);
               if (!input) return;
 
-              input.addEventListener('input', function () {
-                updateErrorPreviews();
-              });
+              input.addEventListener('input', updateErrorPreviews);
 
-              const relatedPreview = errorFields.find(function (field) {
-                const template = field.input?.getAttribute('data-apply-template') || '';
-                return template.includes(limit.placeholder);
+              const relatedPreview = errorPreviews.find(function (field) {
+                return field.template.includes(limit.placeholder);
               });
 
               if (relatedPreview?.preview) {
@@ -743,30 +671,22 @@ activeLinkId: "nav-editor"
             });
           }
 
-          if (shortDescriptionInput) {
-            shortDescriptionInput.addEventListener('focus', function () {
-              shortDescriptionInput.removeAttribute('readonly');
-            }, { once: true });
+          const errorDescriptionHighlightTargets = errorPreviews
+            .map(function (field) { return field.descriptionPreview; })
+            .filter(Boolean);
 
+          if (shortDescriptionInput) {
             shortDescriptionInput.addEventListener('input', function () {
               updateShortDescriptionPreview();
-              
+              updateErrorPreviews();
             });
             applyHighlightOnFocus(shortDescriptionInput, cyaShortDescriptionPreview, 'check-your-answers');
           }
 
-          if (applyToErrorsButton) {
-            applyToErrorsButton.addEventListener('click', applyErrorsFromShortDescription);
+          if (errorDescriptionInput) {
+            errorDescriptionInput.addEventListener('input', updateErrorPreviews);
+            applyHighlightOnFocus(errorDescriptionInput, errorDescriptionHighlightTargets, 'error-messages');
           }
-
-          errorFields.forEach(function (field) {
-            if (field.input) {
-              field.input.addEventListener('input', updateErrorPreviews);
-              if (field.descriptionPreview || field.preview) {
-                applyHighlightOnFocus(field.input, field.descriptionPreview || field.preview, 'error-messages');
-              }
-            }
-          });
 
           wireLimitInputs();
           updateShortDescriptionPreview();
@@ -820,18 +740,6 @@ activeLinkId: "nav-editor"
 
         .preview-panel-tabs .govuk-tabs__panel {
           min-height: 200px;
-        }
-
-        .short-description-input-row {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 15px;
-          align-items: center;
-        }
-
-        .short-description-input-row .govuk-input {
-          flex: 1 1 12rem;
-          min-width: 0;
         }
       </style>
     </div>

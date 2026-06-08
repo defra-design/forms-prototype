@@ -344,6 +344,37 @@
           }
         }
       },
+      "separate_content_v2": {
+        "concept_tag": "Concept: short description with optional error description",
+        "short_description": {
+          "title": "Short description",
+          "hints": {
+            "phone": "Used for error messages and the label shown on the 'Check your answers' page. For example, 'phone number'.",
+            "email": "Used for error messages and the label on check your answers, unless you add an error description. For example, 'email address'.",
+            "shorttext": "Used for error messages and the label on check your answers, unless you add an error description. For example, 'licence period'.",
+            "textarea": "Used for error messages and the label on check your answers, unless you add an error description. For example, 'description of the work'.",
+            "numbers": "Used for error messages and the label on check your answers, unless you add an error description. For example, 'number of employees'.",
+            "date": "Used for error messages and the label on check your answers, unless you add an error description. For example, 'date of birth'.",
+            "date-mmyy": "Used for error messages and the label on check your answers, unless you add an error description. For example, 'expiry date'.",
+            "address": "Used for error messages and the label on check your answers, unless you add an error description. For example, 'home address'.",
+            "fileupload": "Used for error messages and the label on check your answers, unless you add an error description. For example, 'proof of identity'.",
+            "yesno": "Used for error messages and the label on check your answers, unless you add an error description. For example, 'you have a licence'.",
+            "declaration": "Used for error messages and the label on check your answers, unless you add an error description. For example, 'terms and conditions'.",
+            "checkboxes": "Used for error messages and the label on check your answers, unless you add an error description. For example, 'types of licence'.",
+            "radios-nf": "Used for error messages and the label on check your answers, unless you add an error description. For example, 'licence type'.",
+            "autocomplete-nf": "Used for error messages and the label on check your answers, unless you add an error description. For example, 'country of birth'.",
+            "precise-location": "Used for error messages and the label on check your answers, unless you add an error description. For example, 'site location'.",
+            "location-user-choice": "Used for error messages and the label on check your answers, unless you add an error description. For example, 'property location'."
+          }
+        },
+        "error_description": {
+          "title": "Error description (optional)",
+          "hint": "Used in error messages instead of the short description."
+        },
+        "error_messages": {
+          "hint": "Filled from your short description, or your error description if you add one. You can still edit each message."
+        }
+      },
       "answer_limits": {
         "title": "Set answer limits (optional)",
         "min_length": {

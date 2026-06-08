@@ -4,7 +4,7 @@ const configs = require('./edit-separate-content-config');
 const { getDescriptionPlaceholder, buildPreviewListItem } = require('./edit-separate-content-preview-helpers');
 
 const baseDir = path.join(__dirname, '../app/views/titan-mvp-1.2/form-editor/question-type');
-const templatePath = path.join(baseDir, 'phone/edit-separate-content.html');
+const templatePath = path.join(baseDir, 'phone/edit-separate-content-v2.html');
 const template = fs.readFileSync(templatePath, 'utf8');
 
 function extractAnswerLimits(dir, sourceFile) {
@@ -27,47 +27,18 @@ function extractAnswerLimits(dir, sourceFile) {
   return inner;
 }
 
-function buildAnswerLimitsSection(limitsHtml, limitHtml, hasLimitErrors) {
-  let section = `                          <!-- Answer limits section -->
-                          <div class="answer-limits-group govuk-!-margin-top-6">
-                            <h2 class="govuk-heading-m govuk-!-margin-bottom-3">
-                              {{ commonTerms.form_editor.question_settings.separate_content.answer_limits_section.heading }}
-                            </h2>
-                            <p class="govuk-body govuk-!-margin-bottom-4">
-                              {{ commonTerms.form_editor.question_settings.separate_content.answer_limits_section.intro }}
-                            </p>
-                            <details class="govuk-details govuk-!-margin-bottom-0" data-module="govuk-details">
-                              <summary class="govuk-details__summary">
-                                <span class="govuk-details__summary-text">
-                                  {{ commonTerms.form_editor.question_settings.answer_limits.title }}
-                                </span>
-                              </summary>
-                              <div class="govuk-details__text">
+function buildAnswerLimitsSection(limitsHtml) {
+  return `                          <!-- Answer limits -->
+                          <details class="govuk-details" data-module="govuk-details">
+                            <summary class="govuk-details__summary">
+                              <span class="govuk-details__summary-text">
+                                {{ commonTerms.form_editor.question_settings.answer_limits.title }}
+                              </span>
+                            </summary>
+                            <div class="govuk-details__text">
 ${limitsHtml}
                               </div>
-                            </details>`;
-
-  if (hasLimitErrors) {
-    section += `
-                            <details class="govuk-details govuk-!-margin-top-4 govuk-!-margin-bottom-0 limit-dependent-errors" data-module="govuk-details">
-                              <summary class="govuk-details__summary">
-                                <span class="govuk-details__summary-text">
-                                  {{ commonTerms.form_editor.question_settings.separate_content.error_messages.when_limits_set.legend }}
-                                </span>
-                              </summary>
-                              <div class="govuk-details__text">
-                                <p class="govuk-hint govuk-!-margin-bottom-4">
-                                  {{ commonTerms.form_editor.question_settings.separate_content.error_messages.when_limits_set.hint }}
-                                </p>
-${limitHtml}
-                              </div>
-                            </details>`;
-  }
-
-  section += `
-                          </div>
-                          <!-- End answer limits section -->`;
-  return section;
+                          </details>`;
 }
 
 function replaceOrInsertAnswerLimitsSection(content, sectionHtml) {
@@ -78,14 +49,13 @@ function replaceOrInsertAnswerLimitsSection(content, sectionHtml) {
     );
   }
 
-  content = content.replace(
-    /\s*<!-- Answer limits -->[\s\S]*?(?:<div class="govuk-!-margin-top-6[\s\S]*?limit-dependent-errors[\s\S]*?<\/div>\s*\n\n)?(?=\s*<!-- Section Break -->)/,
-    '\n\n                          '
-  );
+  if (content.includes('<!-- Answer limits -->')) {
+    return content.replace(/<!-- Answer limits -->[\s\S]*?<\/details>/, sectionHtml.trim());
+  }
 
   return content.replace(
-    /(\s*<\/fieldset>\s*\n\n)(\s*<!-- Section Break -->)/,
-    `$1\n${sectionHtml}\n\n$2`
+    /(\n\n)(\s*<!-- Section Break -->)/,
+    `$1${sectionHtml}\n\n$2`
   );
 }
 
@@ -97,10 +67,7 @@ function removeAnswerLimits(content) {
     );
   }
 
-  return content.replace(
-    /\s*<!-- Answer limits -->[\s\S]*?(?:<div class="govuk-!-margin-top-6[\s\S]*?limit-dependent-errors[\s\S]*?<\/div>\s*\n\n)?(?=\s*<!-- Section Break -->)/,
-    '\n\n                          '
-  );
+  return content.replace(/\s*<!-- Answer limits -->[\s\S]*?<\/details>\s*\n\n/, '\n\n                          ');
 }
 
 function toPascal(slug) {
@@ -111,102 +78,39 @@ function njkEscape(value) {
   return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
-function buildErrorInput(error, slug, pascal) {
-  const id = `error-${error.id}-input-${slug}`;
-  const name = `error${toPascal(error.id)}Input${pascal}`;
-  const templateAttr = njkEscape(error.defaultValue);
-  const label = njkEscape(error.label);
-  const value = njkEscape(error.defaultValue);
-
-  return `
-                            {{ govukInput({
-                            label: {
-                            text: "${label}",
-                            classes: "govuk-label--s"
-                            },
-                            id: "${id}",
-                            name: "${name}",
-                            value: "${value}",
-                            classes: "govuk-!-width-full",
-                            attributes: {
-                              "data-apply-template": "${templateAttr}"
-                            }
-                            }) }}`;
-}
-
-function getLimitDependentErrorIds(config) {
-  const ids = new Set();
-  (config.previewSections || []).forEach((section) => {
-    if (section.heading && /answer limits/i.test(section.heading)) {
-      section.errors.forEach((error) => ids.add(error.id));
-    }
-  });
-  return ids;
-}
-
-function buildErrorFieldsetParts(config) {
-  const pascal = toPascal(config.slug);
-  const limitIds = getLimitDependentErrorIds(config);
-  const alwaysErrors = config.errors.filter((error) => !limitIds.has(error.id));
-  const limitErrors = config.errors.filter((error) => limitIds.has(error.id));
-
-  return {
-    alwaysHtml: alwaysErrors.map((error) => buildErrorInput(error, config.slug, pascal)).join('\n'),
-    limitHtml: limitErrors.map((error) => buildErrorInput(error, config.slug, pascal)).join('\n'),
-    hasLimitErrors: limitErrors.length > 0,
-  };
-}
-
-function buildErrorPreviewList(config) {
-  const anchor = config.previewAnchor;
-  const sections = config.previewSections || [{ errors: config.errors }];
-  const parts = [];
-
-  for (const section of sections) {
-    if (section.heading) {
-      parts.push(`                    <h3 class="govuk-heading-s">${section.heading}</h3>`);
-    }
-    for (const error of section.errors) {
-      parts.push(buildPreviewListItem(error, anchor, config));
-    }
-  }
-
-  return parts.join('\n');
-}
-
 function buildLimitPlaceholdersJson(config) {
   const placeholders = config.limitPlaceholders || [];
   return JSON.stringify(placeholders);
 }
 
 function buildErrorScript(config) {
-  const slug = config.slug;
   const applyUsesShort = config.applyUsesShortDescription !== false;
   const limitPlaceholdersJson = buildLimitPlaceholdersJson(config);
-  const fileDescriptionPreview = Boolean(config.fileDescriptionPreview);
 
-  const fieldLines = config.errors
+  const previewLines = config.errors
     .map((error) => {
+      const template = JSON.stringify(error.defaultValue);
       const descPlaceholder = getDescriptionPlaceholder(error.defaultValue);
-      if (fileDescriptionPreview && error.id === 'no-file') {
-        return `            { input: document.getElementById('error-${error.id}-input-${slug}'), descriptionPreview: document.getElementById('file-type-description'), descriptionPlaceholder: "[short description]" }`;
+      if (config.fileDescriptionPreview && error.id === 'no-file') {
+        return `            { descriptionPreview: document.getElementById('file-type-description'), template: ${template}, descriptionPlaceholder: "[short description]" }`;
       }
       const descPh = descPlaceholder ? JSON.stringify(descPlaceholder) : 'null';
-      return `            { input: document.getElementById('error-${error.id}-input-${slug}'), preview: document.getElementById('error-${error.id}-preview'), descriptionPreview: document.getElementById('error-${error.id}-description-preview'), descriptionPlaceholder: ${descPh} }`;
+      return `            { preview: document.getElementById('error-${error.id}-preview'), descriptionPreview: document.getElementById('error-${error.id}-description-preview'), template: ${template}, descriptionPlaceholder: ${descPh} }`;
     })
     .join(',\n');
 
   return `
       <script>
         document.addEventListener('DOMContentLoaded', function () {
-          const shortDescriptionInput = document.getElementById('short-description-input-${slug}');
-          const applyToErrorsButton = document.getElementById('apply-short-description-to-errors');
+          const shortDescriptionInput = document.getElementById('short-description-input-${config.slug}');
+          const errorDescriptionInput = document.getElementById('error-description-input-${config.slug}');
           const cyaShortDescriptionPreview = document.getElementById('cya-short-description-preview');
           const placeholderShortDescriptionDisplay = '[Short description]';
           const limitPlaceholders = ${limitPlaceholdersJson};
+          const applyUsesShort = ${applyUsesShort};
 
-          const errorFields = [
-${fieldLines}
+          const errorPreviews = [
+${previewLines}
           ];
 
           function capitalizeFirstLetter(text) {
@@ -218,13 +122,19 @@ ${fieldLines}
             return shortDescriptionInput?.value.trim() || '';
           }
 
-          function getShortDescriptionForApply() {
+          function getErrorDescriptionValue() {
+            return errorDescriptionInput?.value.trim() || '';
+          }
+
+          function getDescriptionForErrors() {
+            const errorDescription = getErrorDescriptionValue();
+            if (errorDescription) return errorDescription;
             return getShortDescriptionValue() || 'short description';
           }
 
-          function applyTemplate(template, shortDescription) {
+          function applyTemplate(template, description) {
             if (!template) return '';
-            const lower = (shortDescription || 'short description').toLowerCase();
+            const lower = (description || 'short description').toLowerCase();
             const cap = lower.charAt(0).toUpperCase() + lower.slice(1);
             return template
               .replace(/\\[Short description\\]/g, cap)
@@ -241,19 +151,6 @@ ${fieldLines}
               result = result.split(limit.placeholder).join(value);
             });
             return result;
-          }
-
-          function applyErrorsFromShortDescription() {
-            errorFields.forEach(function (field) {
-              if (!field.input) return;
-              const template = field.input.getAttribute('data-apply-template') || field.input.value;
-              ${
-                applyUsesShort
-                  ? 'field.input.value = applyTemplate(template, getShortDescriptionForApply());'
-                  : 'field.input.value = template;'
-              }
-            });
-            updateErrorPreviews();
           }
 
           function updateShortDescriptionPreview() {
@@ -284,38 +181,17 @@ ${fieldLines}
           }
 
           function updateErrorPreviews() {
-            errorFields.forEach(function (field) {
-              if (!field.input) return;
-              const template = field.input.getAttribute('data-apply-template') || '';
-              const value = field.input.value.trim();
-
+            const description = getDescriptionForErrors();
+            errorPreviews.forEach(function (field) {
               if (field.descriptionPreview && field.descriptionPlaceholder) {
-                ${
-                  applyUsesShort
-                    ? `field.descriptionPreview.textContent = formatDescriptionText(field.descriptionPlaceholder, getShortDescriptionForApply());`
-                    : 'field.descriptionPreview.textContent = field.descriptionPlaceholder;'
-                }
-              } else if (field.preview) {
-                const message = substituteLimitPlaceholders(value || template);
-                field.preview.textContent = message;
+                field.descriptionPreview.textContent = applyUsesShort
+                  ? formatDescriptionText(field.descriptionPlaceholder, description)
+                  : field.descriptionPlaceholder;
+              } else if (field.preview && !field.descriptionPlaceholder) {
+                field.preview.textContent = substituteLimitPlaceholders(field.template);
               }
-
               updateLimitSpans(field.preview);
             });
-            ${fileDescriptionPreview ? 'updateFileTypeDescriptionPreview();' : ''}
-          }
-
-          ${
-            fileDescriptionPreview
-              ? `
-          function updateFileTypeDescriptionPreview() {
-            const fileTypeDescription = document.getElementById('file-type-description');
-            if (!fileTypeDescription) return;
-            const value = getShortDescriptionValue();
-            fileTypeDescription.textContent = value ? value.toLowerCase() : '[short description]';
-          }
-`
-              : ''
           }
 
           function showPreviewTab(panelId) {
@@ -356,13 +232,10 @@ ${fieldLines}
               const input = document.getElementById(limit.inputId);
               if (!input) return;
 
-              input.addEventListener('input', function () {
-                updateErrorPreviews();
-              });
+              input.addEventListener('input', updateErrorPreviews);
 
-              const relatedPreview = errorFields.find(function (field) {
-                const template = field.input?.getAttribute('data-apply-template') || '';
-                return template.includes(limit.placeholder);
+              const relatedPreview = errorPreviews.find(function (field) {
+                return field.template.includes(limit.placeholder);
               });
 
               if (relatedPreview?.preview) {
@@ -372,36 +245,45 @@ ${fieldLines}
             });
           }
 
-          if (shortDescriptionInput) {
-            shortDescriptionInput.addEventListener('focus', function () {
-              shortDescriptionInput.removeAttribute('readonly');
-            }, { once: true });
+          const errorDescriptionHighlightTargets = errorPreviews
+            .map(function (field) { return field.descriptionPreview; })
+            .filter(Boolean);
 
+          if (shortDescriptionInput) {
             shortDescriptionInput.addEventListener('input', function () {
               updateShortDescriptionPreview();
-              ${fileDescriptionPreview ? 'updateFileTypeDescriptionPreview();' : ''}
+              updateErrorPreviews();
             });
             applyHighlightOnFocus(shortDescriptionInput, cyaShortDescriptionPreview, 'check-your-answers');
           }
 
-          if (applyToErrorsButton) {
-            applyToErrorsButton.addEventListener('click', applyErrorsFromShortDescription);
+          if (errorDescriptionInput) {
+            errorDescriptionInput.addEventListener('input', updateErrorPreviews);
+            applyHighlightOnFocus(errorDescriptionInput, errorDescriptionHighlightTargets, 'error-messages');
           }
-
-          errorFields.forEach(function (field) {
-            if (field.input) {
-              field.input.addEventListener('input', updateErrorPreviews);
-              if (field.descriptionPreview || field.preview) {
-                applyHighlightOnFocus(field.input, field.descriptionPreview || field.preview, 'error-messages');
-              }
-            }
-          });
 
           wireLimitInputs();
           updateShortDescriptionPreview();
           updateErrorPreviews();
         });
       </script>`;
+}
+
+function buildErrorPreviewList(config) {
+  const anchor = config.previewAnchor;
+  const sections = config.previewSections || [{ errors: config.errors }];
+  const parts = [];
+
+  for (const section of sections) {
+    if (section.heading) {
+      parts.push(`                    <h3 class="govuk-heading-s">${section.heading}</h3>`);
+    }
+    for (const error of section.errors) {
+      parts.push(buildPreviewListItem(error, anchor, config));
+    }
+  }
+
+  return parts.join('\n');
 }
 
 function buildTextareaCharacterCountScript(config) {
@@ -467,9 +349,10 @@ function buildForType(config) {
   content = content.replace(/hintTextInputPhone/g, `hintTextInput${pascal}`);
   content = content.replace(/value: data\['hint-text-input-phone'\]/g, `value: ${config.hintData}`);
   content = content.replace(/short-description-input-phone/g, `short-description-input-${slug}`);
+  content = content.replace(/error-description-input-phone/g, `error-description-input-${slug}`);
   content = content.replace(
-    /commonTerms\.form_editor\.question_settings\.separate_content\.short_description\.hint/g,
-    `commonTerms.form_editor.question_settings.separate_content.short_description.hints.${slug}`
+    /commonTerms\.form_editor\.question_settings\.separate_content_v2\.short_description\.hints\.phone/g,
+    `commonTerms.form_editor.question_settings.separate_content_v2.short_description.hints.${slug}`
   );
   content = content.replace(/#phone-number-input/g, `#${config.previewAnchor}`);
   content = content.replace(/01632 960 211/g, config.cyaSample);
@@ -478,11 +361,6 @@ function buildForType(config) {
     /<span class="govuk-visually-hidden"> phone number<\/span>/g,
     `<span class="govuk-visually-hidden"> ${config.cyaHidden}</span>`
   );
-
-  const { alwaysHtml, limitHtml, hasLimitErrors } = buildErrorFieldsetParts(config);
-  const fieldsetRegex =
-    /(<fieldset class="govuk-fieldset govuk-!-margin-top-6">[\s\S]*?<div class="govuk-hint">[\s\S]*?<\/div>\s*)([\s\S]*?)(\s*<\/fieldset>)/;
-  content = content.replace(fieldsetRegex, `$1${alwaysHtml}$3`);
 
   const previewRegex = /(<ul class="govuk-list govuk-error-summary__list">)\s*[\s\S]*?(\s*<\/ul>)/;
   content = content.replace(previewRegex, `$1\n${buildErrorPreviewList(config)}\n                  $2`);
@@ -511,22 +389,18 @@ function buildForType(config) {
     }
   }
   if (answerLimitsHtml) {
-    const sectionHtml = buildAnswerLimitsSection(answerLimitsHtml, limitHtml, hasLimitErrors);
+    const sectionHtml = buildAnswerLimitsSection(answerLimitsHtml);
     content = replaceOrInsertAnswerLimitsSection(content, sectionHtml);
   } else {
     content = removeAnswerLimits(content);
   }
 
-  content = removeAnswerLimitsPanelStyles(content);
-
-  return content;
-}
-
-function removeAnswerLimitsPanelStyles(content) {
-  return content.replace(
+  content = content.replace(
     /\n        \.answer-limits-group__panel[\s\S]*?\.answer-limits-group__panel \.govuk-details \+ \.govuk-details \{[\s\S]*?\}\n/,
     '\n'
   );
+
+  return content;
 }
 
 for (const config of configs) {
@@ -535,7 +409,7 @@ for (const config of configs) {
     console.warn(`Skip ${config.dir}: no previews/edit.html`);
     continue;
   }
-  const outPath = path.join(baseDir, config.dir, 'edit-separate-content.html');
+  const outPath = path.join(baseDir, config.dir, 'edit-separate-content-v2.html');
   fs.writeFileSync(outPath, buildForType(config));
   const limitsNote = config.limitPlaceholders?.length
     ? `, ${config.limitPlaceholders.length} limit fields`
