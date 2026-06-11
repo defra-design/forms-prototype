@@ -2,7 +2,7 @@
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/input/macro.njk" import govukInput %}
-{% import "components/one-login-service-header/service-header.njk" as oneLoginHeader %}
+{% import "titan-mvp-1.2/runner-sign-in/_macros.njk" as runnerSignIn %}
 
 {% set baseHref = "/runner-sign-in/forms/" + application.formKey + "/" + application.id %}
 
@@ -15,12 +15,7 @@ Your details – {{ formDef.formName }} – GOV.UK
 {% endblock %}
 
 {% block header %}
-  {{ oneLoginHeader.govukOneLoginServiceHeader({
-    signOutLink: "/titan-mvp-1.2/roles/sign-out",
-    homepageLink: "/runner-sign-in/applications",
-    oneLoginLinkText: "you@example.com",
-    productName: formDef.formName
-  }) }}
+  {{ runnerSignIn.runnerSignInFormHeader(formDef.formName) }}
 {% endblock %}
 
 {% block content %}

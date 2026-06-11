@@ -11,7 +11,7 @@ Contact details – {{ formDef.formName }} – GOV.UK
 {% endblock %}
 
 {% block beforeContent %}
-  {{ govukBackLink({ text: "Back", href: baseHref + "/name" }) }}
+  {{ govukBackLink({ text: "Back", href: backHref or (baseHref + "/name") }) }}
 {% endblock %}
 
 {% block header %}

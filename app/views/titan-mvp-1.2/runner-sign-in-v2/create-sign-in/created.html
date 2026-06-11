@@ -3,29 +3,56 @@
 {% from "govuk/components/panel/macro.njk" import govukPanel %}
 {% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
 
-{% block pageTitle %}You’ve created your sign in – GOV.UK{% endblock %}
+{% block pageTitle %}
+  {% if isSaveAndExitJourney %}Your progress has been saved – GOV.UK{% else %}You’ve created your sign in – GOV.UK{% endif %}
+{% endblock %}
 
 {% block beforeContent %}{% endblock %}
 
-{% block header %}{{ v2.v2ServiceHeader("forms", { showServiceNav: false }) }}{% endblock %}
+{% block header %}
+  {% if isSaveAndExitJourney %}
+    {{ v2.v2ServiceHeader("", { formName: application.formName }) }}
+  {% else %}
+    {{ v2.v2ServiceHeader("forms", { showServiceNav: false }) }}
+  {% endif %}
+{% endblock %}
 
 {% block content %}
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
-    <h1 class="govuk-heading-xl">You can now start your form</h1>
-    {# {{ govukPanel({
-      titleText: "You can now start your form"
-    }) }} #}
+    {% if isSaveAndExitJourney %}
+      {{ govukPanel({
+        titleText: "Your progress has been saved"
+      }) }}
 
-    <p class="govuk-body">You’ve set up your sign-in details.</p>
+      <h2 class="govuk-heading-l">What happens next</h2>
 
-    <p class="govuk-body govuk-!-margin-bottom-6">We've sent a confirmation email to: you@example.com</p>
+      <p class="govuk-body">Your answers have been saved for 28 days.</p>
 
-    {{ govukButton({
-      text: "Continue to your form",
-      href: continueUrl
-    }) }}
+      <p class="govuk-body">We’ve emailed you a link so you can sign in and continue your '{{ application.formName }}' form.</p>
+
+      <p class="govuk-body">Check your spam folder if you have not received an email after a few minutes.</p>
+
+      <p class="govuk-body">
+        <a class="govuk-link" href="/runner-sign-in-v2/emails/save-and-exit?variant=without-sign-in&amp;formKey={{ formKey | urlencode }}&amp;applicationId={{ applicationId | urlencode }}">View the email (prototype only)</a>
+      </p>
+
+      {{ govukButton({
+        text: "Sign in",
+        href: signInUrl
+      }) }}
+    {% else %}
+      <h1 class="govuk-heading-xl">You can now start your form</h1>
+
+      <p class="govuk-body">You’ve set up your sign-in details.</p>
+
+      <p class="govuk-body govuk-!-margin-bottom-6">We've sent a confirmation email to: {{ userEmail }}</p>
+
+      {{ govukButton({
+        text: "Continue to your form",
+        href: continueUrl
+      }) }}
+    {% endif %}
   </div>
 </div>
 {% endblock %}
-

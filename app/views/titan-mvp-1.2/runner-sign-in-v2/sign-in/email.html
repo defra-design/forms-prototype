@@ -11,7 +11,13 @@
   {{ govukBackLink({ href: backUrl, text: "Back" }) }}
 {% endblock %}
 
-{% block header %}{{ v2.v2ServiceHeader("") }}{% endblock %}
+{% block header %}
+  {% if application and application.formName %}
+    {{ v2.v2ServiceHeader("", { formName: application.formName }) }}
+  {% else %}
+    {{ v2.v2ServiceHeader("") }}
+  {% endif %}
+{% endblock %}
 
 {% block content %}
 <div class="govuk-grid-row">

@@ -268,7 +268,30 @@ Start – Runner sign-in v2 – GOV.UK
         <span class="govuk-!-margin-left-2">{{ govukTag({ text: "Not yet started", classes: "govuk-tag--grey" }) }}</span>
       </p>
     {% else %}
-      {{ govukInsetText({ text: "No not-started example found. Use “Reset seeded examples” to restore the default set." }) }}
+      {{ govukInsetText({ text: "No not-started example found. Use “Clear cache and reset examples” to restore the default set." }) }}
+    {% endif %}
+
+    <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+
+    <h2 class="govuk-heading-m">5) Save and exit without signing in first</h2>
+    <p class="govuk-body">
+      Uses <strong>Apply to volunteer</strong> (no checker required). Sign-in is optional until you choose <strong>Save and exit</strong>, then you’ll be asked to create a sign-in or sign in.<br>
+      <strong>Button</strong>: opens the form’s <strong>start page</strong> (signed out, fresh demo).<br>
+      <strong>Link</strong>: also opens the form’s <strong>start page</strong>. Choose <strong>Continue without signing in</strong> on the next screen.
+    </p>
+    {% if saveAndExitDemoApp %}
+      {{ govukButton({
+        text: "Open start page (save and exit demo)",
+        classes: "govuk-button--secondary",
+        href: saveAndExitDemoStartUrl
+      }) }}
+      <p class="govuk-body">
+        <a class="govuk-link" href="{{ saveAndExitDemoStartUrl }}">Open start page</a>
+        <span class="govuk-!-margin-left-1">for {{ saveAndExitDemoApp.formName }} — {{ saveAndExitDemoApp.reference }}</span>
+        <span class="govuk-!-margin-left-2">{{ govukTag({ text: "Not yet started", classes: "govuk-tag--grey" }) }}</span>
+      </p>
+    {% else %}
+      {{ govukInsetText({ text: "No save-and-exit demo found. Use “Clear cache and reset examples” to restore the default set." }) }}
     {% endif %}
 
     {% if formKey and applicationId %}

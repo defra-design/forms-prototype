@@ -1,0 +1,19 @@
+{% from "govuk/components/header/macro.njk" import govukHeader %}
+{% import "components/one-login-service-header/service-header.njk" as oneLoginHeader %}
+
+{% macro runnerSignInFormHeader(formName) %}
+  {% if data and data.runnerSignInAuthed %}
+    {{ oneLoginHeader.govukOneLoginServiceHeader({
+      signOutLink: "/titan-mvp-1.2/roles/sign-out",
+      homepageLink: data.runnerSignInV2ManageUrl or "/runner-sign-in/applications",
+      oneLoginLink: data.runnerSignInV2ManageUrl,
+      oneLoginLinkText: (data.runnerSignInEmail or "you@example.com"),
+      productName: formName
+    }) }}
+  {% else %}
+    {{ govukHeader({
+      serviceName: formName,
+      serviceUrl: "#"
+    }) }}
+  {% endif %}
+{% endmacro %}

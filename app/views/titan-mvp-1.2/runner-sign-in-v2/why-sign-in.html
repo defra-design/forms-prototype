@@ -47,14 +47,16 @@ Why you need to sign in – Runner sign-in v2 – GOV.UK
       }) }}
     </div>
 
-    <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
-    <h2 class="govuk-heading-m">Other ways to use this service</h2>
-    <p class="govuk-body">
-      You can complete this form without signing in, but you will not be able to reuse answers from previous submissions.
-    </p>
-    <p class="govuk-body">
-      <a class="govuk-link" href="{{ next }}">Continue without signing in</a>
-    </p>
+    {% if optionalSignIn and continueWithoutSignInUrl %}
+      <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+      <h2 class="govuk-heading-m">Other ways to use this service</h2>
+      <p class="govuk-body">
+        You can start filling in this form without signing in. If you want to save your progress and come back later, you’ll need to sign in or create a sign-in when you choose <strong>Save and exit</strong>.
+      </p>
+      <p class="govuk-body">
+        <a class="govuk-link" href="{{ continueWithoutSignInUrl }}">Continue without signing in</a>
+      </p>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

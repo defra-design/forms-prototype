@@ -11,7 +11,7 @@ Your name – {{ formDef.formName }} – GOV.UK
 {% endblock %}
 
 {% block beforeContent %}
-  {{ govukBackLink({ text: "Back", href: "/runner-sign-in/applications" }) }}
+  {{ govukBackLink({ text: "Back", href: backHref or "/runner-sign-in/applications" }) }}
 {% endblock %}
 
 {% block header %}

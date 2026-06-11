@@ -34,11 +34,16 @@
       isStartButton: true
     }) }}
 
-    <h2 class="govuk-heading-m govuk-!-margin-top-6">What you’ll need</h2>
-    <ul class="govuk-list govuk-list--bullet">
-      <li>an email address</li>
-      <li>a UK mobile phone number (used to recover your sign-in)</li>
-    </ul>
+    {% if isSaveExitDemo or optionalSignIn %}
+      <h2 class="govuk-heading-m govuk-!-margin-top-6">Before you start</h2>
+      <p class="govuk-body">You can fill in this form without signing in. You’ll need a sign-in only if you want to save your progress and come back later.</p>
+    {% else %}
+      <h2 class="govuk-heading-m govuk-!-margin-top-6">What you’ll need</h2>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>an email address</li>
+        <li>a UK mobile phone number (used to recover your sign-in)</li>
+      </ul>
+    {% endif %}
   </div>
 </div>
 {% endblock %}
