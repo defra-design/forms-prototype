@@ -31,9 +31,11 @@
       Each section shows the expected step order and links to open the pages.
     </p>
 
-    {{ govukInsetText({
-      html: "<p class=\"govuk-body govuk-!-margin-bottom-2\">This prototype uses a lightweight form sign-in with <strong>email</strong> and <strong>mobile phone number</strong> only. It does not use GOV.UK One Login, passwords or authenticator apps.</p><p class=\"govuk-body govuk-!-margin-bottom-0\">Demo context: <strong>" + (demoFormKey | e) + "</strong> · <strong>" + (demoApplicationId | e) + "</strong>. For error and edge-case journeys, see <a class=\"govuk-link\" href=\"" + (urls.unexpectedJourneys | e) + "\">unexpected journeys</a>.</p>"
-    }) }}
+    <p class="govuk-body">
+      For error and edge-case journeys, see <a class="govuk-link" href="{{ urls.unexpectedJourneys }}">unexpected journeys</a>.
+    </p>
+
+
   </div>
 </div>
 
