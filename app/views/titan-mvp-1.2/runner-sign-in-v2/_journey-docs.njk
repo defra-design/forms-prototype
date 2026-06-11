@@ -1,0 +1,113 @@
+{% macro journeyDocsStyles() %}
+  <style>
+    .journey-docs__path {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .journey-docs__step {
+      border: 1px solid #b1b4b6;
+      padding: 10px;
+      max-width: 170px;
+      min-height: 54px;
+      background: #ffffff;
+    }
+
+    .journey-docs__step--branch {
+      border-color: #1d70b8;
+      border-left: 5px solid #1d70b8;
+    }
+
+    .journey-docs__step--unexpected {
+      border-color: #d4351c;
+      border-left: 5px solid #d4351c;
+    }
+
+    .journey-docs__arrow {
+      font-weight: 700;
+    }
+
+    .journey-docs__section {
+      border-left: 5px solid #1d70b8;
+      padding-left: 15px;
+      margin-bottom: 10px;
+    }
+
+    .journey-docs__preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 30px;
+      margin-top: 20px;
+    }
+
+    .journey-docs__preview {
+      border-top: 1px solid #b1b4b6;
+      padding-top: 15px;
+    }
+
+    .journey-docs__frame-wrap {
+      width: 100%;
+      height: 480px;
+      overflow: auto;
+      border: 1px solid #b1b4b6;
+      background: #ffffff;
+    }
+
+    .journey-docs__frame {
+      width: 100%;
+      height: 480px;
+      border: 0;
+      display: block;
+      background: #ffffff;
+    }
+  </style>
+{% endmacro %}
+
+{% macro journeyPath(steps) %}
+  <div class="journey-docs__path">
+    {% for step in steps %}
+      <div class="journey-docs__step{% if step.branch %} journey-docs__step--branch{% endif %}{% if step.unexpected %} journey-docs__step--unexpected{% endif %}">
+        {% if step.href %}
+          <p class="govuk-body-s govuk-!-margin-bottom-0">
+            <a class="govuk-link govuk-link--no-visited-state" href="{{ step.href }}" target="_blank" rel="noreferrer noopener">{{ step.text }}</a>
+          </p>
+        {% else %}
+          <p class="govuk-body-s govuk-!-margin-bottom-0">{{ step.text }}</p>
+        {% endif %}
+      </div>
+      {% if not loop.last %}
+        <span class="journey-docs__arrow" aria-hidden="true">→</span>
+      {% endif %}
+    {% endfor %}
+  </div>
+{% endmacro %}
+
+{% macro journeyPreviews(pages) %}
+  <div class="journey-docs__preview-grid">
+    {% for page in pages %}
+      {% set frameSrc = page.previewHref or page.href %}
+      {% set linkHref = page.href or frameSrc %}
+      <div class="journey-docs__preview">
+        {% if page.caption or page.journey %}
+          <p class="govuk-body-s govuk-!-margin-bottom-1">{{ page.caption or page.journey }}</p>
+        {% endif %}
+        <h3 class="govuk-heading-s govuk-!-margin-bottom-2">
+          <a class="govuk-link govuk-link--no-visited-state" href="{{ linkHref }}" target="_blank" rel="noreferrer noopener">{{ page.title }}</a>
+        </h3>
+        <div class="journey-docs__frame-wrap">
+          <iframe
+            class="journey-docs__frame"
+            src="{{ frameSrc }}"
+            title="{{ page.title }}"
+            loading="eager"
+          ></iframe>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endmacro %}
+
+{% macro journeyPreviewLoaderScript() %}{% endmacro %}

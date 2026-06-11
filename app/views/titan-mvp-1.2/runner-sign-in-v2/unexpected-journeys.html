@@ -4,6 +4,7 @@
 {% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
 {% from "govuk/components/tag/macro.njk" import govukTag %}
 {% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
+{% import "titan-mvp-1.2/runner-sign-in-v2/_journey-docs.njk" as journeyDocs %}
 
 {% block pageTitle %}
 Unexpected journeys - Runner sign-in v2 - GOV.UK
@@ -11,53 +12,10 @@ Unexpected journeys - Runner sign-in v2 - GOV.UK
 
 {% block head %}
   {{ super() }}
+  {{ journeyDocs.journeyDocsStyles() }}
   <style>
-    .unexpected-journey {
-      border-left: 5px solid #1d70b8;
-      padding-left: 15px;
-    }
-
-    .unexpected-journey__path {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .unexpected-journey__step {
-      border: 1px solid #b1b4b6;
-      padding: 10px;
-      max-width: 170px;
-      min-height: 54px;
-      background: #ffffff;
-    }
-
-    .unexpected-journey__step--unexpected {
-      border-color: #d4351c;
-      border-left: 5px solid #d4351c;
-    }
-
-    .unexpected-journey__arrow {
-      font-weight: 700;
-    }
-
-    .unexpected-preview-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 30px;
-    }
-
-    .unexpected-preview {
-      border-top: 1px solid #b1b4b6;
-      padding-top: 15px;
-    }
-
-    .unexpected-preview__frame {
-      width: 100%;
-      height: 430px;
-      border: 1px solid #b1b4b6;
-      background: #ffffff;
+    .journey-docs__section {
+      border-left-color: #d4351c;
     }
   </style>
 {% endblock %}
@@ -73,19 +31,6 @@ Unexpected journeys - Runner sign-in v2 - GOV.UK
   {{ v2.v2ServiceHeader("start") }}
 {% endblock %}
 
-{% macro journeyPath(steps) %}
-  <div class="unexpected-journey__path">
-    {% for step in steps %}
-      <div class="unexpected-journey__step{% if step.unexpected %} unexpected-journey__step--unexpected{% endif %}">
-        <p class="govuk-body-s govuk-!-margin-bottom-0">{{ step.text }}</p>
-      </div>
-      {% if not loop.last %}
-        <span class="unexpected-journey__arrow" aria-hidden="true">→</span>
-      {% endif %}
-    {% endfor %}
-  </div>
-{% endmacro %}
-
 {% block content %}
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
@@ -94,6 +39,9 @@ Unexpected journeys - Runner sign-in v2 - GOV.UK
 
     <p class="govuk-body">
       Use this page to review what should happen when someone cannot continue through the expected sign-in, recovery or checking journeys.
+    </p>
+    <p class="govuk-body">
+      <a class="govuk-link" href="/runner-sign-in-v2/journeys">Review main sign-in journeys</a>
     </p>
 
     {{ govukInsetText({
@@ -105,8 +53,8 @@ Unexpected journeys - Runner sign-in v2 - GOV.UK
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-full">
     {% set createEmailInUseHtml %}
-      <div class="unexpected-journey">
-        {{ journeyPath([
+      <div class="journey-docs__section">
+        {{ journeyDocs.journeyPath([
           { text: "Start page" },
           { text: "Why you need to sign in" },
           { text: "Enter your email address" },
@@ -120,12 +68,16 @@ Unexpected journeys - Runner sign-in v2 - GOV.UK
         <p class="govuk-body"><strong>You already have a sign-in for this form</strong></p>
         <p class="govuk-body">Sign in using this email address to continue your form.</p>
         <p class="govuk-body">Primary action: <strong>Sign in</strong>. Secondary link: <strong>Use a different email address</strong>.</p>
+
+        {{ journeyDocs.journeyPreviews([
+          { caption: "Email already has a sign-in", title: "You already have a sign-in for this form", href: "/runner-sign-in-v2/unexpected-journeys/email-already-has-sign-in" }
+        ]) }}
       </div>
     {% endset %}
 
     {% set signInNotFoundHtml %}
-      <div class="unexpected-journey">
-        {{ journeyPath([
+      <div class="journey-docs__section">
+        {{ journeyDocs.journeyPath([
           { text: "Start page" },
           { text: "Sign in" },
           { text: "Enter your email address to sign in to your form" },
@@ -139,31 +91,16 @@ Unexpected journeys - Runner sign-in v2 - GOV.UK
         <p class="govuk-body"><strong>We cannot find a sign-in for that email address</strong></p>
         <p class="govuk-body">Check the email address or create a sign-in if you have not used this form before.</p>
         <p class="govuk-body">Primary action: <strong>Try again</strong>. Secondary link: <strong>Create a sign-in</strong>.</p>
-      </div>
-    {% endset %}
 
-    {% set mobileNumberHtml %}
-      <div class="unexpected-journey">
-        {{ journeyPath([
-          { text: "Create a sign-in" },
-          { text: "Enter your email address" },
-          { text: "Enter your mobile phone number" },
-          { text: "You need a UK mobile phone number to create a sign-in", unexpected: true }
+        {{ journeyDocs.journeyPreviews([
+          { caption: "No sign-in found for an email address", title: "We cannot find a sign-in for that email address", href: "/runner-sign-in-v2/unexpected-journeys/no-sign-in-found" }
         ]) }}
-
-        <h3 class="govuk-heading-s">Use when</h3>
-        <p class="govuk-body">Someone cannot provide a UK mobile number. In this design, the number is used only to recover access to a form sign-in.</p>
-
-        <h3 class="govuk-heading-s">Suggested page language</h3>
-        <p class="govuk-body"><strong>You need a UK mobile phone number to create a sign-in</strong></p>
-        <p class="govuk-body">We use this number to send a security code if you need to recover your sign-in.</p>
-        <p class="govuk-body">Primary action: <strong>Enter a UK mobile phone number</strong>. Secondary link: <strong>Continue without creating a sign-in</strong>, if the form allows it.</p>
       </div>
     {% endset %}
 
     {% set securityCodeHtml %}
-      <div class="unexpected-journey">
-        {{ journeyPath([
+      <div class="journey-docs__section">
+        {{ journeyDocs.journeyPath([
           { text: "Check your email or phone" },
           { text: "Enter the 6 digit security code" },
           { text: "Security code problem", unexpected: true }
@@ -175,16 +112,23 @@ Unexpected journeys - Runner sign-in v2 - GOV.UK
         <h3 class="govuk-heading-s">Suggested page language</h3>
         <ul class="govuk-list govuk-list--bullet">
           <li><strong>Your security code has expired</strong> - send a new security code.</li>
-          <li><strong>You entered the wrong security code too many times</strong> - ask the user to wait before trying again.</li>
-          <li><strong>You asked us to send too many security codes</strong> - ask the user to wait before requesting another code.</li>
+          <li><strong>You entered the wrong security code too many times</strong> - link to get a new code, or show a 2 hour lockout.</li>
+          <li><strong>You asked to resend the security code too many times</strong> - show a 2 hour lockout.</li>
         </ul>
         <p class="govuk-body">Keep the channel specific: use <strong>email</strong> when creating or signing in, and <strong>phone</strong> when recovering a sign-in.</p>
+
+        {{ journeyDocs.journeyPreviews([
+          { caption: "Security code problems", title: "Your security code has expired", href: "/runner-sign-in-v2/unexpected-journeys/security-code-expired" },
+          { caption: "Security code problems", title: "You entered the wrong security code too many times (get a new code)", href: "/runner-sign-in-v2/unexpected-journeys/wrong-security-code-too-many-times" },
+          { caption: "Security code problems", title: "You entered the wrong security code too many times (locked out)", href: "/runner-sign-in-v2/unexpected-journeys/wrong-security-code-locked-out" },
+          { caption: "Security code problems", title: "You asked to resend the security code too many times", href: "/runner-sign-in-v2/unexpected-journeys/too-many-security-codes" }
+        ]) }}
       </div>
     {% endset %}
 
     {% set recoverHtml %}
-      <div class="unexpected-journey">
-        {{ journeyPath([
+      <div class="journey-docs__section">
+        {{ journeyDocs.journeyPath([
           { text: "I've forgotten my email address" },
           { text: "Text a security code to your mobile" },
           { text: "Enter your new email address" },
@@ -196,14 +140,18 @@ Unexpected journeys - Runner sign-in v2 - GOV.UK
 
         <h3 class="govuk-heading-s">Suggested page language</h3>
         <p class="govuk-body"><strong>We cannot recover your sign-in online</strong></p>
-        <p class="govuk-body">You can start a new form or contact the service if you need access to a saved form.</p>
-        <p class="govuk-body">Primary action: <strong>Start a new form</strong>. Secondary link: <strong>Contact the service</strong>.</p>
+        <p class="govuk-body">You can start a new form or contact us if you need access to a saved form.</p>
+        <p class="govuk-body">Primary action: <strong>Start a new form</strong>. Secondary link: <strong>Contact us</strong>.</p>
+
+        {{ journeyDocs.journeyPreviews([
+          { caption: "Cannot recover a sign-in online", title: "We cannot recover your sign-in online", href: "/runner-sign-in-v2/unexpected-journeys/cannot-recover-online" }
+        ]) }}
       </div>
     {% endset %}
 
     {% set linkExpiredHtml %}
-      <div class="unexpected-journey">
-        {{ journeyPath([
+      <div class="journey-docs__section">
+        {{ journeyDocs.journeyPath([
           { text: "Save and exit email or checker invite email" },
           { text: "Open link" },
           { text: "This link has expired", unexpected: true }
@@ -217,14 +165,19 @@ Unexpected journeys - Runner sign-in v2 - GOV.UK
           <li><strong>Your link to return to this form has expired</strong> - sign in from the form start page.</li>
           <li><strong>This review link has expired</strong> - ask the applicant to send a new invite.</li>
         </ul>
+
+        {{ journeyDocs.journeyPreviews([
+          { caption: "Expired save or review links", title: "Your link to return to this form has expired", href: "/runner-sign-in-v2/unexpected-journeys/save-link-expired" },
+          { caption: "Expired save or review links", title: "This review link has expired", href: "/runner-sign-in-v2/unexpected-journeys/review-link-expired" }
+        ]) }}
       </div>
     {% endset %}
 
     {% set technicalErrorsHtml %}
-      <div class="unexpected-journey">
-        {{ journeyPath([
+      <div class="journey-docs__section">
+        {{ journeyDocs.journeyPath([
           { text: "Any runner sign-in v2 page" },
-          { text: "Service unavailable or page not found", unexpected: true }
+          { text: "Form unavailable or page not found", unexpected: true }
         ]) }}
 
         <h3 class="govuk-heading-s">Use when</h3>
@@ -232,10 +185,16 @@ Unexpected journeys - Runner sign-in v2 - GOV.UK
 
         <h3 class="govuk-heading-s">Suggested page language</h3>
         <ul class="govuk-list govuk-list--bullet">
-          <li><strong>Sorry, the service is unavailable</strong> - tell the user to try again later.</li>
+          <li><strong>Sorry, the form is unavailable</strong> - tell the user to try again later.</li>
           <li><strong>Page not found</strong> - link back to the form start page.</li>
-          <li><strong>Sorry, there is a problem with the service</strong> - use when the route is recoverable but the action failed.</li>
+          <li><strong>Sorry, there is a problem with the form</strong> - use when the route is recoverable but the action failed.</li>
         </ul>
+
+        {{ journeyDocs.journeyPreviews([
+          { caption: "Technical errors", title: "Sorry, the form is unavailable", href: "/runner-sign-in-v2/unexpected-journeys/service-unavailable" },
+          { caption: "Technical errors", title: "Page not found", href: "/runner-sign-in-v2/unexpected-journeys/page-not-found" },
+          { caption: "Technical errors", title: "Sorry, there is a problem with the form", href: "/runner-sign-in-v2/unexpected-journeys/problem-with-service" }
+        ]) }}
       </div>
     {% endset %}
 
@@ -245,17 +204,13 @@ Unexpected journeys - Runner sign-in v2 - GOV.UK
         {
           heading: { text: "Email already has a sign-in" },
           summary: { text: "Create a sign-in journey" },
-          content: { html: createEmailInUseHtml }
+          content: { html: createEmailInUseHtml },
+          expanded: true
         },
         {
           heading: { text: "No sign-in found for an email address" },
           summary: { text: "Sign-in journey" },
           content: { html: signInNotFoundHtml }
-        },
-        {
-          heading: { text: "No UK mobile phone number" },
-          summary: { text: "Create a sign-in journey" },
-          content: { html: mobileNumberHtml }
         },
         {
           heading: { text: "Security code problems" },
@@ -279,43 +234,10 @@ Unexpected journeys - Runner sign-in v2 - GOV.UK
         }
       ]
     }) }}
-
-    <h2 class="govuk-heading-l govuk-!-margin-top-9">Rendered examples</h2>
-    <p class="govuk-body">
-      Open each page in a new tab to check the full page layout and content.
-    </p>
-
-    {% set renderedExamples = unexpectedPages if unexpectedPages else [
-      { journey: "Email already has a sign-in", title: "You already have a sign-in for this form", href: "/runner-sign-in-v2/unexpected-journeys/email-already-has-sign-in" },
-      { journey: "No sign-in found for an email address", title: "We cannot find a sign-in for that email address", href: "/runner-sign-in-v2/unexpected-journeys/no-sign-in-found" },
-      { journey: "No UK mobile phone number", title: "You need a UK mobile phone number to create a sign-in", href: "/runner-sign-in-v2/unexpected-journeys/uk-mobile-needed" },
-      { journey: "Security code problems", title: "Your security code has expired", href: "/runner-sign-in-v2/unexpected-journeys/security-code-expired" },
-      { journey: "Security code problems", title: "You entered the wrong security code too many times", href: "/runner-sign-in-v2/unexpected-journeys/wrong-security-code-too-many-times" },
-      { journey: "Security code problems", title: "You asked us to send too many security codes", href: "/runner-sign-in-v2/unexpected-journeys/too-many-security-codes" },
-      { journey: "Cannot recover a sign-in online", title: "We cannot recover your sign-in online", href: "/runner-sign-in-v2/unexpected-journeys/cannot-recover-online" },
-      { journey: "Expired save or review links", title: "Your link to return to this form has expired", href: "/runner-sign-in-v2/unexpected-journeys/save-link-expired" },
-      { journey: "Expired save or review links", title: "This review link has expired", href: "/runner-sign-in-v2/unexpected-journeys/review-link-expired" },
-      { journey: "Technical errors", title: "Sorry, the service is unavailable", href: "/runner-sign-in-v2/unexpected-journeys/service-unavailable" },
-      { journey: "Technical errors", title: "Page not found", href: "/runner-sign-in-v2/unexpected-journeys/page-not-found" },
-      { journey: "Technical errors", title: "Sorry, there is a problem with the service", href: "/runner-sign-in-v2/unexpected-journeys/problem-with-service" }
-    ] %}
-
-    <div class="unexpected-preview-grid">
-      {% for page in renderedExamples %}
-        <div class="unexpected-preview">
-          <p class="govuk-body-s govuk-!-margin-bottom-1">{{ page.journey }}</p>
-          <h3 class="govuk-heading-s govuk-!-margin-bottom-2">
-            <a class="govuk-link govuk-link--no-visited-state" href="{{ page.href }}" target="_blank" rel="noreferrer noopener">{{ page.title }}</a>
-          </h3>
-          <iframe
-            class="unexpected-preview__frame"
-            src="{{ page.href }}"
-            title="{{ page.title }}"
-            loading="lazy"
-          ></iframe>
-        </div>
-      {% endfor %}
-    </div>
   </div>
 </div>
+{% endblock %}
+
+{% block pageScripts %}
+  {{ journeyDocs.journeyPreviewLoaderScript() }}
 {% endblock %}
