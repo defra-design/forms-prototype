@@ -39,7 +39,7 @@
       <input type="hidden" name="applicationId" value="{{ applicationId }}" />
       <input type="hidden" name="next" value="{{ next | e }}" />
       {{ govukInput({
-        label: { text: "Enter your email address or phone number to sign in to your form", classes: "govuk-label--xl" },
+        label: { text: "Enter your email address", classes: "govuk-label--xl" },
         isPageHeading: true,
         id: "v2-email",
         name: "runnerSignInV2Email",
@@ -51,7 +51,7 @@
     </form>
 
     <p class="govuk-body">
-      <a class="govuk-link" href="/runner-sign-in-v2/recover/start?formKey={{ formKey | urlencode }}&amp;applicationId={{ applicationId | urlencode }}&amp;next={{ next | urlencode }}">I've forgotten my email address</a>.
+      <a class="govuk-link" href="/runner-sign-in-v2/recover/phone?formKey={{ formKey | urlencode }}&amp;applicationId={{ applicationId | urlencode }}&amp;next={{ next | urlencode }}">I've forgotten my email address</a>.
     </p>
 
 

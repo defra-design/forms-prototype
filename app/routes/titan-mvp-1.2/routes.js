@@ -19835,10 +19835,12 @@ function runnerSignInV2MaskedMobile(data) {
   return digits.length >= 4 ? digits.slice(-4) : "";
 }
 
-function runnerSignInV2EnsureRecoverPrototypePhone(data) {
-  if (!String((data && data.runnerSignInPhone) || "").trim()) {
-    data.runnerSignInPhone = "07700 900000";
-  }
+function runnerSignInV2RecoverPhonePath(formKey, applicationId, next) {
+  return `/runner-sign-in-v2/recover/phone?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}&next=${encodeURIComponent(next)}`;
+}
+
+function runnerSignInV2RecoverStartPath(formKey, applicationId, next) {
+  return `/runner-sign-in-v2/recover/start?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}&next=${encodeURIComponent(next)}`;
 }
 
 function isRunnerSignInV2ProbablyEmail(value) {
@@ -20768,12 +20770,46 @@ router.post("/runner-sign-in-v2/sign-in/get-security-code", function (req, res) 
   );
 });
 
-router.get("/runner-sign-in-v2/recover/start", function (req, res) {
+router.get("/runner-sign-in-v2/recover/phone", function (req, res) {
   const data = ensureRunnerSignInSession(req);
-  runnerSignInV2EnsureRecoverPrototypePhone(data);
   const { formKey, applicationId, next } = runnerSignInV2ReadTriple(req, req.query);
   const application = runnerSignInV2ResolveApplication(req, formKey, applicationId);
   const manageUrl = formKey && applicationId ? runnerSignInV2ManagePath(formKey, applicationId) : "";
+  const resolvedNext = next || manageUrl;
+  const backUrl = `/runner-sign-in-v2/sign-in/email?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}&next=${encodeURIComponent(resolvedNext)}`;
+  return res.render("titan-mvp-1.2/runner-sign-in-v2/recover/phone", {
+    data,
+    application,
+    formKey,
+    applicationId,
+    next: resolvedNext,
+    backUrl,
+    error: data.runnerSignInV2Error || {},
+    values: { runnerSignInV2Mobile: data.runnerSignInPhone || "" },
+  });
+});
+
+router.post("/runner-sign-in-v2/recover/phone", function (req, res) {
+  const data = ensureRunnerSignInSession(req);
+  const { formKey, applicationId, next } = runnerSignInV2ReadTriple(req, req.body);
+  const manageUrl = formKey && applicationId ? runnerSignInV2ManagePath(formKey, applicationId) : "/runner-sign-in-v2/start-page";
+  const resolvedNext = next || manageUrl;
+  // Prototype: allow flicking through without validation.
+  const phone = String(req.body.runnerSignInV2Mobile || "").trim() || "07700 900000";
+  delete data.runnerSignInV2Error;
+  data.runnerSignInPhone = phone;
+  return res.redirect(runnerSignInV2RecoverStartPath(formKey, applicationId, resolvedNext));
+});
+
+router.get("/runner-sign-in-v2/recover/start", function (req, res) {
+  const data = ensureRunnerSignInSession(req);
+  const { formKey, applicationId, next } = runnerSignInV2ReadTriple(req, req.query);
+  const application = runnerSignInV2ResolveApplication(req, formKey, applicationId);
+  const manageUrl = formKey && applicationId ? runnerSignInV2ManagePath(formKey, applicationId) : "";
+  const resolvedNext = next || manageUrl;
+  if (!String(data.runnerSignInPhone || "").trim()) {
+    return res.redirect(runnerSignInV2RecoverPhonePath(formKey, applicationId, resolvedNext));
+  }
   const maskedMobile = runnerSignInV2MaskedMobile(data);
   const resend = req.query.resend === "1" || req.query.resend === "true";
   return res.render("titan-mvp-1.2/runner-sign-in-v2/recover/start", {
@@ -20781,32 +20817,45 @@ router.get("/runner-sign-in-v2/recover/start", function (req, res) {
     application,
     formKey,
     applicationId,
-    next: next || manageUrl,
+    next: resolvedNext,
     maskedMobile,
     resend,
-    backUrl: `/runner-sign-in-v2/start-page?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}`,
+    backUrl: runnerSignInV2RecoverPhonePath(formKey, applicationId, resolvedNext),
     error: data.runnerSignInV2Error || {},
     values: {},
   });
 });
 
 router.post("/runner-sign-in-v2/recover/start", function (req, res) {
+  const data = ensureRunnerSignInSession(req);
   const { formKey, applicationId, next } = runnerSignInV2ReadTriple(req, req.body);
   const manageUrl = formKey && applicationId ? runnerSignInV2ManagePath(formKey, applicationId) : "/runner-sign-in-v2/start-page";
+  const resolvedNext = next || manageUrl;
+  if (!String(data.runnerSignInPhone || "").trim()) {
+    return res.redirect(runnerSignInV2RecoverPhonePath(formKey, applicationId, resolvedNext));
+  }
+  const code = String(req.body.runnerSignInV2Code || "").replace(/\s+/g, "");
+  if (!/^\d{6}$/.test(code)) {
+    data.runnerSignInV2Error = { runnerSignInV2Code: "Enter the 6 digit security code" };
+    return res.redirect(runnerSignInV2RecoverStartPath(formKey, applicationId, resolvedNext));
+  }
+  delete data.runnerSignInV2Error;
   return res.redirect(
-    `/runner-sign-in-v2/recover/check-mobile?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}&next=${encodeURIComponent(next || manageUrl)}`
+    `/runner-sign-in-v2/recover/new-email?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}&next=${encodeURIComponent(resolvedNext)}`
   );
 });
 
 router.get("/runner-sign-in-v2/recover/get-security-code", function (req, res) {
   const data = ensureRunnerSignInSession(req);
-  runnerSignInV2EnsureRecoverPrototypePhone(data);
   const { formKey, applicationId, next } = runnerSignInV2ReadTriple(req, req.query);
   const application = runnerSignInV2ResolveApplication(req, formKey, applicationId);
   const manageUrl = formKey && applicationId ? runnerSignInV2ManagePath(formKey, applicationId) : "";
   const resolvedNext = next || manageUrl;
+  if (!String(data.runnerSignInPhone || "").trim()) {
+    return res.redirect(runnerSignInV2RecoverPhonePath(formKey, applicationId, resolvedNext));
+  }
   const maskedMobile = runnerSignInV2MaskedMobile(data);
-  const backUrl = `/runner-sign-in-v2/recover/start?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}&next=${encodeURIComponent(resolvedNext)}`;
+  const backUrl = runnerSignInV2RecoverStartPath(formKey, applicationId, resolvedNext);
   return res.render("titan-mvp-1.2/runner-sign-in-v2/recover/get-security-code", {
     data,
     application,
@@ -20822,29 +20871,13 @@ router.post("/runner-sign-in-v2/recover/get-security-code", function (req, res) 
   const { formKey, applicationId, next } = runnerSignInV2ReadTriple(req, req.body);
   const manageUrl = formKey && applicationId ? runnerSignInV2ManagePath(formKey, applicationId) : "/runner-sign-in-v2/start-page";
   const resolvedNext = next || manageUrl;
-  return res.redirect(
-    `/runner-sign-in-v2/recover/start?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}&next=${encodeURIComponent(resolvedNext)}&resend=1`
-  );
+  return res.redirect(`${runnerSignInV2RecoverStartPath(formKey, applicationId, resolvedNext)}&resend=1`);
 });
 
 router.get("/runner-sign-in-v2/recover/check-mobile", function (req, res) {
-  const data = ensureRunnerSignInSession(req);
-  runnerSignInV2EnsureRecoverPrototypePhone(data);
   const { formKey, applicationId, next } = runnerSignInV2ReadTriple(req, req.query);
-  const application = runnerSignInV2ResolveApplication(req, formKey, applicationId);
   const manageUrl = formKey && applicationId ? runnerSignInV2ManagePath(formKey, applicationId) : "";
-  const maskedMobile = runnerSignInV2MaskedMobile(data);
-  return res.render("titan-mvp-1.2/runner-sign-in-v2/recover/check-mobile", {
-    data,
-    application,
-    formKey,
-    applicationId,
-    next: next || manageUrl,
-    maskedMobile,
-    backUrl: `/runner-sign-in-v2/recover/start?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}&next=${encodeURIComponent(next || manageUrl)}`,
-    error: data.runnerSignInV2Error || {},
-    values: {},
-  });
+  return res.redirect(runnerSignInV2RecoverStartPath(formKey, applicationId, next || manageUrl));
 });
 
 router.post("/runner-sign-in-v2/recover/check-mobile", function (req, res) {

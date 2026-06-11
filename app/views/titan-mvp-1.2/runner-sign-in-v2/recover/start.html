@@ -2,6 +2,7 @@
 {% from "govuk/components/input/macro.njk" import govukInput %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
 {% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
 {% from "govuk/components/details/macro.njk" import govukDetails %}
 {% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
@@ -17,13 +18,16 @@
 {% block content %}
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
+    {% if error and error.runnerSignInV2Code %}
+      {{ govukErrorSummary({ titleText: "There is a problem", errorList: [{ text: error.runnerSignInV2Code, href: "#v2-code" }] }) }}
+    {% endif %}
     {% if resend %}
       {{ govukNotificationBanner({ type: "success", html: "<p class=\"govuk-notification-banner__heading\">We’ve sent you a new security code.</p>" }) }}
     {% endif %}
     <h1 class="govuk-heading-l">Check your phone</h1>
     <p class="govuk-body">We need to make sure your sign-in details are correct.</p>
     {% if maskedMobile %}
-      {{ govukInsetText({ html: "We have sent a code to your phone number ending with <strong>" + maskedMobile + "</strong>" }) }}
+      {{ govukInsetText({ html: "We have sent a code to your phone number ending with <strong>" + (maskedMobile | e) + "</strong>" }) }}
       <p class="govuk-body">It might take a few minutes to arrive. The code will expire after 15 minutes.</p>
 
       <form method="post" action="/runner-sign-in-v2/recover/start" novalidate>
