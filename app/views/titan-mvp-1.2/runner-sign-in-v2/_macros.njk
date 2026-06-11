@@ -14,6 +14,7 @@
 
   {% if data and data.runnerSignInAuthed %}
     {% set manageHref = data.runnerSignInV2ManageUrl or "/runner-sign-in-v2/start-page" %}
+    {% set securityHref = data.runnerSignInV2SecurityUrl or manageHref %}
     {% set showServiceNav = true if (not options) else (options.showServiceNav is not defined or options.showServiceNav) %}
     {% set navItems = [
       { href: manageHref, text: "Start", active: activeNav == "start" },
@@ -24,7 +25,7 @@
     {% if activeNav != "start" %}
       {% set navItems = [
         { href: manageHref, text: "Forms", active: activeNav == "forms" },
-        { href: manageHref, text: "Security", active: activeNav == "security" }
+        { href: securityHref, text: "Security", active: activeNav == "security" }
       ] %}
     {% endif %}
 

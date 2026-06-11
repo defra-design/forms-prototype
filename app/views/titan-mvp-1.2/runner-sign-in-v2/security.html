@@ -1,0 +1,76 @@
+{% extends "layouts/runner-sign-in-v2.html" %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+{% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}Security – GOV.UK{% endblock %}
+
+{% block beforeContent %}{% endblock %}
+
+{% block header %}{{ v2.v2ServiceHeader("security") }}{% endblock %}
+
+{% block content %}
+{% set _email = data.runnerSignInEmail %}
+{% set _phone = data.runnerSignInPhone or "07700 900000" %}
+{% set _changeEmailUrl = "/runner-sign-in-v2/forms/" + (formKey | urlencode) + "/" + (applicationId | urlencode) + "/security/change-email/get-security-code" %}
+{% set _changePhoneUrl = "/runner-sign-in-v2/forms/" + (formKey | urlencode) + "/" + (applicationId | urlencode) + "/security/change-phone/get-security-code" %}
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">Security</h1>
+
+    {% if query and query.emailChanged %}
+      {{ govukNotificationBanner({ type: "success", html: "<p class=\"govuk-notification-banner__heading\">Email address changed</p>" }) }}
+    {% endif %}
+    {% if query and query.phoneChanged %}
+      {{ govukNotificationBanner({ type: "success", html: "<p class=\"govuk-notification-banner__heading\">Mobile phone number changed</p>" }) }}
+    {% endif %}
+
+    <div class="govuk-summary-card">
+      <div class="govuk-summary-card__title-wrapper">
+        <h2 class="govuk-summary-card__title">Your sign-in details</h2>
+      </div>
+      <div class="govuk-summary-card__content">
+        {{ govukSummaryList({
+          rows: [
+            {
+              key: { text: "Email address" },
+              value: { text: _email },
+              actions: {
+                items: [
+                  { href: _changeEmailUrl, text: "Change", visuallyHiddenText: "email address" }
+                ]
+              }
+            },
+            {
+              key: { text: "Mobile phone number" },
+              value: { text: _phone },
+              actions: {
+                items: [
+                  { href: _changePhoneUrl, text: "Change", visuallyHiddenText: "mobile phone number" }
+                ]
+              }
+            }
+          ]
+        }) }}
+      </div>
+    </div>
+
+    <h2 class="govuk-heading-m govuk-!-margin-top-8">Delete your sign-in</h2>
+
+<p class="govuk-body">
+  To permanently delete your sign-in, email
+  <a class="govuk-link" href="mailto:forms-support@defra.gov.uk">forms-support@defra.gov.uk</a>.
+</p>
+
+
+<p class="govuk-body">
+  Include the email address and mobile phone number linked to your sign-in so we can process your request.
+</p>
+<p class="govuk-body">
+  Deleting your sign-in is permanent. You will not be able to access any forms you have started or submitted using this sign-in.
+</p>
+
+  </div>
+</div>
+{% endblock %}
