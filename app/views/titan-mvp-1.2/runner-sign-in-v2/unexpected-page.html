@@ -35,6 +35,21 @@
       <p class="govuk-body">{{ paragraph }}</p>
     {% endfor %}
 
+    {% if page.paragraphsHtml %}
+      {% for html in page.paragraphsHtml %}
+        {{ html | safe }}
+      {% endfor %}
+    {% endif %}
+
+    {% if page.sections %}
+      {% for section in page.sections %}
+        <h2 class="govuk-heading-m">{{ section.heading }}</h2>
+        {% for paragraph in section.paragraphs %}
+          <p class="govuk-body">{{ paragraph }}</p>
+        {% endfor %}
+      {% endfor %}
+    {% endif %}
+
     {% if page.bullets %}
       <ul class="govuk-list govuk-list--bullet">
         {% for bullet in page.bullets %}
