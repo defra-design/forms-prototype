@@ -4,7 +4,7 @@
 {% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
 
 {% block pageTitle %}
-Why you need to sign in – Runner sign-in v2 – GOV.UK
+Sign in – form name – GOV.UK
 {% endblock %}
 
 {% block header %}
@@ -18,21 +18,10 @@ Why you need to sign in – Runner sign-in v2 – GOV.UK
 {% block content %}
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
-    <span class="govuk-caption-l">{{ application.formName }}</span>
     <h1 class="govuk-heading-l">Sign in to use this form</h1>
 
-    <p class="govuk-body">Signing in means you can:</p>
-    <ul class="govuk-list govuk-list--bullet">
-      <li>save your progress and come back later</li>
-      <li>continue a form you’ve already started</li>
-      <li>reuse answers from previous submissions (if you have any)</li>
-    </ul>
+    <p class="govuk-body govuk-!-margin-bottom-6">You’ll need an email address and a mobile phone number.</p>
 
-    <h2 class="govuk-heading-m">You’ll need</h2>
-    <ul class="govuk-list govuk-list--bullet">
-      <li>an email address</li>
-      <li>a UK mobile phone number (used to recover your sign-in)</li>
-    </ul>
 
     {{ govukButton({
       text: "Create your sign in",

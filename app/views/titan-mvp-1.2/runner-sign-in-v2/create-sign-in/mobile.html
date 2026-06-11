@@ -6,7 +6,7 @@
 {% from "govuk/components/details/macro.njk" import govukDetails %}
 {% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
 
-{% block pageTitle %}Create a sign-in: mobile – GOV.UK{% endblock %}
+{% block pageTitle %}Enter your mobile phone number – GOV.UK{% endblock %}
 
 {% block beforeContent %}
   {{ govukBackLink({ href: backUrl, text: "Back" }) }}
@@ -21,14 +21,15 @@
       {{ govukErrorSummary({ titleText: "There is a problem", errorList: [{ text: error.runnerSignInV2Mobile, href: "#v2-mobile" }] }) }}
     {% endif %}
     <h1 class="govuk-heading-l">Enter your mobile phone number</h1>
-    <p class="govuk-body">If you forget your sign-in details, we’ll send a 6-digit code to your phone so you can get back into your form.</p>
-    <p class="govuk-body">You must use a UK mobile phone number.</p>
+    <p class="govuk-body">If you forget your sign-in details, we will send a 6 digit security code to the number you give us.
+      This will allow you to get back into your form.</p>
+
     <form method="post" action="/runner-sign-in-v2/create-sign-in/mobile" novalidate>
       <input type="hidden" name="formKey" value="{{ formKey }}" />
       <input type="hidden" name="applicationId" value="{{ applicationId }}" />
       <input type="hidden" name="next" value="{{ next | e }}" />
       {{ govukInput({
-        label: { text: "UK mobile phone number" },
+        label: { text: "Mobile phone number" },
         id: "v2-mobile",
         name: "runnerSignInV2Mobile",
         type: "tel",

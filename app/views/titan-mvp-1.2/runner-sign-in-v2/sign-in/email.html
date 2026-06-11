@@ -39,12 +39,10 @@
       <input type="hidden" name="applicationId" value="{{ applicationId }}" />
       <input type="hidden" name="next" value="{{ next | e }}" />
       {{ govukInput({
-        label: { text: "Enter your email address to sign in to your form", classes: "govuk-label--xl" },
+        label: { text: "Enter your email address or phone number to sign in to your form", classes: "govuk-label--xl" },
         isPageHeading: true,
         id: "v2-email",
         name: "runnerSignInV2Email",
-        type: "email",
-        autocomplete: "email",
         spellcheck: false,
         value: values.runnerSignInV2Email,
         errorMessage: { text: error.runnerSignInV2Email } if error and error.runnerSignInV2Email else false
