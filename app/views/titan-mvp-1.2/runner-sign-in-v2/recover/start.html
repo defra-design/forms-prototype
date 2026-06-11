@@ -1,9 +1,12 @@
 {% extends "layouts/runner-sign-in-v2.html" %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+{% from "govuk/components/details/macro.njk" import govukDetails %}
 {% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
 
-{% block pageTitle %}Recover my sign-in – GOV.UK{% endblock %}
+{% block pageTitle %}Check your phone – GOV.UK{% endblock %}
 
 {% block beforeContent %}
   {{ govukBackLink({ href: backUrl, text: "Back" }) }}
@@ -14,18 +17,44 @@
 {% block content %}
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
-    <span class="govuk-caption-l">Recover my sign-in</span>
-    <h1 class="govuk-heading-l">We’ll text a security code to your mobile</h1>
-    <p class="govuk-body">We use the UK mobile number you gave us when you created your sign-in.</p>
-    {% if maskedMobile %}
-      <p class="govuk-body">Number on file ending <strong>{{ maskedMobile }}</strong></p>
+    {% if resend %}
+      {{ govukNotificationBanner({ type: "success", html: "<p class=\"govuk-notification-banner__heading\">We’ve sent you a new security code.</p>" }) }}
     {% endif %}
-    <form method="post" action="/runner-sign-in-v2/recover/start">
-      <input type="hidden" name="formKey" value="{{ formKey }}" />
-      <input type="hidden" name="applicationId" value="{{ applicationId }}" />
-      <input type="hidden" name="next" value="{{ next | e }}" />
-      {{ govukButton({ text: "Continue" }) }}
-    </form>
+    <h1 class="govuk-heading-l">Check your phone</h1>
+    <p class="govuk-body">We need to make sure your sign-in details are correct.</p>
+    {% if maskedMobile %}
+      {{ govukInsetText({ html: "We have sent a code to your phone number ending with <strong>" + maskedMobile + "</strong>" }) }}
+      <p class="govuk-body">It might take a few minutes to arrive. The code will expire after 15 minutes.</p>
+
+      <form method="post" action="/runner-sign-in-v2/recover/start" novalidate>
+        <input type="hidden" name="formKey" value="{{ formKey }}" />
+        <input type="hidden" name="applicationId" value="{{ applicationId }}" />
+        <input type="hidden" name="next" value="{{ next | e }}" />
+        {{ govukInput({
+          label: {
+            text: "Enter the 6 digit code"
+          },
+          classes: "govuk-input--width-10",
+          id: "v2-code",
+          name: "runnerSignInV2Code",
+          errorMessage: { text: error.runnerSignInV2Code } if error and error.runnerSignInV2Code else false,
+          value: values.runnerSignInV2Code
+        }) }}
+        {{ govukButton({ text: "Continue" }) }}
+      </form>
+
+      {% set problemsHtml %}
+        <p class="govuk-body">
+          We can
+          <a class="govuk-link" href="/runner-sign-in-v2/recover/get-security-code?formKey={{ formKey | urlencode }}&amp;applicationId={{ applicationId | urlencode }}&amp;next={{ next | urlencode }}">send the code again</a> if the code is not working or you did not receive it.
+        </p>
+      {% endset %}
+
+      {{ govukDetails({
+        summaryText: "Problems with the code?",
+        html: problemsHtml
+      }) }}
+    {% endif %}
   </div>
 </div>
 {% endblock %}

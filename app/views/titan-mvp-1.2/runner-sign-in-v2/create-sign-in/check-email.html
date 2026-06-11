@@ -53,7 +53,7 @@
     {% set problemsHtml %}
       <p class="govuk-body">
         We can
-        <a class="govuk-link" href="/runner-sign-in-v2/create-sign-in/check-email?formKey={{ formKey | urlencode }}&amp;applicationId={{ applicationId | urlencode }}&amp;next={{ next | urlencode }}&amp;resend=1">send the code again</a>
+        <a class="govuk-link" href="/runner-sign-in-v2/create-sign-in/get-security-code?formKey={{ formKey | urlencode }}&amp;applicationId={{ applicationId | urlencode }}&amp;next={{ next | urlencode }}">send the code again</a>
         or you can
         <a class="govuk-link" href="/runner-sign-in-v2/create-sign-in/email?formKey={{ formKey | urlencode }}&amp;applicationId={{ applicationId | urlencode }}&amp;next={{ next | urlencode }}">use a different email address</a>.
       </p>

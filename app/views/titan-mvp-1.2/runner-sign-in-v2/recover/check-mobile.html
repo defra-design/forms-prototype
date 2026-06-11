@@ -22,7 +22,11 @@
       {{ govukErrorSummary({ titleText: "There is a problem", errorList: [{ text: error.runnerSignInV2Code, href: "#v2-code" }] }) }}
     {% endif %}
     <h1 class="govuk-heading-l">Check your phone</h1>
-    {{ govukInsetText({ text: "We have sent a code to your mobile number." }) }}
+    {% if maskedMobile %}
+      {{ govukInsetText({ html: "We have sent a code to your phone number ending with <strong>" + (maskedMobile | e) + "</strong>" }) }}
+    {% else %}
+      {{ govukInsetText({ text: "We have sent a code to your mobile number." }) }}
+    {% endif %}
 
     <p class="govuk-body">It might take a few minutes to arrive. The code will expire after 15 minutes.</p>
     <form method="post" action="/runner-sign-in-v2/recover/check-mobile" autocomplete="off" novalidate>

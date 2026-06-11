@@ -1,0 +1,36 @@
+{% extends "layouts/runner-sign-in-v2.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}Get security code – GOV.UK{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ href: backUrl, text: "Back" }) }}
+{% endblock %}
+
+{% block header %}{{ v2.v2ServiceHeader("") }}{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">Get security code</h1>
+
+    {{ govukInsetText({
+      html: "We will send a code to your phone number ending with <strong>" + (maskedMobile | e) + "</strong>"
+    }) }}
+
+    <p class="govuk-body">You can request 5 security codes. If you request more than 5, you will be locked out for 2 hours.</p>
+
+    <p class="govuk-body">It might take a few minutes to arrive.</p>
+
+    <form method="post" action="/runner-sign-in-v2/recover/get-security-code" novalidate>
+      <input type="hidden" name="formKey" value="{{ formKey }}" />
+      <input type="hidden" name="applicationId" value="{{ applicationId }}" />
+      <input type="hidden" name="next" value="{{ next | e }}" />
+      {{ govukButton({ text: "Get security code" }) }}
+    </form>
+  </div>
+</div>
+{% endblock %}
