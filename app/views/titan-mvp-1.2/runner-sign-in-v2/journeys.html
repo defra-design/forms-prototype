@@ -40,6 +40,16 @@
       For error and edge-case journeys, see <a class="govuk-link" href="{{ urls.unexpectedJourneys }}">unexpected journeys</a>.
     </p>
 
+    <p class="govuk-body">
+      For save and exit acceptance criteria with prototype links, see
+      <a class="govuk-link" href="{{ urls.saveAndExitStories }}">save and exit user stories</a>.
+      Inline validation errors are on
+      <a class="govuk-link" href="{{ urls.errorMessages }}">validation error messages</a>.
+    </p>
+
+    <p class="govuk-body">
+      <a class="govuk-link" href="{{ urls.allPages }}">All pages</a>
+    </p>
 
   </div>
 </div>
@@ -74,7 +84,8 @@
           { text: "Sign in to use this form", href: urls.whySignIn },
           { text: "Enter your email address", href: urls.signInEmail },
           { text: "Check your email", href: urls.signInCheckEmail },
-          { text: "Manage your form", href: urls.manage }
+          { text: "Manage your form", href: urls.manage },
+          { text: "Sign out", href: urls.signOut }
         ]) }}
         {{ journeyDocs.journeyPreviews([
           { caption: "Sign in", title: "Enter your email address", href: urls.signInEmail, previewHref: urls.preview.signInEmail },
@@ -112,14 +123,16 @@
         {{ journeyDocs.journeyPath([
           { text: "Filling in the form", href: urls.formStartPage },
           { text: "Confirm email to save and exit", href: urls.saveExitConfirmEmail },
-          { text: "Your progress has been saved", href: urls.saveExitConfirmEmail },
-          { text: "Save and exit email", href: urls.emailSaveExit },
+          { text: "We've emailed you a link to come back", href: urls.saveExitWithSignInLeave },
+          { text: "Save and exit email", href: urls.emailSaveExitWithSignIn },
+          { text: "Welcome back", href: urls.saveExitWithSignInResume },
           { text: "Sign in from email link", href: urls.signInEmail },
           { text: "Manage your form", href: urls.manage }
         ]) }}
         {{ journeyDocs.journeyPreviews([
           { caption: "Save and exit", title: "Confirm email", href: urls.saveExitConfirmEmail, previewHref: urls.preview.saveExitConfirmEmail },
-          { caption: "Save and exit", title: "Save and exit email", href: urls.emailSaveExit, previewHref: urls.preview.emailSaveExit }
+          { caption: "Save and exit", title: "Save and exit email", href: urls.emailSaveExitWithSignIn, previewHref: urls.preview.emailSaveExit },
+          { caption: "Save and exit", title: "Welcome back", href: urls.saveExitWithSignInResume, previewHref: urls.preview.saveExitResumeWithSignIn }
         ]) }}
       </div>
     {% endset %}
@@ -132,15 +145,19 @@
           { text: "Continue without signing in", href: urls.formStartPage },
           { text: "Save and exit", href: urls.saveExitChoose },
           { text: "Create a sign-in", href: urls.saveExitCreate },
-          { text: "Check your email", href: urls.createCheckEmail },
-          { text: "Enter mobile phone number", href: urls.createMobile },
-          { text: "Your sign-in has been created", href: urls.saveExitCreate, branch: true },
+          { text: "Check your email", href: urls.saveExitWithoutSignInCheckEmail },
+          { text: "Enter mobile phone number", href: urls.createMobileSaveExit },
+          { text: "Your progress has been saved", href: urls.saveExitCreated, branch: true },
+          { text: "Welcome back", href: urls.saveExitWithoutSignInResume },
           { text: "Sign in from email", href: urls.signInEmail },
           { text: "Manage your form", href: urls.manage }
         ]) }}
         {{ journeyDocs.journeyPreviews([
           { caption: "Save and exit without sign-in", title: "Choose save and exit", href: urls.saveExitChoose, previewHref: urls.preview.saveExitChoose },
-          { caption: "Save and exit without sign-in", title: "Create a sign-in", href: urls.saveExitCreate, previewHref: urls.preview.saveExitCreate }
+          { caption: "Save and exit without sign-in", title: "Create a sign-in", href: urls.saveExitCreate, previewHref: urls.preview.saveExitCreate },
+          { caption: "Save and exit without sign-in", title: "Check your email", href: urls.saveExitWithoutSignInCheckEmail, previewHref: urls.preview.saveExitCheckEmail },
+          { caption: "Save and exit without sign-in", title: "Progress saved", href: urls.saveExitCreated, previewHref: urls.preview.saveExitProgressSaved },
+          { caption: "Save and exit without sign-in", title: "Welcome back", href: urls.saveExitWithoutSignInResume, previewHref: urls.preview.saveExitResumeWithoutSignIn }
         ]) }}
       </div>
     {% endset %}
@@ -211,14 +228,37 @@
         {{ journeyDocs.journeyPath([
           { text: "Manage your form", href: urls.manage },
           { text: "Continue form", href: urls.formStartPage },
+          { text: "Delete draft", href: urls.deleteDraft, branch: true },
           { text: "Ready to submit", href: urls.readyToSubmit, branch: true },
-          { text: "Form submitted", href: urls.manage }
+          { text: "Form submitted", href: urls.formSubmitted },
+          { text: "Start new form", href: urls.startNewForm }
         ]) }}
         <p class="govuk-body">Static examples on the start page also include <strong>Awaiting check</strong>, <strong>Checked</strong> and <strong>Submitted</strong> states.</p>
         {{ journeyDocs.journeyPreviews([
           { caption: "Manage form", title: "Manage your form", href: urls.manage, previewHref: urls.preview.manage },
+          { caption: "Manage form", title: "Delete draft", href: urls.deleteDraft, previewHref: urls.preview.deleteDraft },
           { caption: "Manage form", title: "Ready to submit", href: urls.readyToSubmit, previewHref: urls.preview.readyToSubmit },
+          { caption: "Manage form", title: "Form submitted", href: urls.formSubmitted },
           { caption: "Manage form", title: "Checked (static example)", href: "/runner-sign-in-v2/static/manage-form-checked", previewHref: urls.preview.manageFormChecked }
+        ]) }}
+      </div>
+    {% endset %}
+
+    {% set copySubmissionHtml %}
+      <div class="journey-docs__section">
+        <p class="govuk-body">Someone copies answers from a previous submission, completes the form, and receives a confirmation email that notes answers were copied.</p>
+        {{ journeyDocs.journeyPath([
+          { text: "Advanced settings", href: urls.formEditorAdvancedSettings },
+          { text: "Reuse previous answers", href: urls.formEditorReusePreviousAnswers },
+          { text: "Manage your form (submitted)", href: urls.manage },
+          { text: "Form submitted", href: urls.formSubmitted },
+          { text: "Confirmation email", href: urls.emailFormSubmitted }
+        ]) }}
+        {{ journeyDocs.journeyPreviews([
+          { caption: "Form designer", title: "Reuse previous answers", href: urls.formEditorReusePreviousAnswers },
+          { caption: "Form designer", title: "Check before submission", href: urls.formEditorCheckBeforeSubmission },
+          { caption: "Runner", title: "Form submitted", href: urls.formSubmitted },
+          { caption: "Runner", title: "Form submitted email", href: urls.emailFormSubmitted, previewHref: urls.preview.emailFormSubmitted }
         ]) }}
       </div>
     {% endset %}
@@ -227,10 +267,12 @@
       <div class="journey-docs__section">
         <p class="govuk-body">Email templates used across the journeys. Open each preview to check layout and content.</p>
         {{ journeyDocs.journeyPreviews([
-          { caption: "Emails", title: "Save and exit", href: urls.emailSaveExit, previewHref: urls.preview.emailSaveExit },
+          { caption: "Emails", title: "Save and exit (signed in)", href: urls.emailSaveExitWithSignIn, previewHref: urls.preview.emailSaveExit },
+          { caption: "Emails", title: "Save and exit (without sign-in)", href: urls.emailSaveExitWithoutSignIn },
           { caption: "Emails", title: "Security code", href: urls.emailConfirmation, previewHref: urls.preview.emailConfirmation },
+          { caption: "Emails", title: "Form submitted (copied answers)", href: urls.emailFormSubmitted, previewHref: urls.preview.emailFormSubmitted },
           { caption: "Emails", title: "Checker invite", href: urls.emailCheckerInvite, previewHref: urls.preview.emailCheckerInvite },
-          { caption: "Emails", title: "Form checked (applicant)", href: "/runner-sign-in-v2/emails/applicant-form-checked?formKey=" + (demoFormKey | urlencode) + "&applicationId=" + (demoApplicationId | urlencode), previewHref: "/runner-sign-in-v2/emails/applicant-form-checked?formKey=" + (demoFormKey | urlencode) + "&applicationId=" + (demoApplicationId | urlencode) }
+          { caption: "Emails", title: "Form checked (applicant)", href: urls.emailApplicantFormChecked, previewHref: urls.emailApplicantFormChecked }
         ]) }}
       </div>
     {% endset %}
@@ -278,6 +320,11 @@
           heading: { text: "Manage your form" },
           summary: { text: "Continue, submit and copy" },
           content: { html: manageHtml }
+        },
+        {
+          heading: { text: "Copy a previous submission" },
+          summary: { text: "Form designer settings, submit, and confirmation email" },
+          content: { html: copySubmissionHtml }
         },
         {
           heading: { text: "Emails" },

@@ -1,5 +1,4 @@
 {% extends "layouts/runner-sign-in-v2.html" %}
-{% from "components/govuk-otp-input/macro.njk" import govukOtpInput %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 {% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
@@ -33,14 +32,7 @@
       <input type="hidden" name="formKey" value="{{ formKey }}" />
       <input type="hidden" name="applicationId" value="{{ applicationId }}" />
       <input type="hidden" name="next" value="{{ next | e }}" />
-      {{ govukOtpInput({
-        id: "v2-code",
-        name: "runnerSignInV2Code",
-        maxLength: 6,
-        pattern: "[0-9]",
-        fieldset: {
-          legend: { text: "Enter the 6 digit security code", classes: "govuk-fieldset__legend--s" }
-        },
+      {{ v2.v2SecurityCodeInput({
         errorMessage: { text: error.runnerSignInV2Code } if error and error.runnerSignInV2Code else false,
         value: values.runnerSignInV2Code
       }) }}
@@ -62,8 +54,4 @@
     }) }}
   </div>
 </div>
-{% endblock %}
-
-{% block pageScripts %}
-  <script src="/public/javascripts/govuk-otp-input.js"></script>
 {% endblock %}

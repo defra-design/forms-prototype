@@ -13,6 +13,8 @@ function runnerSignInV2BuildJourneyUrls({
     return url;
   };
   const checkerStartPath = `/runner-sign-in-v2/checker/why-sign-in?token=${enc(staticCheckedReviewToken)}&prototype=1&allowApplicant=1`;
+  const saveExitLeaveUrl = `/runner-sign-in-v2/save-and-exit/without-sign-in/leave?formKey=${enc(formKey)}&applicationId=${enc(applicationId)}`;
+  const queryOnly = `formKey=${enc(formKey)}&applicationId=${enc(applicationId)}`;
 
   return {
     formStartPage: `/runner-sign-in-v2/forms/${enc(formKey)}/${enc(applicationId)}/start-page`,
@@ -40,6 +42,28 @@ function runnerSignInV2BuildJourneyUrls({
     saveExitChoose: triple("/runner-sign-in-v2/save-and-exit/without-sign-in/choose", manageUrl),
     saveExitCreate: triple("/runner-sign-in-v2/save-and-exit/without-sign-in/create-sign-in", manageUrl),
     saveExitConfirmEmail: triple("/runner-sign-in-v2/save-and-exit/with-sign-in/confirm-email", manageUrl),
+    saveExitLeave: saveExitLeaveUrl,
+    saveExitWithSignInLeave: `/runner-sign-in-v2/save-and-exit/with-sign-in/leave?${queryOnly}&email=you@example.com`,
+    saveExitWithSignInResume: `/runner-sign-in-v2/save-and-exit/with-sign-in/resume?${queryOnly}`,
+    saveExitWithoutSignInResume: `/runner-sign-in-v2/save-and-exit/without-sign-in/resume?${queryOnly}`,
+    saveExitWithoutSignInCheckEmail: `/runner-sign-in-v2/save-and-exit/without-sign-in/check-email?${queryOnly}&prototype=1`,
+    saveExitCreated: triple("/runner-sign-in-v2/create-sign-in/created", saveExitLeaveUrl),
+    createCheckEmailSaveExit: triple("/runner-sign-in-v2/create-sign-in/check-email", saveExitLeaveUrl),
+    createMobileSaveExit: triple("/runner-sign-in-v2/create-sign-in/mobile", saveExitLeaveUrl),
+    createGetCodeSaveExit: triple("/runner-sign-in-v2/create-sign-in/get-security-code", saveExitLeaveUrl),
+    createCheckEmailSaveExitResend: `${triple("/runner-sign-in-v2/create-sign-in/check-email", saveExitLeaveUrl)}&resend=1`,
+    emailSaveExitWithoutSignIn: `${triple("/runner-sign-in-v2/emails/save-and-exit", manageUrl)}&variant=without-sign-in`,
+    emailSaveExitWithSignIn: `${triple("/runner-sign-in-v2/emails/save-and-exit", manageUrl)}&variant=with-sign-in`,
+    signOut: "/runner-sign-in-v2/sign-out",
+    formSubmitted: `/runner-sign-in-v2/forms/${enc(formKey)}/${enc(applicationId)}/submitted`,
+    startNewForm: `/runner-sign-in-v2/forms/${enc(formKey)}/${enc(applicationId)}/start-new`,
+    deleteDraft: `/runner-sign-in-v2/forms/${enc(formKey)}/${enc(applicationId)}/delete`,
+    saveAndExitStories: "/runner-sign-in-v2/save-and-exit-stories",
+    errorMessages: "/runner-sign-in-v2/error-messages",
+    allPages: "/runner-sign-in-v2/all-pages",
+    formEditorAdvancedSettings: "/titan-mvp-1.2/form-editor/advanced-settings",
+    formEditorCheckBeforeSubmission: "/titan-mvp-1.2/form-editor/advanced-settings/check-before-submission",
+    formEditorReusePreviousAnswers: "/titan-mvp-1.2/form-editor/advanced-settings/reuse-previous-answers",
     readyToSubmit: `/runner-sign-in-v2/forms/${enc(formKey)}/${enc(applicationId)}/ready-to-submit`,
     checkerInvite: `/runner-sign-in-v2/forms/${enc(formKey)}/${enc(applicationId)}/checker/invite`,
     checkerWhySignIn: `/runner-sign-in-v2/checker/why-sign-in?token=${enc(staticCheckedReviewToken)}`,
@@ -47,6 +71,7 @@ function runnerSignInV2BuildJourneyUrls({
     emailSaveExit: triple("/runner-sign-in-v2/emails/save-and-exit", manageUrl),
     emailCheckerInvite: triple("/runner-sign-in-v2/emails/checker-invite-v2", manageUrl),
     emailApplicantFormChecked: `/runner-sign-in-v2/emails/applicant-form-checked?formKey=${enc(formKey)}&applicationId=${enc(applicationId)}`,
+    emailFormSubmitted: triple("/runner-sign-in-v2/emails/form-submitted", manageUrl),
     staticManageFormChecked: "/runner-sign-in-v2/static/manage-form-checked",
     unexpected: {
       "email-already-has-sign-in": "/runner-sign-in-v2/unexpected-journeys/email-already-has-sign-in",
@@ -94,7 +119,13 @@ function runnerSignInV2BuildJourneyUrls({
           emailSaveExit: journeyPreviewPath("email-save-exit"),
           emailConfirmation: journeyPreviewPath("email-confirmation"),
           emailCheckerInvite: journeyPreviewPath("email-checker-invite"),
+          emailFormSubmitted: journeyPreviewPath("email-form-submitted"),
           manageFormChecked: journeyPreviewPath("manage-form-checked"),
+          saveExitCheckEmail: journeyPreviewPath("save-exit-check-email"),
+          saveExitResumeWithSignIn: journeyPreviewPath("save-exit-resume-with-sign-in"),
+          saveExitResumeWithoutSignIn: journeyPreviewPath("save-exit-resume-without-sign-in"),
+          saveExitProgressSaved: journeyPreviewPath("save-exit-progress-saved"),
+          deleteDraft: journeyPreviewPath("delete-draft"),
         }
       : undefined,
   };

@@ -1,0 +1,85 @@
+{% extends "layouts/runner-sign-in-v2.html" %}
+{% from "govuk/components/accordion/macro.njk" import govukAccordion %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
+{% import "titan-mvp-1.2/runner-sign-in-v2/_journey-docs.njk" as journeyDocs %}
+
+{% block pageTitle %}
+Save and exit user stories – Runner sign-in v2 – GOV.UK
+{% endblock %}
+
+{% block head %}
+  {{ super() }}
+  {{ journeyDocs.journeyDocsStyles() }}
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ href: urls.startPage, text: "Back" }) }}
+{% endblock %}
+
+{% block header %}
+  {{ v2.v2ServiceHeader("start") }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <span class="govuk-caption-l">Runner sign-in v2</span>
+    <h1 class="govuk-heading-xl">Save and exit user stories</h1>
+
+    <p class="govuk-body">
+      GIVEN / WHEN / THEN acceptance criteria for save and exit, resume, manage, delete, sign out, and copy-submission flows.
+      Demo form: <strong>{{ demoFormKey }}</strong> · <strong>{{ demoApplicationId }}</strong>
+    </p>
+
+    <p class="govuk-body">
+      <a class="govuk-link" href="{{ urls.journeys }}">Review sign-in journeys</a>,
+      <a class="govuk-link" href="{{ urls.errorMessages }}">validation error messages</a>,
+      <a class="govuk-link" href="{{ urls.unexpectedJourneys }}">unexpected journeys</a>,
+      or
+      <a class="govuk-link" href="{{ urls.allPages }}">all pages</a>.
+    </p>
+
+    {{ govukInsetText({
+      html: "<p class=\"govuk-body govuk-!-margin-bottom-2\">WELSH VERSION STILL NEEDS TO BE TRANSLATED. Prototype demo security code: <strong>123456</strong>. Codes expire after <strong>15 minutes</strong>.</p><p class=\"govuk-body govuk-!-margin-bottom-0\">Prototype page links open via <strong>/journeys/preview/</strong> so each screen loads with the right example data, without needing to complete sign-in first.</p>"
+    }) }}
+  </div>
+</div>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-full">
+    {% set accordionItems = [] %}
+    {% for story in stories %}
+      {% set storyHtml %}
+        <div class="journey-docs__section">
+          <p class="govuk-body">{{ story.summary }}</p>
+          {% for flow in story.flows %}
+            {{ journeyDocs.journeyStoryFlow(flow) }}
+          {% endfor %}
+        </div>
+      {% endset %}
+      {% set accordionItems = (accordionItems.push({
+        heading: { text: story.title },
+        summary: { text: story.flows.length + " flow" + ("s" if story.flows.length != 1 else "") },
+        content: { html: storyHtml },
+        expanded: loop.first
+      }), accordionItems) %}
+    {% endfor %}
+
+    {{ govukAccordion({
+      id: "save-and-exit-stories",
+      items: accordionItems
+    }) }}
+
+    <h2 class="govuk-heading-l govuk-!-margin-top-9">Related prototype pages</h2>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><a class="govuk-link" href="{{ urls.signOut }}">You have signed out</a></li>
+      <li><a class="govuk-link" href="{{ urls.emailFormSubmittedPreview }}">Form submitted email (copied answers)</a></li>
+      <li><a class="govuk-link" href="{{ urls.formEditorAdvancedSettings }}">Form editor – advanced settings</a></li>
+      <li><a class="govuk-link" href="{{ urls.formEditorReusePreviousAnswers }}">Reuse previous answers setting</a></li>
+      <li><a class="govuk-link" href="{{ urls.formEditorCheckBeforeSubmission }}">Check before submission setting</a></li>
+    </ul>
+  </div>
+</div>
+{% endblock %}

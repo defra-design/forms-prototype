@@ -21,6 +21,9 @@
     {% if query and query.cloned %}
       {{ govukNotificationBanner({ type: "success", html: "<p class=\"govuk-notification-banner__heading\">Form copied</p>" }) }}
     {% endif %}
+    {% if query and query.deleted %}
+      {{ govukNotificationBanner({ type: "success", html: "<p class=\"govuk-notification-banner__heading\">Draft deleted</p>" }) }}
+    {% endif %}
 
     <span class="govuk-caption-l">Manage your form</span>
     <h1 class="govuk-heading-xl">{{ application.formName }}</h1>

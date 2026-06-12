@@ -251,4 +251,27 @@
   </div>
 {% endmacro %}
 
+{% macro journeyStoryFlow(flow) %}
+  <div class="govuk-!-margin-bottom-6">
+    <h3 class="govuk-heading-s">{{ flow.title }}</h3>
+    {% if flow.given %}
+      <p class="govuk-body govuk-!-margin-bottom-1"><strong>GIVEN</strong> {{ flow.given }}</p>
+    {% endif %}
+    {% if flow.when %}
+      <p class="govuk-body govuk-!-margin-bottom-1"><strong>WHEN</strong> {{ flow.when }}</p>
+    {% endif %}
+    {% if flow.then %}
+      <p class="govuk-body"><strong>THEN</strong> {{ flow.then }}</p>
+    {% endif %}
+    {% if flow.links %}
+      <p class="govuk-body govuk-!-margin-bottom-1">Prototype pages:</p>
+      <ul class="govuk-list govuk-list--bullet">
+        {% for link in flow.links %}
+          <li><a class="govuk-link" href="{{ link.href }}">{{ link.text }}</a></li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </div>
+{% endmacro %}
+
 {% macro journeyPreviewLoaderScript() %}{% endmacro %}
