@@ -58,7 +58,6 @@ function runnerSignInV2BuildJourneyUrls({
     formSubmitted: `/runner-sign-in-v2/forms/${enc(formKey)}/${enc(applicationId)}/submitted`,
     startNewForm: `/runner-sign-in-v2/forms/${enc(formKey)}/${enc(applicationId)}/start-new`,
     deleteDraft: `/runner-sign-in-v2/forms/${enc(formKey)}/${enc(applicationId)}/delete`,
-    saveAndExitStories: "/runner-sign-in-v2/save-and-exit-stories",
     errorMessages: "/runner-sign-in-v2/error-messages",
     allPages: "/runner-sign-in-v2/all-pages",
     formEditorAdvancedSettings: "/titan-mvp-1.2/form-editor/advanced-settings",

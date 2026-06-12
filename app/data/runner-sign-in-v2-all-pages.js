@@ -16,7 +16,6 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
         { text: "Start page", href: "/runner-sign-in-v2/start-page" },
         { text: "All pages", href: urls.allPages || "/runner-sign-in-v2/all-pages" },
         { text: "Journeys", href: "/runner-sign-in-v2/journeys" },
-        { text: "Save and exit user stories", href: urls.saveAndExitStories || "/runner-sign-in-v2/save-and-exit-stories" },
         { text: "Journey flowcharts", href: "/runner-sign-in-v2/journey-flowcharts" },
         { text: "Unexpected journeys", href: "/runner-sign-in-v2/unexpected-journeys" },
         { text: "Validation error messages", href: urls.errorMessages || "/runner-sign-in-v2/error-messages" },

@@ -21318,7 +21318,6 @@ function runnerSignInV2DocsUrls() {
     }),
     startPage: "/runner-sign-in-v2/start-page",
     journeys: "/runner-sign-in-v2/journeys",
-    saveAndExitStories: "/runner-sign-in-v2/save-and-exit-stories",
     journeyFlowcharts: "/runner-sign-in-v2/journey-flowcharts",
     unexpectedJourneys: "/runner-sign-in-v2/unexpected-journeys",
     emailConfirmation: `/runner-sign-in-v2/emails/email-confirmation-code?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}`,

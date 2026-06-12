@@ -1,6 +1,5 @@
 {% extends "layouts/runner-sign-in-v2.html" %}
 {% from "govuk/components/accordion/macro.njk" import govukAccordion %}
-{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 {% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
 {% from "govuk/components/table/macro.njk" import govukTable %}
 {% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
@@ -17,7 +16,6 @@ Save and exit user stories – Runner sign-in v2 – GOV.UK
 {% endblock %}
 
 {% block beforeContent %}
-  {{ govukBackLink({ href: urls.startPage, text: "Back" }) }}
 {% endblock %}
 
 {% block header %}
@@ -27,12 +25,16 @@ Save and exit user stories – Runner sign-in v2 – GOV.UK
 {% block content %}
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
-    <span class="govuk-caption-l">Runner sign-in v2</span>
+    <span class="govuk-caption-l">Runner sign-in v2 · hidden page</span>
     <h1 class="govuk-heading-xl">Save and exit user stories</h1>
 
     <p class="govuk-body">
       GIVEN / WHEN / THEN acceptance criteria for save and exit, resume, manage, delete, sign out, and copy-submission flows.
       Demo form: <strong>{{ demoFormKey }}</strong> · <strong>{{ demoApplicationId }}</strong>
+    </p>
+
+    <p class="govuk-body-s govuk-!-margin-bottom-6">
+      Not linked from the prototype navigation. Direct URL only.
     </p>
 
     <p class="govuk-body">
