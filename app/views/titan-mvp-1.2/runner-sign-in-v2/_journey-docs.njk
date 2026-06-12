@@ -66,6 +66,147 @@
   </style>
 {% endmacro %}
 
+{% macro journeyFlowchartStyles() %}
+  <style>
+    .journey-flowchart__panel {
+      border: 1px solid #b1b4b6;
+      padding: 20px;
+      background: #ffffff;
+    }
+
+    .journey-flowchart__header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .journey-flowchart__step-count {
+      color: #505a5f;
+      font-size: 16px;
+    }
+
+    .journey-flowchart__diagram {
+      overflow-x: auto;
+      margin-top: 20px;
+      border-top: 1px solid #b1b4b6;
+      padding-top: 20px;
+    }
+
+    .journey-flowchart__svg {
+      display: block;
+      min-width: 100%;
+    }
+
+    .journey-flowchart__edge {
+      stroke: #505a5f;
+      stroke-width: 1.5;
+    }
+
+    .journey-flowchart__edge--unexpected {
+      stroke: #d4351c;
+      stroke-width: 2;
+    }
+
+    .journey-flowchart__arrow-head {
+      fill: #505a5f;
+    }
+
+    .journey-flowchart__node {
+      fill: #ffffff;
+      stroke: #b1b4b6;
+      stroke-width: 1;
+    }
+
+    .journey-flowchart__node--hub {
+      fill: #e8f0f8;
+      stroke: #1d70b8;
+      stroke-width: 2;
+    }
+
+    .journey-flowchart__node--branch {
+      fill: #f3f2f1;
+      stroke: #1d70b8;
+      stroke-width: 1;
+    }
+
+    .journey-flowchart__node--unexpected {
+      fill: #fef2f2;
+      stroke: #d4351c;
+      stroke-width: 2;
+    }
+
+    .journey-flowchart__label {
+      fill: #0b0c0c;
+      font-family: "GDS Transport", arial, sans-serif;
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    .journey-flowchart__label--link {
+      fill: #1d70b8;
+    }
+
+    .journey-flowchart__node-link {
+      cursor: pointer;
+    }
+
+    .journey-flowchart__node-link:hover .journey-flowchart__node,
+    .journey-flowchart__node-link:focus .journey-flowchart__node {
+      stroke-width: 2;
+    }
+
+    .journey-flowchart__node-link:hover .journey-flowchart__label--link,
+    .journey-flowchart__node-link:focus .journey-flowchart__label--link {
+      text-decoration: underline;
+    }
+
+    .journey-flowchart__node-link:focus {
+      outline: 3px solid #ffdd00;
+      outline-offset: 2px;
+    }
+
+    .journey-flowchart__legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .journey-flowchart__legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 16px;
+    }
+
+    .journey-flowchart__legend-swatch {
+      width: 28px;
+      height: 18px;
+      border-radius: 2px;
+      border: 1px solid #b1b4b6;
+      background: #ffffff;
+    }
+
+    .journey-flowchart__legend-swatch--hub {
+      background: #e8f0f8;
+      border-color: #1d70b8;
+    }
+
+    .journey-flowchart__legend-swatch--branch {
+      background: #f3f2f1;
+      border-color: #1d70b8;
+    }
+
+    .journey-flowchart__legend-swatch--unexpected {
+      background: #fef2f2;
+      border-color: #d4351c;
+    }
+  </style>
+{% endmacro %}
+
 {% macro journeyPath(steps) %}
   <div class="journey-docs__path">
     {% for step in steps %}

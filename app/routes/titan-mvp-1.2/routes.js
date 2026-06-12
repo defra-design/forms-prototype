@@ -5,6 +5,12 @@ const path = require("path");
 const lists = require("../../routes/lists");
 const sections = require("../../routes/sections");
 const terms = require("../../data/dictionary.json");
+const runnerSignInV2JourneyFlows = require("../../data/runner-sign-in-v2-journey-flows");
+const { buildRunnerSignInV2AllPagesSections } = require("../../data/runner-sign-in-v2-all-pages");
+const {
+  runnerSignInV2BuildJourneyUrls,
+  runnerSignInV2ResolveJourneyFlows,
+} = require("../../lib/titan-mvp-1.2/runner-sign-in-v2-journey-urls");
 const express = require("express");
 const welshTranslationLib = require("../../lib/titan-mvp-1.2/welsh-translation.js");
 
@@ -20672,88 +20678,98 @@ router.get("/runner-sign-in-v2/journeys", function (req, res) {
   }
   const demoFormKey = RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_FORM_KEY;
   const demoApplicationId = RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_APP_ID;
-  const enc = (value) => encodeURIComponent(value);
-  const triple = (path, next) => {
-    let url = `${path}?formKey=${enc(demoFormKey)}&applicationId=${enc(demoApplicationId)}`;
-    if (next) url += `&next=${enc(next)}`;
-    return url;
-  };
-  const manageUrl = runnerSignInV2ManagePath(demoFormKey, demoApplicationId);
-  const securityUrl = runnerSignInV2SecurityPath(demoFormKey, demoApplicationId);
   const urls = {
+    ...runnerSignInV2BuildJourneyUrls({
+      formKey: demoFormKey,
+      applicationId: demoApplicationId,
+      staticCheckedReviewToken: RUNNER_SIGN_IN_V2_STATIC_CHECKED_REVIEW_TOKEN,
+      journeyPreviewPath: runnerSignInV2JourneyPreviewPath,
+    }),
     startPage: "/runner-sign-in-v2/start-page",
+    journeyFlowcharts: "/runner-sign-in-v2/journey-flowcharts",
     unexpectedJourneys: "/runner-sign-in-v2/unexpected-journeys",
-    formStartPage: `/runner-sign-in-v2/forms/${enc(demoFormKey)}/${enc(demoApplicationId)}/start-page`,
-    whySignIn: triple("/runner-sign-in-v2/why-sign-in", manageUrl),
-    createEmail: triple("/runner-sign-in-v2/create-sign-in/email", manageUrl),
-    createCheckEmail: triple("/runner-sign-in-v2/create-sign-in/check-email", manageUrl),
-    createMobile: triple("/runner-sign-in-v2/create-sign-in/mobile", manageUrl),
-    createGetCode: triple("/runner-sign-in-v2/create-sign-in/get-security-code", manageUrl),
-    signInEmail: triple("/runner-sign-in-v2/sign-in/email", manageUrl),
-    signInCheckEmail: triple("/runner-sign-in-v2/sign-in/check-email", manageUrl),
-    recoverPhone: triple("/runner-sign-in-v2/recover/phone", manageUrl),
-    recoverStart: triple("/runner-sign-in-v2/recover/start", manageUrl),
-    recoverGetCode: triple("/runner-sign-in-v2/recover/get-security-code", manageUrl),
-    recoverNewEmail: triple("/runner-sign-in-v2/recover/new-email", manageUrl),
-    recoverCheckNewEmail: triple("/runner-sign-in-v2/recover/check-new-email", manageUrl),
-    manage: manageUrl,
-    security: securityUrl,
-    changeEmailGetCode: `${securityUrl}/change-email/get-security-code`,
-    changeEmailCheckPhone: `${securityUrl}/change-email/check-phone`,
-    changeEmailNewEmail: `${securityUrl}/change-email/new-email`,
-    changeEmailCheckNewEmail: `${securityUrl}/change-email/check-new-email`,
-    changePhoneGetCode: `${securityUrl}/change-phone/get-security-code`,
-    changePhoneCheckEmail: `${securityUrl}/change-phone/check-email`,
-    changePhoneNewPhone: `${securityUrl}/change-phone/new-phone`,
-    saveExitChoose: triple("/runner-sign-in-v2/save-and-exit/without-sign-in/choose", manageUrl),
-    saveExitCreate: triple("/runner-sign-in-v2/save-and-exit/without-sign-in/create-sign-in", manageUrl),
-    saveExitConfirmEmail: triple("/runner-sign-in-v2/save-and-exit/with-sign-in/confirm-email", manageUrl),
-    readyToSubmit: `/runner-sign-in-v2/forms/${enc(demoFormKey)}/${enc(demoApplicationId)}/ready-to-submit`,
-    checkerInvite: `/runner-sign-in-v2/forms/${enc(demoFormKey)}/${enc(demoApplicationId)}/checker/invite`,
-    checkerWhySignIn: `/runner-sign-in-v2/checker/why-sign-in?token=${enc(RUNNER_SIGN_IN_V2_STATIC_CHECKED_REVIEW_TOKEN)}`,
-    checkerStart: runnerSignInV2CheckerEmailEntryPath(RUNNER_SIGN_IN_V2_STATIC_CHECKED_REVIEW_TOKEN),
-    emailSaveExit: triple("/runner-sign-in-v2/emails/save-and-exit", manageUrl),
     emailConfirmation: "/runner-sign-in-v2/emails/email-confirmation-code",
-    emailCheckerInvite: triple("/runner-sign-in-v2/emails/checker-invite-v2", manageUrl),
-    preview: {
-      createEmail: runnerSignInV2JourneyPreviewPath("create-sign-in-email"),
-      createCheckEmail: runnerSignInV2JourneyPreviewPath("create-sign-in-check-email"),
-      createMobile: runnerSignInV2JourneyPreviewPath("create-sign-in-mobile"),
-      createGetCode: runnerSignInV2JourneyPreviewPath("create-sign-in-get-security-code"),
-      signInEmail: runnerSignInV2JourneyPreviewPath("sign-in-email"),
-      signInCheckEmail: runnerSignInV2JourneyPreviewPath("sign-in-check-email"),
-      whySignIn: runnerSignInV2JourneyPreviewPath("why-sign-in"),
-      recoverPhone: runnerSignInV2JourneyPreviewPath("recover-phone"),
-      recoverGetCode: runnerSignInV2JourneyPreviewPath("recover-get-security-code"),
-      recoverStart: runnerSignInV2JourneyPreviewPath("recover-start"),
-      recoverNewEmail: runnerSignInV2JourneyPreviewPath("recover-new-email"),
-      recoverCheckNewEmail: runnerSignInV2JourneyPreviewPath("recover-check-new-email"),
-      manage: runnerSignInV2JourneyPreviewPath("manage"),
-      security: runnerSignInV2JourneyPreviewPath("security"),
-      changeEmailGetCode: runnerSignInV2JourneyPreviewPath("change-email-get-security-code"),
-      changeEmailCheckPhone: runnerSignInV2JourneyPreviewPath("change-email-check-phone"),
-      changeEmailNewEmail: runnerSignInV2JourneyPreviewPath("change-email-new-email"),
-      changeEmailCheckNewEmail: runnerSignInV2JourneyPreviewPath("change-email-check-new-email"),
-      changePhoneGetCode: runnerSignInV2JourneyPreviewPath("change-phone-get-security-code"),
-      changePhoneCheckEmail: runnerSignInV2JourneyPreviewPath("change-phone-check-email"),
-      changePhoneNewPhone: runnerSignInV2JourneyPreviewPath("change-phone-new-phone"),
-      saveExitChoose: runnerSignInV2JourneyPreviewPath("save-exit-choose"),
-      saveExitCreate: runnerSignInV2JourneyPreviewPath("save-exit-create"),
-      saveExitConfirmEmail: runnerSignInV2JourneyPreviewPath("save-exit-confirm-email"),
-      checkerInvite: runnerSignInV2JourneyPreviewPath("checker-invite"),
-      checkerWhySignIn: runnerSignInV2JourneyPreviewPath("checker-why-sign-in"),
-      readyToSubmit: runnerSignInV2JourneyPreviewPath("ready-to-submit"),
-      emailSaveExit: runnerSignInV2JourneyPreviewPath("email-save-exit"),
-      emailConfirmation: runnerSignInV2JourneyPreviewPath("email-confirmation"),
-      emailCheckerInvite: runnerSignInV2JourneyPreviewPath("email-checker-invite"),
-      manageFormChecked: runnerSignInV2JourneyPreviewPath("manage-form-checked"),
-    },
   };
   return res.render("titan-mvp-1.2/runner-sign-in-v2/journeys", {
     data,
     demoFormKey,
     demoApplicationId,
     urls,
+  });
+});
+
+router.get("/runner-sign-in-v2/all-pages.html", function (req, res) {
+  return res.redirect("/runner-sign-in-v2/all-pages");
+});
+
+router.get("/runner-sign-in-v2/all-pages", function (req, res) {
+  const data = ensureRunnerSignInSession(req);
+  if (typeof data.runnerSignInV2PrototypeMode === "undefined") {
+    data.runnerSignInV2PrototypeMode = true;
+  }
+  const formKey = RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_FORM_KEY;
+  const applicationId = RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_APP_ID;
+  const pageUrls = runnerSignInV2BuildJourneyUrls({
+    formKey,
+    applicationId,
+    staticCheckedReviewToken: RUNNER_SIGN_IN_V2_STATIC_CHECKED_REVIEW_TOKEN,
+  });
+  const unexpectedPages = Object.keys(RUNNER_SIGN_IN_V2_UNEXPECTED_PAGES).map((slug) => ({
+    slug,
+    href: `/runner-sign-in-v2/unexpected-journeys/${slug}`,
+    title: RUNNER_SIGN_IN_V2_UNEXPECTED_PAGES[slug].title,
+  }));
+  const pageSections = buildRunnerSignInV2AllPagesSections(pageUrls, {
+    formKey,
+    applicationId,
+    reviewToken: RUNNER_SIGN_IN_V2_STATIC_CHECKED_REVIEW_TOKEN,
+    unexpectedPages,
+  });
+  return res.render("titan-mvp-1.2/runner-sign-in-v2/all-pages", {
+    data,
+    pageSections,
+  });
+});
+
+router.get("/runner-sign-in-v2/journey-flowcharts.html", function (req, res) {
+  return res.redirect("/runner-sign-in-v2/journey-flowcharts");
+});
+
+router.get("/runner-sign-in-v2/journey-flowcharts", function (req, res) {
+  const data = ensureRunnerSignInSession(req);
+  if (typeof data.runnerSignInV2PrototypeMode === "undefined") {
+    data.runnerSignInV2PrototypeMode = true;
+  }
+  const journeySelectItems = Object.entries(runnerSignInV2JourneyFlows).map(([id, journey]) => ({
+    value: id,
+    text: journey.title,
+    selected: id === "overview",
+  }));
+  const journeyGlanceItems = Object.entries(runnerSignInV2JourneyFlows).map(([id, journey]) => ({
+    id,
+    title: journey.title,
+    description: journey.description,
+    path: journey.nodes
+      .filter((node) => node.tone !== "unexpected")
+      .map((node) => node.label)
+      .join(" → "),
+  }));
+  const pageUrls = runnerSignInV2BuildJourneyUrls({
+    formKey: RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_FORM_KEY,
+    applicationId: RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_APP_ID,
+    staticCheckedReviewToken: RUNNER_SIGN_IN_V2_STATIC_CHECKED_REVIEW_TOKEN,
+  });
+  const journeyFlows = runnerSignInV2ResolveJourneyFlows(runnerSignInV2JourneyFlows, pageUrls);
+  return res.render("titan-mvp-1.2/runner-sign-in-v2/journey-flowcharts", {
+    data,
+    journeyFlows,
+    journeySelectItems,
+    journeyGlanceItems,
+    urls: {
+      startPage: "/runner-sign-in-v2/start-page",
+      journeys: "/runner-sign-in-v2/journeys",
+      unexpectedJourneys: "/runner-sign-in-v2/unexpected-journeys",
+    },
   });
 });
 
