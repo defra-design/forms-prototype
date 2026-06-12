@@ -239,7 +239,7 @@ Start – Runner sign-in v2 – GOV.UK
       <p class="govuk-body">
         <a class="govuk-link" href="/runner-sign-in-v2/forms/{{ inProgressApp.formKey | urlencode }}/{{ inProgressApp.id | urlencode }}/start-page">Open start page</a>
         <span class="govuk-!-margin-left-1">for {{ inProgressApp.formName }} — {{ inProgressApp.reference }}</span>
-        <span class="govuk-!-margin-left-2">{{ govukTag({ text: "In progress", classes: "govuk-tag--blue" }) }}</span>
+        <span class="govuk-!-margin-left-2">{{ govukTag({ text: "In progress", classes: "govuk-tag--teal" }) }}</span>
       </p>
     {% else %}
       {{ govukInsetText({ text: "No in-progress example found. Use “Reset seeded examples” to restore the default set." }) }}
