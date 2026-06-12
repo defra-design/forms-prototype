@@ -3,7 +3,6 @@
 
 {% from "components/service-header/macro.njk" import serviceHeader %}
 {% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
-
 {% set pageName = "Add and edit your pages - " + form.name %}
 
 {% block header %}
@@ -58,6 +57,12 @@ activeLinkId: "nav-editor"
                 Preview form
             </a>
         </div>
+
+        {% if advancedSettingsHint %}
+        <p class="govuk-body-s govuk-!-margin-top-3 govuk-!-margin-bottom-0">
+            {{ advancedSettingsHint }}
+        </p>
+        {% endif %}
 
     </div>
 </div>
@@ -372,7 +377,7 @@ activeLinkId: "nav-editor"
                             <span id="pages-count">{{ formPages.length }}</span>
                             {% if formPages.length == 1 %}page{% else %}pages{% endif %}
                             {% else %}
-                            <h2 class="govuk-heading-m" id="pages-count-heading"></h2>
+                            <h2 class="govuk-heading-m" id="pages-count-heading">
                             {% endif %}
 
                             <div style="float: right;">
@@ -391,6 +396,27 @@ activeLinkId: "nav-editor"
                                 },
                                 alignMenu: "right",
                                 items: [
+                                {
+                                text: "Advanced settings",
+                                href: "/titan-mvp-1.2/form-editor/advanced-settings",
+                                attributes: {
+                                "onclick": "return true;"
+                                }
+                                },
+                                {
+                                text: "Advanced settings: check before submission",
+                                href: "/titan-mvp-1.2/form-editor/advanced-settings/check-before-submission",
+                                attributes: {
+                                "onclick": "return true;"
+                                }
+                                },
+                                {
+                                text: "Advanced settings: reuse previous answers",
+                                href: "/titan-mvp-1.2/form-editor/advanced-settings/reuse-previous-answers",
+                                attributes: {
+                                "onclick": "return true;"
+                                }
+                                },
                                 {
                                 text: "Manage conditions",
                                 href: "/titan-mvp-1.2/form-editor/conditions/manager",

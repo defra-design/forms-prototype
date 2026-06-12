@@ -1,0 +1,77 @@
+{% extends "layouts/main.html" %}
+{% from "components/service-header/macro.njk" import serviceHeader %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+
+{% set pageName = "Advanced settings - " + form.name %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+containerClasses: containerClasses,
+accountName: "Chris Smith",
+homepageLink: "/",
+signOutLink: "/titan-mvp-1.2/onboarding/sign-out-confirmation",
+navigationItems: [
+{ href: "/titan-mvp-1.2/library", text: "Forms library", id: "nav-library" },
+{ href: "/titan-mvp-1.2/form-overview/index.html", text: "Overview", id: "nav-overview" },
+{ href: "/titan-mvp-1.2/form-editor/listing", text: "Editor", id: "nav-editor", active: true }
+],
+activeLinkId: "nav-editor"
+}) }}
+
+<div class="x-govuk-masthead x-govuk-masthead--large">
+    <div class="govuk-width-container">
+        {{ govukBackLink({
+        classes: "govuk-back-link--inverse govuk-!-margin-bottom-0",
+        text: commonTerms.form_editor.navigation.back_to_add_edit_pages,
+        href: "/titan-mvp-1.2/form-editor/listing"
+        }) }}
+
+        <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"
+            style="border-bottom: 1px solid white; margin-bottom: 0" />
+
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full-from-desktop">
+                <h1 class="x-govuk-masthead__title">
+                    <span class="govuk-caption-l" style="color: white;">{{ form.name }}</span>
+                    Advanced settings
+                </h1>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+        {% if saved %}
+        {{ govukNotificationBanner({
+        type: "success",
+        titleText: "Success",
+        text: "Your changes have been saved"
+        }) }}
+        {% endif %}
+
+        {{ govukSummaryList({
+        rows: summaryRows
+        }) }}
+
+        <h2 class="govuk-heading-m govuk-!-margin-top-8">Related runner prototype pages</h2>
+        <p class="govuk-body">These settings affect runner behaviour in the sign-in v2 prototype.</p>
+        <ul class="govuk-list govuk-list--bullet">
+          <li><a class="govuk-link" href="/runner-sign-in-v2/start-page">Runner sign-in v2 start page</a></li>
+          <li><a class="govuk-link" href="/titan-mvp-1.2/form-editor/advanced-settings/check-before-submission">Check before submission</a></li>
+          <li><a class="govuk-link" href="/titan-mvp-1.2/form-editor/advanced-settings/reuse-previous-answers">Reuse previous answers</a></li>
+          <li><a class="govuk-link" href="/runner-sign-in-v2/emails/form-submitted?formKey=volunteer-application&applicationId=app-save-exit-demo">Form submitted email (copied answers)</a></li>
+          <li><a class="govuk-link" href="/runner-sign-in-v2/save-and-exit-stories">Save and exit user stories</a></li>
+          <li><a class="govuk-link" href="/runner-sign-in-v2/all-pages">All runner sign-in v2 pages</a></li>
+        </ul>
+
+    </div>
+</div>
+{% endblock %}

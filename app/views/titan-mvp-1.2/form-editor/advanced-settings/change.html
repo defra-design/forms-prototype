@@ -1,0 +1,169 @@
+{% extends "layouts/main.html" %}
+{% from "components/service-header/macro.njk" import serviceHeader %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% from "govuk/components/textarea/macro.njk" import govukTextarea %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/details/macro.njk" import govukDetails %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
+
+{% set pageName = setting.label + " - " + form.name %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+containerClasses: containerClasses,
+accountName: "Chris Smith",
+homepageLink: "/",
+signOutLink: "/titan-mvp-1.2/onboarding/sign-out-confirmation",
+navigationItems: [
+{ href: "/titan-mvp-1.2/library", text: "Forms library", id: "nav-library" },
+{ href: "/titan-mvp-1.2/form-overview/index.html", text: "Overview", id: "nav-overview" },
+{ href: "/titan-mvp-1.2/form-editor/listing", text: "Editor", id: "nav-editor", active: true }
+],
+activeLinkId: "nav-editor"
+}) }}
+{% endblock %}
+
+{% block beforeContent %}
+{{ govukBackLink({
+text: "Back to advanced settings",
+href: "/titan-mvp-1.2/form-editor/advanced-settings"
+}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+        <form class="form" action="/titan-mvp-1.2/form-editor/advanced-settings/{{ setting.slug }}" method="post">
+
+            <span class="govuk-caption-l">{{ form.name }}</span>
+
+            {% if errors and errors.whoCanCheckDescription %}
+            {{ govukErrorSummary({
+            titleText: "There is a problem",
+            errorList: [
+            {
+            text: errors.whoCanCheckDescription,
+            href: "#who-can-check-description"
+            }
+            ]
+            }) }}
+            {% endif %}
+
+            {% if setting.slug == "check-before-submission" %}
+            {% set whoCanCheckHtml %}
+            {{ govukTextarea({
+            id: "who-can-check-description",
+            name: "whoCanCheckDescription",
+            value: data.whoCanCheckDescription,
+            label: {
+            text: setting.whoCanCheckLabel
+            },
+            hint: {
+            text: setting.whoCanCheckHint
+            },
+            errorMessage: {
+            text: errors.whoCanCheckDescription
+            } if errors and errors.whoCanCheckDescription else false
+            }) }}
+            {% endset -%}
+
+            {{ govukRadios({
+            name: setting.key,
+            fieldset: {
+            legend: {
+            text: setting.label,
+            isPageHeading: true,
+            classes: "govuk-fieldset__legend--l"
+            }
+            },
+            hint: {
+            text: setting.hint
+            },
+            items: [
+            {
+            value: "yes",
+            text: "Yes",
+            checked: data[setting.key] == "yes",
+            conditional: {
+            html: whoCanCheckHtml
+            }
+            },
+            {
+            value: "no",
+            text: "No",
+            checked: data[setting.key] == "no" or not data[setting.key]
+            }
+            ]
+            }) }}
+            {% else %}
+            {{ govukRadios({
+            classes: "govuk-radios--inline",
+            name: setting.key,
+            fieldset: {
+            legend: {
+            text: setting.label,
+            isPageHeading: true,
+            classes: "govuk-fieldset__legend--l"
+            }
+            },
+            hint: {
+            text: setting.hint
+            },
+            items: [
+            {
+            value: "yes",
+            text: "Yes",
+            checked: data[setting.key] == "yes"
+            },
+            {
+            value: "no",
+            text: "No",
+            checked: data[setting.key] == "no" or not data[setting.key]
+            }
+            ]
+            }) }}
+            {% endif %}
+
+            {% if setting.autoEnableWarning %}
+            {{ govukWarningText({
+            text: setting.autoEnableWarning,
+            iconFallbackText: "Warning",
+            classes: "govuk-!-margin-top-6 govuk-!-margin-bottom-6"
+            }) }}
+            {% endif %}
+
+            {% set detailsHtml %}
+            <p class="govuk-body govuk-!-margin-bottom-2"><strong>Yes</strong></p>
+            <p class="govuk-body govuk-!-margin-bottom-4">{{ setting.yesDescription }}</p>
+            <p class="govuk-body govuk-!-margin-bottom-2"><strong>No</strong></p>
+            <p class="govuk-body govuk-!-margin-bottom-0">{{ setting.noDescription }}</p>
+            {% endset %}
+
+            {{ govukDetails({
+            summaryText: "What your choice means",
+            html: detailsHtml,
+            classes: "govuk-!-margin-top-6 govuk-!-margin-bottom-6"
+            }) }}
+
+            {{ govukButton({
+            text: "Save and continue"
+            }) }}
+
+        </form>
+
+        <h2 class="govuk-heading-m govuk-!-margin-top-8">Related runner prototype pages</h2>
+        <ul class="govuk-list govuk-list--bullet">
+          <li><a class="govuk-link" href="/titan-mvp-1.2/form-editor/advanced-settings">Advanced settings overview</a></li>
+          <li><a class="govuk-link" href="/runner-sign-in-v2/emails/form-submitted?formKey=volunteer-application&applicationId=app-save-exit-demo">Form submitted email (copied answers)</a></li>
+          <li><a class="govuk-link" href="/runner-sign-in-v2/save-and-exit-stories">Save and exit user stories</a></li>
+          <li><a class="govuk-link" href="/runner-sign-in-v2/all-pages">All runner sign-in v2 pages</a></li>
+        </ul>
+
+    </div>
+</div>
+{% endblock %}

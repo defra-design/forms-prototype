@@ -7,10 +7,15 @@ const sections = require("../../routes/sections");
 const terms = require("../../data/dictionary.json");
 const runnerSignInV2JourneyFlows = require("../../data/runner-sign-in-v2-journey-flows");
 const { buildRunnerSignInV2AllPagesSections } = require("../../data/runner-sign-in-v2-all-pages");
+const { buildRunnerSignInV2SaveExitStories } = require("../../data/runner-sign-in-v2-save-exit-stories");
 const {
   runnerSignInV2BuildJourneyUrls,
   runnerSignInV2ResolveJourneyFlows,
 } = require("../../lib/titan-mvp-1.2/runner-sign-in-v2-journey-urls");
+const {
+  RUNNER_SIGN_IN_V2_FIELD_ERRORS,
+  groupRunnerSignInV2FieldErrors,
+} = require("../../lib/titan-mvp-1.2/runner-sign-in-v2-field-errors");
 const express = require("express");
 const welshTranslationLib = require("../../lib/titan-mvp-1.2/welsh-translation.js");
 
@@ -1906,6 +1911,34 @@ router.get("/titan-mvp-1.2/form-editor/location-answer", function (req, res) {
   });
 });
 
+function getListingAdvancedSettingsHint(formData) {
+  const settings = formData.advancedSettings || {};
+  const checkBeforeSubmission =
+    settings.checkBeforeSubmission || settings.requiresApproval || "no";
+  const reusePreviousAnswers =
+    settings.reusePreviousAnswers || settings.allowCopies || "no";
+  const whoCanCheckDescription = settings.whoCanCheckDescription || "";
+  const parts = [];
+
+  if (checkBeforeSubmission === "yes") {
+    parts.push(
+      whoCanCheckDescription
+        ? `Checked by ${whoCanCheckDescription}`
+        : "Check before submission",
+    );
+  }
+
+  if (reusePreviousAnswers === "yes") {
+    parts.push("Saved answers on");
+  }
+
+  if (!parts.length) {
+    return null;
+  }
+
+  return parts.join(" · ");
+}
+
 // Listing and setup routes
 router.get("/titan-mvp-1.2/form-editor/listing", function (req, res) {
   const formPages = req.session.data["formPages"] || [];
@@ -1956,6 +1989,7 @@ router.get("/titan-mvp-1.2/form-editor/listing", function (req, res) {
   res.render("titan-mvp-1.2/form-editor/listing/index", {
     formPages,
     sections,
+    advancedSettingsHint: getListingAdvancedSettingsHint(formData),
     form: {
       name: formData.formName || "Form name",
     },
@@ -2008,6 +2042,7 @@ router.get("/titan-mvp-1.2/form-editor/listing.html", function (req, res) {
   res.render("titan-mvp-1.2/form-editor/listing/index", {
     formPages,
     sections,
+    advancedSettingsHint: getListingAdvancedSettingsHint(formData),
     form: {
       name: formData.formName || "Form name",
     },
@@ -2388,6 +2423,219 @@ router.get("/titan-mvp-1.2/form-overview/welsh-mocks/overview-entry.html", (req,
     request: req,
   });
 });
+
+// Advanced settings
+const ADVANCED_SETTINGS_PAGES = {
+  "check-before-submission": {
+    key: "checkBeforeSubmission",
+    slug: "check-before-submission",
+    summaryLabel: "Check before submission",
+    summaryValueYes: "Someone else reviews answers before submission",
+    summaryValueNo: "Submitted without anyone else reviewing answers",
+    label: "Does someone need to check the form before it is submitted?",
+    hint:
+      "Use when someone other than the person filling in the form should review their answers first.",
+    yesDescription:
+      "The person filling in the form asks someone else to review their answers. They cannot submit until that review is finished.",
+    noDescription:
+      "The person filling in the form can submit when they are ready. No one else needs to review their answers.",
+    changeHiddenText: "whether someone must check the form before it is submitted",
+    whoCanCheckLabel: "Who can check the form",
+    whoCanCheckHint:
+      "Tell people who they should ask to review their answers. For example, their manager or a colleague in the same team.",
+    autoEnableWarning:
+      "If someone must check the form before it is submitted, the confirmation email and reference number will be switched on automatically.",
+  },
+  "reuse-previous-answers": {
+    key: "reusePreviousAnswers",
+    slug: "reuse-previous-answers",
+    summaryLabel: "Reuse previous answers",
+    summaryValueYes: "Answers from a past submission can be copied forward",
+    summaryValueNo: "Every new form starts with blank answers",
+    label: "Can people reuse answers from a previous submission?",
+    hint:
+      "Use when people often submit this form more than once with similar answers.",
+    yesDescription:
+      "After submitting, they can start again with answers from their last submission already filled in. They can change anything before sending the new form.",
+    noDescription:
+      "Each time they use the form, they enter all answers from scratch.",
+    changeHiddenText:
+      "whether people can reuse answers from a previous submission",
+    autoEnableWarning:
+      "If people can reuse answers from a previous submission, the confirmation email and reference number will be switched on automatically.",
+  },
+};
+
+function enableConfirmationEmailAndReferenceNumber(formData) {
+  formData.confirmationEmailEnabled = "yes";
+  formData.referenceNumberEnabled = "yes";
+}
+
+function getAdvancedSettings(formData) {
+  const settings = formData.advancedSettings || {};
+  return {
+    checkBeforeSubmission:
+      settings.checkBeforeSubmission || settings.requiresApproval || "no",
+    whoCanCheckDescription: settings.whoCanCheckDescription || "",
+    reusePreviousAnswers:
+      settings.reusePreviousAnswers || settings.allowCopies || "no",
+  };
+}
+
+function getAdvancedSettingsSummaryRows(formData) {
+  const data = getAdvancedSettings(formData);
+  const rows = Object.values(ADVANCED_SETTINGS_PAGES).map((setting) => ({
+    key: { text: setting.summaryLabel },
+    value: {
+      text:
+        data[setting.key] === "yes"
+          ? setting.summaryValueYes
+          : setting.summaryValueNo,
+    },
+    actions: {
+      items: [
+        {
+          href: `/titan-mvp-1.2/form-editor/advanced-settings/${setting.slug}`,
+          text: "Change",
+          visuallyHiddenText: setting.changeHiddenText,
+        },
+      ],
+    },
+  }));
+
+  if (data.checkBeforeSubmission === "yes") {
+    const checkSetting = ADVANCED_SETTINGS_PAGES["check-before-submission"];
+    rows.splice(1, 0, {
+      key: { text: checkSetting.whoCanCheckLabel },
+      value: {
+        text: data.whoCanCheckDescription || "Not added yet",
+      },
+      actions: {
+        items: [
+          {
+            href: `/titan-mvp-1.2/form-editor/advanced-settings/${checkSetting.slug}`,
+            text: "Change",
+            visuallyHiddenText: checkSetting.whoCanCheckLabel.toLowerCase(),
+          },
+        ],
+      },
+    });
+  }
+
+  return rows;
+}
+
+function renderAdvancedSettingsOverview(req, res) {
+  const formData = req.session.data || {};
+
+  res.render("titan-mvp-1.2/form-editor/advanced-settings", {
+    summaryRows: getAdvancedSettingsSummaryRows(formData),
+    form: {
+      name: formData.formName || "Form name",
+    },
+    saved: req.query.saved === "true",
+  });
+}
+
+router.get(
+  "/titan-mvp-1.2/form-editor/advanced-settings",
+  renderAdvancedSettingsOverview
+);
+
+router.get(
+  "/titan-mvp-1.2/form-editor/advanced-settings.html",
+  renderAdvancedSettingsOverview
+);
+
+function renderAdvancedSettingsChange(req, res) {
+  const formData = req.session.data || {};
+  const setting = ADVANCED_SETTINGS_PAGES[req.params.setting];
+
+  if (!setting) {
+    return res.redirect("/titan-mvp-1.2/form-editor/advanced-settings");
+  }
+
+  res.render("titan-mvp-1.2/form-editor/advanced-settings/change", {
+    data: getAdvancedSettings(formData),
+    setting,
+    form: {
+      name: formData.formName || "Form name",
+    },
+    errors: {},
+  });
+}
+
+router.get(
+  "/titan-mvp-1.2/form-editor/advanced-settings/:setting",
+  renderAdvancedSettingsChange
+);
+
+router.get(
+  "/titan-mvp-1.2/form-editor/advanced-settings/:setting.html",
+  renderAdvancedSettingsChange
+);
+
+router.post(
+  "/titan-mvp-1.2/form-editor/advanced-settings/:setting",
+  function (req, res) {
+    const formData = req.session.data || {};
+    const setting = ADVANCED_SETTINGS_PAGES[req.params.setting];
+
+    if (!setting) {
+      return res.redirect("/titan-mvp-1.2/form-editor/advanced-settings");
+    }
+
+    if (!formData.advancedSettings) {
+      formData.advancedSettings = {};
+    }
+
+    const selectedValue = req.body[setting.key] || "no";
+    formData.advancedSettings[setting.key] = selectedValue;
+
+    if (setting.slug === "check-before-submission") {
+      const whoCanCheckDescription = String(
+        req.body.whoCanCheckDescription || ""
+      ).trim();
+
+      if (selectedValue === "yes" && !whoCanCheckDescription) {
+        return res.render("titan-mvp-1.2/form-editor/advanced-settings/change", {
+          data: {
+            ...getAdvancedSettings(formData),
+            whoCanCheckDescription,
+          },
+          setting,
+          form: {
+            name: formData.formName || "Form name",
+          },
+          errors: {
+            whoCanCheckDescription: "Enter who can check the form",
+          },
+        });
+      }
+
+      formData.advancedSettings.whoCanCheckDescription =
+        selectedValue === "yes" ? whoCanCheckDescription : "";
+
+      if (selectedValue === "yes") {
+        enableConfirmationEmailAndReferenceNumber(formData);
+      }
+    }
+
+    if (setting.slug === "reuse-previous-answers") {
+      formData.savedAnswersEnabled = selectedValue === "yes" ? "yes" : "no";
+
+      if (selectedValue === "yes") {
+        enableConfirmationEmailAndReferenceNumber(formData);
+      }
+    }
+
+    req.session.data = formData;
+
+    res.redirect(
+      "/titan-mvp-1.2/form-editor/advanced-settings?saved=true"
+    );
+  }
+);
 
 // Add route for what-happens-next-settings
 router.get(
@@ -16728,10 +16976,12 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/submitted", functio
     runnerSignInV2EnsureApplication(req, req.params.formKey, req.params.applicationId);
   if (!application) return res.redirect("/runner-sign-in-v2/start-page");
   setRunnerSignInV2ManageFocus(req, application.formKey, application.id);
+  const confirmationEmailUrl = `/runner-sign-in-v2/emails/form-submitted?formKey=${encodeURIComponent(application.formKey)}&applicationId=${encodeURIComponent(application.id)}`;
   return res.render("titan-mvp-1.2/runner-sign-in-v2/form-submitted", {
     data,
     application,
     manageUrl: runnerSignInV2ManagePath(application.formKey, application.id),
+    confirmationEmailUrl,
   });
 });
 
@@ -19905,6 +20155,51 @@ function isRunnerSignInV2ProbablyEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
 }
 
+const RUNNER_SIGN_IN_V2_DEMO_SECURITY_CODE = "123456";
+
+function validateRunnerSignInV2EmailField(email) {
+  const s = String(email || "").trim();
+  if (!s) return "Enter an email address";
+  if (!isRunnerSignInV2ProbablyEmail(s)) {
+    return "Enter an email address in the correct format, like name@example.com";
+  }
+  return null;
+}
+
+function validateRunnerSignInV2MobileField(phone) {
+  const s = String(phone || "").trim();
+  if (!s) return "Enter telephone number in the correct format";
+  const normalized = s.replace(/[\s()-]/g, "");
+  const digits = normalized.replace(/\D/g, "");
+  const ukMobile = /^(?:\+?44)?7\d{9}$/.test(digits) || /^07\d{9}$/.test(normalized);
+  const international = /^\+[1-9]\d{9,14}$/.test(normalized);
+  if (ukMobile || international || (digits.length >= 10 && digits.length <= 15)) {
+    return null;
+  }
+  return "Enter telephone number in the correct format";
+}
+
+function validateRunnerSignInV2OtpField(code, { checkDemoCode } = {}) {
+  const digits = String(code || "").replace(/\s+/g, "");
+  if (!digits) return "Enter the 6 digit security code";
+  if (digits.length > 6) return "Enter the security code using only 6 digits";
+  if (!/^\d+$/.test(digits)) return "Enter the security code using only 6 digits";
+  if (digits.length < 6) return "Enter the 6 digit security code";
+  if (checkDemoCode && digits !== RUNNER_SIGN_IN_V2_DEMO_SECURITY_CODE) {
+    return "The code you entered is not correct or has expired – enter it again or request a new code";
+  }
+  return null;
+}
+
+function runnerSignInV2CheckEmailRedirectPath(formKey, applicationId, next, extraQuery) {
+  let url =
+    `/runner-sign-in-v2/create-sign-in/check-email?formKey=${encodeURIComponent(formKey)}` +
+    `&applicationId=${encodeURIComponent(applicationId)}`;
+  if (next) url += `&next=${encodeURIComponent(next)}`;
+  if (extraQuery) url += extraQuery;
+  return url;
+}
+
 function runnerSignInV2ReadTriple(req, body) {
   const src = body || req.query || {};
   return {
@@ -20066,6 +20361,38 @@ router.get("/runner-sign-in-v2/reset", function (req, res) {
   delete data.runnerSignInV2FocusFormKey;
   delete data.runnerSignInV2FocusApplicationId;
   return res.redirect("/runner-sign-in-v2/start-page");
+});
+
+router.get("/runner-sign-in-v2/sign-out", function (req, res) {
+  const data = ensureRunnerSignInSession(req);
+  const formKey =
+    String(req.query.formKey || data.runnerSignInV2FocusFormKey || "").trim();
+  const applicationId =
+    String(req.query.applicationId || data.runnerSignInV2FocusApplicationId || "").trim();
+
+  data.runnerSignInAuthed = false;
+  delete data.runnerSignInEmail;
+  delete data.runnerSignInMethod;
+  delete data.runnerSignInPhone;
+  delete data.runnerSignInPhoneConfirmed;
+  delete data.runnerSignInV2PendingEmail;
+  delete data.runnerSignInV2PendingMobile;
+  delete data.runnerSignInV2CreateSignInEmailConfirmed;
+  delete data.runnerSignInV2SignInPendingEmail;
+  delete data.runnerSignInV2RecoverNewEmail;
+  delete data.runnerSignInV2Error;
+  delete data.runnerSignInError;
+
+  let signInUrl = "/runner-sign-in-v2/sign-in/email";
+  if (formKey && applicationId) {
+    const manageUrl = runnerSignInV2ManagePath(formKey, applicationId);
+    signInUrl = `/runner-sign-in-v2/sign-in/email?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}&next=${encodeURIComponent(manageUrl)}`;
+  }
+
+  return res.render("titan-mvp-1.2/runner-sign-in-v2/sign-out", {
+    data,
+    signInUrl,
+  });
 });
 
 router.get("/runner-sign-in-v2/start-page", function (req, res) {
@@ -20571,10 +20898,97 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
   }
 
   if (slug === "save-exit-choose") {
+    const saveExitLeaveUrl = runnerSignInV2SaveAndExitWithoutSignInLeavePath(formKey, applicationId);
+    const chooseUrl = runnerSignInV2SaveAndExitChoosePath(formKey, applicationId);
+    const saveExitConfirmUrl = runnerSignInV2SaveAndExitWithSignInConfirmPath(formKey, applicationId);
     return res.render("titan-mvp-1.2/runner-sign-in-v2/save-and-exit/without-sign-in/choose", {
       ...base,
-      next: manageUrl,
       backUrl: journeysUrl,
+      createSignInUrl:
+        `/runner-sign-in-v2/create-sign-in/email?formKey=${enc(formKey)}&applicationId=${enc(applicationId)}` +
+        `&next=${enc(saveExitLeaveUrl)}&back=${enc(chooseUrl)}`,
+      signInUrl:
+        `/runner-sign-in-v2/sign-in/email?formKey=${enc(formKey)}&applicationId=${enc(applicationId)}` +
+        `&next=${enc(saveExitConfirmUrl)}&back=${enc(chooseUrl)}`,
+    });
+  }
+
+  if (slug === "create-sign-in-email-save-exit") {
+    const saveExitLeaveUrl = runnerSignInV2SaveAndExitWithoutSignInLeavePath(formKey, applicationId);
+    const chooseUrl = runnerSignInV2SaveAndExitChoosePath(formKey, applicationId);
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/create-sign-in/email", {
+      ...base,
+      next: saveExitLeaveUrl,
+      backUrl: chooseUrl,
+      values: { runnerSignInV2Email: email },
+    });
+  }
+
+  if (slug === "create-sign-in-mobile-save-exit") {
+    const saveExitLeaveUrl = runnerSignInV2SaveAndExitWithoutSignInLeavePath(formKey, applicationId);
+    data.runnerSignInV2PendingEmail = email;
+    data.runnerSignInV2CreateSignInEmailConfirmed = true;
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/create-sign-in/mobile", {
+      ...base,
+      next: saveExitLeaveUrl,
+      backUrl: triple("/runner-sign-in-v2/create-sign-in/check-email", saveExitLeaveUrl),
+      values: { runnerSignInV2Mobile: phone },
+    });
+  }
+
+  if (slug === "create-sign-in-check-email-resend") {
+    data.runnerSignInV2PendingEmail = email;
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/create-sign-in/check-email", {
+      ...base,
+      next: manageUrl,
+      email,
+      resend: true,
+      backUrl: triple("/runner-sign-in-v2/create-sign-in/email", manageUrl),
+    });
+  }
+
+  if (slug === "save-exit-with-sign-in-leave") {
+    applyRunnerSignInV2EmailAuth(req, email, phone);
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/save-and-exit/with-sign-in/leave", {
+      ...base,
+      manageUrl,
+    });
+  }
+
+  if (slug === "save-exit-without-sign-in-leave") {
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/save-and-exit/without-sign-in/leave", {
+      ...base,
+      manageUrl,
+    });
+  }
+
+  if (slug === "email-save-exit-without-sign-in") {
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/emails/save-and-exit", {
+      ...base,
+      variant: "without-sign-in",
+      toEmail: email,
+      resumeUrl: `${PUBLIC_BASE_URL}/runner-sign-in-v2/save-and-exit/without-sign-in/resume?formKey=${enc(formKey)}&applicationId=${enc(applicationId)}`,
+      formName: application.formName,
+    });
+  }
+
+  if (slug === "email-save-exit-with-sign-in") {
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/emails/save-and-exit", {
+      ...base,
+      variant: "with-sign-in",
+      toEmail: email,
+      resumeUrl: `${PUBLIC_BASE_URL}/runner-sign-in-v2/save-and-exit/with-sign-in/resume?formKey=${enc(formKey)}&applicationId=${enc(applicationId)}`,
+      formName: application.formName,
+    });
+  }
+
+  if (slug === "form-submitted") {
+    applyRunnerSignInV2EmailAuth(req, email, phone);
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/form-submitted", {
+      data,
+      application,
+      manageUrl,
+      confirmationEmailUrl: `/runner-sign-in-v2/journeys/preview/email-form-submitted`,
     });
   }
 
@@ -20593,6 +21007,51 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
       next: manageUrl,
       backUrl: journeysUrl,
       values: { runnerSignInV2ResumeEmail: email },
+    });
+  }
+
+  if (slug === "save-exit-progress-saved") {
+    data.runnerSignInV2SaveAndExitAccountCreated = { formKey, applicationId };
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/create-sign-in/created", {
+      ...base,
+      continueUrl: runnerSignInV2SaveAndExitWithoutSignInLeavePath(formKey, applicationId),
+      isSaveAndExitJourney: true,
+      signInUrl: triple("/runner-sign-in-v2/sign-in/email", manageUrl),
+      userEmail: email,
+    });
+  }
+
+  if (slug === "save-exit-resume-with-sign-in") {
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/save-and-exit/with-sign-in/resume", {
+      ...base,
+      signInUrl: triple("/runner-sign-in-v2/sign-in/email", manageUrl),
+    });
+  }
+
+  if (slug === "save-exit-resume-without-sign-in") {
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/save-and-exit/without-sign-in/resume", {
+      ...base,
+      signInUrl: triple("/runner-sign-in-v2/sign-in/email", manageUrl),
+    });
+  }
+
+  if (slug === "save-exit-check-email") {
+    data.runnerSignInV2PendingEmail = email;
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/save-and-exit/without-sign-in/check-email", {
+      ...base,
+      next: runnerSignInV2SaveAndExitWithoutSignInLeavePath(formKey, applicationId),
+      email,
+      resend: false,
+      backUrl: triple("/runner-sign-in-v2/create-sign-in/email", runnerSignInV2SaveAndExitWithoutSignInLeavePath(formKey, applicationId)),
+    });
+  }
+
+  if (slug === "delete-draft") {
+    applyRunnerSignInV2EmailAuth(req, email, phone);
+    setRunnerSignInV2ManageFocus(req, formKey, applicationId);
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/delete-application", {
+      ...base,
+      manageUrl,
     });
   }
 
@@ -20660,6 +21119,17 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
     });
   }
 
+  if (slug === "email-form-submitted") {
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/emails/form-submitted", {
+      ...base,
+      toEmail: email,
+      formName: application.formName,
+      referenceNumber: "V25-AWC-M56",
+      submittedAt: "2:49pm on 20 April 2026",
+      linkExpiresAt: "1:49pm on Wednesday 20 January 2027",
+    });
+  }
+
   if (slug === "manage-form-checked") {
     return res.redirect("/runner-sign-in-v2/static/manage-form-checked");
   }
@@ -20678,18 +21148,7 @@ router.get("/runner-sign-in-v2/journeys", function (req, res) {
   }
   const demoFormKey = RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_FORM_KEY;
   const demoApplicationId = RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_APP_ID;
-  const urls = {
-    ...runnerSignInV2BuildJourneyUrls({
-      formKey: demoFormKey,
-      applicationId: demoApplicationId,
-      staticCheckedReviewToken: RUNNER_SIGN_IN_V2_STATIC_CHECKED_REVIEW_TOKEN,
-      journeyPreviewPath: runnerSignInV2JourneyPreviewPath,
-    }),
-    startPage: "/runner-sign-in-v2/start-page",
-    journeyFlowcharts: "/runner-sign-in-v2/journey-flowcharts",
-    unexpectedJourneys: "/runner-sign-in-v2/unexpected-journeys",
-    emailConfirmation: "/runner-sign-in-v2/emails/email-confirmation-code",
-  };
+  const urls = runnerSignInV2DocsUrls();
   return res.render("titan-mvp-1.2/runner-sign-in-v2/journeys", {
     data,
     demoFormKey,
@@ -20765,11 +21224,7 @@ router.get("/runner-sign-in-v2/journey-flowcharts", function (req, res) {
     journeyFlows,
     journeySelectItems,
     journeyGlanceItems,
-    urls: {
-      startPage: "/runner-sign-in-v2/start-page",
-      journeys: "/runner-sign-in-v2/journeys",
-      unexpectedJourneys: "/runner-sign-in-v2/unexpected-journeys",
-    },
+    urls: runnerSignInV2DocsUrls(),
   });
 });
 
@@ -20797,6 +21252,144 @@ router.get("/runner-sign-in-v2/unexpected-journeys/:slug", function (req, res) {
   return res.render("titan-mvp-1.2/runner-sign-in-v2/unexpected-page", {
     data,
     page,
+  });
+});
+
+function runnerSignInV2FieldErrorPreviewContext(req, slug) {
+  const item = RUNNER_SIGN_IN_V2_FIELD_ERRORS[String(slug || "")];
+  if (!item) return null;
+
+  const data = ensureRunnerSignInSession(req);
+  data.runnerSignInV2PrototypeMode = true;
+  const formKey = RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_FORM_KEY;
+  const applicationId = RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_APP_ID;
+  const manageUrl = runnerSignInV2ManagePath(formKey, applicationId);
+  const application = runnerSignInV2EnsureApplication(req, formKey, applicationId);
+  const leaveUrl = runnerSignInV2SaveAndExitWithoutSignInLeavePath(formKey, applicationId);
+  const chooseUrl = runnerSignInV2SaveAndExitChoosePath(formKey, applicationId, "details");
+
+  delete data.runnerSignInV2PendingEmail;
+  delete data.runnerSignInV2SignInPendingEmail;
+  delete data.runnerSignInV2CreateSignInEmailConfirmed;
+  if (typeof item.setupSession === "function") {
+    item.setupSession(data);
+  }
+
+  const next = item.template.includes("save-and-exit") ? leaveUrl : manageUrl;
+  const enc = (value) => encodeURIComponent(value);
+  const triple = (path, dest) =>
+    `${path}?formKey=${enc(formKey)}&applicationId=${enc(applicationId)}&next=${enc(dest || manageUrl)}`;
+
+  let backUrl = "/runner-sign-in-v2/error-messages";
+  if (item.template.includes("create-sign-in/email")) backUrl = triple("/runner-sign-in-v2/create-sign-in/email", next);
+  if (item.template.includes("create-sign-in/check-email")) backUrl = triple("/runner-sign-in-v2/create-sign-in/email", next);
+  if (item.template.includes("create-sign-in/mobile")) backUrl = triple("/runner-sign-in-v2/create-sign-in/check-email", next);
+  if (item.template.includes("sign-in/email")) backUrl = triple("/runner-sign-in-v2/sign-in/email", next);
+  if (item.template.includes("sign-in/check-email")) backUrl = triple("/runner-sign-in-v2/sign-in/email", next);
+  if (item.template.includes("with-sign-in/confirm-email")) backUrl = runnerSignInV2ManagePath(formKey, applicationId);
+  if (item.template.includes("without-sign-in/check-email")) {
+    backUrl = triple("/runner-sign-in-v2/create-sign-in/email", leaveUrl);
+  }
+
+  return {
+    data,
+    application,
+    formKey,
+    applicationId,
+    next,
+    backUrl,
+    manageUrl,
+    error: item.error,
+    values: item.values || {},
+    email: (item.extra && item.extra.email) || "you@example.com",
+    resend: Boolean(item.extra && item.extra.resend),
+  };
+}
+
+function runnerSignInV2DocsUrls() {
+  const formKey = RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_FORM_KEY;
+  const applicationId = RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_APP_ID;
+  return {
+    ...runnerSignInV2BuildJourneyUrls({
+      formKey,
+      applicationId,
+      staticCheckedReviewToken: RUNNER_SIGN_IN_V2_STATIC_CHECKED_REVIEW_TOKEN,
+      journeyPreviewPath: runnerSignInV2JourneyPreviewPath,
+    }),
+    startPage: "/runner-sign-in-v2/start-page",
+    journeys: "/runner-sign-in-v2/journeys",
+    saveAndExitStories: "/runner-sign-in-v2/save-and-exit-stories",
+    journeyFlowcharts: "/runner-sign-in-v2/journey-flowcharts",
+    unexpectedJourneys: "/runner-sign-in-v2/unexpected-journeys",
+    emailConfirmation: `/runner-sign-in-v2/emails/email-confirmation-code?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}`,
+  };
+}
+
+router.get("/runner-sign-in-v2/save-and-exit-stories", function (req, res) {
+  const data = ensureRunnerSignInSession(req);
+  data.runnerSignInV2PrototypeMode = true;
+  runnerSignInV2EnsureApplication(
+    req,
+    RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_FORM_KEY,
+    RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_APP_ID
+  );
+  const demoFormKey = RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_FORM_KEY;
+  const demoApplicationId = RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_APP_ID;
+  const urls = {
+    ...runnerSignInV2DocsUrls(),
+    preview: runnerSignInV2JourneyPreviewPath,
+    emailFormSubmittedPreview: runnerSignInV2JourneyPreviewPath("email-form-submitted"),
+  };
+  const stories = buildRunnerSignInV2SaveExitStories(urls);
+  return res.render("titan-mvp-1.2/runner-sign-in-v2/save-and-exit-stories", {
+    data,
+    demoFormKey,
+    demoApplicationId,
+    urls,
+    stories,
+  });
+});
+
+router.get("/runner-sign-in-v2/error-messages", function (req, res) {
+  const data = ensureRunnerSignInSession(req);
+  const urls = runnerSignInV2DocsUrls();
+  const errorGroups = groupRunnerSignInV2FieldErrors().map((group) => ({
+    heading: group.heading,
+    items: group.items.map((item) => ({
+      ...item,
+      errorText: item.error[item.field],
+      previewHref: `/runner-sign-in-v2/error-messages/${item.slug}/preview`,
+    })),
+  }));
+
+  return res.render("titan-mvp-1.2/runner-sign-in-v2/error-messages", {
+    data,
+    errorGroups,
+    urls,
+  });
+});
+
+router.get("/runner-sign-in-v2/error-messages/:slug/preview", function (req, res) {
+  const slug = String(req.params.slug || "").trim();
+  const item = RUNNER_SIGN_IN_V2_FIELD_ERRORS[slug];
+  if (!item) return res.redirect("/runner-sign-in-v2/error-messages");
+
+  const ctx = runnerSignInV2FieldErrorPreviewContext(req, slug);
+  return res.render(item.template, ctx);
+});
+
+router.get("/runner-sign-in-v2/error-messages/:slug", function (req, res) {
+  const slug = String(req.params.slug || "").trim();
+  const item = RUNNER_SIGN_IN_V2_FIELD_ERRORS[slug];
+  if (!item) return res.redirect("/runner-sign-in-v2/error-messages");
+
+  const data = ensureRunnerSignInSession(req);
+  return res.render("titan-mvp-1.2/runner-sign-in-v2/error-message-reference", {
+    data,
+    errorItem: {
+      ...item,
+    },
+    previewUrl: `/runner-sign-in-v2/error-messages/${encodeURIComponent(slug)}/preview`,
   });
 });
 
@@ -20972,8 +21565,14 @@ router.post("/runner-sign-in-v2/create-sign-in/email", function (req, res) {
   const data = ensureRunnerSignInSession(req);
   const { formKey, applicationId, next } = runnerSignInV2ReadTriple(req, req.body);
   const manageUrl = formKey && applicationId ? runnerSignInV2ManagePath(formKey, applicationId) : "/runner-sign-in-v2/start-page";
-  // Prototype: allow flicking through without validation.
-  const email = String(req.body.runnerSignInV2Email || "").trim() || "you@example.com";
+  const email = String(req.body.runnerSignInV2Email || "").trim();
+  const emailError = validateRunnerSignInV2EmailField(email);
+  if (emailError) {
+    data.runnerSignInV2Error = { runnerSignInV2Email: emailError };
+    return res.redirect(
+      `/runner-sign-in-v2/create-sign-in/email?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}&next=${encodeURIComponent(next || manageUrl)}`
+    );
+  }
   delete data.runnerSignInV2Error;
 
   if (runnerSignInV2NextIsCheckerJourney(req, next)) {
@@ -21023,16 +21622,23 @@ router.post("/runner-sign-in-v2/create-sign-in/check-email", function (req, res)
   const data = ensureRunnerSignInSession(req);
   const { formKey, applicationId, next } = runnerSignInV2ReadTriple(req, req.body);
   const manageUrl = formKey && applicationId ? runnerSignInV2ManagePath(formKey, applicationId) : "/runner-sign-in-v2/start-page";
+  const resolvedNext = next || manageUrl;
   if (!data.runnerSignInV2PendingEmail) {
     return res.redirect(
-      `/runner-sign-in-v2/create-sign-in/email?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}&next=${encodeURIComponent(next || manageUrl)}`
+      `/runner-sign-in-v2/create-sign-in/email?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}&next=${encodeURIComponent(resolvedNext)}`
     );
   }
-  // Prototype: allow flicking through without validation.
+  const codeError = validateRunnerSignInV2OtpField(req.body.runnerSignInV2Code, {
+    checkDemoCode: runnerSignInV2PrototypeMode(req),
+  });
+  if (codeError) {
+    data.runnerSignInV2Error = { runnerSignInV2Code: codeError };
+    return res.redirect(runnerSignInV2CheckEmailRedirectPath(formKey, applicationId, resolvedNext));
+  }
   delete data.runnerSignInV2Error;
   data.runnerSignInV2CreateSignInEmailConfirmed = true;
   return res.redirect(
-    `/runner-sign-in-v2/create-sign-in/mobile?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}&next=${encodeURIComponent(next || manageUrl)}`
+    `/runner-sign-in-v2/create-sign-in/mobile?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}&next=${encodeURIComponent(resolvedNext)}`
   );
 });
 
@@ -21111,8 +21717,14 @@ router.post("/runner-sign-in-v2/create-sign-in/mobile", function (req, res) {
       `/runner-sign-in-v2/create-sign-in/email?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}&next=${encodeURIComponent(next || manageUrl)}`
     );
   }
-  // Prototype: allow flicking through without validation.
-  const phone = String(req.body.runnerSignInV2Mobile || "").trim() || "07700 900000";
+  const phone = String(req.body.runnerSignInV2Mobile || "").trim();
+  const phoneError = validateRunnerSignInV2MobileField(phone);
+  if (phoneError) {
+    data.runnerSignInV2Error = { runnerSignInV2Mobile: phoneError };
+    return res.redirect(
+      `/runner-sign-in-v2/create-sign-in/mobile?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}&next=${encodeURIComponent(next || manageUrl)}`
+    );
+  }
   delete data.runnerSignInV2Error;
   const dest = runnerSignInV2PostAuthDestination(req, formKey, applicationId, next);
   const isSaveAndExitJourney = runnerSignInV2IsSaveAndExitNext(dest) || runnerSignInV2IsSaveAndExitNext(next);
@@ -21205,9 +21817,28 @@ router.post("/runner-sign-in-v2/sign-in/email", function (req, res) {
   const data = ensureRunnerSignInSession(req);
   const { formKey, applicationId, next } = runnerSignInV2ReadTriple(req, req.body);
   const manageUrl = formKey && applicationId ? runnerSignInV2ManagePath(formKey, applicationId) : "/runner-sign-in-v2/start-page";
-  // Prototype: allow flicking through without validation.
-  const email = String(req.body.runnerSignInV2Email || "").trim() || "you@example.com";
+  const email = String(req.body.runnerSignInV2Email || "").trim();
+  const emailError = validateRunnerSignInV2EmailField(email);
+  if (emailError) {
+    data.runnerSignInV2Error = { runnerSignInV2Email: emailError };
+    return res.redirect(
+      `/runner-sign-in-v2/sign-in/email?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}&next=${encodeURIComponent(next || manageUrl)}`
+    );
+  }
   delete data.runnerSignInV2Error;
+
+  if (String(req.query.scenario || req.body.scenario || "").trim() === "no-sign-in") {
+    return res.redirect("/runner-sign-in-v2/unexpected-journeys/no-sign-in-found");
+  }
+  const knownEmail = String(data.runnerSignInEmail || "").trim().toLowerCase();
+  if (
+    knownEmail &&
+    email.toLowerCase() !== knownEmail &&
+    !data.runnerSignInAuthed &&
+    String(data.runnerSignInPhone || "").trim()
+  ) {
+    return res.redirect("/runner-sign-in-v2/unexpected-journeys/no-sign-in-found");
+  }
 
   if (runnerSignInV2NextIsCheckerJourney(req, next)) {
     applyRunnerSignInV2EmailAuth(req, email, data.runnerSignInPhone);
@@ -21250,7 +21881,17 @@ router.get("/runner-sign-in-v2/sign-in/check-email", function (req, res) {
 router.post("/runner-sign-in-v2/sign-in/check-email", function (req, res) {
   const data = ensureRunnerSignInSession(req);
   const { formKey, applicationId, next } = runnerSignInV2ReadTriple(req, req.body);
-  // Prototype: allow flicking through without validation.
+  const manageUrl = formKey && applicationId ? runnerSignInV2ManagePath(formKey, applicationId) : "/runner-sign-in-v2/start-page";
+  const resolvedNext = next || manageUrl;
+  const codeError = validateRunnerSignInV2OtpField(req.body.runnerSignInV2Code, {
+    checkDemoCode: runnerSignInV2PrototypeMode(req),
+  });
+  if (codeError) {
+    data.runnerSignInV2Error = { runnerSignInV2Code: codeError };
+    return res.redirect(
+      `/runner-sign-in-v2/sign-in/check-email?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}&next=${encodeURIComponent(resolvedNext)}`
+    );
+  }
   delete data.runnerSignInV2Error;
   applyRunnerSignInV2EmailAuth(req, data.runnerSignInV2SignInPendingEmail, data.runnerSignInPhone);
   delete data.runnerSignInV2SignInPendingEmail;
@@ -21594,7 +22235,7 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/manage", function (
     const primaryHref = statusText === "Checked" ? readyToSubmitHref : continueHref;
     const primaryLabel = statusText === "Checked" ? "Review and submit" : "Continue";
     const copyHref = `/runner-sign-in/applications/${encodeURIComponent(a.id)}/clone`;
-    const deleteHref = `/runner-sign-in/applications/${encodeURIComponent(a.id)}/delete`;
+    const deleteHref = `/runner-sign-in-v2/forms/${encodeURIComponent(a.formKey)}/${encodeURIComponent(a.id)}/delete`;
     const actionsHtml = isSubmitted
       ? `<a class="govuk-link" href="${copyHref}">Copy</a>`
       : `<a class="govuk-link" href="${primaryHref}">${primaryLabel}</a> <span class="govuk-body govuk-!-margin-left-2 govuk-!-margin-right-2">|</span> <a class="govuk-link" href="${deleteHref}">Delete</a>`;
@@ -22199,18 +22840,57 @@ router.post("/runner-sign-in-v2/save-and-exit/without-sign-in/create-sign-in", f
 });
 
 router.get("/runner-sign-in-v2/save-and-exit/without-sign-in/check-email", function (req, res) {
+  const data = ensureRunnerSignInSession(req);
   const { formKey, applicationId, next } = runnerSignInV2ReadTriple(req, req.query);
+  const application = runnerSignInV2ResolveApplication(req, formKey, applicationId);
   const leaveUrl = runnerSignInV2SaveAndExitWithoutSignInLeavePath(formKey, applicationId);
-  return res.redirect(
-    `/runner-sign-in-v2/create-sign-in/check-email?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}&next=${encodeURIComponent(next || leaveUrl)}`
-  );
+  const resolvedNext = next || leaveUrl;
+  if (!data.runnerSignInV2PendingEmail && runnerSignInV2PrototypeMode(req)) {
+    data.runnerSignInV2PendingEmail = "you@example.com";
+  }
+  if (!data.runnerSignInV2PendingEmail) {
+    return res.redirect(
+      `/runner-sign-in-v2/create-sign-in/email?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}&next=${encodeURIComponent(resolvedNext)}`
+    );
+  }
+  const resend = req.query.resend === "1" || req.query.resend === "true";
+  return res.render("titan-mvp-1.2/runner-sign-in-v2/save-and-exit/without-sign-in/check-email", {
+    data,
+    application,
+    formKey,
+    applicationId,
+    next: resolvedNext,
+    email: data.runnerSignInV2PendingEmail,
+    resend,
+    backUrl: `/runner-sign-in-v2/create-sign-in/email?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}&next=${encodeURIComponent(resolvedNext)}`,
+    error: data.runnerSignInV2Error || {},
+    values: {},
+  });
 });
 
 router.post("/runner-sign-in-v2/save-and-exit/without-sign-in/check-email", function (req, res) {
+  const data = ensureRunnerSignInSession(req);
   const { formKey, applicationId, next } = runnerSignInV2ReadTriple(req, req.body);
   const leaveUrl = runnerSignInV2SaveAndExitWithoutSignInLeavePath(formKey, applicationId);
+  const resolvedNext = next || leaveUrl;
+  if (!data.runnerSignInV2PendingEmail) {
+    return res.redirect(
+      `/runner-sign-in-v2/create-sign-in/email?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}&next=${encodeURIComponent(resolvedNext)}`
+    );
+  }
+  const codeError = validateRunnerSignInV2OtpField(req.body.runnerSignInV2Code, {
+    checkDemoCode: runnerSignInV2PrototypeMode(req),
+  });
+  if (codeError) {
+    data.runnerSignInV2Error = { runnerSignInV2Code: codeError };
+    return res.redirect(
+      `/runner-sign-in-v2/save-and-exit/without-sign-in/check-email?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}&next=${encodeURIComponent(resolvedNext)}`
+    );
+  }
+  delete data.runnerSignInV2Error;
+  data.runnerSignInV2CreateSignInEmailConfirmed = true;
   return res.redirect(
-    `/runner-sign-in-v2/create-sign-in/check-email?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}&next=${encodeURIComponent(next || leaveUrl)}`
+    `/runner-sign-in-v2/create-sign-in/mobile?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}&next=${encodeURIComponent(resolvedNext)}`
   );
 });
 
@@ -22231,10 +22911,64 @@ router.get("/runner-sign-in-v2/save-and-exit/without-sign-in/resume", function (
   if (!formKey || !applicationId) {
     return res.redirect("/runner-sign-in-v2/start-page");
   }
+  const application = runnerSignInV2ResolveApplication(req, formKey, applicationId);
   const manageUrl = runnerSignInV2ManagePath(formKey, applicationId);
-  return res.redirect(
-    `/runner-sign-in-v2/sign-in/email?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}&next=${encodeURIComponent(manageUrl)}`
-  );
+  const signInUrl =
+    `/runner-sign-in-v2/sign-in/email?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}` +
+    `&next=${encodeURIComponent(manageUrl)}`;
+  return res.render("titan-mvp-1.2/runner-sign-in-v2/save-and-exit/without-sign-in/resume", {
+    data: ensureRunnerSignInSession(req),
+    application,
+    formKey,
+    applicationId,
+    signInUrl,
+  });
+});
+
+router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/delete", function (req, res) {
+  const data = ensureRunnerSignInSession(req);
+  if (!data.runnerSignInAuthed) {
+    return res.redirect(
+      `/runner-sign-in-v2/sign-in/email?formKey=${encodeURIComponent(req.params.formKey)}&applicationId=${encodeURIComponent(req.params.applicationId)}&next=${encodeURIComponent(runnerSignInV2ManagePath(req.params.formKey, req.params.applicationId))}`
+    );
+  }
+  const applications = ensureRunnerSignInApplications(req);
+  const application = applications.find((a) => a && a.id === req.params.applicationId);
+  if (!application) return res.redirect(runnerSignInV2ManagePath(req.params.formKey, req.params.applicationId));
+  if (application.status === "Submitted") {
+    return res.redirect(runnerSignInV2ManagePath(req.params.formKey, req.params.applicationId));
+  }
+  const manageUrl = runnerSignInV2ManagePath(application.formKey, application.id);
+  return res.render("titan-mvp-1.2/runner-sign-in-v2/delete-application", {
+    data,
+    application,
+    formKey: application.formKey,
+    applicationId: application.id,
+    manageUrl,
+  });
+});
+
+router.post("/runner-sign-in-v2/forms/:formKey/:applicationId/delete", function (req, res) {
+  const data = ensureRunnerSignInSession(req);
+  if (!data.runnerSignInAuthed) {
+    return res.redirect(
+      `/runner-sign-in-v2/sign-in/email?formKey=${encodeURIComponent(req.params.formKey)}&applicationId=${encodeURIComponent(req.params.applicationId)}`
+    );
+  }
+  const choice = String(req.body.deleteApplication || "").trim();
+  const targetId = String(req.body.targetApplicationId || req.params.applicationId || "").trim();
+  const manageUrl = runnerSignInV2ManagePath(req.params.formKey, req.params.applicationId);
+  if (choice !== "yes") return res.redirect(manageUrl);
+
+  const applications = ensureRunnerSignInApplications(req);
+  const idx = applications.findIndex((a) => a && a.id === targetId);
+  if (idx < 0) return res.redirect(manageUrl);
+  if (applications[idx].status === "Submitted") return res.redirect(manageUrl);
+
+  applications.splice(idx, 1);
+  data.runnerSignInApplications = applications;
+
+  return res.redirect(`${manageUrl}?deleted=1`);
 });
 
 router.get("/runner-sign-in-v2/emails/save-and-exit", function (req, res) {
@@ -22294,6 +23028,25 @@ router.get("/runner-sign-in-v2/emails/email-confirmation-code", function (req, r
     applicationId,
     application,
     formName,
+  });
+});
+
+router.get("/runner-sign-in-v2/emails/form-submitted", function (req, res) {
+  const data = ensureRunnerSignInSession(req);
+  const toEmail = String(req.query.email || data.runnerSignInEmail || "").trim();
+  const formKey = String(req.query.formKey || "").trim();
+  const applicationId = String(req.query.applicationId || "").trim();
+  const application = runnerSignInV2ResolveApplication(req, formKey, applicationId);
+  const formName = (application && application.formName) || "";
+  return res.render("titan-mvp-1.2/runner-sign-in-v2/emails/form-submitted", {
+    toEmail,
+    formKey,
+    applicationId,
+    application,
+    formName,
+    referenceNumber: String(req.query.referenceNumber || "V25-AWC-M56").trim(),
+    submittedAt: String(req.query.submittedAt || "2:49pm on 20 April 2026").trim(),
+    linkExpiresAt: String(req.query.linkExpiresAt || "1:49pm on Wednesday 20 January 2027").trim(),
   });
 });
 

@@ -14,9 +14,20 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
       heading: "Prototype",
       links: [
         { text: "Start page", href: "/runner-sign-in-v2/start-page" },
+        { text: "All pages", href: urls.allPages || "/runner-sign-in-v2/all-pages" },
         { text: "Journeys", href: "/runner-sign-in-v2/journeys" },
+        { text: "Save and exit user stories", href: urls.saveAndExitStories || "/runner-sign-in-v2/save-and-exit-stories" },
         { text: "Journey flowcharts", href: "/runner-sign-in-v2/journey-flowcharts" },
         { text: "Unexpected journeys", href: "/runner-sign-in-v2/unexpected-journeys" },
+        { text: "Validation error messages", href: urls.errorMessages || "/runner-sign-in-v2/error-messages" },
+      ],
+    },
+    {
+      heading: "Form designer (advanced settings)",
+      links: [
+        { text: "Advanced settings", href: urls.formEditorAdvancedSettings },
+        { text: "Check before submission", href: urls.formEditorCheckBeforeSubmission },
+        { text: "Reuse previous answers", href: urls.formEditorReusePreviousAnswers },
       ],
     },
     {
@@ -26,8 +37,9 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
         { text: "Sign in to use this form", href: urls.whySignIn },
         { text: "Manage your form", href: urls.manage },
         { text: "Ready to submit", href: urls.readyToSubmit },
-        { text: "Form submitted", href: `/runner-sign-in-v2/forms/${enc(formKey)}/${enc(applicationId)}/submitted` },
-        { text: "Start a new application", href: `/runner-sign-in-v2/forms/${enc(formKey)}/${enc(applicationId)}/start-new` },
+        { text: "Form submitted", href: urls.formSubmitted },
+        { text: "Form submitted confirmation email", href: urls.emailFormSubmitted },
+        { text: "Start a new application", href: urls.startNewForm },
         { text: "Manage your form (checked example)", href: urls.staticManageFormChecked },
       ],
     },
@@ -47,6 +59,7 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
         { text: "Enter your email address", href: urls.signInEmail },
         { text: "Check your email", href: urls.signInCheckEmail },
         { text: "Get security code", href: triple("/runner-sign-in-v2/sign-in/get-security-code", urls.manage) },
+        { text: "You have signed out", href: urls.signOut },
       ],
     },
     {
@@ -64,19 +77,23 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
       heading: "Save and exit (signed in)",
       links: [
         { text: "Confirm email to save and exit", href: urls.saveExitConfirmEmail },
-        { text: "Your progress has been saved", href: `/runner-sign-in-v2/save-and-exit/with-sign-in/leave?${q}&email=you@example.com` },
-        { text: "Save and exit email", href: urls.emailSaveExit },
-        { text: "Sign in from email link", href: `/runner-sign-in-v2/save-and-exit/with-sign-in/resume?${q}` },
+        { text: "We've emailed you a link to come back", href: urls.saveExitWithSignInLeave },
+        { text: "Save and exit email", href: urls.emailSaveExitWithSignIn || urls.emailSaveExit },
+        { text: "Welcome back (from email)", href: urls.saveExitWithSignInResume },
+        { text: "Sign in from email link", href: urls.signInEmail },
       ],
     },
     {
       heading: "Save and exit (without signing in)",
       links: [
-        { text: "Save and exit", href: urls.saveExitChoose },
+        { text: "Sign in to save your progress", href: urls.saveExitChoose },
         { text: "Create a sign-in", href: urls.saveExitCreate },
-        { text: "Check your email", href: `/runner-sign-in-v2/save-and-exit/without-sign-in/check-email?${q}` },
-        { text: "Your sign-in has been created", href: `/runner-sign-in-v2/save-and-exit/without-sign-in/leave?${q}` },
-        { text: "Sign in from email", href: `/runner-sign-in-v2/save-and-exit/without-sign-in/resume?${q}` },
+        { text: "Check your email", href: urls.saveExitWithoutSignInCheckEmail },
+        { text: "Your progress has been saved", href: urls.saveExitCreated || "/runner-sign-in-v2/journeys/preview/save-exit-progress-saved" },
+        { text: "We've emailed you a link to resume", href: urls.saveExitLeave },
+        { text: "Save and exit email", href: urls.emailSaveExitWithoutSignIn || `${urls.emailSaveExit}&variant=without-sign-in` },
+        { text: "Welcome back (from email)", href: urls.saveExitWithoutSignInResume },
+        { text: "Delete draft confirmation", href: urls.deleteDraft },
       ],
     },
     {
@@ -110,11 +127,13 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
     {
       heading: "Emails",
       links: [
-        { text: "Save and exit email", href: urls.emailSaveExit },
+        { text: "Save and exit email (signed in)", href: urls.emailSaveExitWithSignIn || urls.emailSaveExit },
+        { text: "Save and exit email (without sign-in)", href: urls.emailSaveExitWithoutSignIn || `${urls.emailSaveExit}&variant=without-sign-in` },
         { text: "Security code email", href: `/runner-sign-in-v2/emails/email-confirmation-code?${q}` },
         { text: "Sign-in created email", href: `/runner-sign-in-v2/emails/one-login-created?${q}&email=you@example.com` },
         { text: "Checker invite email", href: urls.emailCheckerInvite },
         { text: "Applicant form checked email", href: urls.emailApplicantFormChecked },
+        { text: "Form submitted email (copied answers)", href: urls.emailFormSubmitted },
       ],
     },
     {
