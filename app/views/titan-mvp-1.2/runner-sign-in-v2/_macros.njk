@@ -72,25 +72,3 @@
     errorMessage: params.errorMessage or false
   }) }}
 {% endmacro %}
-
-{% macro v2SecurityCodeInput(params) %}
-  {% from "govuk/components/input/macro.njk" import govukInput %}
-  {{ govukInput({
-    label: {
-      text: params.labelText or "Enter the 6 digit security code",
-      classes: params.labelClasses
-    },
-    classes: "govuk-input--width-10 govuk-!-font-weight-bold",
-    id: params.id or "v2-code",
-    name: params.name or "runnerSignInV2Code",
-    type: "text",
-    spellcheck: false,
-    autocomplete: "one-time-code",
-    attributes: {
-      inputmode: "numeric",
-      maxlength: "6"
-    },
-    value: params.value,
-    errorMessage: params.errorMessage or false
-  }) }}
-{% endmacro %}

@@ -10,6 +10,12 @@
 
 // Add extra styles here
 
+// In-progress status tag (AC: govuk-tag--teal; not in core GOV.UK Frontend)
+.govuk-tag.govuk-tag--teal {
+  background-color: #008281;
+  color: #ffffff;
+}
+
 // Custom active navigation link underline color
 .govuk-service-navigation__item--active .govuk-service-navigation__link::after {
   background-color: #008531 !important;

@@ -20772,7 +20772,7 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
       tableRow: {
         reference: application.reference,
         statusText: "In progress",
-        statusTagClasses: "govuk-tag--blue",
+        statusTagClasses: "govuk-tag--teal",
         lastUpdatedText: "Last updated today",
         expiryText: "—",
         actionsHtml: '<a class="govuk-link" href="#">Continue</a>',
@@ -20781,7 +20781,7 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
       query: {},
       v2PrimaryAction: "continue",
       v2StatusLabel: "In progress",
-      v2StatusTagClasses: "govuk-tag--blue",
+      v2StatusTagClasses: "govuk-tag--teal",
       lastUpdatedText: "Last updated today",
       expiryText: "—",
       continueUrl: "#",
@@ -20793,7 +20793,7 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
       checkerStartUrl: "#",
       checkerInviteEmailPreviewUrl: "#",
       checkingRequired: false,
-      startNewUrl: "#",
+      startNewUrl: `/runner-sign-in-v2/forms/${enc(formKey)}/${enc(applicationId)}/start-new`,
     });
   }
 
@@ -21340,13 +21340,14 @@ router.get("/runner-sign-in-v2/save-and-exit-stories", function (req, res) {
     preview: runnerSignInV2JourneyPreviewPath,
     emailFormSubmittedPreview: runnerSignInV2JourneyPreviewPath("email-form-submitted"),
   };
-  const stories = buildRunnerSignInV2SaveExitStories(urls);
+  const { stories, openItems } = buildRunnerSignInV2SaveExitStories(urls);
   return res.render("titan-mvp-1.2/runner-sign-in-v2/save-and-exit-stories", {
     data,
     demoFormKey,
     demoApplicationId,
     urls,
     stories,
+    openItems,
   });
 });
 
@@ -22216,7 +22217,9 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/manage", function (
     if (s === "Awaiting check") return "govuk-tag--yellow";
     if (s === "Checked") return "govuk-tag--turquoise";
     if (s === "Not yet started") return "govuk-tag--grey";
-    return "govuk-tag--blue";
+    if (s === "Deleted") return "govuk-tag--red";
+    if (s === "In progress") return "govuk-tag--teal";
+    return "govuk-tag--teal";
   }
 
   function runnerSignInV2TableRowFor(a) {
@@ -22239,6 +22242,7 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/manage", function (
     const actionsHtml = isSubmitted
       ? `<a class="govuk-link" href="${copyHref}">Copy</a>`
       : `<a class="govuk-link" href="${primaryHref}">${primaryLabel}</a> <span class="govuk-body govuk-!-margin-left-2 govuk-!-margin-right-2">|</span> <a class="govuk-link" href="${deleteHref}">Delete</a>`;
+    const sortExpiryTs = isSubmitted ? Number.POSITIVE_INFINITY : Date.parse(a.expiryIso) || Number.POSITIVE_INFINITY;
     return {
       id: a.id,
       formName: a.formName,
@@ -22249,6 +22253,7 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/manage", function (
       expiryText,
       actionsHtml,
       _sortTs: sortTs,
+      _sortExpiryTs: sortExpiryTs,
     };
   }
 
@@ -22272,8 +22277,21 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/manage", function (
     tableRows.push(tableRow);
   }
 
-  // Show newest version first (most recently updated/submitted).
-  tableRows.sort((a, b) => (b._sortTs || 0) - (a._sortTs || 0));
+  function runnerSignInV2ManageRowRank(row) {
+    if (row.statusText === "Deleted") return 3;
+    if (row.statusText === "Submitted") return 2;
+    return 1;
+  }
+
+  // Active in-progress rows first (earliest expiry first), then submitted, then deleted.
+  tableRows.sort((a, b) => {
+    const rankDiff = runnerSignInV2ManageRowRank(a) - runnerSignInV2ManageRowRank(b);
+    if (rankDiff !== 0) return rankDiff;
+    if (runnerSignInV2ManageRowRank(a) === 1) {
+      return (a._sortExpiryTs || Number.POSITIVE_INFINITY) - (b._sortExpiryTs || Number.POSITIVE_INFINITY);
+    }
+    return (b._sortTs || 0) - (a._sortTs || 0);
+  });
 
   const formDef = getRunnerSignInFormDef(application.formKey);
   const checkingRequired = Boolean(application.checking && application.checking.required);
@@ -22281,7 +22299,7 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/manage", function (
 
   let v2PrimaryAction = "continue";
   let v2StatusLabel = "In progress";
-  let v2StatusTagClasses = "govuk-tag--blue";
+  let v2StatusTagClasses = "govuk-tag--teal";
   if (application.status === "Submitted") {
     v2PrimaryAction = "copy";
     v2StatusLabel = "Submitted";

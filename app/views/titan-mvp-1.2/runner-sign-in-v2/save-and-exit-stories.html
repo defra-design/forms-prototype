@@ -2,6 +2,8 @@
 {% from "govuk/components/accordion/macro.njk" import govukAccordion %}
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 {% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% from "govuk/components/table/macro.njk" import govukTable %}
+{% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
 {% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
 {% import "titan-mvp-1.2/runner-sign-in-v2/_journey-docs.njk" as journeyDocs %}
 
@@ -54,9 +56,37 @@ Save and exit user stories – Runner sign-in v2 – GOV.UK
       {% set storyHtml %}
         <div class="journey-docs__section">
           <p class="govuk-body">{{ story.summary }}</p>
+          {% if story.notice %}
+            {{ govukWarningText({ text: story.notice, classes: "govuk-!-margin-bottom-6" }) }}
+          {% endif %}
           {% for flow in story.flows %}
             {{ journeyDocs.journeyStoryFlow(flow) }}
           {% endfor %}
+          {% if story.additionalAc %}
+            {% for block in story.additionalAc %}
+              <h3 class="govuk-heading-s govuk-!-margin-top-6">{{ block.title }}</h3>
+              {% if block.intro %}
+                <p class="govuk-body">{{ block.intro }}</p>
+              {% endif %}
+              {% if block.items %}
+                <ul class="govuk-list govuk-list--bullet">
+                  {% for item in block.items %}
+                    <li>{{ item }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+              {% if block.table %}
+                {{ govukTable(block.table) }}
+              {% endif %}
+              {% if block.links %}
+                <ul class="govuk-list govuk-list--bullet">
+                  {% for link in block.links %}
+                    <li><a class="govuk-link" href="{{ link.href }}">{{ link.text }}</a></li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            {% endfor %}
+          {% endif %}
         </div>
       {% endset %}
       {% set accordionItems = (accordionItems.push({
@@ -71,6 +101,15 @@ Save and exit user stories – Runner sign-in v2 – GOV.UK
       id: "save-and-exit-stories",
       items: accordionItems
     }) }}
+
+    {% if openItems %}
+      <h2 class="govuk-heading-l govuk-!-margin-top-9">Open items for Dan</h2>
+      <ul class="govuk-list govuk-list--bullet">
+        {% for item in openItems %}
+          <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
 
     <h2 class="govuk-heading-l govuk-!-margin-top-9">Related prototype pages</h2>
     <ul class="govuk-list govuk-list--bullet">
