@@ -89,6 +89,33 @@ const RUNNER_SIGN_IN_V2_FIELD_ERRORS = {
       data.runnerSignInV2ChangeEmailPhoneVerified = true;
     },
   },
+  "create-mobile-empty": {
+    title: "Enter a mobile phone number",
+    group: "Mobile phone number",
+    journey: "Create a sign-in",
+    page: "Enter your mobile phone number",
+    useWhen: "The user selects Continue without entering a mobile phone number.",
+    field: "runnerSignInV2Mobile",
+    error: { runnerSignInV2Mobile: "Enter a mobile phone number" },
+    values: { runnerSignInV2Mobile: "" },
+    template: "titan-mvp-1.2/runner-sign-in-v2/create-sign-in/mobile",
+    setupSession: (data) => {
+      data.runnerSignInV2PendingEmail = "you@example.com";
+      data.runnerSignInV2CreateSignInEmailConfirmed = true;
+    },
+  },
+  "recover-mobile-empty": {
+    title: "Enter a mobile phone number (recover)",
+    group: "Mobile phone number",
+    journey: "Recover my sign-in",
+    page: "Enter the phone number you used to sign in",
+    useWhen:
+      "The user selects Continue on the recover mobile phone page without entering a mobile phone number.",
+    field: "runnerSignInV2Mobile",
+    error: { runnerSignInV2Mobile: "Enter a mobile phone number" },
+    values: { runnerSignInV2Mobile: "" },
+    template: "titan-mvp-1.2/runner-sign-in-v2/recover/phone",
+  },
   "create-mobile-invalid-format": {
     title: "Enter telephone number in the correct format",
     group: "Mobile phone number",
