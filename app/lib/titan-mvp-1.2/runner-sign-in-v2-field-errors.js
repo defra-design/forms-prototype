@@ -1,8 +1,59 @@
 const RUNNER_SIGN_IN_V2_CHANGE_EMAIL_SAME_AS_CURRENT_ERROR =
   "Enter a different email address. This is the same as your current email address.";
 
+const RUNNER_SIGN_IN_V2_CHANGE_EMAIL_USED_ON_OTHER_ACCOUNT_ERROR =
+  "Enter a different email address. This email address is already used for another sign-in.";
+
+const RUNNER_SIGN_IN_V2_CHANGE_PHONE_SAME_AS_CURRENT_ERROR =
+  "Enter a different mobile phone number. This is the same as your current mobile phone number.";
+
+const RUNNER_SIGN_IN_V2_CHANGE_PHONE_USED_ON_OTHER_ACCOUNT_ERROR =
+  "Enter a different mobile phone number. This mobile phone number is already used for another sign-in.";
+
 const RUNNER_SIGN_IN_V2_STATIC_CHANGE_EMAIL_NEW_EMAIL_SAME_AS_CURRENT_PATH =
   "/runner-sign-in-v2/static/change-email-new-email-same-as-current";
+
+const RUNNER_SIGN_IN_V2_STATIC_CHANGE_EMAIL_USED_ON_OTHER_ACCOUNT_PATH =
+  "/runner-sign-in-v2/static/change-email-new-email-used-on-other-account";
+
+const RUNNER_SIGN_IN_V2_STATIC_CHANGE_PHONE_SAME_AS_CURRENT_PATH =
+  "/runner-sign-in-v2/static/change-phone-same-as-current";
+
+const RUNNER_SIGN_IN_V2_STATIC_CHANGE_PHONE_USED_ON_OTHER_ACCOUNT_PATH =
+  "/runner-sign-in-v2/static/change-phone-used-on-other-account";
+
+const RUNNER_SIGN_IN_V2_PROTOTYPE_EMAIL_USED_ON_OTHER_ACCOUNT = "alreadyused@example.com";
+const RUNNER_SIGN_IN_V2_PROTOTYPE_PHONE_USED_ON_OTHER_ACCOUNT = "07123456789";
+
+function runnerSignInV2NormalizePhoneDigits(phone) {
+  return String(phone || "").replace(/\D+/g, "");
+}
+
+function runnerSignInV2ChangeEmailValidationError(email, currentEmail) {
+  const normalized = String(email || "").trim().toLowerCase();
+  if (!normalized) return null;
+  const current = String(currentEmail || "").trim().toLowerCase();
+  if (current && normalized === current) {
+    return RUNNER_SIGN_IN_V2_CHANGE_EMAIL_SAME_AS_CURRENT_ERROR;
+  }
+  if (normalized === RUNNER_SIGN_IN_V2_PROTOTYPE_EMAIL_USED_ON_OTHER_ACCOUNT.toLowerCase()) {
+    return RUNNER_SIGN_IN_V2_CHANGE_EMAIL_USED_ON_OTHER_ACCOUNT_ERROR;
+  }
+  return null;
+}
+
+function runnerSignInV2ChangePhoneValidationError(phone, currentPhone) {
+  const normalized = runnerSignInV2NormalizePhoneDigits(phone);
+  if (!normalized) return null;
+  const currentNormalized = runnerSignInV2NormalizePhoneDigits(currentPhone);
+  if (currentNormalized && normalized === currentNormalized) {
+    return RUNNER_SIGN_IN_V2_CHANGE_PHONE_SAME_AS_CURRENT_ERROR;
+  }
+  if (normalized === runnerSignInV2NormalizePhoneDigits(RUNNER_SIGN_IN_V2_PROTOTYPE_PHONE_USED_ON_OTHER_ACCOUNT)) {
+    return RUNNER_SIGN_IN_V2_CHANGE_PHONE_USED_ON_OTHER_ACCOUNT_ERROR;
+  }
+  return null;
+}
 
 const RUNNER_SIGN_IN_V2_FIELD_ERRORS = {
   "create-email-empty": {
@@ -87,6 +138,65 @@ const RUNNER_SIGN_IN_V2_FIELD_ERRORS = {
     setupSession: (data) => {
       data.runnerSignInEmail = "you@example.com";
       data.runnerSignInV2ChangeEmailPhoneVerified = true;
+    },
+  },
+  "change-email-used-on-other-account": {
+    title: "Enter a different email address (already used)",
+    group: "Email address",
+    journey: "Security · Change email",
+    page: "Enter your new email address",
+    useWhen:
+      "The user enters an email address that is already linked to a different sign-in when changing their email address.",
+    field: "runnerSignInV2NewEmail",
+    error: {
+      runnerSignInV2NewEmail: RUNNER_SIGN_IN_V2_CHANGE_EMAIL_USED_ON_OTHER_ACCOUNT_ERROR,
+    },
+    values: { runnerSignInV2NewEmail: RUNNER_SIGN_IN_V2_PROTOTYPE_EMAIL_USED_ON_OTHER_ACCOUNT },
+    template: "titan-mvp-1.2/runner-sign-in-v2/security/change-email/new-email",
+    staticHref: RUNNER_SIGN_IN_V2_STATIC_CHANGE_EMAIL_USED_ON_OTHER_ACCOUNT_PATH,
+    setupSession: (data) => {
+      data.runnerSignInEmail = "you@example.com";
+      data.runnerSignInV2ChangeEmailPhoneVerified = true;
+    },
+  },
+  "change-phone-same-as-current": {
+    title: "Enter a different mobile phone number (change phone)",
+    group: "Mobile phone number",
+    journey: "Security · Change phone",
+    page: "Enter your new mobile phone number",
+    useWhen:
+      "The user enters the same mobile phone number as their current sign-in number when changing their phone number.",
+    field: "runnerSignInV2Mobile",
+    error: {
+      runnerSignInV2Mobile: RUNNER_SIGN_IN_V2_CHANGE_PHONE_SAME_AS_CURRENT_ERROR,
+    },
+    values: { runnerSignInV2Mobile: "07700 900000" },
+    template: "titan-mvp-1.2/runner-sign-in-v2/security/change-phone/new-phone",
+    staticHref: RUNNER_SIGN_IN_V2_STATIC_CHANGE_PHONE_SAME_AS_CURRENT_PATH,
+    setupSession: (data) => {
+      data.runnerSignInEmail = "you@example.com";
+      data.runnerSignInPhone = "07700 900000";
+      data.runnerSignInV2ChangePhoneEmailVerified = true;
+    },
+  },
+  "change-phone-used-on-other-account": {
+    title: "Enter a different mobile phone number (already used)",
+    group: "Mobile phone number",
+    journey: "Security · Change phone",
+    page: "Enter your new mobile phone number",
+    useWhen:
+      "The user enters a mobile phone number that is already linked to a different sign-in when changing their phone number.",
+    field: "runnerSignInV2Mobile",
+    error: {
+      runnerSignInV2Mobile: RUNNER_SIGN_IN_V2_CHANGE_PHONE_USED_ON_OTHER_ACCOUNT_ERROR,
+    },
+    values: { runnerSignInV2Mobile: RUNNER_SIGN_IN_V2_PROTOTYPE_PHONE_USED_ON_OTHER_ACCOUNT },
+    template: "titan-mvp-1.2/runner-sign-in-v2/security/change-phone/new-phone",
+    staticHref: RUNNER_SIGN_IN_V2_STATIC_CHANGE_PHONE_USED_ON_OTHER_ACCOUNT_PATH,
+    setupSession: (data) => {
+      data.runnerSignInEmail = "you@example.com";
+      data.runnerSignInPhone = "07700 900000";
+      data.runnerSignInV2ChangePhoneEmailVerified = true;
     },
   },
   "create-mobile-empty": {
@@ -298,7 +408,17 @@ function groupRunnerSignInV2FieldErrors() {
 
 module.exports = {
   RUNNER_SIGN_IN_V2_CHANGE_EMAIL_SAME_AS_CURRENT_ERROR,
+  RUNNER_SIGN_IN_V2_CHANGE_EMAIL_USED_ON_OTHER_ACCOUNT_ERROR,
+  RUNNER_SIGN_IN_V2_CHANGE_PHONE_SAME_AS_CURRENT_ERROR,
+  RUNNER_SIGN_IN_V2_CHANGE_PHONE_USED_ON_OTHER_ACCOUNT_ERROR,
+  RUNNER_SIGN_IN_V2_PROTOTYPE_EMAIL_USED_ON_OTHER_ACCOUNT,
+  RUNNER_SIGN_IN_V2_PROTOTYPE_PHONE_USED_ON_OTHER_ACCOUNT,
   RUNNER_SIGN_IN_V2_STATIC_CHANGE_EMAIL_NEW_EMAIL_SAME_AS_CURRENT_PATH,
+  RUNNER_SIGN_IN_V2_STATIC_CHANGE_EMAIL_USED_ON_OTHER_ACCOUNT_PATH,
+  RUNNER_SIGN_IN_V2_STATIC_CHANGE_PHONE_SAME_AS_CURRENT_PATH,
+  RUNNER_SIGN_IN_V2_STATIC_CHANGE_PHONE_USED_ON_OTHER_ACCOUNT_PATH,
+  runnerSignInV2ChangeEmailValidationError,
+  runnerSignInV2ChangePhoneValidationError,
   RUNNER_SIGN_IN_V2_FIELD_ERRORS,
   listRunnerSignInV2FieldErrors,
   groupRunnerSignInV2FieldErrors,

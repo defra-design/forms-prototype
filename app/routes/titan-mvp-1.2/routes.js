@@ -14,8 +14,18 @@ const {
 } = require("../../lib/titan-mvp-1.2/runner-sign-in-v2-journey-urls");
 const {
   RUNNER_SIGN_IN_V2_CHANGE_EMAIL_SAME_AS_CURRENT_ERROR,
+  RUNNER_SIGN_IN_V2_CHANGE_EMAIL_USED_ON_OTHER_ACCOUNT_ERROR,
+  RUNNER_SIGN_IN_V2_CHANGE_PHONE_SAME_AS_CURRENT_ERROR,
+  RUNNER_SIGN_IN_V2_CHANGE_PHONE_USED_ON_OTHER_ACCOUNT_ERROR,
   RUNNER_SIGN_IN_V2_FIELD_ERRORS,
   RUNNER_SIGN_IN_V2_STATIC_CHANGE_EMAIL_NEW_EMAIL_SAME_AS_CURRENT_PATH,
+  RUNNER_SIGN_IN_V2_STATIC_CHANGE_EMAIL_USED_ON_OTHER_ACCOUNT_PATH,
+  RUNNER_SIGN_IN_V2_STATIC_CHANGE_PHONE_SAME_AS_CURRENT_PATH,
+  RUNNER_SIGN_IN_V2_STATIC_CHANGE_PHONE_USED_ON_OTHER_ACCOUNT_PATH,
+  RUNNER_SIGN_IN_V2_PROTOTYPE_EMAIL_USED_ON_OTHER_ACCOUNT,
+  RUNNER_SIGN_IN_V2_PROTOTYPE_PHONE_USED_ON_OTHER_ACCOUNT,
+  runnerSignInV2ChangeEmailValidationError,
+  runnerSignInV2ChangePhoneValidationError,
   groupRunnerSignInV2FieldErrors,
 } = require("../../lib/titan-mvp-1.2/runner-sign-in-v2-field-errors");
 const express = require("express");
@@ -20165,6 +20175,54 @@ function runnerSignInV2ChangeEmailNewEmailSameAsCurrentContext(req) {
   };
 }
 
+function runnerSignInV2SecurityChangeEmailNewEmailErrorContext(req, { errorMessage, emailValue }) {
+  const data = ensureRunnerSignInSession(req);
+  data.runnerSignInV2PrototypeMode = true;
+  const formKey = RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_FORM_KEY;
+  const applicationId = RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_APP_ID;
+  const application = runnerSignInV2EnsureApplication(req, formKey, applicationId);
+  const email = "you@example.com";
+  const phone = "07700 900000";
+  applyRunnerSignInV2EmailAuth(req, email, phone);
+  data.runnerSignInV2ChangeEmailPhoneVerified = true;
+  setRunnerSignInV2ManageFocus(req, formKey, applicationId);
+  return {
+    data,
+    application,
+    formKey,
+    applicationId,
+    securityUrl: runnerSignInV2SecurityPath(formKey, applicationId),
+    checkPhoneUrl: runnerSignInV2SecurityChangeEmailPath(formKey, applicationId, "check-phone"),
+    formAction: runnerSignInV2SecurityChangeEmailPath(formKey, applicationId, "new-email"),
+    error: { runnerSignInV2NewEmail: errorMessage },
+    values: { runnerSignInV2NewEmail: emailValue },
+  };
+}
+
+function runnerSignInV2SecurityChangePhoneNewPhoneErrorContext(req, { errorMessage, phoneValue }) {
+  const data = ensureRunnerSignInSession(req);
+  data.runnerSignInV2PrototypeMode = true;
+  const formKey = RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_FORM_KEY;
+  const applicationId = RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_APP_ID;
+  const application = runnerSignInV2EnsureApplication(req, formKey, applicationId);
+  const email = "you@example.com";
+  const phone = "07700 900000";
+  applyRunnerSignInV2EmailAuth(req, email, phone);
+  data.runnerSignInV2ChangePhoneEmailVerified = true;
+  setRunnerSignInV2ManageFocus(req, formKey, applicationId);
+  return {
+    data,
+    application,
+    formKey,
+    applicationId,
+    securityUrl: runnerSignInV2SecurityPath(formKey, applicationId),
+    checkEmailUrl: runnerSignInV2SecurityChangePhonePath(formKey, applicationId, "check-email"),
+    formAction: runnerSignInV2SecurityChangePhonePath(formKey, applicationId, "new-phone"),
+    error: { runnerSignInV2Mobile: errorMessage },
+    values: { runnerSignInV2Mobile: phoneValue },
+  };
+}
+
 function runnerSignInV2EnsureSecuritySession(req, res) {
   const data = ensureRunnerSignInSession(req);
   const formKey = String(req.params.formKey || "").trim();
@@ -21148,6 +21206,18 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
     return res.redirect(RUNNER_SIGN_IN_V2_STATIC_CHANGE_EMAIL_NEW_EMAIL_SAME_AS_CURRENT_PATH);
   }
 
+  if (slug === "change-email-new-email-used-on-other-account") {
+    return res.redirect(RUNNER_SIGN_IN_V2_STATIC_CHANGE_EMAIL_USED_ON_OTHER_ACCOUNT_PATH);
+  }
+
+  if (slug === "change-phone-new-phone-same-as-current") {
+    return res.redirect(RUNNER_SIGN_IN_V2_STATIC_CHANGE_PHONE_SAME_AS_CURRENT_PATH);
+  }
+
+  if (slug === "change-phone-new-phone-used-on-other-account") {
+    return res.redirect(RUNNER_SIGN_IN_V2_STATIC_CHANGE_PHONE_USED_ON_OTHER_ACCOUNT_PATH);
+  }
+
   if (slug === "change-email-check-new-email") {
     applyRunnerSignInV2EmailAuth(req, email, phone);
     setRunnerSignInV2ManageFocus(req, formKey, applicationId);
@@ -21643,6 +21713,9 @@ function runnerSignInV2FieldErrorPreviewContext(req, slug) {
   if (item.template.includes("security/change-email/new-email")) {
     backUrl = runnerSignInV2SecurityChangeEmailPath(formKey, applicationId, "check-phone");
   }
+  if (item.template.includes("security/change-phone/new-phone")) {
+    backUrl = runnerSignInV2SecurityChangePhonePath(formKey, applicationId, "check-email");
+  }
 
   return {
     data,
@@ -21654,7 +21727,10 @@ function runnerSignInV2FieldErrorPreviewContext(req, slug) {
     manageUrl,
     securityUrl,
     checkPhoneUrl: runnerSignInV2SecurityChangeEmailPath(formKey, applicationId, "check-phone"),
-    formAction: runnerSignInV2SecurityChangeEmailPath(formKey, applicationId, "new-email"),
+    checkEmailUrl: runnerSignInV2SecurityChangePhonePath(formKey, applicationId, "check-email"),
+    formAction: item.template.includes("security/change-phone/new-phone")
+      ? runnerSignInV2SecurityChangePhonePath(formKey, applicationId, "new-phone")
+      : runnerSignInV2SecurityChangeEmailPath(formKey, applicationId, "new-email"),
     error: item.error,
     values: item.values || {},
     email: (item.extra && item.extra.email) || "you@example.com",
@@ -22577,6 +22653,36 @@ router.get("/runner-sign-in-v2/static/change-email-new-email-same-as-current", f
   );
 });
 
+router.get("/runner-sign-in-v2/static/change-email-new-email-used-on-other-account", function (req, res) {
+  return res.render(
+    "titan-mvp-1.2/runner-sign-in-v2/security/change-email/new-email",
+    runnerSignInV2SecurityChangeEmailNewEmailErrorContext(req, {
+      errorMessage: RUNNER_SIGN_IN_V2_CHANGE_EMAIL_USED_ON_OTHER_ACCOUNT_ERROR,
+      emailValue: RUNNER_SIGN_IN_V2_PROTOTYPE_EMAIL_USED_ON_OTHER_ACCOUNT,
+    })
+  );
+});
+
+router.get("/runner-sign-in-v2/static/change-phone-same-as-current", function (req, res) {
+  return res.render(
+    "titan-mvp-1.2/runner-sign-in-v2/security/change-phone/new-phone",
+    runnerSignInV2SecurityChangePhoneNewPhoneErrorContext(req, {
+      errorMessage: RUNNER_SIGN_IN_V2_CHANGE_PHONE_SAME_AS_CURRENT_ERROR,
+      phoneValue: "07700 900000",
+    })
+  );
+});
+
+router.get("/runner-sign-in-v2/static/change-phone-used-on-other-account", function (req, res) {
+  return res.render(
+    "titan-mvp-1.2/runner-sign-in-v2/security/change-phone/new-phone",
+    runnerSignInV2SecurityChangePhoneNewPhoneErrorContext(req, {
+      errorMessage: RUNNER_SIGN_IN_V2_CHANGE_PHONE_USED_ON_OTHER_ACCOUNT_ERROR,
+      phoneValue: RUNNER_SIGN_IN_V2_PROTOTYPE_PHONE_USED_ON_OTHER_ACCOUNT,
+    })
+  );
+});
+
 router.get("/runner-sign-in-v2/static/manage-form-checked", function (req, res) {
   const data = ensureRunnerSignInSession(req);
   const application = runnerSignInV2EnsureStaticCheckedExample(req);
@@ -22946,10 +23052,9 @@ router.post("/runner-sign-in-v2/forms/:formKey/:applicationId/security/change-em
     return res.redirect(runnerSignInV2SecurityChangeEmailPath(formKey, applicationId, "new-email"));
   }
   const currentEmail = String(data.runnerSignInEmail || "").trim().toLowerCase();
-  if (currentEmail && email.toLowerCase() === currentEmail) {
-    data.runnerSignInV2Error = {
-      runnerSignInV2NewEmail: RUNNER_SIGN_IN_V2_CHANGE_EMAIL_SAME_AS_CURRENT_ERROR,
-    };
+  const changeEmailError = runnerSignInV2ChangeEmailValidationError(email, currentEmail);
+  if (changeEmailError) {
+    data.runnerSignInV2Error = { runnerSignInV2NewEmail: changeEmailError };
     data.runnerSignInV2ChangeEmailPending = email;
     return res.redirect(runnerSignInV2SecurityChangeEmailPath(formKey, applicationId, "new-email"));
   }
@@ -23088,7 +23193,16 @@ router.post("/runner-sign-in-v2/forms/:formKey/:applicationId/security/change-ph
   if (!data.runnerSignInV2ChangePhoneEmailVerified) {
     return res.redirect(runnerSignInV2SecurityChangePhonePath(formKey, applicationId, "get-security-code"));
   }
-  const phone = String(req.body.runnerSignInV2Mobile || "").trim() || "07700 900000";
+  const phone = String(req.body.runnerSignInV2Mobile || "").trim();
+  if (!phone) {
+    data.runnerSignInV2Error = { runnerSignInV2Mobile: "Enter a mobile phone number" };
+    return res.redirect(runnerSignInV2SecurityChangePhonePath(formKey, applicationId, "new-phone"));
+  }
+  const changePhoneError = runnerSignInV2ChangePhoneValidationError(phone, data.runnerSignInPhone);
+  if (changePhoneError) {
+    data.runnerSignInV2Error = { runnerSignInV2Mobile: changePhoneError };
+    return res.redirect(runnerSignInV2SecurityChangePhonePath(formKey, applicationId, "new-phone"));
+  }
   delete data.runnerSignInV2Error;
   data.runnerSignInPhone = phone;
   delete data.runnerSignInV2ChangePhoneEmailVerified;
