@@ -12214,13 +12214,15 @@ router.post(
       formData.declarationText = req.body.checkAnswersGuidanceTextInput;
     }
     // Persist new tab options
-    if (req.body.confirmationEmailEnabled) {
-      formData.confirmationEmailEnabled = req.body.confirmationEmailEnabled;
-    }
-    if (req.body.referenceNumberEnabled) {
-      formData.referenceNumberEnabled = req.body.referenceNumberEnabled;
-    }
-    if (req.body.feedbackPageEnabled) {
+    if (req.body.currentTab === "confirmation-email") {
+      const raw = req.body.confirmationEmailDisabled;
+      const isOff = raw === "yes" || (Array.isArray(raw) && raw.includes("yes"));
+      formData.confirmationEmailEnabled = isOff ? "no" : "yes";
+    } else if (req.body.currentTab === "reference-number") {
+      const raw = req.body.referenceNumberEnabled;
+      const isYes = raw === "yes" || (Array.isArray(raw) && raw.includes("yes"));
+      formData.referenceNumberEnabled = isYes ? "yes" : "no";
+    } else if (req.body.feedbackPageEnabled) {
       formData.feedbackPageEnabled = req.body.feedbackPageEnabled;
     }
     if (req.body.currentTab === "saved-answers") {
@@ -12798,6 +12800,252 @@ router.get("/titan-mvp-1.2/ai/form-creation-results", (req, res) => {
   });
 });
 
+// Settings v2 page with persistent tabs
+router.get(
+  "/titan-mvp-1.2/form-editor/check-answers/settings-v2",
+  function (req, res) {
+    const tab = req.query.tab;
+    const add = req.query.add;
+    const formData = req.session.data || {};
+
+    if (formData.showDeclarationTab === undefined)
+      formData.showDeclarationTab = false;
+    if (formData.showSectionsTab === undefined)
+      formData.showSectionsTab = false;
+
+    let currentTab = "page-settings";
+    if (add === "declaration") {
+      formData.showDeclarationTab = true;
+      currentTab = "declaration";
+    } else if (add === "sections") {
+      formData.showSectionsTab = true;
+      currentTab = "sections";
+    } else if (tab === "declaration") {
+      formData.showDeclarationTab = true;
+      currentTab = "declaration";
+    } else if (tab === "confirmation-email") {
+      currentTab = "confirmation-email";
+    } else if (tab === "reference-number") {
+      currentTab = "reference-number";
+    } else if (tab === "sections") {
+      formData.showSectionsTab = true;
+      currentTab = "sections";
+    } else if (tab === "feedback") {
+      currentTab = "feedback";
+    } else if (tab === "saved-answers") {
+      currentTab = "saved-answers";
+    }
+
+    if (req.query.savedAnswersEnabled === "yes" || req.query.savedAnswersEnabled === "no") {
+      formData.savedAnswersEnabled = req.query.savedAnswersEnabled;
+      req.session.data = formData;
+    }
+    if (currentTab === "saved-answers" && (formData.savedAnswersEnabled !== "yes" && formData.savedAnswersEnabled !== "no")) {
+      formData.savedAnswersEnabled = "no";
+    }
+
+    if (currentTab === "declaration") {
+      formData.showDeclarationTab = true;
+    } else if (currentTab === "sections") {
+      formData.showSectionsTab = true;
+
+      if (!formData.checkAnswersItems) {
+        formData.checkAnswersItems = [
+          {
+            id: 1,
+            type: "page",
+            key: "Business details",
+            value: "Page with multiple questions",
+            section: null,
+            questions: [
+              { label: "Business registered with RPA", value: "Yes" },
+              { label: "Business name", value: "Doe Farms Ltd" },
+              { label: "Business address", value: "123 Farm Lane, Rural Town" },
+            ],
+          },
+          {
+            id: 2,
+            type: "question",
+            key: "Country for livestock",
+            value: "England",
+            section: null,
+          },
+          {
+            id: 3,
+            type: "question",
+            key: "Arrival date of livestock",
+            value: "20 04 2024",
+            section: null,
+          },
+          {
+            id: 4,
+            type: "page",
+            key: "Livestock information",
+            value: "Page with multiple questions",
+            section: null,
+            questions: [
+              { label: "Type of livestock", value: "Cow" },
+              { label: "Number of animals", value: "25" },
+              { label: "Breed", value: "Holstein Friesian" },
+            ],
+          },
+          {
+            id: 5,
+            type: "question",
+            key: "Applicant's name",
+            value: "John Doe",
+            section: null,
+          },
+          {
+            id: 6,
+            type: "page",
+            key: "Contact details",
+            value: "Page with multiple questions",
+            section: null,
+            questions: [
+              { label: "Main phone number", value: "07700 900457" },
+              { label: "Email address", value: "john.doe@example.com" },
+              {
+                label: "Alternative contact",
+                value: "Jane Doe - 07700 900458",
+              },
+            ],
+          },
+          {
+            id: 7,
+            type: "question",
+            key: "Business purpose",
+            value: "Livestock farming",
+            section: null,
+          },
+          {
+            id: 8,
+            type: "question",
+            key: "National Grid field number",
+            value: "NG123456",
+            section: null,
+          },
+          {
+            id: 9,
+            type: "question",
+            key: "Methodology statement",
+            value: "1 file uploaded",
+            section: null,
+          },
+        ];
+      }
+      if (!formData.sections) {
+        formData.sections = [];
+      }
+    }
+
+    req.session.data = formData;
+
+    res.render("titan-mvp-1.2/form-editor/check-answers/settings-v2", {
+      data: {
+        ...formData,
+        showDeclarationTab: formData.showDeclarationTab,
+        showSectionsTab: formData.showSectionsTab,
+        currentTab: currentTab,
+      },
+    });
+  }
+);
+
+router.post(
+  "/titan-mvp-1.2/form-editor/check-answers/settings-v2",
+  function (req, res) {
+    const formData = req.session.data || {};
+
+    Object.assign(formData, req.body);
+
+    if (req.body.declarationOption) {
+      formData.declarationOption = req.body.declarationOption;
+    }
+    if (req.body.checkAnswersGuidanceTextInput) {
+      formData.declarationText = req.body.checkAnswersGuidanceTextInput;
+    }
+    if (req.body.currentTab === "confirmation-email") {
+      const raw = req.body.confirmationEmailDisabled;
+      const isOff = raw === "yes" || (Array.isArray(raw) && raw.includes("yes"));
+      formData.confirmationEmailEnabled = isOff ? "no" : "yes";
+    } else if (req.body.currentTab === "reference-number") {
+      const raw = req.body.referenceNumberEnabled;
+      const isYes = raw === "yes" || (Array.isArray(raw) && raw.includes("yes"));
+      formData.referenceNumberEnabled = isYes ? "yes" : "no";
+    } else if (req.body.feedbackPageEnabled) {
+      formData.feedbackPageEnabled = req.body.feedbackPageEnabled;
+    }
+    if (req.body.currentTab === "saved-answers") {
+      const raw = req.body.savedAnswersEnabled;
+      const isYes = raw === "yes" || (Array.isArray(raw) && raw.includes("yes"));
+      formData.savedAnswersEnabled = isYes ? "yes" : "no";
+      if (isYes) {
+        formData.confirmationEmailEnabled = "yes";
+        formData.referenceNumberEnabled = "yes";
+      }
+    } else if (req.body.savedAnswersEnabled) {
+      formData.savedAnswersEnabled = req.body.savedAnswersEnabled;
+    }
+
+    let redirectTab = "page-settings";
+    if (req.body.currentTab) {
+      redirectTab = req.body.currentTab;
+    } else if (req.body.declarationOption) {
+      redirectTab = "declaration";
+    }
+
+    req.session.data = formData;
+
+    req.session.save(function (err) {
+      if (err) return res.sendStatus(500);
+      let url = `/titan-mvp-1.2/form-editor/check-answers/settings-v2?tab=${redirectTab}`;
+      if (redirectTab === "saved-answers" && formData.savedAnswersEnabled) {
+        url += "&savedAnswersEnabled=" + formData.savedAnswersEnabled;
+      }
+      res.redirect(url);
+    });
+  }
+);
+
+router.get(
+  "/titan-mvp-1.2/form-editor/check-answers/static/confirmation-email",
+  function (req, res) {
+    res.render("titan-mvp-1.2/form-editor/check-answers/static/confirmation-email");
+  }
+);
+
+router.get(
+  "/titan-mvp-1.2/form-editor/check-answers/static/confirmation-email.html",
+  function (req, res) {
+    res.redirect("/titan-mvp-1.2/form-editor/check-answers/static/confirmation-email");
+  }
+);
+
+router.get(
+  "/titan-mvp-1.2/form-editor/check-answers/static/reference-number",
+  function (req, res) {
+    res.render("titan-mvp-1.2/form-editor/check-answers/static/reference-number");
+  }
+);
+
+router.get(
+  "/titan-mvp-1.2/form-editor/check-answers/static/reference-number.html",
+  function (req, res) {
+    res.redirect("/titan-mvp-1.2/form-editor/check-answers/static/reference-number");
+  }
+);
+
+router.get(
+  "/titan-mvp-1.2/form-editor/check-answers/settings-v2.html",
+  function (req, res) {
+    const qs = req.originalUrl.includes("?")
+      ? req.originalUrl.slice(req.originalUrl.indexOf("?"))
+      : "";
+    res.redirect(`/titan-mvp-1.2/form-editor/check-answers/settings-v2${qs}`);
+  }
+);
+
 // Catch-all route for any .html file in titan-mvp-1.2 (must be last)
 router.get("/titan-mvp-1.2/*", function (req, res, next) {
   console.log("CATCH-ALL ROUTE: /titan-mvp-1.2/*", req.path);
@@ -12868,67 +13116,6 @@ router.post(
     res.redirect(
       "/titan-mvp-1.2/form-editor/check-answers/settings-modular?tab=sections"
     );
-  }
-);
-
-// Settings v2 page with persistent tabs
-router.get(
-  "/titan-mvp-1.2/form-editor/check-answers/settings-v2",
-  function (req, res) {
-    const tab = req.query.tab;
-    const add = req.query.add;
-    const formData = req.session.data || {};
-
-    // Initialize tab visibility flags if not present
-    if (formData.showDeclarationTab === undefined)
-      formData.showDeclarationTab = false;
-    if (formData.showSectionsTab === undefined)
-      formData.showSectionsTab = false;
-
-    // Set flags based on the requested action
-    if (add === "declaration") {
-      formData.showDeclarationTab = true;
-    }
-    if (add === "sections") {
-      formData.showSectionsTab = true;
-    }
-
-    // Optionally, allow direct tab navigation
-    if (tab === "declaration") {
-      formData.showDeclarationTab = true;
-    }
-    if (tab === "sections") {
-      formData.showSectionsTab = true;
-    }
-
-    // Set current tab for the template
-    let currentTab = "page-settings";
-    if (tab === "declaration") {
-      currentTab = "declaration";
-    } else if (tab === "sections") {
-      currentTab = "sections";
-    }
-
-    // Debug log
-    console.log(
-      "DEBUG route: showDeclarationTab:",
-      formData.showDeclarationTab,
-      "showSectionsTab:",
-      formData.showSectionsTab,
-      "currentTab:",
-      currentTab
-    );
-
-    req.session.data = formData;
-
-    res.render("titan-mvp-1.2/form-editor/check-answers/settings-v2", {
-      data: {
-        ...formData,
-        showDeclarationTab: formData.showDeclarationTab,
-        showSectionsTab: formData.showSectionsTab,
-        currentTab: currentTab,
-      },
-    });
   }
 );
 
@@ -19931,6 +20118,30 @@ function runnerSignInV2SecurityChangePhonePath(formKey, applicationId, step) {
   return `/runner-sign-in-v2/forms/${encodeURIComponent(formKey)}/${encodeURIComponent(applicationId)}/security/change-phone/${step}`;
 }
 
+function runnerSignInV2SecurityDeleteSignInPath(formKey, applicationId, step) {
+  const base = `/runner-sign-in-v2/forms/${encodeURIComponent(formKey)}/${encodeURIComponent(applicationId)}/security/delete-sign-in`;
+  return step ? `${base}/${step}` : base;
+}
+
+function runnerSignInV2ClearSignIn(data) {
+  data.runnerSignInAuthed = false;
+  delete data.runnerSignInEmail;
+  delete data.runnerSignInMethod;
+  delete data.runnerSignInPhone;
+  delete data.runnerSignInPhoneConfirmed;
+  delete data.runnerSignInV2PendingEmail;
+  delete data.runnerSignInV2PendingMobile;
+  delete data.runnerSignInV2CreateSignInEmailConfirmed;
+  delete data.runnerSignInV2SignInPendingEmail;
+  delete data.runnerSignInV2RecoverNewEmail;
+  delete data.runnerSignInV2ChangeEmailPhoneVerified;
+  delete data.runnerSignInV2ChangeEmailPending;
+  delete data.runnerSignInV2ChangePhoneEmailVerified;
+  delete data.runnerSignInV2DeleteSignInVerified;
+  delete data.runnerSignInV2Error;
+  delete data.runnerSignInError;
+}
+
 function runnerSignInV2ChangeEmailNewEmailSameAsCurrentContext(req) {
   const data = ensureRunnerSignInSession(req);
   data.runnerSignInV2PrototypeMode = true;
@@ -22882,6 +23093,62 @@ router.post("/runner-sign-in-v2/forms/:formKey/:applicationId/security/change-ph
   data.runnerSignInPhone = phone;
   delete data.runnerSignInV2ChangePhoneEmailVerified;
   return res.redirect(`${securityUrl}?phoneChanged=1`);
+});
+
+// ── Security: delete sign-in (verify via email) ─────────────────────────────
+
+router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/security/delete-sign-in", function (req, res) {
+  const ctx = runnerSignInV2EnsureSecuritySession(req, res);
+  if (!ctx) return;
+  const { formKey, applicationId } = ctx;
+  return res.redirect(runnerSignInV2SecurityDeleteSignInPath(formKey, applicationId, "check-email"));
+});
+
+router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/security/delete-sign-in/check-email", function (req, res) {
+  const ctx = runnerSignInV2EnsureSecuritySession(req, res);
+  if (!ctx) return;
+  const { data, formKey, applicationId, application, securityUrl } = ctx;
+  const resend = req.query.resend === "1" || req.query.resend === "true";
+  const checkEmailPath = runnerSignInV2SecurityDeleteSignInPath(formKey, applicationId, "check-email");
+  const emailPrototypeUrl = `/runner-sign-in-v2/emails/email-confirmation-code?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}`;
+  return res.render("titan-mvp-1.2/runner-sign-in-v2/security/delete-sign-in/check-email", {
+    data,
+    application,
+    formKey,
+    applicationId,
+    securityUrl,
+    email: data.runnerSignInEmail || "you@example.com",
+    formAction: checkEmailPath,
+    resendUrl: `${checkEmailPath}?resend=1`,
+    emailPrototypeUrl,
+    resend,
+    error: data.runnerSignInV2Error || {},
+    values: {},
+  });
+});
+
+router.post("/runner-sign-in-v2/forms/:formKey/:applicationId/security/delete-sign-in/check-email", function (req, res) {
+  const ctx = runnerSignInV2EnsureSecuritySession(req, res);
+  if (!ctx) return;
+  const { data, formKey, applicationId } = ctx;
+  const checkEmailPath = runnerSignInV2SecurityDeleteSignInPath(formKey, applicationId, "check-email");
+  const codeError = validateRunnerSignInV2OtpField(req.body.runnerSignInV2Code, {
+    checkDemoCode: runnerSignInV2PrototypeMode(req),
+  });
+  if (codeError) {
+    data.runnerSignInV2Error = { runnerSignInV2Code: codeError };
+    return res.redirect(checkEmailPath);
+  }
+  delete data.runnerSignInV2Error;
+  runnerSignInV2ClearSignIn(data);
+  return res.redirect(runnerSignInV2SecurityDeleteSignInPath(formKey, applicationId, "confirmation"));
+});
+
+router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/security/delete-sign-in/confirmation", function (req, res) {
+  const data = ensureRunnerSignInSession(req);
+  return res.render("titan-mvp-1.2/runner-sign-in-v2/security/delete-sign-in/confirmation", {
+    data,
+  });
 });
 
 router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/ready-to-submit", function (req, res) {
