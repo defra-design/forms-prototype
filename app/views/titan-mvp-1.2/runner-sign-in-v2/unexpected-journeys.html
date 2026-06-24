@@ -132,6 +132,28 @@ Unexpected journeys - Runner sign-in v2 - GOV.UK
       </div>
     {% endset %}
 
+    {% set recoverPhoneNotFoundHtml %}
+      <div class="journey-docs__section">
+        {{ journeyDocs.journeyPath([
+          { text: "I've forgotten my email address" },
+          { text: "Enter your mobile phone number" },
+          { text: "We cannot find a sign-in for that mobile number", unexpected: true }
+        ]) }}
+
+        <h3 class="govuk-heading-s">Use when</h3>
+        <p class="govuk-body">Someone enters a mobile number during recovery that is not linked to a sign-in for the form they are trying to use.</p>
+
+        <h3 class="govuk-heading-s">Suggested page language</h3>
+        <p class="govuk-body"><strong>We cannot find a sign-in for that mobile number</strong></p>
+        <p class="govuk-body">There is no sign-in for the mobile number they entered. They can create a sign-in or try another mobile number.</p>
+        <p class="govuk-body">Primary action: <strong>Create a sign-in</strong>. Secondary link: <strong>Try another mobile number</strong>.</p>
+
+        {{ journeyDocs.journeyPreviews([
+          { caption: "No sign-in found for a mobile number", title: "We cannot find a sign-in for that mobile number", href: "/runner-sign-in-v2/static/recover-no-sign-in-for-mobile" }
+        ]) }}
+      </div>
+    {% endset %}
+
     {% set recoverHtml %}
       <div class="journey-docs__section">
         {{ journeyDocs.journeyPath([
@@ -222,6 +244,11 @@ Unexpected journeys - Runner sign-in v2 - GOV.UK
           heading: { text: "Security code problems" },
           summary: { text: "Create, sign in, recover and checker journeys" },
           content: { html: securityCodeHtml }
+        },
+        {
+          heading: { text: "No sign-in found for a mobile number" },
+          summary: { text: "Recover sign-in journey" },
+          content: { html: recoverPhoneNotFoundHtml }
         },
         {
           heading: { text: "Cannot recover a sign-in online" },

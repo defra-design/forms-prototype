@@ -1,3 +1,9 @@
+const RUNNER_SIGN_IN_V2_CHANGE_EMAIL_SAME_AS_CURRENT_ERROR =
+  "Enter a different email address. This is the same as your current email address.";
+
+const RUNNER_SIGN_IN_V2_STATIC_CHANGE_EMAIL_NEW_EMAIL_SAME_AS_CURRENT_PATH =
+  "/runner-sign-in-v2/static/change-email-new-email-same-as-current";
+
 const RUNNER_SIGN_IN_V2_FIELD_ERRORS = {
   "create-email-empty": {
     title: "Enter an email address",
@@ -64,6 +70,24 @@ const RUNNER_SIGN_IN_V2_FIELD_ERRORS = {
     error: { runnerSignInV2ResumeEmail: "Enter an email address in the correct format, like name@example.com" },
     values: { runnerSignInV2ResumeEmail: "not-an-email" },
     template: "titan-mvp-1.2/runner-sign-in-v2/save-and-exit/with-sign-in/confirm-email",
+  },
+  "change-email-same-as-current": {
+    title: "Enter a different email address (change email)",
+    group: "Email address",
+    journey: "Security · Change email",
+    page: "Enter your new email address",
+    useWhen: "The user enters the same email address as their current sign-in email when changing their email address.",
+    field: "runnerSignInV2NewEmail",
+    error: {
+      runnerSignInV2NewEmail: RUNNER_SIGN_IN_V2_CHANGE_EMAIL_SAME_AS_CURRENT_ERROR,
+    },
+    values: { runnerSignInV2NewEmail: "you@example.com" },
+    template: "titan-mvp-1.2/runner-sign-in-v2/security/change-email/new-email",
+    staticHref: RUNNER_SIGN_IN_V2_STATIC_CHANGE_EMAIL_NEW_EMAIL_SAME_AS_CURRENT_PATH,
+    setupSession: (data) => {
+      data.runnerSignInEmail = "you@example.com";
+      data.runnerSignInV2ChangeEmailPhoneVerified = true;
+    },
   },
   "create-mobile-invalid-format": {
     title: "Enter telephone number in the correct format",
@@ -231,6 +255,7 @@ function listRunnerSignInV2FieldErrors() {
   return Object.entries(RUNNER_SIGN_IN_V2_FIELD_ERRORS).map(([slug, item]) => ({
     slug,
     href: `/runner-sign-in-v2/error-messages/${slug}`,
+    previewHref: item.staticHref || `/runner-sign-in-v2/error-messages/${slug}/preview`,
     ...item,
   }));
 }
@@ -245,6 +270,8 @@ function groupRunnerSignInV2FieldErrors() {
 }
 
 module.exports = {
+  RUNNER_SIGN_IN_V2_CHANGE_EMAIL_SAME_AS_CURRENT_ERROR,
+  RUNNER_SIGN_IN_V2_STATIC_CHANGE_EMAIL_NEW_EMAIL_SAME_AS_CURRENT_PATH,
   RUNNER_SIGN_IN_V2_FIELD_ERRORS,
   listRunnerSignInV2FieldErrors,
   groupRunnerSignInV2FieldErrors,

@@ -1,0 +1,37 @@
+{% extends "layouts/runner-sign-in-v2.html" %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}Recover my sign-in – GOV.UK{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ href: backUrl, text: "Back" }) }}
+{% endblock %}
+
+{% block header %}{{ v2.v2ServiceHeader("") }}{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <span class="govuk-caption-l">Recover my sign-in</span>
+    <h1 class="govuk-heading-l">We cannot find a sign-in for that mobile number</h1>
+    <p class="govuk-body">There is no sign-in for <strong>{{ mobile }}</strong>.</p>
+    <p class="govuk-body">You'll need to create a sign-in to use this form.</p>
+
+    {{ govukInsetText({
+      text: "Sign-in accounts are linked to the form you are using. A mobile number used for another service will not work here."
+    }) }}
+
+    {{ govukButton({
+      text: "Create a sign-in",
+      href: createSignInUrl
+    }) }}
+
+    <p class="govuk-body">
+      <a class="govuk-link" href="{{ recoverPhoneUrl }}">Try another mobile number</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

@@ -100,6 +100,7 @@
           { text: "Enter your email address", href: urls.signInEmail },
           { text: "I've forgotten my email address", href: urls.recoverPhone, branch: true },
           { text: "Enter your mobile phone number", href: urls.recoverPhone },
+          { text: "No sign-in found for mobile number", href: urls.staticRecoverNoSignInForMobile },
           { text: "Get security code", href: urls.recoverGetCode },
           { text: "Check your phone", href: urls.recoverStart },
           { text: "Enter your new email address", href: urls.recoverNewEmail },
@@ -108,6 +109,7 @@
         ]) }}
         {{ journeyDocs.journeyPreviews([
           { caption: "Recover sign-in", title: "Enter mobile phone number", href: urls.recoverPhone, previewHref: urls.preview.recoverPhone },
+          { caption: "Recover sign-in", title: "No sign-in found for mobile number", href: urls.staticRecoverNoSignInForMobile },
           { caption: "Recover sign-in", title: "Get security code (phone)", href: urls.recoverGetCode, previewHref: urls.preview.recoverGetCode },
           { caption: "Recover sign-in", title: "Check your phone", href: urls.recoverStart, previewHref: urls.preview.recoverStart },
           { caption: "Recover sign-in", title: "Enter new email address", href: urls.recoverNewEmail, previewHref: urls.preview.recoverNewEmail }
@@ -174,6 +176,7 @@
           { text: "Get security code (phone)", href: urls.changeEmailGetCode },
           { text: "Check your phone", href: urls.changeEmailCheckPhone },
           { text: "Enter new email address", href: urls.changeEmailNewEmail },
+          { text: "Enter new email address (same as current error)", href: urls.staticChangeEmailNewEmailSameAsCurrent },
           { text: "Check your email", href: urls.changeEmailCheckNewEmail },
           { text: "Security", href: urls.security }
         ]) }}
@@ -191,6 +194,7 @@
           { caption: "Change email", title: "Get security code (phone)", href: urls.changeEmailGetCode, previewHref: urls.preview.changeEmailGetCode },
           { caption: "Change email", title: "Check your phone", href: urls.changeEmailCheckPhone, previewHref: urls.preview.changeEmailCheckPhone },
           { caption: "Change email", title: "Enter new email address", href: urls.changeEmailNewEmail, previewHref: urls.preview.changeEmailNewEmail },
+          { caption: "Change email", title: "Enter new email address (same as current error)", href: urls.staticChangeEmailNewEmailSameAsCurrent, previewHref: urls.preview.changeEmailNewEmailSameAsCurrent },
           { caption: "Change email", title: "Check your email", href: urls.changeEmailCheckNewEmail, previewHref: urls.preview.changeEmailCheckNewEmail },
           { caption: "Change phone", title: "Get security code (email)", href: urls.changePhoneGetCode, previewHref: urls.preview.changePhoneGetCode },
           { caption: "Change phone", title: "Check your email", href: urls.changePhoneCheckEmail, previewHref: urls.preview.changePhoneCheckEmail },
