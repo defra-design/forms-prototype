@@ -71,7 +71,12 @@ function runnerSignInV2BuildJourneyUrls({
     emailCheckerInvite: triple("/runner-sign-in-v2/emails/checker-invite-v2", manageUrl),
     emailApplicantFormChecked: `/runner-sign-in-v2/emails/applicant-form-checked?formKey=${enc(formKey)}&applicationId=${enc(applicationId)}`,
     emailFormSubmitted: triple("/runner-sign-in-v2/emails/form-submitted", manageUrl),
+    textRecoverSecurityCode: "/runner-sign-in-v2/texts/recover-security-code",
+    textChangeEmailSecurityCode: "/runner-sign-in-v2/texts/change-email-security-code",
     staticManageFormChecked: "/runner-sign-in-v2/static/manage-form-checked",
+    staticChangeEmailNewEmailSameAsCurrent:
+      "/runner-sign-in-v2/static/change-email-new-email-same-as-current",
+    staticRecoverNoSignInForMobile: "/runner-sign-in-v2/static/recover-no-sign-in-for-mobile",
     unexpected: {
       "email-already-has-sign-in": "/runner-sign-in-v2/unexpected-journeys/email-already-has-sign-in",
       "no-sign-in-found": "/runner-sign-in-v2/unexpected-journeys/no-sign-in-found",
@@ -80,6 +85,7 @@ function runnerSignInV2BuildJourneyUrls({
       "wrong-security-code-locked-out": "/runner-sign-in-v2/unexpected-journeys/wrong-security-code-locked-out",
       "too-many-security-codes": "/runner-sign-in-v2/unexpected-journeys/too-many-security-codes",
       "cannot-recover-online": "/runner-sign-in-v2/unexpected-journeys/cannot-recover-online",
+      "no-sign-in-found-for-mobile": "/runner-sign-in-v2/static/recover-no-sign-in-for-mobile",
       "save-link-expired": "/runner-sign-in-v2/unexpected-journeys/save-link-expired",
       "review-link-expired": "/runner-sign-in-v2/unexpected-journeys/review-link-expired",
       "service-unavailable": "/runner-sign-in-v2/unexpected-journeys/service-unavailable",
@@ -105,6 +111,8 @@ function runnerSignInV2BuildJourneyUrls({
           changeEmailGetCode: journeyPreviewPath("change-email-get-security-code"),
           changeEmailCheckPhone: journeyPreviewPath("change-email-check-phone"),
           changeEmailNewEmail: journeyPreviewPath("change-email-new-email"),
+          changeEmailNewEmailSameAsCurrent:
+            "/runner-sign-in-v2/static/change-email-new-email-same-as-current",
           changeEmailCheckNewEmail: journeyPreviewPath("change-email-check-new-email"),
           changePhoneGetCode: journeyPreviewPath("change-phone-get-security-code"),
           changePhoneCheckEmail: journeyPreviewPath("change-phone-check-email"),
@@ -139,6 +147,12 @@ function runnerSignInV2ResolvePageKey(pageKey, urls) {
   if (pageKey.startsWith("static:")) {
     const slug = pageKey.slice("static:".length);
     if (slug === "manage-form-checked") return urls.staticManageFormChecked;
+    if (slug === "change-email-new-email-same-as-current") {
+      return urls.staticChangeEmailNewEmailSameAsCurrent;
+    }
+    if (slug === "recover-no-sign-in-for-mobile") {
+      return urls.staticRecoverNoSignInForMobile;
+    }
     return null;
   }
   return urls[pageKey] || null;

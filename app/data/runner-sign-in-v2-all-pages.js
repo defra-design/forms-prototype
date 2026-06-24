@@ -65,6 +65,10 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
       heading: "Recover a sign-in",
       links: [
         { text: "Enter your mobile phone number", href: urls.recoverPhone },
+        {
+          text: "No sign-in found for mobile number",
+          href: urls.staticRecoverNoSignInForMobile,
+        },
         { text: "Get security code", href: urls.recoverGetCode },
         { text: "Check your phone", href: urls.recoverStart },
         { text: "Check your phone (alternate)", href: triple("/runner-sign-in-v2/recover/check-mobile") },
@@ -102,6 +106,10 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
         { text: "Change email: get security code (phone)", href: urls.changeEmailGetCode },
         { text: "Change email: check your phone", href: urls.changeEmailCheckPhone },
         { text: "Change email: enter new email address", href: urls.changeEmailNewEmail },
+        {
+          text: "Change email: enter new email address (same as current error)",
+          href: urls.staticChangeEmailNewEmailSameAsCurrent,
+        },
         { text: "Change email: check your email", href: urls.changeEmailCheckNewEmail },
         { text: "Change phone: get security code (email)", href: urls.changePhoneGetCode },
         { text: "Change phone: check your email", href: urls.changePhoneCheckEmail },
@@ -133,6 +141,13 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
         { text: "Checker invite email", href: urls.emailCheckerInvite },
         { text: "Applicant form checked email", href: urls.emailApplicantFormChecked },
         { text: "Form submitted email (copied answers)", href: urls.emailFormSubmitted },
+      ],
+    },
+    {
+      heading: "Text messages",
+      links: [
+        { text: "Security code text (recover sign-in)", href: urls.textRecoverSecurityCode },
+        { text: "Security code text (change email address)", href: urls.textChangeEmailSecurityCode },
       ],
     },
     {

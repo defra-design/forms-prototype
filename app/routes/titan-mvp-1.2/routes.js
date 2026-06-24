@@ -13,7 +13,9 @@ const {
   runnerSignInV2ResolveJourneyFlows,
 } = require("../../lib/titan-mvp-1.2/runner-sign-in-v2-journey-urls");
 const {
+  RUNNER_SIGN_IN_V2_CHANGE_EMAIL_SAME_AS_CURRENT_ERROR,
   RUNNER_SIGN_IN_V2_FIELD_ERRORS,
+  RUNNER_SIGN_IN_V2_STATIC_CHANGE_EMAIL_NEW_EMAIL_SAME_AS_CURRENT_PATH,
   groupRunnerSignInV2FieldErrors,
 } = require("../../lib/titan-mvp-1.2/runner-sign-in-v2-field-errors");
 const express = require("express");
@@ -19929,6 +19931,29 @@ function runnerSignInV2SecurityChangePhonePath(formKey, applicationId, step) {
   return `/runner-sign-in-v2/forms/${encodeURIComponent(formKey)}/${encodeURIComponent(applicationId)}/security/change-phone/${step}`;
 }
 
+function runnerSignInV2ChangeEmailNewEmailSameAsCurrentContext(req) {
+  const data = ensureRunnerSignInSession(req);
+  data.runnerSignInV2PrototypeMode = true;
+  const formKey = RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_FORM_KEY;
+  const applicationId = RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_APP_ID;
+  const application = runnerSignInV2EnsureApplication(req, formKey, applicationId);
+  const email = "you@example.com";
+  const phone = "07700 900000";
+  applyRunnerSignInV2EmailAuth(req, email, phone);
+  setRunnerSignInV2ManageFocus(req, formKey, applicationId);
+  return {
+    data,
+    application,
+    formKey,
+    applicationId,
+    securityUrl: runnerSignInV2SecurityPath(formKey, applicationId),
+    checkPhoneUrl: runnerSignInV2SecurityChangeEmailPath(formKey, applicationId, "check-phone"),
+    formAction: runnerSignInV2SecurityChangeEmailPath(formKey, applicationId, "new-email"),
+    error: { runnerSignInV2NewEmail: RUNNER_SIGN_IN_V2_CHANGE_EMAIL_SAME_AS_CURRENT_ERROR },
+    values: { runnerSignInV2NewEmail: email },
+  };
+}
+
 function runnerSignInV2EnsureSecuritySession(req, res) {
   const data = ensureRunnerSignInSession(req);
   const formKey = String(req.params.formKey || "").trim();
@@ -20140,12 +20165,55 @@ function runnerSignInV2MaskedMobile(data) {
   return digits.length >= 4 ? digits.slice(-4) : "";
 }
 
+function runnerSignInV2NormalizePhone(value) {
+  return String(value || "").replace(/\D+/g, "");
+}
+
+function runnerSignInV2FormatMobileDisplay(phone) {
+  const digits = runnerSignInV2NormalizePhone(phone);
+  if (digits.length === 11 && digits.startsWith("0")) {
+    return `${digits.slice(0, 5)} ${digits.slice(5, 8)} ${digits.slice(8)}`;
+  }
+  if (digits.length === 10) {
+    return `${digits.slice(0, 4)} ${digits.slice(4, 7)} ${digits.slice(7)}`;
+  }
+  return String(phone || "").trim() || "07700 900 000";
+}
+
 function runnerSignInV2RecoverPhonePath(formKey, applicationId, next) {
   return `/runner-sign-in-v2/recover/phone?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}&next=${encodeURIComponent(next)}`;
 }
 
 function runnerSignInV2RecoverStartPath(formKey, applicationId, next) {
   return `/runner-sign-in-v2/recover/start?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}&next=${encodeURIComponent(next)}`;
+}
+
+function runnerSignInV2RecoverNoSignInForMobilePath(formKey, applicationId, next) {
+  return `/runner-sign-in-v2/recover/no-sign-in-for-mobile?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}&next=${encodeURIComponent(next)}`;
+}
+
+const RUNNER_SIGN_IN_V2_STATIC_RECOVER_NO_SIGN_IN_FOR_MOBILE_PATH =
+  "/runner-sign-in-v2/static/recover-no-sign-in-for-mobile";
+const RUNNER_SIGN_IN_V2_PROTOTYPE_KNOWN_RECOVER_PHONE = "07700900000";
+
+function runnerSignInV2RecoverNoSignInForMobileContext(req, { formKey, applicationId, next, mobile }) {
+  const data = ensureRunnerSignInSession(req);
+  const manageUrl = formKey && applicationId ? runnerSignInV2ManagePath(formKey, applicationId) : "";
+  const resolvedNext = next || manageUrl;
+  const enc = (value) => encodeURIComponent(value);
+  const triple = (path) =>
+    `${path}?formKey=${enc(formKey)}&applicationId=${enc(applicationId)}&next=${enc(resolvedNext)}`;
+  return {
+    data,
+    application: runnerSignInV2ResolveApplication(req, formKey, applicationId),
+    formKey,
+    applicationId,
+    next: resolvedNext,
+    mobile: runnerSignInV2FormatMobileDisplay(mobile || "07123 456789"),
+    recoverPhoneUrl: runnerSignInV2RecoverPhonePath(formKey, applicationId, resolvedNext),
+    createSignInUrl: triple("/runner-sign-in-v2/create-sign-in/email"),
+    backUrl: runnerSignInV2RecoverPhonePath(formKey, applicationId, resolvedNext),
+  };
 }
 
 function isRunnerSignInV2ProbablyEmail(value) {
@@ -20480,6 +20548,8 @@ const RUNNER_SIGN_IN_V2_UNEXPECTED_PAGES = {
   "no-sign-in-found": {
     title: "We cannot find a sign-in for that email address",
     journey: "No sign-in found for an email address",
+    template: "titan-mvp-1.2/runner-sign-in-v2/unexpected/no-sign-in-found",
+    runnerView: true,
     paragraphs: [
       "Check the email address and try again.",
       "If you have not used this form before, you can create a sign-in.",
@@ -20548,6 +20618,11 @@ const RUNNER_SIGN_IN_V2_UNEXPECTED_PAGES = {
     secondaryLinks: [
       { text: "Contact us", href: "#" },
     ],
+  },
+  "no-sign-in-found-for-mobile": {
+    title: "We cannot find a sign-in for that mobile number",
+    journey: "No sign-in found for a mobile number",
+    staticHref: RUNNER_SIGN_IN_V2_STATIC_RECOVER_NO_SIGN_IN_FOR_MOBILE_PATH,
   },
   "save-link-expired": {
     title: "Your link has expired",
@@ -20856,6 +20931,10 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
       formAction: `${securityUrl}/change-email/new-email`,
       values: { runnerSignInV2NewEmail: "new.email@example.com" },
     });
+  }
+
+  if (slug === "change-email-new-email-same-as-current") {
+    return res.redirect(RUNNER_SIGN_IN_V2_STATIC_CHANGE_EMAIL_NEW_EMAIL_SAME_AS_CURRENT_PATH);
   }
 
   if (slug === "change-email-check-new-email") {
@@ -21246,14 +21325,71 @@ router.get("/runner-sign-in-v2/unexpected-journeys", function (req, res) {
 
 router.get("/runner-sign-in-v2/unexpected-journeys/:slug", function (req, res) {
   const data = ensureRunnerSignInSession(req);
-  const page = RUNNER_SIGN_IN_V2_UNEXPECTED_PAGES[String(req.params.slug || "")];
+  const slug = String(req.params.slug || "");
+  const page = RUNNER_SIGN_IN_V2_UNEXPECTED_PAGES[slug];
   if (!page) return res.redirect("/runner-sign-in-v2/unexpected-journeys");
+  if (page.staticHref) return res.redirect(page.staticHref);
+
+  if (page.runnerView && page.template) {
+    const ctx = runnerSignInV2UnexpectedRunnerPageContext(req, slug);
+    if (ctx) return res.render(page.template, ctx);
+  }
 
   return res.render("titan-mvp-1.2/runner-sign-in-v2/unexpected-page", {
     data,
     page,
   });
 });
+
+function runnerSignInV2UnexpectedRunnerPageContext(req, slug) {
+  const page = RUNNER_SIGN_IN_V2_UNEXPECTED_PAGES[String(slug || "")];
+  if (!page || !page.runnerView) return null;
+
+  const data = ensureRunnerSignInSession(req);
+  const { formKey, applicationId, next } = runnerSignInV2ReadTriple(req, req.query);
+  const resolvedFormKey = formKey || RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_FORM_KEY;
+  const resolvedApplicationId = applicationId || RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_APP_ID;
+  const application =
+    runnerSignInV2ResolveApplication(req, resolvedFormKey, resolvedApplicationId) ||
+    runnerSignInV2EnsureApplication(req, resolvedFormKey, resolvedApplicationId);
+  const manageUrl = runnerSignInV2ManagePath(resolvedFormKey, resolvedApplicationId);
+  const resolvedNext = next || manageUrl;
+  const enc = (value) => encodeURIComponent(value);
+  const triple = (path) =>
+    `${path}?formKey=${enc(resolvedFormKey)}&applicationId=${enc(resolvedApplicationId)}&next=${enc(resolvedNext)}`;
+  const formStartUrl = `/runner-sign-in-v2/forms/${enc(resolvedFormKey)}/${enc(resolvedApplicationId)}/start-page`;
+
+  const buttonHref = page.buttonHref ? triple(page.buttonHref.split("?")[0]) : "";
+  const secondaryLinks = (page.secondaryLinks || []).map((link) => ({
+    ...link,
+    href: triple(String(link.href || "").split("?")[0]),
+  }));
+
+  return {
+    data: {
+      ...data,
+      runnerSignInAuthed: false,
+      runnerSignInV2ManageUrl: "",
+    },
+    application,
+    formKey: resolvedFormKey,
+    applicationId: resolvedApplicationId,
+    next: resolvedNext,
+    runnerStartUrl: formStartUrl,
+    serviceName: application.formName,
+    page: {
+      ...page,
+      buttonHref,
+      secondaryLinks,
+      backHref: triple("/runner-sign-in-v2/sign-in/email"),
+    },
+  };
+}
+
+function runnerSignInV2UnexpectedNoSignInFoundPath(formKey, applicationId, next) {
+  const enc = (value) => encodeURIComponent(value);
+  return `/runner-sign-in-v2/unexpected-journeys/no-sign-in-found?formKey=${enc(formKey)}&applicationId=${enc(applicationId)}&next=${enc(next)}`;
+}
 
 function runnerSignInV2FieldErrorPreviewContext(req, slug) {
   const item = RUNNER_SIGN_IN_V2_FIELD_ERRORS[String(slug || "")];
@@ -21291,6 +21427,11 @@ function runnerSignInV2FieldErrorPreviewContext(req, slug) {
     backUrl = triple("/runner-sign-in-v2/create-sign-in/email", leaveUrl);
   }
 
+  const securityUrl = runnerSignInV2SecurityPath(formKey, applicationId);
+  if (item.template.includes("security/change-email/new-email")) {
+    backUrl = runnerSignInV2SecurityChangeEmailPath(formKey, applicationId, "check-phone");
+  }
+
   return {
     data,
     application,
@@ -21299,6 +21440,9 @@ function runnerSignInV2FieldErrorPreviewContext(req, slug) {
     next,
     backUrl,
     manageUrl,
+    securityUrl,
+    checkPhoneUrl: runnerSignInV2SecurityChangeEmailPath(formKey, applicationId, "check-phone"),
+    formAction: runnerSignInV2SecurityChangeEmailPath(formKey, applicationId, "new-email"),
     error: item.error,
     values: item.values || {},
     email: (item.extra && item.extra.email) || "you@example.com",
@@ -21358,7 +21502,7 @@ router.get("/runner-sign-in-v2/error-messages", function (req, res) {
     items: group.items.map((item) => ({
       ...item,
       errorText: item.error[item.field],
-      previewHref: `/runner-sign-in-v2/error-messages/${item.slug}/preview`,
+      previewHref: item.previewHref || `/runner-sign-in-v2/error-messages/${item.slug}/preview`,
     })),
   }));
 
@@ -21373,6 +21517,7 @@ router.get("/runner-sign-in-v2/error-messages/:slug/preview", function (req, res
   const slug = String(req.params.slug || "").trim();
   const item = RUNNER_SIGN_IN_V2_FIELD_ERRORS[slug];
   if (!item) return res.redirect("/runner-sign-in-v2/error-messages");
+  if (item.staticHref) return res.redirect(item.staticHref);
 
   const ctx = runnerSignInV2FieldErrorPreviewContext(req, slug);
   return res.render(item.template, ctx);
@@ -21389,7 +21534,7 @@ router.get("/runner-sign-in-v2/error-messages/:slug", function (req, res) {
     errorItem: {
       ...item,
     },
-    previewUrl: `/runner-sign-in-v2/error-messages/${encodeURIComponent(slug)}/preview`,
+    previewUrl: item.staticHref || `/runner-sign-in-v2/error-messages/${encodeURIComponent(slug)}/preview`,
   });
 });
 
@@ -21828,7 +21973,9 @@ router.post("/runner-sign-in-v2/sign-in/email", function (req, res) {
   delete data.runnerSignInV2Error;
 
   if (String(req.query.scenario || req.body.scenario || "").trim() === "no-sign-in") {
-    return res.redirect("/runner-sign-in-v2/unexpected-journeys/no-sign-in-found");
+    return res.redirect(
+      runnerSignInV2UnexpectedNoSignInFoundPath(formKey, applicationId, next || manageUrl)
+    );
   }
   const knownEmail = String(data.runnerSignInEmail || "").trim().toLowerCase();
   if (
@@ -21837,7 +21984,9 @@ router.post("/runner-sign-in-v2/sign-in/email", function (req, res) {
     !data.runnerSignInAuthed &&
     String(data.runnerSignInPhone || "").trim()
   ) {
-    return res.redirect("/runner-sign-in-v2/unexpected-journeys/no-sign-in-found");
+    return res.redirect(
+      runnerSignInV2UnexpectedNoSignInFoundPath(formKey, applicationId, next || manageUrl)
+    );
   }
 
   if (runnerSignInV2NextIsCheckerJourney(req, next)) {
@@ -21962,11 +22111,39 @@ router.post("/runner-sign-in-v2/recover/phone", function (req, res) {
   const { formKey, applicationId, next } = runnerSignInV2ReadTriple(req, req.body);
   const manageUrl = formKey && applicationId ? runnerSignInV2ManagePath(formKey, applicationId) : "/runner-sign-in-v2/start-page";
   const resolvedNext = next || manageUrl;
-  // Prototype: allow flicking through without validation.
-  const phone = String(req.body.runnerSignInV2Mobile || "").trim() || "07700 900000";
+  const phone = String(req.body.runnerSignInV2Mobile || "").trim();
+  const resolvedPhone = phone || "07700 900000";
+  const normalizedPhone = runnerSignInV2NormalizePhone(resolvedPhone);
+  const showNoSignInForMobile =
+    String(req.query.scenario || req.body.scenario || "").trim() === "no-sign-in-for-mobile" ||
+    normalizedPhone !== RUNNER_SIGN_IN_V2_PROTOTYPE_KNOWN_RECOVER_PHONE;
+
+  if (showNoSignInForMobile) {
+    data.runnerSignInV2RecoverPhoneNotFound = resolvedPhone;
+    return res.redirect(runnerSignInV2RecoverNoSignInForMobilePath(formKey, applicationId, resolvedNext));
+  }
+
   delete data.runnerSignInV2Error;
-  data.runnerSignInPhone = phone;
+  delete data.runnerSignInV2RecoverPhoneNotFound;
+  data.runnerSignInPhone = resolvedPhone;
   return res.redirect(runnerSignInV2RecoverStartPath(formKey, applicationId, resolvedNext));
+});
+
+router.get("/runner-sign-in-v2/recover/no-sign-in-for-mobile", function (req, res) {
+  const data = ensureRunnerSignInSession(req);
+  const { formKey, applicationId, next } = runnerSignInV2ReadTriple(req, req.query);
+  const manageUrl = formKey && applicationId ? runnerSignInV2ManagePath(formKey, applicationId) : "";
+  const resolvedNext = next || manageUrl;
+  const mobile = data.runnerSignInV2RecoverPhoneNotFound || req.query.mobile || "07123 456789";
+  return res.render(
+    "titan-mvp-1.2/runner-sign-in-v2/recover/no-sign-in-for-mobile",
+    runnerSignInV2RecoverNoSignInForMobileContext(req, {
+      formKey,
+      applicationId,
+      next: resolvedNext,
+      mobile,
+    })
+  );
 });
 
 router.get("/runner-sign-in-v2/recover/start", function (req, res) {
@@ -22152,6 +22329,28 @@ router.post("/runner-sign-in-v2/recover/check-new-email", function (req, res) {
 router.get("/runner-sign-in-v2/demo/save-and-exit/start-page", function (req, res) {
   runnerSignInV2PrepareSaveAndExitDemo(req);
   return res.redirect(runnerSignInV2SaveAndExitDemoStartPagePath());
+});
+
+router.get("/runner-sign-in-v2/static/recover-no-sign-in-for-mobile", function (req, res) {
+  return res.render(
+    "titan-mvp-1.2/runner-sign-in-v2/recover/no-sign-in-for-mobile",
+    runnerSignInV2RecoverNoSignInForMobileContext(req, {
+      formKey: RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_FORM_KEY,
+      applicationId: RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_APP_ID,
+      next: runnerSignInV2ManagePath(
+        RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_FORM_KEY,
+        RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_APP_ID
+      ),
+      mobile: "07123 456789",
+    })
+  );
+});
+
+router.get("/runner-sign-in-v2/static/change-email-new-email-same-as-current", function (req, res) {
+  return res.render(
+    "titan-mvp-1.2/runner-sign-in-v2/security/change-email/new-email",
+    runnerSignInV2ChangeEmailNewEmailSameAsCurrentContext(req)
+  );
 });
 
 router.get("/runner-sign-in-v2/static/manage-form-checked", function (req, res) {
@@ -22485,6 +22684,9 @@ router.post("/runner-sign-in-v2/forms/:formKey/:applicationId/security/change-em
 });
 
 router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/security/change-email/new-email", function (req, res) {
+  if (String(req.query.error || req.query.scenario || "").trim() === "same-email") {
+    return res.redirect(RUNNER_SIGN_IN_V2_STATIC_CHANGE_EMAIL_NEW_EMAIL_SAME_AS_CURRENT_PATH);
+  }
   const ctx = runnerSignInV2EnsureSecuritySession(req, res);
   if (!ctx) return;
   const { data, formKey, applicationId, application } = ctx;
@@ -22517,6 +22719,14 @@ router.post("/runner-sign-in-v2/forms/:formKey/:applicationId/security/change-em
   }
   if (!isRunnerSignInV2ProbablyEmail(email)) {
     data.runnerSignInV2Error = { runnerSignInV2NewEmail: "Enter an email address in the correct format, like name@example.com" };
+    return res.redirect(runnerSignInV2SecurityChangeEmailPath(formKey, applicationId, "new-email"));
+  }
+  const currentEmail = String(data.runnerSignInEmail || "").trim().toLowerCase();
+  if (currentEmail && email.toLowerCase() === currentEmail) {
+    data.runnerSignInV2Error = {
+      runnerSignInV2NewEmail: RUNNER_SIGN_IN_V2_CHANGE_EMAIL_SAME_AS_CURRENT_ERROR,
+    };
+    data.runnerSignInV2ChangeEmailPending = email;
     return res.redirect(runnerSignInV2SecurityChangeEmailPath(formKey, applicationId, "new-email"));
   }
   delete data.runnerSignInV2Error;
@@ -23046,6 +23256,14 @@ router.get("/runner-sign-in-v2/emails/email-confirmation-code", function (req, r
     application,
     formName,
   });
+});
+
+router.get("/runner-sign-in-v2/texts/recover-security-code", function (req, res) {
+  return res.render("titan-mvp-1.2/runner-sign-in-v2/texts/recover-security-code");
+});
+
+router.get("/runner-sign-in-v2/texts/change-email-security-code", function (req, res) {
+  return res.render("titan-mvp-1.2/runner-sign-in-v2/texts/change-email-security-code");
 });
 
 router.get("/runner-sign-in-v2/emails/form-submitted", function (req, res) {
