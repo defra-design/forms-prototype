@@ -20236,7 +20236,7 @@ function validateRunnerSignInV2EmailField(email) {
 
 function validateRunnerSignInV2MobileField(phone) {
   const s = String(phone || "").trim();
-  if (!s) return "Enter telephone number in the correct format";
+  if (!s) return "Enter a mobile phone number";
   const normalized = s.replace(/[\s()-]/g, "");
   const digits = normalized.replace(/\D/g, "");
   const ukMobile = /^(?:\+?44)?7\d{9}$/.test(digits) || /^07\d{9}$/.test(normalized);
@@ -21420,6 +21420,7 @@ function runnerSignInV2FieldErrorPreviewContext(req, slug) {
   if (item.template.includes("create-sign-in/email")) backUrl = triple("/runner-sign-in-v2/create-sign-in/email", next);
   if (item.template.includes("create-sign-in/check-email")) backUrl = triple("/runner-sign-in-v2/create-sign-in/email", next);
   if (item.template.includes("create-sign-in/mobile")) backUrl = triple("/runner-sign-in-v2/create-sign-in/check-email", next);
+  if (item.template.includes("recover/phone")) backUrl = triple("/runner-sign-in-v2/sign-in/email", next);
   if (item.template.includes("sign-in/email")) backUrl = triple("/runner-sign-in-v2/sign-in/email", next);
   if (item.template.includes("sign-in/check-email")) backUrl = triple("/runner-sign-in-v2/sign-in/email", next);
   if (item.template.includes("with-sign-in/confirm-email")) backUrl = runnerSignInV2ManagePath(formKey, applicationId);
@@ -22102,7 +22103,12 @@ router.get("/runner-sign-in-v2/recover/phone", function (req, res) {
     next: resolvedNext,
     backUrl,
     error: data.runnerSignInV2Error || {},
-    values: { runnerSignInV2Mobile: data.runnerSignInPhone || "" },
+    values: {
+      runnerSignInV2Mobile:
+        data.runnerSignInV2RecoverPhoneAttempt !== undefined
+          ? data.runnerSignInV2RecoverPhoneAttempt
+          : data.runnerSignInPhone || "",
+    },
   });
 });
 
@@ -22112,20 +22118,27 @@ router.post("/runner-sign-in-v2/recover/phone", function (req, res) {
   const manageUrl = formKey && applicationId ? runnerSignInV2ManagePath(formKey, applicationId) : "/runner-sign-in-v2/start-page";
   const resolvedNext = next || manageUrl;
   const phone = String(req.body.runnerSignInV2Mobile || "").trim();
-  const resolvedPhone = phone || "07700 900000";
-  const normalizedPhone = runnerSignInV2NormalizePhone(resolvedPhone);
+  const phoneError = validateRunnerSignInV2MobileField(phone);
+  if (phoneError) {
+    data.runnerSignInV2Error = { runnerSignInV2Mobile: phoneError };
+    data.runnerSignInV2RecoverPhoneAttempt = phone;
+    return res.redirect(runnerSignInV2RecoverPhonePath(formKey, applicationId, resolvedNext));
+  }
+
+  const normalizedPhone = runnerSignInV2NormalizePhone(phone);
   const showNoSignInForMobile =
     String(req.query.scenario || req.body.scenario || "").trim() === "no-sign-in-for-mobile" ||
     normalizedPhone !== RUNNER_SIGN_IN_V2_PROTOTYPE_KNOWN_RECOVER_PHONE;
 
   if (showNoSignInForMobile) {
-    data.runnerSignInV2RecoverPhoneNotFound = resolvedPhone;
+    data.runnerSignInV2RecoverPhoneNotFound = phone;
     return res.redirect(runnerSignInV2RecoverNoSignInForMobilePath(formKey, applicationId, resolvedNext));
   }
 
   delete data.runnerSignInV2Error;
+  delete data.runnerSignInV2RecoverPhoneAttempt;
   delete data.runnerSignInV2RecoverPhoneNotFound;
-  data.runnerSignInPhone = resolvedPhone;
+  data.runnerSignInPhone = phone;
   return res.redirect(runnerSignInV2RecoverStartPath(formKey, applicationId, resolvedNext));
 });
 
