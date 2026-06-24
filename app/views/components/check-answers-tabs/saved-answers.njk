@@ -1,10 +1,11 @@
 {% from "govuk/components/checkboxes/macro.njk" import govukCheckboxes %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
+{% set settingsBaseUrl = settingsBaseUrl or "/titan-mvp-1.2/form-editor/check-answers/settings-modular" %}
 
 <span class="govuk-caption-l">Check answers</span>
 <h1 class="govuk-heading-l">Saved answers</h1>
 
-<form class="form" action="/titan-mvp-1.2/form-editor/check-answers/settings-modular" method="post">
+<form class="form" action="{{ settingsBaseUrl }}" method="post">
   <input type="hidden" name="currentTab" value="saved-answers">
 
   <p class="govuk-body">

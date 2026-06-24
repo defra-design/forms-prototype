@@ -1,0 +1,12 @@
+{% extends "titan-mvp-1.2/form-editor/check-answers/static/_layout.html" %}
+{% set pageName = "Reference number settings (static) - Apply for a county parish holding number in England" %}
+{% set currentTab = "reference-number" %}
+
+{% block tabContent %}
+{% set staticPage = true %}
+{% set data = {
+  referenceNumberEnabled: "yes",
+  savedAnswersEnabled: "yes"
+} %}
+{% include "components/check-answers-tabs/reference-number.njk" %}
+{% endblock %}

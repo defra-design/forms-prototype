@@ -76,10 +76,20 @@ navigationItems: [
                     baseUrl="/titan-mvp-1.2/form-editor/check-answers/settings-v2"
                     ) }}
 
+                    {% set settingsBaseUrl = "/titan-mvp-1.2/form-editor/check-answers/settings-v2" %}
+
                     {% if data.currentTab == 'declaration' %}
                     {% include "components/check-answers-tabs/declaration.njk" %}
                     {% elif data.currentTab == 'sections' %}
                     {% include "components/check-answers-tabs/sections.njk" %}
+                    {% elif data.currentTab == 'confirmation-email' %}
+                    {% include "components/check-answers-tabs/confirmation-email.njk" %}
+                    {% elif data.currentTab == 'reference-number' %}
+                    {% include "components/check-answers-tabs/reference-number.njk" %}
+                    {% elif data.currentTab == 'feedback' %}
+                    {% include "components/check-answers-tabs/feedback.njk" %}
+                    {% elif data.currentTab == 'saved-answers' %}
+                    {% include "components/check-answers-tabs/saved-answers.njk" %}
                     {% else %}
                     {% include "components/check-answers-tabs/page-settings.njk" %}
                     {% endif %}

@@ -1,4 +1,5 @@
-{% macro checkAnswersSubNav(currentTab, showDeclarationTab, showSectionsTab, baseUrl) %}
+{% macro checkAnswersSubNav(currentTab, showDeclarationTab, showSectionsTab, baseUrl, tabUrls) %}
+{% set tabUrls = tabUrls or {} %}
 <nav class="moj-sub-navigation check-answers-sub-nav" aria-label="Sub navigation">
   <ul class="moj-sub-navigation__list" id="nav-list-{{ currentTab }}">
     <li class="moj-sub-navigation__item">
@@ -12,7 +13,7 @@
     <li class="moj-sub-navigation__item">
       <a class="moj-sub-navigation__link {% if currentTab == 'declaration' %}moj-sub-navigation__link--active{% endif %}"
          {% if currentTab == 'declaration' %}aria-current="page"{% endif %}
-         href="#">
+         href="{{ baseUrl }}?tab=declaration">
         Declaration
       </a>
     </li>
@@ -20,14 +21,14 @@
     <li class="moj-sub-navigation__item">
       <a class="moj-sub-navigation__link {% if currentTab == 'confirmation-email' %}moj-sub-navigation__link--active{% endif %}"
          {% if currentTab == 'confirmation-email' %}aria-current="page"{% endif %}
-         href="#">
+         href="{{ tabUrls['confirmation-email'] if tabUrls['confirmation-email'] else baseUrl ~ '?tab=confirmation-email' }}">
         Confirmation email
       </a>
     </li>
     <li class="moj-sub-navigation__item">
       <a class="moj-sub-navigation__link {% if currentTab == 'reference-number' %}moj-sub-navigation__link--active{% endif %}"
          {% if currentTab == 'reference-number' %}aria-current="page"{% endif %}
-         href="#">
+         href="{{ tabUrls['reference-number'] if tabUrls['reference-number'] else baseUrl ~ '?tab=reference-number' }}">
         Reference number
       </a>
     </li>
@@ -43,7 +44,7 @@
     <li class="moj-sub-navigation__item">
       <a class="moj-sub-navigation__link {% if currentTab == 'feedback' %}moj-sub-navigation__link--active{% endif %}"
          {% if currentTab == 'feedback' %}aria-current="page"{% endif %}
-         href="#">
+         href="{{ baseUrl }}?tab=feedback">
         User feedback
       </a>
     </li>

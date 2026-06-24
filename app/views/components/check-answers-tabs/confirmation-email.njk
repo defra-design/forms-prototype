@@ -1,42 +1,71 @@
-{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% from "govuk/components/checkboxes/macro.njk" import govukCheckboxes %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+{% set settingsBaseUrl = settingsBaseUrl or "/titan-mvp-1.2/form-editor/check-answers/settings-modular" %}
+{% set answerReuseSettingsUrl = answerReuseSettingsUrl or "/titan-mvp-1.2/form-editor/advanced-settings/reuse-previous-answers" %}
+{% set lockedBySavedAnswers = (data and data.savedAnswersEnabled === "yes") %}
+{% set confirmationEmailOn = lockedBySavedAnswers or (data.confirmationEmailEnabled !== "no") %}
 
-<span class="govuk-caption-l">Check answers</span>
-<h1 class="govuk-heading-l">Confirmation email</h1>
-
-<form class="form" action="/titan-mvp-1.2/form-editor/check-answers/settings-modular" method="post">
+{% if staticPage %}
+<div>
+{% else %}
+<form class="form" action="{{ settingsBaseUrl }}" method="post">
   <input type="hidden" name="currentTab" value="confirmation-email">
+{% endif %}
 
-  {{ govukRadios({
-    name: "confirmationEmailEnabled",
+  <div class="govuk-warning-text">
+    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+    <strong class="govuk-warning-text__text">
+      <span class="govuk-visually-hidden">Warning</span>
+      If you turn off confirmation emails, users will not receive a copy of their answers
+    </strong>
+  </div>
+
+  {% if lockedBySavedAnswers %}
+  {{ govukNotificationBanner({
+    type: "important",
+    titleText: "Important",
+    html: '<p class="govuk-body govuk-!-margin-bottom-0">You have enabled <a class="govuk-link govuk-link--no-visited-state" href="' ~ answerReuseSettingsUrl ~ '" target="_blank" rel="noopener noreferrer">answer reuse (opens in a new tab)</a>. Confirmation emails and reference numbers are now turned on and cannot be turned off.</p>'
+  }) }}
+  {% endif %}
+
+  <h1 class="govuk-heading-m">Do you want to turn off the confirmation email?</h1>
+
+  <p class="govuk-body">
+    The confirmation email is switched on by default but you can turn it off if you have an equivalent confirmation process.
+  </p>
+
+  {{ govukCheckboxes({
+    name: "confirmationEmailDisabled",
     fieldset: {
       legend: {
-        text: "Send a confirmation email when the form is submitted?",
+        text: "Do you want to turn off the confirmation email?",
         isPageHeading: false,
-        classes: "govuk-fieldset__legend--m"
+        classes: "govuk-visually-hidden"
       }
-    },
-    hint: {
-      text: "Users will receive an email after they submit the form. You can customise the email content in the Confirmation email tab."
     },
     items: [
       {
         value: "yes",
-        text: "Yes, send a confirmation email"
-      },
-      {
-        value: "no",
-        text: "No, do not send a confirmation email"
+        text: "Turn off the confirmation email",
+        id: "confirmation-email-disabled-checkbox",
+        disabled: lockedBySavedAnswers
       }
     ],
-    value: data.confirmationEmailEnabled
+    values: ["yes"] if not confirmationEmailOn else []
   }) }}
 
   <div class="govuk-button-group">
     {{ govukButton({
-      text: "Save",
-      type: "submit",
-      id: "confirmation-email-save"
+      text: "Save changes",
+      type: "button" if staticPage else "submit",
+      id: "confirmation-email-save",
+      disabled: lockedBySavedAnswers
     }) }}
   </div>
+
+{% if staticPage %}
+</div>
+{% else %}
 </form>
+{% endif %}

@@ -1,0 +1,44 @@
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+
+<p class="govuk-body-s" style="margin-bottom: 30px; border-bottom: #008938 1px;">
+  <a href="#" class="govuk-link govuk-link--no-visited-state" rel="noreferrer noopener" target="_blank">
+    Preview this page in a new tab
+  </a>
+</p>
+
+<h1 class="govuk-heading-l">Check your answers before sending your form</h1>
+
+{{ govukSummaryList({
+  classes: "govuk-!-margin-bottom-9",
+  rows: [
+    {
+      key: { text: "Business registered with RPA" },
+      value: { text: "Yes" },
+      actions: {
+        items: [{
+          html: '<a class="govuk-link govuk-link--no-visited-state" href="#" style="color: #b1b4b6; cursor: default;" onclick="event.preventDefault(); return false;">Change<span class="govuk-visually-hidden"> registration status</span></a>'
+        }]
+      }
+    },
+    {
+      key: { text: "Applicant's name" },
+      value: { text: "John Doe" },
+      actions: {
+        items: [{
+          html: '<a class="govuk-link govuk-link--no-visited-state" href="#" style="color: #b1b4b6; cursor: default;" onclick="event.preventDefault(); return false;">Change<span class="govuk-visually-hidden"> applicant name</span></a>'
+        }]
+      }
+    },
+    {
+      key: { text: "Email address" },
+      value: { text: "john.doe@example.com" },
+      actions: {
+        items: [{
+          html: '<a class="govuk-link govuk-link--no-visited-state" href="#" style="color: #b1b4b6; cursor: default;" onclick="event.preventDefault(); return false;">Change<span class="govuk-visually-hidden"> email address</span></a>'
+        }]
+      }
+    }
+  ]
+}) }}
+
+<button class="govuk-button govuk-!-margin-top-6" disabled>Send</button>

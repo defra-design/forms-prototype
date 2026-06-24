@@ -1,9 +1,10 @@
 {% from "govuk/components/input/macro.njk" import govukInput %}
 {% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% set settingsBaseUrl = settingsBaseUrl or "/titan-mvp-1.2/form-editor/check-answers/settings-modular" %}
 
 <span class="govuk-caption-l">Check answers</span>
 
-<form class="form" action="/titan-mvp-1.2/form-editor/check-answers/settings-modular" method="post">
+<form class="form" action="{{ settingsBaseUrl }}" method="post">
   <input type="hidden" name="currentTab" value="declaration">
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>

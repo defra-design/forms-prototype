@@ -1,42 +1,71 @@
-{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% from "govuk/components/checkboxes/macro.njk" import govukCheckboxes %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+{% set settingsBaseUrl = settingsBaseUrl or "/titan-mvp-1.2/form-editor/check-answers/settings-modular" %}
+{% set answerReuseSettingsUrl = answerReuseSettingsUrl or "/titan-mvp-1.2/form-editor/advanced-settings/reuse-previous-answers" %}
+{% set lockedBySavedAnswers = (data and data.savedAnswersEnabled === "yes") %}
+{% set referenceNumberOn = lockedBySavedAnswers or (data.referenceNumberEnabled === "yes") %}
 
-<span class="govuk-caption-l">Check answers</span>
-<h1 class="govuk-heading-l">Reference number</h1>
-
-<form class="form" action="/titan-mvp-1.2/form-editor/check-answers/settings-modular" method="post">
+{% if staticPage %}
+<div>
+{% else %}
+<form class="form" action="{{ settingsBaseUrl }}" method="post">
   <input type="hidden" name="currentTab" value="reference-number">
+{% endif %}
 
-  {{ govukRadios({
+  <div class="govuk-warning-text">
+    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+    <strong class="govuk-warning-text__text">
+      <span class="govuk-visually-hidden">Warning</span>
+      The reference number is automatically switched on if you add a payment option to your form or enable answer reuse.
+    </strong>
+  </div>
+
+  {% if lockedBySavedAnswers %}
+  {{ govukNotificationBanner({
+    type: "important",
+    titleText: "Important",
+    html: '<p class="govuk-body govuk-!-margin-bottom-0">You have enabled <a class="govuk-link govuk-link--no-visited-state" href="' ~ answerReuseSettingsUrl ~ '" target="_blank" rel="noopener noreferrer">answer reuse (opens in a new tab)</a>. Confirmation emails and reference numbers are now turned on and cannot be turned off.</p>'
+  }) }}
+  {% endif %}
+
+  <h1 class="govuk-heading-m">Do you want to turn on the reference number?</h1>
+
+  <p class="govuk-body">
+    The reference number is switched off by default but you can turn it on if you want to share it with users.
+  </p>
+
+  {{ govukCheckboxes({
     name: "referenceNumberEnabled",
     fieldset: {
       legend: {
-        text: "Show a reference number when the form is submitted?",
+        text: "Do you want to turn on the reference number?",
         isPageHeading: false,
-        classes: "govuk-fieldset__legend--m"
+        classes: "govuk-visually-hidden"
       }
-    },
-    hint: {
-      text: "Users will see a unique reference number on the confirmation page and in their confirmation email. They can use it to track their submission."
     },
     items: [
       {
         value: "yes",
-        text: "Yes, show a reference number"
-      },
-      {
-        value: "no",
-        text: "No, do not show a reference number"
+        text: "Turn on the reference number",
+        id: "reference-number-checkbox",
+        disabled: lockedBySavedAnswers
       }
     ],
-    value: data.referenceNumberEnabled
+    values: ["yes"] if referenceNumberOn else []
   }) }}
 
   <div class="govuk-button-group">
     {{ govukButton({
-      text: "Save",
-      type: "submit",
-      id: "reference-number-save"
+      text: "Save changes",
+      type: "button" if staticPage else "submit",
+      id: "reference-number-save",
+      disabled: lockedBySavedAnswers
     }) }}
   </div>
+
+{% if staticPage %}
+</div>
+{% else %}
 </form>
+{% endif %}

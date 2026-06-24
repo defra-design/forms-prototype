@@ -14,6 +14,7 @@
 {% set _phone = data.runnerSignInPhone or "07700 900000" %}
 {% set _changeEmailUrl = "/runner-sign-in-v2/forms/" + (formKey | urlencode) + "/" + (applicationId | urlencode) + "/security/change-email/get-security-code" %}
 {% set _changePhoneUrl = "/runner-sign-in-v2/forms/" + (formKey | urlencode) + "/" + (applicationId | urlencode) + "/security/change-phone/get-security-code" %}
+{% set _deleteSignInUrl = "/runner-sign-in-v2/forms/" + (formKey | urlencode) + "/" + (applicationId | urlencode) + "/security/delete-sign-in/check-email" %}
 
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
@@ -58,18 +59,13 @@
 
     <h2 class="govuk-heading-m govuk-!-margin-top-8">Delete your sign-in</h2>
 
-<p class="govuk-body">
-  To permanently delete your sign-in, email
-  <a class="govuk-link" href="mailto:forms-support@defra.gov.uk">forms-support@defra.gov.uk</a>.
-</p>
+    <p class="govuk-body">
+      This will permanently delete your sign-in. You’ll no longer be able to access the forms you’ve used with it.
+    </p>
 
-
-<p class="govuk-body">
-  Include the email address and mobile phone number linked to your sign-in so we can process your request.
-</p>
-<p class="govuk-body">
-  Deleting your sign-in is permanent. You will not be able to access any forms you have started or submitted using this sign-in.
-</p>
+    <p class="govuk-body">
+      <a class="govuk-link" href="{{ _deleteSignInUrl }}">Delete your sign-in</a>
+    </p>
 
   </div>
 </div>

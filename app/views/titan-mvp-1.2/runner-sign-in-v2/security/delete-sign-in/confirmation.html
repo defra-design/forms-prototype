@@ -1,0 +1,30 @@
+{% extends "layouts/runner-sign-in-v2.html" %}
+{% from "govuk/components/panel/macro.njk" import govukPanel %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}Your sign-in has been deleted – GOV.UK{% endblock %}
+
+{% block beforeContent %}{% endblock %}
+
+{% block header %}{{ v2.v2ServiceHeader("") }}{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {{ govukPanel({
+      titleText: "Your sign-in has been deleted",
+      html: "You can no longer access any forms you have started or submitted using this sign-in."
+    }) }}
+
+    <p class="govuk-body">
+      If you need to use this form again, you will need to create a new sign-in.
+    </p>
+
+    {{ govukButton({
+      text: "Continue",
+      href: "/runner-sign-in-v2/start-page"
+    }) }}
+  </div>
+</div>
+{% endblock %}

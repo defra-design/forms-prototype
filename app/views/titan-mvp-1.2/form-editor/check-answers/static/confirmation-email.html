@@ -1,0 +1,12 @@
+{% extends "titan-mvp-1.2/form-editor/check-answers/static/_layout.html" %}
+{% set pageName = "Confirmation email settings (static) - Apply for a county parish holding number in England" %}
+{% set currentTab = "confirmation-email" %}
+
+{% block tabContent %}
+{% set staticPage = true %}
+{% set data = {
+  confirmationEmailEnabled: "yes",
+  savedAnswersEnabled: "yes"
+} %}
+{% include "components/check-answers-tabs/confirmation-email.njk" %}
+{% endblock %}

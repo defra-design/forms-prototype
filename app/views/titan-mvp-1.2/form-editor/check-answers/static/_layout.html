@@ -1,0 +1,93 @@
+{% extends "layouts/main.html" %}
+{% from "components/service-header/macro.njk" import serviceHeader %}
+{% from "components/check-answers-sub-nav/macro.njk" import checkAnswersSubNav %}
+
+{% set staticSettingsBase = "/titan-mvp-1.2/form-editor/check-answers/settings-v2" %}
+{% set staticTabUrls = {
+  "confirmation-email": "/titan-mvp-1.2/form-editor/check-answers/static/confirmation-email",
+  "reference-number": "/titan-mvp-1.2/form-editor/check-answers/static/reference-number"
+} %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+containerClasses: containerClasses,
+accountName: "Chris Smith",
+homepageLink: "/",
+signOutLink: "/titan-mvp-1.2/onboarding/sign-out-confirmation",
+navigationItems: [
+{ href: "/titan-mvp-1.2/library", text: "Forms library", id: "nav-library" },
+{ href: "/titan-mvp-1.2/form-overview/index", text: "Overview", id: "nav-overview" },
+{ href: "/titan-mvp-1.2/form-editor/listing", text: "Editor", id: "nav-editor", active: true }
+]
+}) }}
+
+<div class="x-govuk-masthead x-govuk-masthead--large">
+  <div class="govuk-width-container">
+    {{ govukBackLink({
+    classes: "govuk-back-link--inverse govuk-!-margin-bottom-0",
+    text: "Back to add and edit pages",
+    href: "/titan-mvp-1.2/form-editor/listing"
+    }) }}
+
+    <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"
+      style="border-bottom: 1px solid white; margin-bottom: 0;" />
+
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-full-from-desktop">
+        <h1 class="x-govuk-masthead__title">
+          Apply for a county parish holding (CPH) number
+        </h1>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half-from-desktop" id="container"
+    style="flex: 1 1 75%; height: 100%; overflow-y: auto;">
+    <div class="govuk-summary-card govuk-!-margin-top-0" style="border-left: 10px solid #b1b4b6;">
+      <div class="govuk-summary-card__content govuk-!-padding-top-0" style="background-color: #f3f2f1;">
+        <dl class="govuk-summary-list">
+          <div class="govuk-summary-list__row">
+            <dd class="govuk-summary-list__value">
+              <div class="govuk-grid-row" id="page-settings-container-1">
+                <div id="question-1">
+                  <div class="govuk-summary-card__content" style="margin-bottom: 0;">
+                    {{ checkAnswersSubNav(
+                      currentTab=currentTab,
+                      showDeclarationTab=false,
+                      showSectionsTab=false,
+                      baseUrl=staticSettingsBase,
+                      tabUrls=staticTabUrls
+                    ) }}
+
+                    {% block tabContent %}{% endblock %}
+                  </div>
+                </div>
+              </div>
+            </dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </div>
+
+  <div class="govuk-grid-column-one-half-from-desktop" id="second-container"
+    style="outline: solid 1px #008938; height: 100%; position: sticky; top: 0; padding: 20px; box-shadow: 5px 10px #008938; overflow-y: auto; max-height: 100vh;">
+    <div id="before-content" style="background-color: #cce2d8;">
+      <p class="govuk-body-s" style="margin-bottom: 0; color: #005a30; padding: 2px 8px 3px; text-align: center;">
+        Preview
+      </p>
+    </div>
+
+    <div style="margin-top: 60px!important;">
+      {% include "titan-mvp-1.2/form-editor/check-answers/static/_preview-panel.html" %}
+    </div>
+  </div>
+</div>
+{% endblock %}
