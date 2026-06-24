@@ -1,0 +1,133 @@
+{#
+  Security code text message preview.
+
+  Params:
+  - caption (string): journey caption above the heading
+  - code (string): security code, defaults to 123456
+  - fromName (string): sender name, defaults to Submit form to Defra
+  - toLabel (string): recipient label, defaults to Mobile number
+  - formNameEn (string): English form name in message body
+  - formNameCy (string): Welsh form name in message body
+  - variant (string): "recover" (default) or "change-email"
+#}
+{% macro securityCodeTextMessage(params) %}
+  {% set _code = params.code if params.code else "123456" %}
+  {% set _from = params.fromName if params.fromName else "Submit form to Defra" %}
+  {% set _to = params.toLabel if params.toLabel else "Mobile number" %}
+  {% set _formNameEn = params.formNameEn if params.formNameEn else "Apply for a grant" %}
+  {% set _formNameCy = params.formNameCy if params.formNameCy else "Gwneud cais am grant" %}
+  {% set _variant = params.variant if params.variant else "recover" %}
+
+  <style>
+    .text-message {
+      border: 1px solid #b1b4b6;
+      background: #ffffff;
+    }
+
+    .text-message-meta {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .text-message-meta th,
+    .text-message-meta td {
+      padding: 12px 20px;
+      border-bottom: 1px solid #b1b4b6;
+      vertical-align: top;
+      text-align: left;
+    }
+
+    .text-message-meta th {
+      width: 90px;
+      font-weight: 700;
+    }
+
+    .text-message-body {
+      padding: 20px;
+    }
+
+    .text-message-bubble {
+      background: #f3f2f1;
+      border-radius: 10px;
+      padding: 20px 24px;
+      max-width: 34em;
+      position: relative;
+    }
+
+    .text-message-bubble::after {
+      content: "";
+      position: absolute;
+      bottom: -10px;
+      right: 24px;
+      width: 0;
+      height: 0;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-top: 10px solid #f3f2f1;
+    }
+
+    .text-message-block + .text-message-block {
+      margin-top: 20px;
+    }
+
+    .text-message-block p {
+      margin: 0;
+    }
+
+    .text-message-block p + p {
+      margin-top: 8px;
+    }
+
+    .text-message-code {
+      color: #1d70b8;
+      text-decoration: underline;
+      font-weight: 700;
+    }
+  </style>
+
+  {% if params.caption %}
+    <span class="govuk-caption-l">{{ params.caption }}</span>
+  {% endif %}
+
+  <h1 class="govuk-heading-l{% if params.caption %} govuk-!-margin-top-2{% else %} govuk-!-margin-top-6{% endif %}">Security code text message</h1>
+
+  <div class="text-message govuk-!-margin-top-6">
+    <table class="text-message-meta">
+      <tbody>
+        <tr>
+          <th scope="row">From</th>
+          <td>{{ _from }}</td>
+        </tr>
+        <tr>
+          <th scope="row">To</th>
+          <td>{{ _to }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="text-message-body">
+      <div class="text-message-bubble">
+        <div class="text-message-block">
+          <p class="govuk-body">
+            {% if _variant == "change-email" %}
+              <span class="text-message-code">{{ _code }}</span> is your security code to change your email address for your '{{ _formNameEn }}' form.
+            {% else %}
+              <span class="text-message-code">{{ _code }}</span> is your security code for completing your '{{ _formNameEn }}' form.
+            {% endif %}
+          </p>
+          <p class="govuk-body">Your code expires in 15 minutes.</p>
+        </div>
+        <div class="text-message-block">
+          <p class="govuk-body">
+            {% if _variant == "change-email" %}
+              <span class="text-message-code">{{ _code }}</span> yw eich cod diogelwch i newid eich cyfeiriad e-bost ar gyfer eich ffurflen '{{ _formNameCy }}'.
+            {% else %}
+              <span class="text-message-code">{{ _code }}</span> yw eich cod diogelwch ar gyfer gwblhau eich ffurflen '{{ _formNameCy }}'.
+            {% endif %}
+          </p>
+          <p class="govuk-body">Mae eich cod yn dod i ben mewn 15 munud.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endmacro %}

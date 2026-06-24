@@ -1,0 +1,18 @@
+{% extends "layouts/main.html" %}
+{% import "titan-mvp-1.2/runner-sign-in-v2/texts/_security-code-text-message.njk" as textMessage %}
+
+{% block pageTitle %}Security code text message – prototype{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {{ textMessage.securityCodeTextMessage({
+      caption: "Recovering a sign-in",
+      variant: "recover",
+      fromName: "Submit form to Defra",
+      formNameEn: "Apply for a grant",
+      formNameCy: "Gwneud cais am grant"
+    }) }}
+  </div>
+</div>
+{% endblock %}

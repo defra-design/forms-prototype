@@ -30,6 +30,10 @@
     {{ govukInsetText({ html: "We have sent a code to your phone number ending with <strong>" + (maskedMobile | e) + "</strong>" }) }}
     <p class="govuk-body">It might take a few minutes to arrive. The code will expire after 15 minutes.</p>
 
+    <p class="govuk-body">
+      <a class="govuk-link" href="/runner-sign-in-v2/texts/change-email-security-code">View the text message (prototype only)</a>
+    </p>
+
     <form method="post" action="{{ formAction }}" novalidate>
       <input type="hidden" name="formKey" value="{{ formKey }}" />
       <input type="hidden" name="applicationId" value="{{ applicationId }}" />
