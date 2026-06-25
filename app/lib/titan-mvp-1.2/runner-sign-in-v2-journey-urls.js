@@ -76,8 +76,7 @@ function runnerSignInV2BuildJourneyUrls({
     staticManageFormChecked: "/runner-sign-in-v2/static/manage-form-checked",
     staticChangeEmailNewEmailSameAsCurrent:
       "/runner-sign-in-v2/static/change-email-new-email-same-as-current",
-    staticChangeEmailUsedOnOtherAccount:
-      "/runner-sign-in-v2/static/change-email-new-email-used-on-other-account",
+    staticChangeEmailUsedOnOtherAccount: "/runner-sign-in-v2/static/change-email-used-on-other-account",
     staticChangePhoneSameAsCurrent: "/runner-sign-in-v2/static/change-phone-same-as-current",
     staticChangePhoneUsedOnOtherAccount: "/runner-sign-in-v2/static/change-phone-used-on-other-account",
     staticRecoverNoSignInForMobile: "/runner-sign-in-v2/static/recover-no-sign-in-for-mobile",
@@ -117,8 +116,7 @@ function runnerSignInV2BuildJourneyUrls({
           changeEmailNewEmail: journeyPreviewPath("change-email-new-email"),
           changeEmailNewEmailSameAsCurrent:
             "/runner-sign-in-v2/static/change-email-new-email-same-as-current",
-          changeEmailNewEmailUsedOnOtherAccount:
-            "/runner-sign-in-v2/static/change-email-new-email-used-on-other-account",
+          changeEmailNewEmailUsedOnOtherAccount: "/runner-sign-in-v2/static/change-email-used-on-other-account",
           changeEmailCheckNewEmail: journeyPreviewPath("change-email-check-new-email"),
           changePhoneGetCode: journeyPreviewPath("change-phone-get-security-code"),
           changePhoneCheckEmail: journeyPreviewPath("change-phone-check-email"),
@@ -159,7 +157,7 @@ function runnerSignInV2ResolvePageKey(pageKey, urls) {
     if (slug === "change-email-new-email-same-as-current") {
       return urls.staticChangeEmailNewEmailSameAsCurrent;
     }
-    if (slug === "change-email-new-email-used-on-other-account") {
+    if (slug === "change-email-used-on-other-account") {
       return urls.staticChangeEmailUsedOnOtherAccount;
     }
     if (slug === "change-phone-same-as-current") {

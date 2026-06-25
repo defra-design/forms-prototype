@@ -14,7 +14,7 @@ const RUNNER_SIGN_IN_V2_STATIC_CHANGE_EMAIL_NEW_EMAIL_SAME_AS_CURRENT_PATH =
   "/runner-sign-in-v2/static/change-email-new-email-same-as-current";
 
 const RUNNER_SIGN_IN_V2_STATIC_CHANGE_EMAIL_USED_ON_OTHER_ACCOUNT_PATH =
-  "/runner-sign-in-v2/static/change-email-new-email-used-on-other-account";
+  "/runner-sign-in-v2/static/change-email-used-on-other-account";
 
 const RUNNER_SIGN_IN_V2_STATIC_CHANGE_PHONE_SAME_AS_CURRENT_PATH =
   "/runner-sign-in-v2/static/change-phone-same-as-current";

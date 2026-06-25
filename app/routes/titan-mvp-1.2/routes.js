@@ -21206,7 +21206,7 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
     return res.redirect(RUNNER_SIGN_IN_V2_STATIC_CHANGE_EMAIL_NEW_EMAIL_SAME_AS_CURRENT_PATH);
   }
 
-  if (slug === "change-email-new-email-used-on-other-account") {
+  if (slug === "change-email-used-on-other-account") {
     return res.redirect(RUNNER_SIGN_IN_V2_STATIC_CHANGE_EMAIL_USED_ON_OTHER_ACCOUNT_PATH);
   }
 
@@ -22653,7 +22653,7 @@ router.get("/runner-sign-in-v2/static/change-email-new-email-same-as-current", f
   );
 });
 
-router.get("/runner-sign-in-v2/static/change-email-new-email-used-on-other-account", function (req, res) {
+router.get("/runner-sign-in-v2/static/change-email-used-on-other-account", function (req, res) {
   return res.render(
     "titan-mvp-1.2/runner-sign-in-v2/security/change-email/new-email",
     runnerSignInV2SecurityChangeEmailNewEmailErrorContext(req, {
@@ -22661,6 +22661,10 @@ router.get("/runner-sign-in-v2/static/change-email-new-email-used-on-other-accou
       emailValue: RUNNER_SIGN_IN_V2_PROTOTYPE_EMAIL_USED_ON_OTHER_ACCOUNT,
     })
   );
+});
+
+router.get("/runner-sign-in-v2/static/change-email-new-email-used-on-other-account", function (req, res) {
+  return res.redirect(RUNNER_SIGN_IN_V2_STATIC_CHANGE_EMAIL_USED_ON_OTHER_ACCOUNT_PATH);
 });
 
 router.get("/runner-sign-in-v2/static/change-phone-same-as-current", function (req, res) {

@@ -178,7 +178,7 @@ module.exports = {
         id: "usedemail",
         label: "Email already used",
         tone: "unexpected",
-        pageKey: "static:change-email-new-email-used-on-other-account",
+        pageKey: "static:change-email-used-on-other-account",
       },
       { id: "checkemail", label: "Check your email", tone: "main", pageKey: "changeEmailCheckNewEmail" },
       { id: "codes", label: "Security code problem", tone: "unexpected", pageKey: "unexpected:wrong-security-code-too-many-times" },
