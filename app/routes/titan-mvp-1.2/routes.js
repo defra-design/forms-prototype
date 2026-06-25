@@ -13,6 +13,11 @@ const {
   runnerSignInV2ResolveJourneyFlows,
 } = require("../../lib/titan-mvp-1.2/runner-sign-in-v2-journey-urls");
 const {
+  runnerSignInV2ChooseJourneyRadioItems,
+  runnerSignInV2ChooseJourneyRedirect,
+  runnerSignInV2PrepareChooseJourneySession,
+} = require("../../lib/titan-mvp-1.2/runner-sign-in-v2-choose-journeys");
+const {
   RUNNER_SIGN_IN_V2_CHANGE_EMAIL_SAME_AS_CURRENT_ERROR,
   RUNNER_SIGN_IN_V2_CHANGE_EMAIL_USED_ON_OTHER_ACCOUNT_ERROR,
   RUNNER_SIGN_IN_V2_CHANGE_PHONE_SAME_AS_CURRENT_ERROR,
@@ -20682,7 +20687,7 @@ function renderRunnerSignInV2CheckerCheckAnswers(req, res, { token, entry, error
 }
 
 router.get("/runner-sign-in-v2", function (req, res) {
-  return res.redirect("/runner-sign-in-v2/start-page");
+  return res.redirect("/runner-sign-in-v2/choose-journey");
 });
 
 router.get("/runner-sign-in-v2/reset", function (req, res) {
@@ -20798,6 +20803,74 @@ router.get("/runner-sign-in-v2/start-page", function (req, res) {
     saveAndExitDemoApp,
     saveAndExitDemoStartUrl,
   });
+});
+
+function runnerSignInV2ChooseJourneyContext(req, { selected = "", errorMessage = "", error = null } = {}) {
+  const data = ensureRunnerSignInSession(req);
+  if (typeof data.runnerSignInV2PrototypeMode === "undefined") {
+    data.runnerSignInV2PrototypeMode = true;
+  }
+  ensureRunnerSignInApplications(req);
+  return {
+    data,
+    journeyItems: runnerSignInV2ChooseJourneyRadioItems(selected),
+    errorMessage: errorMessage || undefined,
+    error: error || undefined,
+  };
+}
+
+function runnerSignInV2ChooseJourneyHelpers(req) {
+  const data = ensureRunnerSignInSession(req);
+  return {
+    demoFormKey: RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_FORM_KEY,
+    demoApplicationId: RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_APP_ID,
+    clearAuth: () => runnerSignInV2ClearSignIn(data),
+    signIn: () => applyRunnerSignInV2EmailAuth(req, data.runnerSignInEmail || "you@example.com", data.runnerSignInPhone || "07700 900000"),
+    prepareSaveAndExitDemo: () => runnerSignInV2PrepareSaveAndExitDemo(req),
+    setFocus: (formKey, applicationId) => setRunnerSignInV2ManageFocus(req, formKey, applicationId),
+    seedRecoverPhone: (phone) => {
+      data.runnerSignInV2RecoverPhoneAttempt = phone;
+      delete data.runnerSignInV2RecoverPhoneNotFound;
+      delete data.runnerSignInV2Error;
+    },
+    seedRecoverPhoneNotFound: (phone) => {
+      data.runnerSignInV2RecoverPhoneNotFound = phone;
+      delete data.runnerSignInV2RecoverPhoneAttempt;
+      delete data.runnerSignInV2Error;
+    },
+  };
+}
+
+router.get("/runner-sign-in-v2/choose-journey", function (req, res) {
+  return res.render("titan-mvp-1.2/runner-sign-in-v2/choose-journey", runnerSignInV2ChooseJourneyContext(req));
+});
+
+router.post("/runner-sign-in-v2/choose-journey", function (req, res) {
+  const journeyId = String(req.body.journey || "").trim();
+  const helpers = runnerSignInV2ChooseJourneyHelpers(req);
+  const redirectUrl = runnerSignInV2ChooseJourneyRedirect(journeyId, {
+    demoFormKey: helpers.demoFormKey,
+    demoApplicationId: helpers.demoApplicationId,
+    managePath: runnerSignInV2ManagePath,
+    securityPath: runnerSignInV2SecurityPath,
+    deleteSignInCheckEmailPath: (formKey, applicationId) =>
+      runnerSignInV2SecurityDeleteSignInPath(formKey, applicationId, "check-email"),
+    formStepPath: (formKey, applicationId, step) =>
+      `/runner-sign-in/forms/${encodeURIComponent(formKey)}/${encodeURIComponent(applicationId)}/${encodeURIComponent(step)}`,
+  });
+
+  if (!redirectUrl) {
+    return res.status(200).render(
+      "titan-mvp-1.2/runner-sign-in-v2/choose-journey",
+      runnerSignInV2ChooseJourneyContext(req, {
+        errorMessage: "Select a journey",
+        error: [{ text: "Select a journey", href: "#journey" }],
+      })
+    );
+  }
+
+  runnerSignInV2PrepareChooseJourneySession(req, journeyId, helpers);
+  return res.redirect(redirectUrl);
 });
 
 const RUNNER_SIGN_IN_V2_UNEXPECTED_PAGES = {
@@ -21749,6 +21822,7 @@ function runnerSignInV2DocsUrls() {
       journeyPreviewPath: runnerSignInV2JourneyPreviewPath,
     }),
     startPage: "/runner-sign-in-v2/start-page",
+    chooseJourney: "/runner-sign-in-v2/choose-journey",
     journeys: "/runner-sign-in-v2/journeys",
     journeyFlowcharts: "/runner-sign-in-v2/journey-flowcharts",
     unexpectedJourneys: "/runner-sign-in-v2/unexpected-journeys",
