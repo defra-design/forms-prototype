@@ -14,6 +14,7 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
       heading: "Prototype",
       links: [
         { text: "Start page", href: "/runner-sign-in-v2/start-page" },
+        { text: "Choose a journey", href: "/runner-sign-in-v2/choose-journey" },
         { text: "All pages", href: urls.allPages || "/runner-sign-in-v2/all-pages" },
         { text: "Journeys", href: "/runner-sign-in-v2/journeys" },
         { text: "Journey flowcharts", href: "/runner-sign-in-v2/journey-flowcharts" },

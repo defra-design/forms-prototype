@@ -1,0 +1,51 @@
+{% extends "layouts/runner-sign-in-v2.html" %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}
+Choose a journey – Runner sign-in v2 – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}{% endblock %}
+
+{% block header %}
+  {{ v2.v2ServiceHeader("start") }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% if error %}
+      {{ govukErrorSummary({
+        titleText: "There is a problem",
+        errorList: error
+      }) }}
+    {% endif %}
+
+    <form method="post" action="/runner-sign-in-v2/choose-journey" novalidate>
+      {{ govukRadios({
+        idPrefix: "journey",
+        name: "journey",
+        fieldset: {
+          legend: {
+            text: "Choose a journey",
+            isPageHeading: true,
+            classes: "govuk-fieldset__legend--xl"
+          }
+        },
+        hint: {
+          text: "Select one option."
+        },
+        errorMessage: errorMessage,
+        items: journeyItems
+      }) }}
+
+      {{ govukButton({
+        text: "Continue"
+      }) }}
+    </form>
+  </div>
+</div>
+{% endblock %}

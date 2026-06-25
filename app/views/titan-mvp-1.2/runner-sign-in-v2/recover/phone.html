@@ -3,6 +3,7 @@
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 {% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
 {% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
 
 {% block pageTitle %}Recover my sign-in: mobile phone number – GOV.UK{% endblock %}
@@ -22,6 +23,12 @@
     <span class="govuk-caption-l">Recover my sign-in</span>
     <h1 class="govuk-heading-l">Enter the phone number you used to sign in</h1>
     <p class="govuk-body">We will send a 6 digit security code to this number so you can recover your sign-in.</p>
+
+    {% if data and data.runnerSignInV2PrototypeMode %}
+      {{ govukInsetText({
+        text: "Prototype only: use 07700 900 000 to continue the recovery journey. Any other number shows the ‘not linked to a sign-in’ error page."
+      }) }}
+    {% endif %}
 
     <form method="post" action="/runner-sign-in-v2/recover/phone" novalidate>
       <input type="hidden" name="formKey" value="{{ formKey }}" />
