@@ -18,6 +18,13 @@ const {
   buildStaticAdvancedSettingsIndexContext,
 } = require("../../data/advanced-settings-static");
 const {
+  buildStaticConditionsManagerContext,
+  buildStaticConditionsManagerIndexContext,
+} = require("../../data/conditions-manager-static");
+const {
+  enrichConditionsWithUsedInLabels,
+} = require("../../lib/titan-mvp-1.2/condition-usage");
+const {
   runnerSignInV2BuildJourneyUrls,
   runnerSignInV2ResolveJourneyFlows,
 } = require("../../lib/titan-mvp-1.2/runner-sign-in-v2-journey-urls");
@@ -451,6 +458,43 @@ router.get(
 
 // Form-level conditions management (manager)
 router.get(
+  "/titan-mvp-1.2/form-editor/conditions/manager/static",
+  function (req, res) {
+    res.render(
+      "titan-mvp-1.2/form-editor/conditions/manager/static/index",
+      buildStaticConditionsManagerIndexContext()
+    );
+  }
+);
+
+router.get(
+  "/titan-mvp-1.2/form-editor/conditions/manager/static.html",
+  function (req, res) {
+    res.redirect("/titan-mvp-1.2/form-editor/conditions/manager/static");
+  }
+);
+
+router.get(
+  "/titan-mvp-1.2/form-editor/conditions/manager/static/:variant",
+  function (req, res) {
+    const context = buildStaticConditionsManagerContext(req.params.variant);
+    if (!context) {
+      return res.redirect("/titan-mvp-1.2/form-editor/conditions/manager/static");
+    }
+    res.render("titan-mvp-1.2/form-editor/conditions/manager", context);
+  }
+);
+
+router.get(
+  "/titan-mvp-1.2/form-editor/conditions/manager/static/:variant.html",
+  function (req, res) {
+    res.redirect(
+      `/titan-mvp-1.2/form-editor/conditions/manager/static/${req.params.variant}`
+    );
+  }
+);
+
+router.get(
   "/titan-mvp-1.2/form-editor/conditions/manager",
   function (req, res) {
     const formData = req.session.data || {};
@@ -459,6 +503,7 @@ router.get(
     let formPages = req.session.data["formPages"] || [];
     const conditions = formData.conditions || [];
     const conditionSaved = req.query.conditionSaved === "true";
+    const emailOutputs = formData.conditionalOutputs?.outputs || [];
 
     if (!formPages || formPages.length === 0) {
       // Try to reconstruct from other session data if possible
@@ -492,7 +537,11 @@ router.get(
         name: formData.formName || "Form name",
       },
       availableQuestions: availableQuestions,
-      conditions: conditions,
+      conditions: enrichConditionsWithUsedInLabels(
+        conditions,
+        formPages,
+        emailOutputs
+      ),
       formPages: formPages,
       conditionSaved: conditionSaved,
       query: req.query, // Pass query params for context banner

@@ -293,6 +293,8 @@ function buildStaticConditionalMailboxIndexContext() {
       "/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing",
     advancedSettingsStaticUrl:
       "/titan-mvp-1.2/form-editor/advanced-settings/static",
+    conditionsManagerStaticUrl:
+      "/titan-mvp-1.2/form-editor/conditions/manager/static",
     staticPageBase: STATIC_BASE,
   };
 }
