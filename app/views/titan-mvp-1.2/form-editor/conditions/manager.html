@@ -3,6 +3,7 @@
 {% from "moj/components/button-menu/macro.njk" import mojButtonMenu %}
 {% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
 {% set pageName %}Manage conditions - {{ form.name }}{% endset %}
 {% set fromPageId = query.fromPageId %}
 {% set fromPageHeading = query.fromPageHeading %}
@@ -50,6 +51,12 @@ activeLinkId: "nav-editor"
     {{ formPages | dump | safe }}
     </script>
     <div class="govuk-grid-column-full">
+
+        {% if staticPage %}
+        {{ govukInsetText({
+        html: '<strong>Static handover page: ' + staticPageTitle + '.</strong> ' + staticPageDescription + ' Forms do not save. <a class="govuk-link" href="' + staticIndexUrl + '">View all static pages</a>. <a class="govuk-link" href="' + emailActionsStaticUrl + '">View email actions example</a>.'
+        }) }}
+        {% endif %}
 
         {# <div class="govuk-grid-column-two-thirds">
 
@@ -155,43 +162,41 @@ activeLinkId: "nav-editor"
                                 </p>
                             </td>
                             <td class="govuk-table__cell">
-                                {% set pagesWithCondition = [] %}
-                                {% set pageCounter = 1 %}
-                                {% for page in formPages %}
-                                {% if page.conditions %}
-                                {% for pageCondition in page.conditions %}
-                                {% if pageCondition.id == condition.id %}
-                                {% set pageLabel = page.pageHeading or 'Page ' + pageCounter %}
-                                {% if pageLabel not in pagesWithCondition %}
-                                {% set pagesWithCondition = pagesWithCondition.concat([pageLabel]) %}
-                                {% endif %}
-                                {% endif %}
-                                {% endfor %}
-                                {% endif %}
-                                {% set pageCounter = pageCounter + 1 %}
-                                {% endfor %}
-                                {% if pagesWithCondition | length == 0 %}
+                                {% set pagesWithCondition = condition.usedInPages or [] %}
+                                {% set hasEmailActions = condition.hasEmailActions %}
+                                {% if pagesWithCondition | length == 0 and not hasEmailActions %}
                                 Not used
-                                {% elseif pagesWithCondition | length == 1 %}
+                                {% elseif pagesWithCondition | length == 1 and not hasEmailActions %}
                                 {{ pagesWithCondition[0] }}
-                                {% else %}
-                                <ul class="govuk-list govuk-list--bullet">
+                                {% elseif pagesWithCondition | length > 1 and not hasEmailActions %}
+                                <ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-0">
                                     {% for label in pagesWithCondition %}
                                     <li>{{ label }}</li>
                                     {% endfor %}
+                                </ul>
+                                {% elseif pagesWithCondition | length == 0 and hasEmailActions %}
+                                email actions
+                                {% else %}
+                                <ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-0">
+                                    {% for label in pagesWithCondition %}
+                                    <li>{{ label }}</li>
+                                    {% endfor %}
+                                    {% if hasEmailActions %}
+                                    <li>email actions</li>
+                                    {% endif %}
                                 </ul>
                                 {% endif %}
                             </td>
                             <td class="govuk-table__cell">
                                 <ul class="govuk-summary-list__actions-list">
                                     <li class="govuk-summary-list__actions-list-item">
-                                        <a href="/titan-mvp-1.2/form-editor/conditions/edit/{{ condition.id }}"
+                                        <a href="{% if staticPage %}#{% else %}/titan-mvp-1.2/form-editor/conditions/edit/{{ condition.id }}{% endif %}"
                                             class="govuk-link govuk-link--no-visited-state">Edit<span
                                                 class="govuk-visually-hidden"> {{
                                                 condition.conditionName }}</span></a>
                                     </li>
                                     <li class="govuk-summary-list__actions-list-item">
-                                        <a href="/titan-mvp-1.2/form-editor/conditions/delete/{{ condition.id }}"
+                                        <a href="{% if staticPage %}#{% else %}/titan-mvp-1.2/form-editor/conditions/delete/{{ condition.id }}{% endif %}"
                                             class="govuk-link govuk-link--no-visited-state govuk-link--destructive">Delete<span
                                                 class="govuk-visually-hidden"> {{
                                                 condition.conditionName }}</span></a>
@@ -213,6 +218,7 @@ activeLinkId: "nav-editor"
 
 
                     <!-- Add New Condition Button -->
+                    {% if not staticPage %}
                     <div class="govuk-button-group" style="align-items: center;">
                         <button class="govuk-button" id="add-new-condition" style="display: block;">
                             Create new condition
@@ -230,6 +236,7 @@ activeLinkId: "nav-editor"
                             Join selected conditions
                         </button>
                     </div>
+                    {% endif %}
 
                     {# {{ mojButtonMenu({
                     button: {
