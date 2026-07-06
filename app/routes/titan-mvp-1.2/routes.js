@@ -445,6 +445,8 @@ router.get(
   "/titan-mvp-1.2/form-editor/conditions/manager",
   function (req, res) {
     const formData = req.session.data || {};
+    ensureDemoMailboxRoutingConditions(formData);
+    req.session.data = formData;
     let formPages = req.session.data["formPages"] || [];
     const conditions = formData.conditions || [];
     const conditionSaved = req.query.conditionSaved === "true";
@@ -2539,7 +2541,299 @@ function getAdvancedSettingsSummaryRows(formData) {
     });
   }
 
+  const mailboxSettings = getConditionalMailboxSettings(formData);
+  rows.push({
+    key: { text: "Conditional mailbox routing" },
+    value: {
+      text:
+        mailboxSettings.outputs.length > 0
+          ? `${mailboxSettings.outputs.length} additional email address${mailboxSettings.outputs.length === 1 ? "" : "es"}`
+          : "Default email address only",
+    },
+    actions: {
+      items: [
+        {
+          href: "/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing",
+          text: "Change",
+          visuallyHiddenText: "conditional mailbox routing",
+        },
+      ],
+    },
+  });
+
   return rows;
+}
+
+const MAX_CONDITIONAL_OUTPUTS = 5;
+
+function formatSubmissionTypeLabel(submissionType, submissionVersion) {
+  if (submissionType === "machine-readable") {
+    return `Machine readable format (v${submissionVersion || "3"})`;
+  }
+  return "Human readable format";
+}
+
+function getConditionalMailboxSettings(formData) {
+  const settings = formData.conditionalOutputs || {};
+  const draftSettings = formData.draftSettings || {};
+  const formDetails = formData.formDetails || {};
+
+  return {
+    enabled: settings.enabled || "no",
+    defaultMailbox: {
+      emailAddress:
+        settings.defaultMailbox?.emailAddress ||
+        draftSettings.notificationEmail ||
+        formDetails.notificationEmail ||
+        formData.notificationEmail ||
+        "notify@defra.gov.uk",
+      submissionType:
+        settings.defaultMailbox?.submissionType ||
+        draftSettings.submissionType ||
+        "human-only",
+      submissionVersion:
+        settings.defaultMailbox?.submissionVersion ||
+        draftSettings.submissionVersion ||
+        "3",
+    },
+    outputs: settings.outputs || [],
+  };
+}
+
+function ensureConditionalOutputsStore(formData) {
+  if (!formData.conditionalOutputs) {
+    formData.conditionalOutputs = {
+      defaultMailbox: {},
+      outputs: [],
+    };
+  }
+  if (!formData.conditionalOutputs.outputs) {
+    formData.conditionalOutputs.outputs = [];
+  }
+  return formData.conditionalOutputs;
+}
+
+function getConditionById(formData, conditionId) {
+  const conditions = formData.conditions || [];
+  return conditions.find(
+    (condition) => String(condition.id) === String(conditionId)
+  );
+}
+
+const DEMO_MAILBOX_ROUTING_CONDITIONS = [
+  {
+    id: 1001,
+    conditionName: "Applicant is a farmer",
+    rules: [
+      {
+        questionText: "Are you a farmer?",
+        operator: "is",
+        value: "Yes",
+      },
+    ],
+    text: "Are you a farmer? is 'Yes'",
+  },
+  {
+    id: 1002,
+    conditionName: "Livestock type is cattle",
+    rules: [
+      {
+        questionText: "What type of livestock are you registering?",
+        operator: "is",
+        value: "Cattle",
+      },
+    ],
+    text: "What type of livestock are you registering? is 'Cattle'",
+  },
+  {
+    id: 1003,
+    conditionName: "Application is urgent",
+    rules: [
+      {
+        questionText: "Is this application urgent?",
+        operator: "is",
+        value: "Yes",
+      },
+    ],
+    text: "Is this application urgent? is 'Yes'",
+  },
+];
+
+function hasUsableConditions(conditions) {
+  return (
+    Array.isArray(conditions) &&
+    conditions.some((condition) => condition && condition.conditionName && condition.id)
+  );
+}
+
+function ensureDemoMailboxRoutingConditions(formData) {
+  if (hasUsableConditions(formData.conditions)) {
+    return formData.conditions;
+  }
+
+  formData.conditions = DEMO_MAILBOX_ROUTING_CONDITIONS.map((condition) => ({
+    ...condition,
+    rules: condition.rules.map((rule) => ({ ...rule })),
+  }));
+
+  return formData.conditions;
+}
+
+function formatConditionRulesSummary(rules) {
+  if (!rules || !rules.length) {
+    return "";
+  }
+
+  return rules
+    .map((rule, index) => {
+      const valueText = Array.isArray(rule.value)
+        ? rule.value.map((value) => `'${value}'`).join(" or ")
+        : `'${rule.value}'`;
+      const operator = String(rule.operator || "is").replace(/-/g, " ");
+      const prefix = index > 0 ? `${rule.logicalOperator || "AND"} ` : "";
+      return `${prefix}'${rule.questionText}' ${operator} ${valueText}`;
+    })
+    .join(" ");
+}
+
+function buildMailboxConditionSelectItems(conditions, selectedConditionId) {
+  const hasSelectedCondition =
+    selectedConditionId !== null &&
+    selectedConditionId !== undefined &&
+    String(selectedConditionId) !== "";
+
+  return [
+    {
+      value: "",
+      text: "Every submission (no condition)",
+      selected: !hasSelectedCondition,
+    },
+    ...conditions.map((condition) => ({
+      value: String(condition.id),
+      text: condition.conditionName,
+      hint: {
+        text: condition.ruleSummary || formatConditionRulesSummary(condition.rules),
+      },
+      selected: String(condition.id) === String(selectedConditionId),
+    })),
+  ];
+}
+
+function validateSingleOutputFields(body) {
+  const errors = {};
+  const conditionId = String(body.conditionId || "").trim();
+  const emailAddress = String(body.emailAddress || "").trim();
+
+  if (!emailAddress) {
+    errors.emailAddress = "Enter an email address";
+  } else if (!/.*@.*\.gov\.uk$/.test(emailAddress)) {
+    errors.emailAddress = "Enter an email address ending in .gov.uk";
+  }
+
+  return {
+    errors,
+    output: {
+      conditionId: conditionId ? Number(conditionId) : null,
+      emailAddress,
+      submissionType: body.submissionType || "human-only",
+      submissionVersion: body.submissionVersion || "3",
+    },
+  };
+}
+
+
+function renderConditionalMailboxRouting(req, res, options = {}) {
+  const formData = req.session.data || {};
+  ensureDemoMailboxRoutingConditions(formData);
+  req.session.data = formData;
+  const mailboxSettings = getConditionalMailboxSettings(formData);
+  const defaultMailbox = {
+    ...mailboxSettings.defaultMailbox,
+    formatLabel: formatSubmissionTypeLabel(
+      mailboxSettings.defaultMailbox.submissionType,
+      mailboxSettings.defaultMailbox.submissionVersion
+    ),
+  };
+  mailboxSettings.defaultMailbox = defaultMailbox;
+  const store = ensureConditionalOutputsStore(formData);
+  store.defaultMailbox = {
+    emailAddress: defaultMailbox.emailAddress,
+    submissionType: defaultMailbox.submissionType,
+    submissionVersion: defaultMailbox.submissionVersion,
+    formatLabel: defaultMailbox.formatLabel,
+  };
+  req.session.data = formData;
+  const routingConditions = formData.conditions || [];
+
+  const outputsWithConditions = mailboxSettings.outputs.map((output) => {
+    const condition = getConditionById(formData, output.conditionId);
+    return {
+      ...output,
+      conditionName: condition
+        ? condition.conditionName
+        : "Every submission (no condition)",
+      conditionText: condition ? condition.text : "",
+      ruleSummary: condition
+        ? formatConditionRulesSummary(condition.rules)
+        : "",
+      formatLabel: formatSubmissionTypeLabel(
+        output.submissionType,
+        output.submissionVersion
+      ),
+    };
+  });
+
+  const routingConditionsWithSummary = routingConditions.map((condition) => ({
+    ...condition,
+    ruleSummary: formatConditionRulesSummary(condition.rules),
+  }));
+
+  const editOutputId = options.editOutputId || req.query.edit || null;
+  const editOutput =
+    editOutputId &&
+    outputsWithConditions.find(
+      (output) => String(output.id) === String(editOutputId)
+    );
+
+  const addOutputForm = options.addOutputForm ||
+    (editOutput
+      ? {
+          outputId: editOutput.id,
+          conditionId: editOutput.conditionId,
+          emailAddress: editOutput.emailAddress,
+          submissionType: editOutput.submissionType,
+          submissionVersion: editOutput.submissionVersion,
+        }
+      : {
+          conditionId: "",
+          emailAddress: "",
+          submissionType: "human-only",
+          submissionVersion: "3",
+        });
+
+  const mailboxConditionSelectItems = buildMailboxConditionSelectItems(
+    routingConditionsWithSummary,
+    addOutputForm.conditionId
+  );
+
+  res.render(
+    "titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing",
+    {
+      data: formData,
+      outputs: outputsWithConditions,
+      routingConditions: routingConditionsWithSummary,
+      mailboxConditionSelectItems,
+      addOutputForm,
+      editOutput,
+      maxOutputs: MAX_CONDITIONAL_OUTPUTS,
+      formatSubmissionTypeLabel,
+      form: {
+        name: formData.formName || "Form name",
+      },
+      saved: req.query.saved === "true",
+      errors: options.errors || {},
+    }
+  );
 }
 
 function renderAdvancedSettingsOverview(req, res) {
@@ -2562,6 +2856,130 @@ router.get(
 router.get(
   "/titan-mvp-1.2/form-editor/advanced-settings.html",
   renderAdvancedSettingsOverview
+);
+
+router.get(
+  "/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing",
+  function (req, res) {
+    renderConditionalMailboxRouting(req, res);
+  }
+);
+
+router.get(
+  "/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing.html",
+  function (req, res) {
+    renderConditionalMailboxRouting(req, res);
+  }
+);
+
+router.post(
+  "/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing",
+  function (req, res) {
+    const formData = req.session.data || {};
+    ensureDemoMailboxRoutingConditions(formData);
+    const store = ensureConditionalOutputsStore(formData);
+    const action = req.body.action || "save-default";
+
+    if (action === "save-default") {
+      store.defaultMailbox = {
+        emailAddress: String(req.body.emailAddress || "").trim(),
+        submissionType: req.body.submissionType || "human-only",
+        submissionVersion: req.body.submissionVersion || "3",
+      };
+
+      if (!store.defaultMailbox.emailAddress) {
+        return renderConditionalMailboxRouting(req, res, {
+          errors: { emailAddress: "Enter an email address" },
+        });
+      }
+
+      if (!/.*@.*\.gov\.uk$/.test(store.defaultMailbox.emailAddress)) {
+        return renderConditionalMailboxRouting(req, res, {
+          errors: {
+            emailAddress: "Enter an email address ending in .gov.uk",
+          },
+        });
+      }
+
+      req.session.data = formData;
+      return res.redirect(
+        "/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing?saved=true"
+      );
+    }
+
+    if (action === "add-output") {
+      if (store.outputs.length >= MAX_CONDITIONAL_OUTPUTS) {
+        return renderConditionalMailboxRouting(req, res, {
+          errors: {
+            form: `You can only add up to ${MAX_CONDITIONAL_OUTPUTS} additional email addresses`,
+          },
+        });
+      }
+
+      const { errors, output } = validateSingleOutputFields(req.body);
+
+      if (Object.keys(errors).length > 0) {
+        return renderConditionalMailboxRouting(req, res, {
+          errors: { outputErrors: errors },
+          addOutputForm: output,
+        });
+      }
+
+      store.outputs.push({
+        id: Date.now(),
+        ...output,
+      });
+
+      req.session.data = formData;
+      return res.redirect(
+        "/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing?saved=true#mailbox-add-section"
+      );
+    }
+
+    if (action === "update-output") {
+      const outputId = req.body.outputId;
+      const { errors, output } = validateSingleOutputFields(req.body);
+
+      if (Object.keys(errors).length > 0) {
+        return renderConditionalMailboxRouting(req, res, {
+          errors: { outputErrors: errors },
+          addOutputForm: { outputId, ...output },
+          editOutputId: outputId,
+        });
+      }
+
+      const index = store.outputs.findIndex(
+        (item) => String(item.id) === String(outputId)
+      );
+
+      if (index >= 0) {
+        store.outputs[index] = {
+          id: Number(outputId),
+          ...output,
+        };
+      }
+
+      req.session.data = formData;
+      return res.redirect(
+        "/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing?saved=true#mailbox-add-section"
+      );
+    }
+
+    if (action === "remove-output") {
+      const outputId = req.body.outputId;
+      store.outputs = store.outputs.filter(
+        (output) => String(output.id) !== String(outputId)
+      );
+      req.session.data = formData;
+      return res.redirect(
+        "/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing?saved=true#mailbox-add-section"
+      );
+    }
+
+    res.redirect(
+      "/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing"
+    );
+  }
 );
 
 function renderAdvancedSettingsChange(req, res) {

@@ -63,6 +63,7 @@ function runnerSignInV2BuildJourneyUrls({
     formEditorAdvancedSettings: "/titan-mvp-1.2/form-editor/advanced-settings",
     formEditorCheckBeforeSubmission: "/titan-mvp-1.2/form-editor/advanced-settings/check-before-submission",
     formEditorReusePreviousAnswers: "/titan-mvp-1.2/form-editor/advanced-settings/reuse-previous-answers",
+    formEditorConditionalMailboxRouting: "/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing",
     readyToSubmit: `/runner-sign-in-v2/forms/${enc(formKey)}/${enc(applicationId)}/ready-to-submit`,
     checkerInvite: `/runner-sign-in-v2/forms/${enc(formKey)}/${enc(applicationId)}/checker/invite`,
     checkerWhySignIn: `/runner-sign-in-v2/checker/why-sign-in?token=${enc(staticCheckedReviewToken)}`,

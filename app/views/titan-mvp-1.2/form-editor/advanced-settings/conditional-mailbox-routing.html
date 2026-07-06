@@ -1,0 +1,320 @@
+{% extends "layouts/main.html" %}
+
+{% from "components/service-header/macro.njk" import serviceHeader %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/select/macro.njk" import govukSelect %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+
+{% set pageName = "Email actions - " + form.name %}
+
+{% macro submissionFormatRadios(namePrefix, submissionType, submissionVersion, idPrefix) %}
+{% set fieldIdPrefix = idPrefix or namePrefix %}
+{% set versionFieldName = namePrefix + "Version" %}
+{{ govukRadios({
+  name: namePrefix + "Type",
+  id: fieldIdPrefix + "-type",
+  idPrefix: fieldIdPrefix + "Type",
+  fieldset: {
+    legend: {
+      text: "How should submissions be formatted?"
+    }
+  },
+  hint: {
+    text: "Choose how submissions are sent to this email address."
+  },
+  items: [
+    {
+      value: "human-only",
+      text: "Human-readable",
+      hint: {
+        text: "Easy for people to read and process."
+      },
+      checked: submissionType == "human-only"
+    },
+    {
+      value: "machine-readable",
+      text: "Machine-readable",
+      hint: {
+        text: "Structured data for automated systems."
+      },
+      checked: submissionType == "machine-readable" or not submissionType,
+      conditional: {
+        html: '<div class="govuk-form-group" id="' + fieldIdPrefix + '-version-selection">
+          <fieldset class="govuk-fieldset">
+            <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">Which version do you need?</legend>
+            <div class="govuk-radios">
+              <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="' + fieldIdPrefix + '-version-3" name="' + versionFieldName + '" type="radio" value="3" ' + (submissionVersion == "3" or not submissionVersion and "checked" or "") + '>
+                <label class="govuk-label govuk-radios__label" for="' + fieldIdPrefix + '-version-3">v3 (latest)</label>
+              </div>
+              <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="' + fieldIdPrefix + '-version-2" name="' + versionFieldName + '" type="radio" value="2" ' + (submissionVersion == "2" and "checked" or "") + '>
+                <label class="govuk-label govuk-radios__label" for="' + fieldIdPrefix + '-version-2">v2</label>
+              </div>
+              <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="' + fieldIdPrefix + '-version-1" name="' + versionFieldName + '" type="radio" value="1" ' + (submissionVersion == "1" and "checked" or "") + '>
+                <label class="govuk-label govuk-radios__label" for="' + fieldIdPrefix + '-version-1">v1</label>
+              </div>
+            </div>
+          </fieldset>
+        </div>'
+      }
+    }
+  ]
+}) }}
+{% endmacro %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+containerClasses: containerClasses,
+accountName: "Chris Smith",
+homepageLink: "/",
+signOutLink: "/titan-mvp-1.2/onboarding/sign-out-confirmation",
+navigationItems: [
+{ href: "/titan-mvp-1.2/library", text: "Forms library", id: "nav-library" },
+{ href: "/titan-mvp-1.2/form-overview/index.html", text: "Overview", id: "nav-overview" },
+{ href: "/titan-mvp-1.2/form-editor/listing", text: "Editor", id: "nav-editor", active: true }
+],
+activeLinkId: "nav-editor"
+}) }}
+
+<div class="x-govuk-masthead x-govuk-masthead--large">
+    <div class="govuk-width-container">
+        {{ govukBackLink({
+        classes: "govuk-back-link--inverse govuk-!-margin-bottom-0",
+        text: "Back to advanced settings",
+        href: "/titan-mvp-1.2/form-editor/advanced-settings"
+        }) }}
+
+        <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"
+            style="border-bottom: 1px solid white; margin-bottom: 0" />
+
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full-from-desktop">
+                <h1 class="x-govuk-masthead__title">
+                    <span class="govuk-caption-l" style="color: white;">{{ form.name }}</span>
+                    Email actions
+                </h1>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+{% set storedDefaultMailbox = data.conditionalOutputs.defaultMailbox if data.conditionalOutputs and data.conditionalOutputs.defaultMailbox else {} %}
+{% set routingDefaultEmail = storedDefaultMailbox.emailAddress or data.draftSettings.notificationEmail or (data.formDetails.notificationEmail if data.formDetails else '') or data.notificationEmail or 'notify@defra.gov.uk' %}
+{% set routingDefaultSubmissionType = storedDefaultMailbox.submissionType or data.draftSettings.submissionType or 'human-only' %}
+{% set routingDefaultSubmissionVersion = storedDefaultMailbox.submissionVersion or data.draftSettings.submissionVersion or '3' %}
+{% if routingDefaultSubmissionType == 'machine-readable' %}
+{% set routingDefaultFormatLabel = 'Machine-readable (v' + routingDefaultSubmissionVersion + ')' %}
+{% else %}
+{% set routingDefaultFormatLabel = 'Human-readable' %}
+{% endif %}
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+        {% if saved %}
+        {{ govukNotificationBanner({
+        type: "success",
+        titleText: "Success",
+        text: "Your changes have been saved"
+        }) }}
+        {% endif %}
+
+        <div class="govuk-summary-card govuk-!-margin-bottom-6">
+            <div class="govuk-summary-card__title-wrapper">
+                <h2 class="govuk-summary-card__title">Default email address</h2>
+                <ul class="govuk-summary-card__actions">
+                    <li class="govuk-summary-card__action">
+                        <a class="govuk-link" href="/titan-mvp-1.2/form-overview/support/notification-email">Change<span class="govuk-visually-hidden"> default email address on form overview</span></a>
+                    </li>
+                </ul>
+            </div>
+            <div class="govuk-summary-card__content">
+                <dl class="govuk-summary-list govuk-summary-list--no-border govuk-!-margin-bottom-0">
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">Email address</dt>
+                        <dd class="govuk-summary-list__value">{{ routingDefaultEmail }}</dd>
+                    </div>
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">Submission format</dt>
+                        <dd class="govuk-summary-list__value">{{ routingDefaultFormatLabel }}</dd>
+                    </div>
+                    {# <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">When used</dt>
+                        <dd class="govuk-summary-list__value">When no additional email address applies</dd>
+                    </div> #}
+                </dl>
+            </div>
+        </div>
+
+
+
+
+        <h2 class="govuk-heading-l">Additional email addresses</h2>
+
+        <p class="govuk-body">You can send submissions to up to 5 additional email addresses.</p>
+        <p class="govuk-body">To send submissions based on answers, create and manage conditions in the <a class="govuk-link" href="/titan-mvp-1.2/form-editor/conditions/manager">conditions manager</a>.</p>
+
+
+        {% if outputs and outputs | length %}
+        <div id="outputs-list" class="govuk-!-margin-bottom-6">
+            {% for output in outputs %}
+            <div class="govuk-summary-card{% if not loop.last %} govuk-!-margin-bottom-4{% endif %}" data-output-id="{{ output.id }}">
+                <div class="govuk-summary-card__title-wrapper">
+                    <h3 class="govuk-summary-card__title">{{ output.emailAddress }}</h3>
+                    <ul class="govuk-summary-card__actions">
+                        <li class="govuk-summary-card__action">
+                            <a class="govuk-link" href="/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing?edit={{ output.id }}#mailbox-add-section">Change<span class="govuk-visually-hidden"> {{ output.emailAddress }}</span></a>
+                        </li>
+                        <li class="govuk-summary-card__action">
+                            <form method="post" action="/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing" style="display: inline;">
+                                <input type="hidden" name="action" value="remove-output">
+                                <input type="hidden" name="outputId" value="{{ output.id }}">
+                                <button type="submit" class="govuk-link govuk-body govuk-!-margin-bottom-0" style="border: none; background: none; padding: 0; cursor: pointer; text-decoration: underline; color: #1d70b8;">Remove<span class="govuk-visually-hidden"> {{ output.emailAddress }}</span></button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+                <div class="govuk-summary-card__content">
+                    <dl class="govuk-summary-list govuk-summary-list--no-border govuk-!-margin-bottom-0">
+                        <div class="govuk-summary-list__row">
+                            <dt class="govuk-summary-list__key">When</dt>
+                            <dd class="govuk-summary-list__value">
+                                {{ output.conditionName }}
+                                {% if output.conditionId and (output.ruleSummary or output.conditionText) %}
+                                <div class="govuk-hint govuk-!-margin-top-1">{{ output.ruleSummary or output.conditionText }}</div>
+                                {% endif %}
+                            </dd>
+                        </div>
+                        <div class="govuk-summary-list__row">
+                            <dt class="govuk-summary-list__key">Submission format</dt>
+                            <dd class="govuk-summary-list__value">{{ output.formatLabel }}</dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+
+        {% endif %}
+
+        {% if errors.form or errors.outputErrors %}
+        {% set outputErrorList = [] %}
+        {% if errors.form %}
+        {% set outputErrorList = (outputErrorList.push({ text: errors.form, href: "#mailbox-add-section" }), outputErrorList) | last %}
+        {% endif %}
+        {% if errors.outputErrors and errors.outputErrors.emailAddress %}
+        {% set outputErrorList = (outputErrorList.push({ text: errors.outputErrors.emailAddress, href: "#mailbox-email-address" }), outputErrorList) | last %}
+        {% endif %}
+        {{ govukErrorSummary({
+        titleText: "There is a problem",
+        errorList: outputErrorList
+        }) }}
+        {% endif %}
+
+        <div id="mailbox-add-section">
+        {% if editOutput %}
+        <h3 class="govuk-heading-m">Change email address</h3>
+        <form method="post" action="/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing">
+            <input type="hidden" name="action" value="update-output">
+            <input type="hidden" name="outputId" value="{{ addOutputForm.outputId }}">
+
+            {{ govukSelect({
+            id: "mailbox-condition",
+            name: "conditionId",
+            label: {
+            text: "When should submissions be sent to this email address?",
+            classes: "govuk-label--m"
+            },
+            hint: {
+            text: "Choose a condition, or leave as every submission to send all submissions to this address."
+            },
+            items: mailboxConditionSelectItems
+            }) }}
+
+            {{ govukInput({
+            label: {
+            text: "What is the email address?",
+            classes: "govuk-label--m"
+            },
+            id: "mailbox-email-address",
+            name: "emailAddress",
+            type: "email",
+            value: addOutputForm.emailAddress,
+            errorMessage: {
+            text: errors.outputErrors.emailAddress
+            } if errors.outputErrors and errors.outputErrors.emailAddress else false,
+            attributes: {
+            pattern: ".*@.*\\.gov\\.uk$",
+            title: "Enter an email address ending in .gov.uk"
+            }
+            }) }}
+
+            {{ submissionFormatRadios("submission", addOutputForm.submissionType, addOutputForm.submissionVersion, "edit-submission") }}
+
+            <div class="govuk-button-group">
+                {{ govukButton({ text: "Save changes" }) }}
+                <a class="govuk-link govuk-link--no-visited-state" href="/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing">Cancel</a>
+            </div>
+        </form>
+        {% elif outputs | length < maxOutputs %}
+        <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+        <h3 class="govuk-heading-m">Add a new email address</h3>
+        <form method="post" action="/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing">
+            <input type="hidden" name="action" value="add-output">
+
+            {{ govukSelect({
+            id: "mailbox-condition",
+            name: "conditionId",
+            label: {
+            text: "When should submissions be sent to this email address? (optional)"
+            },
+            hint: {
+            text: "Choose a condition, or leave as every submission to send all submissions to this address."
+            },
+            items: mailboxConditionSelectItems
+            }) }}
+
+            {{ govukInput({
+            label: {
+            text: "What is the email address?"
+            },
+
+            id: "mailbox-email-address",
+            name: "emailAddress",
+            type: "email",
+            classes: "govuk-input--width-20",
+            value: addOutputForm.emailAddress,
+            errorMessage: {
+            text: errors.outputErrors.emailAddress
+            } if errors.outputErrors and errors.outputErrors.emailAddress else false,
+            attributes: {
+            pattern: ".*@.*\\.gov\\.uk$",
+            title: "Enter an email address ending in .gov.uk"
+            }
+            }) }}
+
+            {{ submissionFormatRadios("submission", addOutputForm.submissionType, addOutputForm.submissionVersion, "add-submission") }}
+
+            {{ govukButton({
+            text: "Save new email address"
+            }) }}
+        </form>
+        {% else %}
+        <p class="govuk-body">You have added the maximum number of email addresses (5).</p>
+        {% endif %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}
