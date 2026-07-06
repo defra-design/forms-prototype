@@ -7,8 +7,10 @@
 {% from "govuk/components/select/macro.njk" import govukSelect %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
 
 {% set pageName = "Email actions - " + form.name %}
+{% set pageBaseUrl = staticPageBase if staticPage else "/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing" %}
 
 {% macro submissionFormatRadios(namePrefix, submissionType, submissionVersion, idPrefix) %}
 {% set fieldIdPrefix = idPrefix or namePrefix %}
@@ -121,12 +123,42 @@ activeLinkId: "nav-editor"
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
 
-        {% if saved %}
-        {{ govukNotificationBanner({
-        type: "success",
-        titleText: "Success",
-        text: "Your changes have been saved"
+        {% if staticPage %}
+        {{ govukInsetText({
+        html: '<strong>Static handover page: ' + staticPageTitle + '.</strong> ' + staticPageDescription + ' Forms do not save. <a class="govuk-link" href="' + staticIndexUrl + '">View all static pages</a>.'
         }) }}
+        {% endif %}
+
+        {% if errors.form or errors.outputErrors %}
+        {% set outputErrorList = [] %}
+        {% if errors.form %}
+        {% set outputErrorList = outputErrorList.concat([{ text: errors.form, href: "#mailbox-add-section" }]) %}
+        {% endif %}
+        {% if errors.outputErrors and errors.outputErrors.emailAddress %}
+        {% set outputErrorList = outputErrorList.concat([{ text: errors.outputErrors.emailAddress, href: "#mailbox-email-address" }]) %}
+        {% endif %}
+        {{ govukErrorSummary({
+        titleText: "There is a problem",
+        errorList: outputErrorList
+        }) }}
+        {% endif %}
+
+        {% if saved %}
+        {% call govukNotificationBanner({ type: "success" }) %}
+          <p class="govuk-notification-banner__heading">
+            Your changes have been saved.
+          </p>
+        {% endcall %}
+        {% endif %}
+
+        {% if outputs | length >= maxOutputs %}
+        {% call govukNotificationBanner() %}
+          <p class="govuk-notification-banner__heading">
+            You can only add up to {{ maxOutputs }} additional email addresses.
+          </p>
+          <p class="govuk-body">Change or remove an email address to add another.</p>
+
+        {% endcall %}
         {% endif %}
 
         <div class="govuk-summary-card govuk-!-margin-bottom-6">
@@ -161,7 +193,6 @@ activeLinkId: "nav-editor"
 
         <h2 class="govuk-heading-l">Additional email addresses</h2>
 
-        <p class="govuk-body">You can send submissions to up to 5 additional email addresses.</p>
         <p class="govuk-body">To send submissions based on answers, create and manage conditions in the <a class="govuk-link" href="/titan-mvp-1.2/form-editor/conditions/manager">conditions manager</a>.</p>
 
 
@@ -173,14 +204,18 @@ activeLinkId: "nav-editor"
                     <h3 class="govuk-summary-card__title">{{ output.emailAddress }}</h3>
                     <ul class="govuk-summary-card__actions">
                         <li class="govuk-summary-card__action">
-                            <a class="govuk-link" href="/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing?edit={{ output.id }}#mailbox-add-section">Change<span class="govuk-visually-hidden"> {{ output.emailAddress }}</span></a>
+                            <a class="govuk-link" href="{% if staticPage %}{{ pageBaseUrl }}/edit-output{% else %}{{ pageBaseUrl }}?edit={{ output.id }}#mailbox-add-section{% endif %}">Change<span class="govuk-visually-hidden"> {{ output.emailAddress }}</span></a>
                         </li>
                         <li class="govuk-summary-card__action">
-                            <form method="post" action="/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing" style="display: inline;">
+                            {% if staticPage %}
+                            <span class="govuk-body govuk-!-margin-bottom-0" style="color: #505a5f;">Remove</span>
+                            {% else %}
+                            <form method="post" action="{{ pageBaseUrl }}" style="display: inline;">
                                 <input type="hidden" name="action" value="remove-output">
                                 <input type="hidden" name="outputId" value="{{ output.id }}">
                                 <button type="submit" class="govuk-link govuk-body govuk-!-margin-bottom-0" style="border: none; background: none; padding: 0; cursor: pointer; text-decoration: underline; color: #1d70b8;">Remove<span class="govuk-visually-hidden"> {{ output.emailAddress }}</span></button>
                             </form>
+                            {% endif %}
                         </li>
                     </ul>
                 </div>
@@ -208,24 +243,10 @@ activeLinkId: "nav-editor"
 
         {% endif %}
 
-        {% if errors.form or errors.outputErrors %}
-        {% set outputErrorList = [] %}
-        {% if errors.form %}
-        {% set outputErrorList = (outputErrorList.push({ text: errors.form, href: "#mailbox-add-section" }), outputErrorList) | last %}
-        {% endif %}
-        {% if errors.outputErrors and errors.outputErrors.emailAddress %}
-        {% set outputErrorList = (outputErrorList.push({ text: errors.outputErrors.emailAddress, href: "#mailbox-email-address" }), outputErrorList) | last %}
-        {% endif %}
-        {{ govukErrorSummary({
-        titleText: "There is a problem",
-        errorList: outputErrorList
-        }) }}
-        {% endif %}
-
         <div id="mailbox-add-section">
         {% if editOutput %}
         <h3 class="govuk-heading-m">Change email address</h3>
-        <form method="post" action="/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing">
+        <form method="post" action="{% if staticPage %}#{% else %}{{ pageBaseUrl }}{% endif %}">
             <input type="hidden" name="action" value="update-output">
             <input type="hidden" name="outputId" value="{{ addOutputForm.outputId }}">
 
@@ -256,21 +277,21 @@ activeLinkId: "nav-editor"
             } if errors.outputErrors and errors.outputErrors.emailAddress else false,
             attributes: {
             pattern: ".*@.*\\.gov\\.uk$",
-            title: "Enter an email address ending in .gov.uk"
+            title: "Enter an email address in the correct format, like name@example.com"
             }
             }) }}
 
             {{ submissionFormatRadios("submission", addOutputForm.submissionType, addOutputForm.submissionVersion, "edit-submission") }}
 
             <div class="govuk-button-group">
-                {{ govukButton({ text: "Save changes" }) }}
-                <a class="govuk-link govuk-link--no-visited-state" href="/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing">Cancel</a>
+                {{ govukButton({ text: "Save changes", disabled: staticPage }) }}
+                <a class="govuk-link govuk-link--no-visited-state" href="{% if staticPage %}{{ pageBaseUrl }}/with-outputs{% else %}{{ pageBaseUrl }}{% endif %}">Cancel</a>
             </div>
         </form>
         {% elif outputs | length < maxOutputs %}
         <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
         <h3 class="govuk-heading-m">Add a new email address</h3>
-        <form method="post" action="/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing">
+        <form method="post" action="{% if staticPage %}#{% else %}{{ pageBaseUrl }}{% endif %}">
             <input type="hidden" name="action" value="add-output">
 
             {{ govukSelect({
@@ -300,18 +321,18 @@ activeLinkId: "nav-editor"
             } if errors.outputErrors and errors.outputErrors.emailAddress else false,
             attributes: {
             pattern: ".*@.*\\.gov\\.uk$",
-            title: "Enter an email address ending in .gov.uk"
+            title: "Enter an email address in the correct format, like name@example.com"
             }
             }) }}
 
             {{ submissionFormatRadios("submission", addOutputForm.submissionType, addOutputForm.submissionVersion, "add-submission") }}
 
             {{ govukButton({
-            text: "Save new email address"
+            text: "Save new email address",
+            disabled: staticPage
             }) }}
         </form>
         {% else %}
-        <p class="govuk-body">You have added the maximum number of email addresses (5).</p>
         {% endif %}
         </div>
 

@@ -2,6 +2,7 @@
 {% from "components/service-header/macro.njk" import serviceHeader %}
 {% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
 {% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
 
 {% set pageName = "Advanced settings - " + form.name %}
 
@@ -57,6 +58,12 @@ activeLinkId: "nav-editor"
         }) }}
         {% endif %}
 
+        {% if staticPage %}
+        {{ govukInsetText({
+        html: '<strong>Static handover page: ' + staticPageTitle + '.</strong> ' + staticPageDescription + ' Forms do not save. <a class="govuk-link" href="' + staticIndexUrl + '">View all static pages</a>.'
+        }) }}
+        {% endif %}
+
         {{ govukSummaryList({
         rows: summaryRows
         }) }}
@@ -64,12 +71,19 @@ activeLinkId: "nav-editor"
         <h2 class="govuk-heading-m govuk-!-margin-top-8">Related runner prototype pages</h2>
         <p class="govuk-body">These settings affect runner behaviour in the sign-in v2 prototype.</p>
         <ul class="govuk-list govuk-list--bullet">
+          {% if staticPage %}
+          <li><a class="govuk-link" href="{{ staticIndexUrl }}">Advanced settings — static pages</a></li>
+          <li><a class="govuk-link" href="/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing/static">Email actions — static pages</a></li>
+          {% else %}
           <li><a class="govuk-link" href="/runner-sign-in-v2/start-page">Runner sign-in v2 start page</a></li>
           <li><a class="govuk-link" href="/titan-mvp-1.2/form-editor/advanced-settings/check-before-submission">Check before submission</a></li>
           <li><a class="govuk-link" href="/titan-mvp-1.2/form-editor/advanced-settings/reuse-previous-answers">Reuse previous answers</a></li>
-          <li><a class="govuk-link" href="/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing">Where submissions are sent</a></li>
+          <li><a class="govuk-link" href="/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing">Email actions</a></li>
+          <li><a class="govuk-link" href="/titan-mvp-1.2/form-editor/advanced-settings/static">Advanced settings — static pages (handover)</a></li>
+          <li><a class="govuk-link" href="/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing/static">Email actions — static pages (handover)</a></li>
           <li><a class="govuk-link" href="/runner-sign-in-v2/emails/form-submitted?formKey=volunteer-application&applicationId=app-save-exit-demo">Form submitted email (copied answers)</a></li>
           <li><a class="govuk-link" href="/runner-sign-in-v2/all-pages">All runner sign-in v2 pages</a></li>
+          {% endif %}
         </ul>
 
     </div>

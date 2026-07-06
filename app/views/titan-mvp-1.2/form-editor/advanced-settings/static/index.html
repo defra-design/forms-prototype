@@ -1,0 +1,96 @@
+{% extends "layouts/main.html" %}
+{% from "components/service-header/macro.njk" import serviceHeader %}
+{% from "govuk/components/table/macro.njk" import govukTable %}
+
+{% set pageName = "Advanced settings static pages - " + form.name %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+containerClasses: containerClasses,
+accountName: "Chris Smith",
+homepageLink: "/",
+signOutLink: "/titan-mvp-1.2/onboarding/sign-out-confirmation",
+navigationItems: [
+{ href: "/titan-mvp-1.2/library", text: "Forms library", id: "nav-library" },
+{ href: "/titan-mvp-1.2/form-overview/index.html", text: "Overview", id: "nav-overview" },
+{ href: "/titan-mvp-1.2/form-editor/listing", text: "Editor", id: "nav-editor", active: true }
+],
+activeLinkId: "nav-editor"
+}) }}
+
+<div class="x-govuk-masthead x-govuk-masthead--large">
+    <div class="govuk-width-container">
+        {{ govukBackLink({
+        classes: "govuk-back-link--inverse govuk-!-margin-bottom-0",
+        text: "Back to advanced settings",
+        href: livePageUrl
+        }) }}
+
+        <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"
+            style="border-bottom: 1px solid white; margin-bottom: 0" />
+
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full-from-desktop">
+                <h1 class="x-govuk-masthead__title">
+                    <span class="govuk-caption-l" style="color: white;">{{ form.name }}</span>
+                    Advanced settings — static pages
+                </h1>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        <p class="govuk-body">Use these pages for development handover. Each page shows a fixed UI state with example data. Forms do not save.</p>
+        <p class="govuk-body"><a class="govuk-link" href="{{ livePageUrl }}">Open the live prototype page</a> (uses session data).</p>
+
+        <h2 class="govuk-heading-m govuk-!-margin-top-8">Overview</h2>
+        {% set overviewRows = [] %}
+        {% for page in overviewPages %}
+        {% set overviewRows = overviewRows.concat([[
+        { html: '<a class="govuk-link" href="' + page.href + '">' + page.title + '</a>' },
+        { text: page.description }
+        ]]) %}
+        {% endfor %}
+        {{ govukTable({
+        head: [{ text: "Page" }, { text: "Description" }],
+        rows: overviewRows
+        }) }}
+
+        <h2 class="govuk-heading-m govuk-!-margin-top-8">Check before submission</h2>
+        {% set checkRows = [] %}
+        {% for page in checkBeforeSubmissionPages %}
+        {% set checkRows = checkRows.concat([[
+        { html: '<a class="govuk-link" href="' + page.href + '">' + page.title + '</a>' },
+        { text: page.description }
+        ]]) %}
+        {% endfor %}
+        {{ govukTable({
+        head: [{ text: "Page" }, { text: "Description" }],
+        rows: checkRows
+        }) }}
+
+        <h2 class="govuk-heading-m govuk-!-margin-top-8">Reuse previous answers</h2>
+        {% set reuseRows = [] %}
+        {% for page in reusePreviousAnswersPages %}
+        {% set reuseRows = reuseRows.concat([[
+        { html: '<a class="govuk-link" href="' + page.href + '">' + page.title + '</a>' },
+        { text: page.description }
+        ]]) %}
+        {% endfor %}
+        {{ govukTable({
+        head: [{ text: "Page" }, { text: "Description" }],
+        rows: reuseRows
+        }) }}
+
+        <h2 class="govuk-heading-m govuk-!-margin-top-8">Email actions</h2>
+        <p class="govuk-body"><a class="govuk-link" href="{{ emailActionsStaticUrl }}">Email actions static pages</a></p>
+    </div>
+</div>
+{% endblock %}

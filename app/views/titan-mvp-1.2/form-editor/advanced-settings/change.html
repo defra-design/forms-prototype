@@ -6,8 +6,11 @@
 {% from "govuk/components/details/macro.njk" import govukDetails %}
 {% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
 {% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
 
 {% set pageName = setting.label + " - " + form.name %}
+{% set backUrl = overviewStaticUrl if staticPage else "/titan-mvp-1.2/form-editor/advanced-settings" %}
+{% set formAction = "#" if staticPage else "/titan-mvp-1.2/form-editor/advanced-settings/" + setting.slug %}
 
 {% block header %}
 {{ serviceHeader({
@@ -30,7 +33,7 @@ activeLinkId: "nav-editor"
 {% block beforeContent %}
 {{ govukBackLink({
 text: "Back to advanced settings",
-href: "/titan-mvp-1.2/form-editor/advanced-settings"
+href: backUrl
 }) }}
 {% endblock %}
 
@@ -38,7 +41,13 @@ href: "/titan-mvp-1.2/form-editor/advanced-settings"
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
 
-        <form class="form" action="/titan-mvp-1.2/form-editor/advanced-settings/{{ setting.slug }}" method="post">
+        {% if staticPage %}
+        {{ govukInsetText({
+        html: '<strong>Static handover page: ' + staticPageTitle + '.</strong> ' + staticPageDescription + ' Forms do not save. <a class="govuk-link" href="' + staticIndexUrl + '">View all static pages</a>.'
+        }) }}
+        {% endif %}
+
+        <form class="form" action="{{ formAction }}" method="post">
 
             <span class="govuk-caption-l">{{ form.name }}</span>
 
@@ -151,7 +160,8 @@ href: "/titan-mvp-1.2/form-editor/advanced-settings"
             }) }}
 
             {{ govukButton({
-            text: "Save and continue"
+            text: "Save and continue",
+            disabled: staticPage
             }) }}
 
         </form>

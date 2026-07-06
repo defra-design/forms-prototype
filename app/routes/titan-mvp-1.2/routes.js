@@ -9,6 +9,15 @@ const runnerSignInV2JourneyFlows = require("../../data/runner-sign-in-v2-journey
 const { buildRunnerSignInV2AllPagesSections } = require("../../data/runner-sign-in-v2-all-pages");
 const { buildRunnerSignInV2SaveExitStories } = require("../../data/runner-sign-in-v2-save-exit-stories");
 const {
+  buildStaticConditionalMailboxContext,
+  buildStaticConditionalMailboxIndexContext,
+} = require("../../data/conditional-mailbox-routing-static");
+const {
+  buildStaticAdvancedSettingsOverviewContext,
+  buildStaticAdvancedSettingsChangeContext,
+  buildStaticAdvancedSettingsIndexContext,
+} = require("../../data/advanced-settings-static");
+const {
   runnerSignInV2BuildJourneyUrls,
   runnerSignInV2ResolveJourneyFlows,
 } = require("../../lib/titan-mvp-1.2/runner-sign-in-v2-journey-urls");
@@ -2543,7 +2552,7 @@ function getAdvancedSettingsSummaryRows(formData) {
 
   const mailboxSettings = getConditionalMailboxSettings(formData);
   rows.push({
-    key: { text: "Conditional mailbox routing" },
+    key: { text: "Email actions" },
     value: {
       text:
         mailboxSettings.outputs.length > 0
@@ -2564,7 +2573,7 @@ function getAdvancedSettingsSummaryRows(formData) {
   return rows;
 }
 
-const MAX_CONDITIONAL_OUTPUTS = 5;
+const MAX_CONDITIONAL_OUTPUTS = 20;
 
 function formatSubmissionTypeLabel(submissionType, submissionVersion) {
   if (submissionType === "machine-readable") {
@@ -2727,7 +2736,7 @@ function validateSingleOutputFields(body) {
   if (!emailAddress) {
     errors.emailAddress = "Enter an email address";
   } else if (!/.*@.*\.gov\.uk$/.test(emailAddress)) {
-    errors.emailAddress = "Enter an email address ending in .gov.uk";
+    errors.emailAddress = "Enter an email address in the correct format, like name@example.com";
   }
 
   return {
@@ -2859,6 +2868,89 @@ router.get(
 );
 
 router.get(
+  "/titan-mvp-1.2/form-editor/advanced-settings/static",
+  function (req, res) {
+    res.render(
+      "titan-mvp-1.2/form-editor/advanced-settings/static/index",
+      buildStaticAdvancedSettingsIndexContext()
+    );
+  }
+);
+
+router.get(
+  "/titan-mvp-1.2/form-editor/advanced-settings/static.html",
+  function (req, res) {
+    res.redirect("/titan-mvp-1.2/form-editor/advanced-settings/static");
+  }
+);
+
+router.get(
+  "/titan-mvp-1.2/form-editor/advanced-settings/static/check-before-submission/:variant",
+  function (req, res) {
+    const context = buildStaticAdvancedSettingsChangeContext(
+      "check-before-submission",
+      req.params.variant
+    );
+    if (!context) {
+      return res.redirect("/titan-mvp-1.2/form-editor/advanced-settings/static");
+    }
+    res.render("titan-mvp-1.2/form-editor/advanced-settings/change", context);
+  }
+);
+
+router.get(
+  "/titan-mvp-1.2/form-editor/advanced-settings/static/check-before-submission/:variant.html",
+  function (req, res) {
+    res.redirect(
+      `/titan-mvp-1.2/form-editor/advanced-settings/static/check-before-submission/${req.params.variant}`
+    );
+  }
+);
+
+router.get(
+  "/titan-mvp-1.2/form-editor/advanced-settings/static/reuse-previous-answers/:variant",
+  function (req, res) {
+    const context = buildStaticAdvancedSettingsChangeContext(
+      "reuse-previous-answers",
+      req.params.variant
+    );
+    if (!context) {
+      return res.redirect("/titan-mvp-1.2/form-editor/advanced-settings/static");
+    }
+    res.render("titan-mvp-1.2/form-editor/advanced-settings/change", context);
+  }
+);
+
+router.get(
+  "/titan-mvp-1.2/form-editor/advanced-settings/static/reuse-previous-answers/:variant.html",
+  function (req, res) {
+    res.redirect(
+      `/titan-mvp-1.2/form-editor/advanced-settings/static/reuse-previous-answers/${req.params.variant}`
+    );
+  }
+);
+
+router.get(
+  "/titan-mvp-1.2/form-editor/advanced-settings/static/:variant",
+  function (req, res) {
+    const context = buildStaticAdvancedSettingsOverviewContext(req.params.variant);
+    if (!context) {
+      return res.redirect("/titan-mvp-1.2/form-editor/advanced-settings/static");
+    }
+    res.render("titan-mvp-1.2/form-editor/advanced-settings", context);
+  }
+);
+
+router.get(
+  "/titan-mvp-1.2/form-editor/advanced-settings/static/:variant.html",
+  function (req, res) {
+    res.redirect(
+      `/titan-mvp-1.2/form-editor/advanced-settings/static/${req.params.variant}`
+    );
+  }
+);
+
+router.get(
   "/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing",
   function (req, res) {
     renderConditionalMailboxRouting(req, res);
@@ -2896,7 +2988,7 @@ router.post(
       if (!/.*@.*\.gov\.uk$/.test(store.defaultMailbox.emailAddress)) {
         return renderConditionalMailboxRouting(req, res, {
           errors: {
-            emailAddress: "Enter an email address ending in .gov.uk",
+            emailAddress: "Enter an email address in the correct format, like name@example.com",
           },
         });
       }
@@ -2978,6 +3070,51 @@ router.post(
 
     res.redirect(
       "/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing"
+    );
+  }
+);
+
+router.get(
+  "/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing/static",
+  function (req, res) {
+    res.render(
+      "titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing/static/index",
+      buildStaticConditionalMailboxIndexContext()
+    );
+  }
+);
+
+router.get(
+  "/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing/static.html",
+  function (req, res) {
+    res.redirect(
+      "/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing/static"
+    );
+  }
+);
+
+router.get(
+  "/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing/static/:variant",
+  function (req, res) {
+    const context = buildStaticConditionalMailboxContext(req.params.variant);
+    if (!context) {
+      return res.redirect(
+        "/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing/static"
+      );
+    }
+
+    res.render(
+      "titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing",
+      context
+    );
+  }
+);
+
+router.get(
+  "/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing/static/:variant.html",
+  function (req, res) {
+    res.redirect(
+      `/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing/static/${req.params.variant}`
     );
   }
 );
