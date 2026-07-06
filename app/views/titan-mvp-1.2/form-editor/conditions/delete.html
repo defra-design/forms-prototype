@@ -58,39 +58,24 @@ navigationItems: [
                 Are you sure you want to delete this condition?
             </h1>
 
-            {% if pagesWithCondition | length > 0 %}
-            <div class="govuk-warning-text govuk-!-margin-bottom-2">
+            {% if pagesWithCondition | length > 0 or hasEmailActions %}
+            <div class="govuk-warning-text govuk-!-margin-bottom-8">
                 <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
                 <strong class="govuk-warning-text__text">
                     <span class="govuk-visually-hidden">Warning</span>
-                    Deleting this condition will affect the following pages:
+                    Deleting this condition will affect:
 
                     <ul class="govuk-list govuk-list--bullet govuk-!-font-weight-bold govuk-!-margin-top-2">
                         {% for page in pagesWithCondition %}
-                        <li>Page {{ page.pageNumber }}</li>
+                        <li>page {{ page.pageNumber }}</li>
                         {% endfor %}
-                    </ul>
-                </strong>
-            </div>
-            {% endif %}
-
-            {% if hasEmailActions %}
-            <div class="govuk-warning-text{% if pagesWithCondition | length == 0 %} govuk-!-margin-bottom-8{% else %} govuk-!-margin-bottom-2{% endif %}">
-                <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
-                <strong class="govuk-warning-text__text">
-                    <span class="govuk-visually-hidden">Warning</span>
-                    Deleting this condition will affect email actions going to:
-
-                    <ul class="govuk-list govuk-list--bullet govuk-!-font-weight-bold govuk-!-margin-top-2">
                         {% for emailAddress in affectedEmailAddresses %}
-                        <li>{{ emailAddress }}</li>
+                        <li>emails sent to {{ emailAddress }}</li>
                         {% endfor %}
                     </ul>
                 </strong>
             </div>
-            {% endif %}
-
-            {% if pagesWithCondition | length == 0 and not hasEmailActions %}
+            {% else %}
             <div class="govuk-warning-text govuk-!-margin-bottom-8">
                 <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
                 <strong class="govuk-warning-text__text">
