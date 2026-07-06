@@ -20,9 +20,12 @@ const {
 const {
   buildStaticConditionsManagerContext,
   buildStaticConditionsManagerIndexContext,
+  buildStaticConditionDeleteContext,
+  buildStaticConditionDeleteIndexContext,
 } = require("../../data/conditions-manager-static");
 const {
   enrichConditionsWithUsedInLabels,
+  getEmailAddressesForCondition,
 } = require("../../lib/titan-mvp-1.2/condition-usage");
 const {
   runnerSignInV2BuildJourneyUrls,
@@ -495,6 +498,43 @@ router.get(
 );
 
 router.get(
+  "/titan-mvp-1.2/form-editor/conditions/delete/static",
+  function (req, res) {
+    res.render(
+      "titan-mvp-1.2/form-editor/conditions/delete/static/index",
+      buildStaticConditionDeleteIndexContext()
+    );
+  }
+);
+
+router.get(
+  "/titan-mvp-1.2/form-editor/conditions/delete/static.html",
+  function (req, res) {
+    res.redirect("/titan-mvp-1.2/form-editor/conditions/delete/static");
+  }
+);
+
+router.get(
+  "/titan-mvp-1.2/form-editor/conditions/delete/static/:variant",
+  function (req, res) {
+    const context = buildStaticConditionDeleteContext(req.params.variant);
+    if (!context) {
+      return res.redirect("/titan-mvp-1.2/form-editor/conditions/delete/static");
+    }
+    res.render("titan-mvp-1.2/form-editor/conditions/delete", context);
+  }
+);
+
+router.get(
+  "/titan-mvp-1.2/form-editor/conditions/delete/static/:variant.html",
+  function (req, res) {
+    res.redirect(
+      `/titan-mvp-1.2/form-editor/conditions/delete/static/${req.params.variant}`
+    );
+  }
+);
+
+router.get(
   "/titan-mvp-1.2/form-editor/conditions/manager",
   function (req, res) {
     const formData = req.session.data || {};
@@ -852,12 +892,21 @@ router.get(
       }
     });
 
+    const emailOutputs = formData.conditionalOutputs?.outputs || [];
+    const affectedEmailAddresses = getEmailAddressesForCondition(
+      emailOutputs,
+      conditionId
+    );
+
     res.render("titan-mvp-1.2/form-editor/conditions/delete", {
       form: formData,
       conditionName: condition.conditionName,
       conditionId: conditionId,
       pagesWithCondition: pagesWithCondition,
+      affectedEmailAddresses: affectedEmailAddresses,
+      hasEmailActions: affectedEmailAddresses.length > 0,
       formName: formData.name || "Untitled form",
+      cancelUrl: "/titan-mvp-1.2/form-editor/conditions/manager",
     });
   }
 );

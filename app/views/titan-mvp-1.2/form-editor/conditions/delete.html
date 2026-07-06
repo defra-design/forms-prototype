@@ -1,6 +1,8 @@
 {% extends "layouts/main.html" %}
 {% from "components/service-header/macro.njk" import serviceHeader %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
 {% set pageName = "Delete condition - Apply for a county parish holding number in England" %}
+{% set cancelHref = cancelUrl or "/titan-mvp-1.2/form-editor/conditions/manager" %}
 
 {% block header %}
 {{ serviceHeader({
@@ -21,8 +23,7 @@ navigationItems: [
 <div class="x-govuk-masthead x-govuk-masthead--large">
     <div class="govuk-width-container">
         {{ govukBackLink({ classes: "govuk-back-link--inverse govuk-!-margin-bottom-0", text:
-        commonTerms.form_editor.navigation.back_to_add_edit_pages, href:
-        "/titan-mvp-1.2/form-editor/conditions-manager.html" }) }}
+        commonTerms.form_editor.navigation.back_to_add_edit_pages, href: cancelHref }) }}
 
         <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"
             style="border-bottom: 1px solid white; margin-bottom: 0" />
@@ -42,7 +43,13 @@ navigationItems: [
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
 
-        <form method="post" action="/titan-mvp-1.2/form-editor/conditions/delete/{{ conditionId }}">
+        {% if staticPage %}
+        {{ govukInsetText({
+        html: '<strong>Static handover page: ' + staticPageTitle + '.</strong> ' + staticPageDescription + ' Forms do not save. <a class="govuk-link" href="' + staticIndexUrl + '">View all static pages</a>. <a class="govuk-link" href="' + managerStaticUrl + '">Back to conditions manager example</a>.'
+        }) }}
+        {% endif %}
+
+        <form method="post" action="{% if staticPage %}#{% else %}/titan-mvp-1.2/form-editor/conditions/delete/{{ conditionId }}{% endif %}">
             <input type="hidden" name="conditionId" value="{{ conditionId }}">
 
             <span class="govuk-caption-l">Condition: {{ conditionName }}</span>
@@ -65,7 +72,25 @@ navigationItems: [
                     </ul>
                 </strong>
             </div>
-            {% else %}
+            {% endif %}
+
+            {% if hasEmailActions %}
+            <div class="govuk-warning-text{% if pagesWithCondition | length == 0 %} govuk-!-margin-bottom-8{% else %} govuk-!-margin-bottom-2{% endif %}">
+                <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+                <strong class="govuk-warning-text__text">
+                    <span class="govuk-visually-hidden">Warning</span>
+                    Deleting this condition will affect email actions going to:
+
+                    <ul class="govuk-list govuk-list--bullet govuk-!-font-weight-bold govuk-!-margin-top-2">
+                        {% for emailAddress in affectedEmailAddresses %}
+                        <li>{{ emailAddress }}</li>
+                        {% endfor %}
+                    </ul>
+                </strong>
+            </div>
+            {% endif %}
+
+            {% if pagesWithCondition | length == 0 and not hasEmailActions %}
             <div class="govuk-warning-text govuk-!-margin-bottom-8">
                 <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
                 <strong class="govuk-warning-text__text">
@@ -76,9 +101,12 @@ navigationItems: [
             {% endif %}
 
             <div class="govuk-button-group">
+                {% if staticPage %}
+                <button type="button" class="govuk-button govuk-button--warning" disabled aria-disabled="true">Delete condition</button>
+                {% else %}
                 <button type="submit" class="govuk-button govuk-button--warning">Delete condition</button>
-                <button type="button" class="govuk-button govuk-button--secondary"
-                    onclick="window.location.href='/titan-mvp-1.2/form-editor/conditions/manager'">Cancel</button>
+                {% endif %}
+                <a href="{{ cancelHref }}" class="govuk-button govuk-button--secondary">Cancel</a>
             </div>
         </form>
     </div>

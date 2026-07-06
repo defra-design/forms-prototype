@@ -1,8 +1,10 @@
 const {
   enrichConditionsWithUsedInLabels,
+  getEmailAddressesForCondition,
 } = require("../lib/titan-mvp-1.2/condition-usage");
 
 const STATIC_BASE = "/titan-mvp-1.2/form-editor/conditions/manager/static";
+const DELETE_STATIC_BASE = "/titan-mvp-1.2/form-editor/conditions/delete/static";
 
 const FORM_NAME = "Apply for a county parish holding (CPH) number";
 
@@ -74,6 +76,151 @@ const DEMO_FORM_PAGES = buildDemoFormPages({
   23: 1001,
   26: 1002,
 });
+
+function getPagesWithCondition(formPages, conditionId) {
+  const pagesWithCondition = [];
+
+  (formPages || []).forEach((page, index) => {
+    if (page.conditions) {
+      const usesCondition = page.conditions.some(
+        (condition) => String(condition.id) === String(conditionId)
+      );
+      if (usesCondition) {
+        pagesWithCondition.push({
+          pageNumber: index + 1,
+        });
+      }
+    }
+  });
+
+  return pagesWithCondition;
+}
+
+function conditionHasEmailActions(emailOutputs, conditionId) {
+  return getEmailAddressesForCondition(emailOutputs, conditionId).length > 0;
+}
+
+const DELETE_STATIC_PAGES = [
+  {
+    slug: "not-used",
+    title: "Not used",
+    description:
+      "Condition is not linked to any pages or email actions.",
+    managerSlug: "mixed-usage",
+    conditionId: 1004,
+    formPages: [],
+    emailOutputs: [],
+  },
+  {
+    slug: "pages-only",
+    title: "Used on pages only",
+    description:
+      "Deleting will affect the pages that use this condition.",
+    managerSlug: "pages-only",
+    conditionId: 1002,
+    formPages: buildDemoFormPages({ 26: 1002 }),
+    emailOutputs: [],
+  },
+  {
+    slug: "email-action-only",
+    title: "Used by email action only",
+    description:
+      "Deleting will affect email actions that use this condition.",
+    managerSlug: "email-action-only",
+    conditionId: 1001,
+    formPages: [],
+    emailOutputs: [
+      {
+        id: 2001,
+        conditionId: 1001,
+        emailAddress: "farmers@defra.gov.uk",
+      },
+    ],
+  },
+  {
+    slug: "page-and-email-action",
+    title: "Used on a page and by email action",
+    description:
+      "Deleting will affect both pages and email actions that use this condition.",
+    managerSlug: "page-and-email-action",
+    conditionId: 1001,
+    formPages: buildDemoFormPages({ 23: 1001 }),
+    emailOutputs: [
+      {
+        id: 2001,
+        conditionId: 1001,
+        emailAddress: "farmers@defra.gov.uk",
+      },
+    ],
+  },
+];
+
+function getStaticDeleteSlugForCondition(condition) {
+  const usedPages = condition.usedInPages || [];
+  const hasEmailActions = condition.hasEmailActions;
+
+  if (hasEmailActions && usedPages.length > 0) {
+    return "page-and-email-action";
+  }
+  if (hasEmailActions) {
+    return "email-action-only";
+  }
+  if (usedPages.length > 0) {
+    return "pages-only";
+  }
+  return "not-used";
+}
+
+function buildStaticConditionDeleteContext(variant) {
+  const page = DELETE_STATIC_PAGES.find((item) => item.slug === variant);
+  if (!page) {
+    return null;
+  }
+
+  const condition = DEMO_CONDITIONS.find(
+    (item) => String(item.id) === String(page.conditionId)
+  );
+  if (!condition) {
+    return null;
+  }
+
+  return {
+    form: { name: FORM_NAME },
+    formName: FORM_NAME,
+    conditionName: condition.conditionName,
+    conditionId: condition.id,
+    pagesWithCondition: getPagesWithCondition(page.formPages, condition.id),
+    affectedEmailAddresses: getEmailAddressesForCondition(
+      page.emailOutputs,
+      condition.id
+    ),
+    hasEmailActions: conditionHasEmailActions(
+      page.emailOutputs,
+      condition.id
+    ),
+    staticPage: true,
+    staticPageTitle: page.title,
+    staticPageDescription: page.description,
+    staticPageSlug: page.slug,
+    staticIndexUrl: DELETE_STATIC_BASE,
+    managerStaticUrl: `${STATIC_BASE}/${page.managerSlug}`,
+    livePageUrl: `/titan-mvp-1.2/form-editor/conditions/delete/${condition.id}`,
+    cancelUrl: `${STATIC_BASE}/${page.managerSlug}`,
+  };
+}
+
+function buildStaticConditionDeleteIndexContext() {
+  return {
+    form: { name: FORM_NAME },
+    staticPages: DELETE_STATIC_PAGES.map((page) => ({
+      ...page,
+      href: `${DELETE_STATIC_BASE}/${page.slug}`,
+      managerHref: `${STATIC_BASE}/${page.managerSlug}`,
+    })),
+    livePageUrl: "/titan-mvp-1.2/form-editor/conditions/manager",
+    managerStaticUrl: STATIC_BASE,
+  };
+}
 
 const STATIC_PAGES = [
   {
@@ -183,6 +330,7 @@ function buildStaticConditionsManagerContext(variant) {
     livePageUrl: "/titan-mvp-1.2/form-editor/conditions/manager",
     emailActionsStaticUrl:
       "/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing/static/with-outputs",
+    deleteStaticBase: DELETE_STATIC_BASE,
   };
 }
 
@@ -198,11 +346,16 @@ function buildStaticConditionsManagerIndexContext() {
       "/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing/static",
     advancedSettingsStaticUrl:
       "/titan-mvp-1.2/form-editor/advanced-settings/static",
+    deleteStaticUrl: DELETE_STATIC_BASE,
   };
 }
 
 module.exports = {
   STATIC_BASE,
+  DELETE_STATIC_BASE,
   buildStaticConditionsManagerContext,
   buildStaticConditionsManagerIndexContext,
+  buildStaticConditionDeleteContext,
+  buildStaticConditionDeleteIndexContext,
+  getStaticDeleteSlugForCondition,
 };

@@ -19,24 +19,35 @@ function getPageLabelsForCondition(formPages, conditionId) {
   return labels;
 }
 
+function getEmailAddressesForCondition(emailOutputs, conditionId) {
+  return (emailOutputs || [])
+    .filter(
+      (output) =>
+        output.conditionId &&
+        String(output.conditionId) === String(conditionId)
+    )
+    .map((output) => output.emailAddress)
+    .filter(Boolean);
+}
+
 function enrichConditionsWithUsedInLabels(conditions, formPages, emailOutputs) {
   return (conditions || []).map((condition) => {
     const usedInPages = getPageLabelsForCondition(formPages, condition.id);
-    const hasEmailActions = (emailOutputs || []).some(
-      (output) =>
-        output.conditionId &&
-        String(output.conditionId) === String(condition.id)
+    const affectedEmailAddresses = getEmailAddressesForCondition(
+      emailOutputs,
+      condition.id
     );
 
     return {
       ...condition,
       usedInPages,
-      hasEmailActions,
+      hasEmailActions: affectedEmailAddresses.length > 0,
     };
   });
 }
 
 module.exports = {
   getPageLabelsForCondition,
+  getEmailAddressesForCondition,
   enrichConditionsWithUsedInLabels,
 };

@@ -2,7 +2,7 @@
 {% from "components/service-header/macro.njk" import serviceHeader %}
 {% from "govuk/components/table/macro.njk" import govukTable %}
 
-{% set pageName = "Conditions manager static pages - " + form.name %}
+{% set pageName = "Delete condition static pages - " + form.name %}
 
 {% block header %}
 {{ serviceHeader({
@@ -26,7 +26,7 @@ activeLinkId: "nav-editor"
         {{ govukBackLink({
         classes: "govuk-back-link--inverse govuk-!-margin-bottom-0",
         text: "Back to conditions manager",
-        href: livePageUrl
+        href: managerStaticUrl
         }) }}
 
         <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"
@@ -36,7 +36,7 @@ activeLinkId: "nav-editor"
             <div class="govuk-grid-column-full-from-desktop">
                 <h1 class="x-govuk-masthead__title">
                     <span class="govuk-caption-l" style="color: white;">{{ form.name }}</span>
-                    Conditions manager — static pages
+                    Delete condition — static pages
                 </h1>
             </div>
         </div>
@@ -47,7 +47,7 @@ activeLinkId: "nav-editor"
 {% block content %}
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
-        <p class="govuk-body">Use these pages for development handover. Each page shows how the <strong>Used in</strong> column appears when conditions are linked to email actions.</p>
+        <p class="govuk-body">Use these pages for development handover. Each page shows the delete confirmation for a different usage scenario.</p>
         <p class="govuk-body"><a class="govuk-link" href="{{ livePageUrl }}">Open the live conditions manager</a> (uses session data).</p>
 
         {% set tableRows = [] %}
@@ -65,9 +65,7 @@ activeLinkId: "nav-editor"
 
         <h2 class="govuk-heading-m govuk-!-margin-top-8">Related static pages</h2>
         <ul class="govuk-list govuk-list--bullet">
-            <li><a class="govuk-link" href="{{ deleteStaticUrl }}">Delete condition static pages</a></li>
-            <li><a class="govuk-link" href="{{ emailActionsStaticUrl }}">Email actions static pages</a></li>
-            <li><a class="govuk-link" href="{{ advancedSettingsStaticUrl }}">Advanced settings static pages</a></li>
+            <li><a class="govuk-link" href="{{ managerStaticUrl }}">Conditions manager static pages</a></li>
         </ul>
     </div>
 </div>

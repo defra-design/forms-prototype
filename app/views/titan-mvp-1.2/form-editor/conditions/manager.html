@@ -196,10 +196,27 @@ activeLinkId: "nav-editor"
                                                 condition.conditionName }}</span></a>
                                     </li>
                                     <li class="govuk-summary-list__actions-list-item">
-                                        <a href="{% if staticPage %}#{% else %}/titan-mvp-1.2/form-editor/conditions/delete/{{ condition.id }}{% endif %}"
+                                        {% if staticPage %}
+                                        {% set usedPages = condition.usedInPages or [] %}
+                                        {% if condition.hasEmailActions and usedPages | length > 0 %}
+                                        {% set deleteHref = deleteStaticBase + "/page-and-email-action" %}
+                                        {% elif condition.hasEmailActions %}
+                                        {% set deleteHref = deleteStaticBase + "/email-action-only" %}
+                                        {% elif usedPages | length > 0 %}
+                                        {% set deleteHref = deleteStaticBase + "/pages-only" %}
+                                        {% else %}
+                                        {% set deleteHref = deleteStaticBase + "/not-used" %}
+                                        {% endif %}
+                                        <a href="{{ deleteHref }}"
                                             class="govuk-link govuk-link--no-visited-state govuk-link--destructive">Delete<span
                                                 class="govuk-visually-hidden"> {{
                                                 condition.conditionName }}</span></a>
+                                        {% else %}
+                                        <a href="/titan-mvp-1.2/form-editor/conditions/delete/{{ condition.id }}"
+                                            class="govuk-link govuk-link--no-visited-state govuk-link--destructive">Delete<span
+                                                class="govuk-visually-hidden"> {{
+                                                condition.conditionName }}</span></a>
+                                        {% endif %}
                                     </li>
                                 </ul>
                             </td>
