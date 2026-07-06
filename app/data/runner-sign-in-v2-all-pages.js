@@ -26,8 +26,20 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
       heading: "Form designer (advanced settings)",
       links: [
         { text: "Advanced settings", href: urls.formEditorAdvancedSettings },
+        {
+          text: "Advanced settings — static pages",
+          href: "/titan-mvp-1.2/form-editor/advanced-settings/static",
+        },
         { text: "Check before submission", href: urls.formEditorCheckBeforeSubmission },
         { text: "Reuse previous answers", href: urls.formEditorReusePreviousAnswers },
+        {
+          text: "Email actions (live)",
+          href: urls.formEditorConditionalMailboxRouting,
+        },
+        {
+          text: "Email actions — static pages",
+          href: "/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing/static",
+        },
       ],
     },
     {
