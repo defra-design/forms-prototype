@@ -154,6 +154,7 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
         { text: "Checker invite email", href: urls.emailCheckerInvite },
         { text: "Applicant form checked email", href: urls.emailApplicantFormChecked },
         { text: "Form submitted email (copied answers)", href: urls.emailFormSubmitted },
+        { text: "Form submitted email – public view (copied answers)", href: urls.emailFormSubmittedPublic },
       ],
     },
     {
