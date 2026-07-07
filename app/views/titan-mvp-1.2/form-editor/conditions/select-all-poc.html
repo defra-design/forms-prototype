@@ -1,0 +1,207 @@
+{% extends "layouts/main.html" %}
+{% from "components/service-header/macro.njk" import serviceHeader %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% set pageName = "Select all POC - Edit condition" %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+containerClasses: containerClasses,
+accountName: "Chris Smith",
+homepageLink: "/",
+signOutLink: "/onboarding/sign-out-confirmation",
+navigationItems: [
+{ href: "/titan-mvp-1.2/library", text: "Forms library", id: "nav-library" },
+{ href: "/titan-mvp-1.2/form-overview/index", text: "Overview", id: "nav-overview" },
+{ href: "/titan-mvp-1.2/form-editor/listing", text: "Editor", id: "nav-editor" }
+],
+activeLinkId: "nav-editor"
+}) }}
+
+<div class="x-govuk-masthead x-govuk-masthead--large">
+    <div class="govuk-width-container">
+        {{ govukBackLink({
+        classes: "govuk-back-link--inverse govuk-!-margin-bottom-0",
+        text: "Back to conditions manager",
+        href: "/titan-mvp-1.2/form-editor/conditions/manager"
+        }) }}
+
+        <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"
+            style="border-bottom: 1px solid white; margin-bottom: 0" />
+
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full-from-desktop">
+                <h1 class="x-govuk-masthead__title">
+                    <span class="govuk-caption-l" style="color: white;">{{ formName }}</span>
+                    Manage conditions
+                </h1>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+
+        {{ govukInsetText({
+        html: '<strong>Proof of concept.</strong> This page tests a <a class="govuk-link" href="https://github.com/nhsuk/nhsuk-frontend/pull/1707" rel="noreferrer noopener" target="_blank">select all checkbox pattern</a> for choosing condition values. It is separate from the live conditions flow. <a class="govuk-link" href="/titan-mvp-1.2/form-editor/conditions/edit/1001">View the current edit condition page</a>.'
+        }) }}
+
+        <nav class="moj-sub-navigation govuk-!-padding-top-0 govuk-!-margin-bottom-2" aria-label="Sub navigation">
+            <ul class="moj-sub-navigation__list">
+                <li class="moj-sub-navigation__item">
+                    <a class="moj-sub-navigation__link" href="/titan-mvp-1.2/form-editor/conditions/manager">
+                        All conditions
+                    </a>
+                </li>
+                <li class="moj-sub-navigation__item">
+                    <a class="moj-sub-navigation__link" aria-current="page" href="#">
+                        Edit condition
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <form method="post" action="#">
+            <div class="govuk-form-group app-form-container">
+                <h2 class="govuk-heading-m app-form-container__title">Condition settings</h2>
+
+                <div class="govuk-form-group">
+                    <label class="govuk-label" for="questionSelect">
+                        Select a question
+                    </label>
+                    <select class="govuk-select" id="questionSelect" name="question">
+                        <option value="page-1-applying-for" selected>Page 1: What are you applying for?</option>
+                    </select>
+                </div>
+
+                <div class="govuk-form-group">
+                    <label class="govuk-label" for="operatorSelect">
+                        Condition type
+                    </label>
+                    <select class="govuk-select" id="operatorSelect" name="operator">
+                        <option value="is" selected>is</option>
+                        <option value="is-not">is not</option>
+                    </select>
+                </div>
+
+                <div class="govuk-form-group">
+                    <p class="govuk-body govuk-!-margin-bottom-2">
+                        Multiple selections will result in any of them meeting the condition (OR).
+                    </p>
+
+                    <fieldset class="govuk-fieldset">
+                        <legend class="govuk-fieldset__legend govuk-fieldset__legend--s govuk-!-font-weight-bold">
+                            Select a value
+                        </legend>
+
+                        <div class="govuk-checkboxes" data-module="inclusive-checkboxes">
+                            <div class="govuk-checkboxes__item app-inclusive-checkboxes--js-only">
+                                <input class="govuk-checkboxes__input" id="condition-value-all" name="condition-value"
+                                    type="checkbox" value="all" data-behaviour="inclusive">
+                                <label class="govuk-label govuk-checkboxes__label" for="condition-value-all">
+                                    All values
+                                </label>
+                            </div>
+
+                            <div class="govuk-checkboxes__divider app-inclusive-checkboxes--js-only">or</div>
+
+                            <div class="govuk-checkboxes__item">
+                                <input class="govuk-checkboxes__input" id="condition-value-ne" name="condition-value"
+                                    type="checkbox" value="NE">
+                                <label class="govuk-label govuk-checkboxes__label" for="condition-value-ne">
+                                    NE
+                                </label>
+                            </div>
+
+                            <div class="govuk-checkboxes__item">
+                                <input class="govuk-checkboxes__input" id="condition-value-ea" name="condition-value"
+                                    type="checkbox" value="EA">
+                                <label class="govuk-label govuk-checkboxes__label" for="condition-value-ea">
+                                    EA
+                                </label>
+                            </div>
+
+                            <div class="govuk-checkboxes__item">
+                                <input class="govuk-checkboxes__input" id="condition-value-rpa" name="condition-value"
+                                    type="checkbox" value="RPA">
+                                <label class="govuk-label govuk-checkboxes__label" for="condition-value-rpa">
+                                    RPA
+                                </label>
+                            </div>
+
+                            <div class="govuk-checkboxes__item">
+                                <input class="govuk-checkboxes__input" id="condition-value-vmd" name="condition-value"
+                                    type="checkbox" value="VMD">
+                                <label class="govuk-label govuk-checkboxes__label" for="condition-value-vmd">
+                                    VMD
+                                </label>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div class="govuk-button-group">
+                    <button class="govuk-button govuk-button--inverse" type="button">
+                        <svg class="govuk-!-margin-right-1" style="position: relative; top: 2px" width="12"
+                            height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M6 1V11" stroke="currentColor" stroke-width="2" />
+                            <path d="M1 6H11" stroke="currentColor" stroke-width="2" />
+                        </svg>
+                        Add another condition
+                    </button>
+                </div>
+
+                <div class="govuk-form-group govuk-!-margin-top-6">
+                    <label class="govuk-label govuk-label--m" for="conditionName">
+                        Condition name
+                    </label>
+                    <div class="govuk-hint">
+                        Condition names help you to identify conditions in your form, for example, 'Not a farmer'.
+                        Users will not see condition names.
+                    </div>
+                    <input class="govuk-input" id="conditionName" name="conditionName" type="text"
+                        value="Applying to all agencies">
+                </div>
+
+                <div class="govuk-button-group">
+                    <button type="submit" class="govuk-button">Save condition</button>
+                    <a href="/titan-mvp-1.2/form-editor/conditions/manager"
+                        class="govuk-link govuk-link--no-visited-state">Cancel</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .app-form-container {
+        border-left: 4px solid #008938;
+        background-color: #f8f8f8;
+        outline: 1px solid #b1b4b6;
+        padding: 30px;
+        position: relative;
+        margin-bottom: 20px;
+    }
+
+    .app-form-container__title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        margin-top: 0;
+    }
+
+    .app-inclusive-checkboxes--js-only {
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="/public/javascripts/inclusive-checkboxes.js"></script>
+{% endblock %}

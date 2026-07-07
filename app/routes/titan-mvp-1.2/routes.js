@@ -459,6 +459,25 @@ router.get(
   }
 );
 
+// Select-all checkbox POC for condition values (NHS.UK Frontend PR #1707)
+router.get(
+  "/titan-mvp-1.2/form-editor/conditions/select-all-poc",
+  function (req, res) {
+    res.render("titan-mvp-1.2/form-editor/conditions/select-all-poc", {
+      formName:
+        req.session.data?.formName ||
+        "Apply for a county parish holding (CPH) number",
+    });
+  }
+);
+
+router.get(
+  "/titan-mvp-1.2/form-editor/conditions/select-all-poc.html",
+  function (req, res) {
+    res.redirect("/titan-mvp-1.2/form-editor/conditions/select-all-poc");
+  }
+);
+
 // Form-level conditions management (manager)
 router.get(
   "/titan-mvp-1.2/form-editor/conditions/manager/static",
