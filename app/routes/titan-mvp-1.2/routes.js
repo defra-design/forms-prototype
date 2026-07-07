@@ -22209,10 +22209,36 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
     return res.render("titan-mvp-1.2/runner-sign-in-v2/emails/form-submitted", {
       ...base,
       toEmail: email,
-      formName: application.formName,
-      referenceNumber: "V25-AWC-M56",
-      submittedAt: "2:49pm on 20 April 2026",
+      formName: application.formName || "Apply to volunteer",
+      answers: runnerSignInV2VolunteerApplicationEmailAnswers(application),
+      referenceNumber: "YCU-C8R-7KY",
+      previousReference: "FL3-5H4-L8N",
+      submittedAt: "11:10am on Tuesday 7 July 2026",
       linkExpiresAt: "1:49pm on Wednesday 20 January 2027",
+      whatHappensNext: "We'll review your application and contact you if we need more information.",
+      helpTelephone: "N/A",
+      helpEmail: "daniel.dasilveira@defra.gov.uk",
+      helpResponseTime: "We aim to get back to you as soon as I can.",
+      helpContactLinkText: "Online contact link",
+      helpContactLinkHref: "#",
+    });
+  }
+
+  if (slug === "email-form-submitted-public") {
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/emails/form-submitted-public", {
+      ...base,
+      toEmail: email,
+      formName: application.formName || "Apply to volunteer",
+      answers: runnerSignInV2VolunteerApplicationEmailAnswers(application),
+      referenceNumber: "YCU-C8R-7KY",
+      previousReference: "FL3-5H4-L8N",
+      submittedAt: "11:10am on Tuesday 7 July 2026",
+      whatHappensNext: "We'll review your application and contact you if we need more information.",
+      helpTelephone: "N/A",
+      helpEmail: "daniel.dasilveira@defra.gov.uk",
+      helpResponseTime: "We aim to get back to you as soon as I can.",
+      helpContactLinkText: "Online contact link",
+      helpContactLinkHref: "#",
     });
   }
 
@@ -24391,23 +24417,59 @@ router.get("/runner-sign-in-v2/texts/change-email-security-code", function (req,
   return res.render("titan-mvp-1.2/runner-sign-in-v2/texts/change-email-security-code");
 });
 
-router.get("/runner-sign-in-v2/emails/form-submitted", function (req, res) {
+function runnerSignInV2VolunteerApplicationEmailAnswers(application) {
+  const answers = (application && application.answers) || {};
+  return {
+    fullName: answers.fullName || "Alex Taylor",
+    email: answers.email || "",
+    volunteerRole: answers.volunteerRole || "Gardening",
+    declarationAccepted: answers.declarationAccepted || "yes",
+  };
+}
+
+function runnerSignInV2FormSubmittedEmailContext(req) {
   const data = ensureRunnerSignInSession(req);
   const toEmail = String(req.query.email || data.runnerSignInEmail || "").trim();
-  const formKey = String(req.query.formKey || "").trim();
+  const formKey = String(req.query.formKey || "volunteer-application").trim();
   const applicationId = String(req.query.applicationId || "").trim();
   const application = runnerSignInV2ResolveApplication(req, formKey, applicationId);
-  const formName = (application && application.formName) || "";
-  return res.render("titan-mvp-1.2/runner-sign-in-v2/emails/form-submitted", {
+  const formName = (application && application.formName) || "Apply to volunteer";
+  const answers = runnerSignInV2VolunteerApplicationEmailAnswers(application);
+  return {
     toEmail,
     formKey,
     applicationId,
     application,
     formName,
-    referenceNumber: String(req.query.referenceNumber || "V25-AWC-M56").trim(),
-    submittedAt: String(req.query.submittedAt || "2:49pm on 20 April 2026").trim(),
+    answers,
+    referenceNumber: String(req.query.referenceNumber || "YCU-C8R-7KY").trim(),
+    previousReference: String(req.query.previousReference || "FL3-5H4-L8N").trim(),
+    submittedAt: String(req.query.submittedAt || "11:10am on Tuesday 7 July 2026").trim(),
     linkExpiresAt: String(req.query.linkExpiresAt || "1:49pm on Wednesday 20 January 2027").trim(),
-  });
+    whatHappensNext: String(
+      req.query.whatHappensNext ||
+        "We'll review your application and contact you if we need more information."
+    ).trim(),
+    helpTelephone: String(req.query.helpTelephone || "N/A").trim(),
+    helpEmail: String(req.query.helpEmail || "daniel.dasilveira@defra.gov.uk").trim(),
+    helpResponseTime: String(req.query.helpResponseTime || "We aim to get back to you as soon as I can.").trim(),
+    helpContactLinkText: String(req.query.helpContactLinkText || "Online contact link").trim(),
+    helpContactLinkHref: String(req.query.helpContactLinkHref || "#").trim(),
+  };
+}
+
+router.get("/runner-sign-in-v2/emails/form-submitted/public", function (req, res) {
+  return res.render(
+    "titan-mvp-1.2/runner-sign-in-v2/emails/form-submitted-public",
+    runnerSignInV2FormSubmittedEmailContext(req)
+  );
+});
+
+router.get("/runner-sign-in-v2/emails/form-submitted", function (req, res) {
+  return res.render(
+    "titan-mvp-1.2/runner-sign-in-v2/emails/form-submitted",
+    runnerSignInV2FormSubmittedEmailContext(req)
+  );
 });
 
 router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/checker/invite", function (req, res) {

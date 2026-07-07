@@ -1,0 +1,30 @@
+{% set formTitle = formName or "Apply to volunteer" %}
+
+<div class="email-message">
+  <table class="email-message-meta">
+    <tbody>
+      <tr>
+        <th scope="row">From</th>
+        <td>Submit form to Defra (defra@notifications.gov.uk)</td>
+      </tr>
+      <tr>
+        <th scope="row">To</th>
+        <td>
+          {% if toEmail %}
+            {{ toEmail }}
+          {% else %}
+            <span class="placeholder-no-brackets" style="background: #fd0;">Email address</span>
+          {% endif %}
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">Subject</th>
+        <td>Form submission{% if formTitle %}: {{ formTitle }}{% endif %}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="email-message-body govuk-!-margin-top-2 govuk-!-margin-bottom-0">
+    {% include "titan-mvp-1.2/runner-sign-in-v2/emails/_form-submitted-email-body.njk" %}
+  </div>
+</div>
