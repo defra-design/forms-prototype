@@ -27,8 +27,8 @@ const REUSE_PREVIOUS_ANSWERS_SETTING = {
   key: "reusePreviousAnswers",
   slug: "reuse-previous-answers",
   summaryLabel: "Reuse previous answers",
-  summaryValueYes: "Answers from a past submission can be copied forward",
-  summaryValueNo: "Every new form starts with blank answers",
+  summaryValueYes: "Reuse answers from a previous submission",
+  summaryValueNo: "Start each new form with blank answers",
   label: "Can people reuse answers from a previous submission?",
   hint:
     "Use when people often submit this form more than once with similar answers.",
@@ -61,7 +61,7 @@ const OVERVIEW_VARIANTS = [
   {
     slug: "reuse-previous-answers-enabled",
     title: "Reuse previous answers enabled",
-    description: "People can copy answers from a past submission.",
+    description: "Reuse answers from a previous submission.",
   },
   {
     slug: "with-email-actions",
@@ -97,12 +97,12 @@ const REUSE_PREVIOUS_ANSWERS_VARIANTS = [
   {
     slug: "no-selected",
     title: "No selected",
-    description: "Every new form starts with blank answers.",
+    description: "Start each new form with blank answers.",
   },
   {
     slug: "yes-selected",
     title: "Yes selected",
-    description: "Answers from a past submission can be copied forward.",
+    description: "Reuse answers from a previous submission.",
   },
 ];
 
