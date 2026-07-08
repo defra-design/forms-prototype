@@ -4,6 +4,7 @@ const SEED = {
   inProgressRefund: { formKey: "request-refund", applicationId: "app-1721152526405", step: "bank-details" },
   awaitingCheck: { formKey: "apply-small-grant", applicationId: "app-1721152526407" },
   submittedCopy: { formKey: "volunteer-application", applicationId: "app-1721152526408" },
+  copyDraft: { formKey: "volunteer-application", applicationId: "app-copy-volunteer-draft" },
 };
 
 // Must match RUNNER_SIGN_IN_V2_PROTOTYPE_KNOWN_RECOVER_PHONE in routes.js (07700900000).
