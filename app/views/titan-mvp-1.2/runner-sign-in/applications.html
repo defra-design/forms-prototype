@@ -95,15 +95,18 @@ Your forms – {{ serviceName }} – GOV.UK
       {% set isDraft = (statusText == "Not yet started") %}
       {% set isAwaiting = (statusText == "Awaiting check") %}
       {% set isChecked = (statusText == "Checked") %}
-      {% set statusTagHtml = govukTag({
-        text: statusText,
-        classes: (
-          "govuk-tag--green" if isSubmitted
-          else ("govuk-tag--yellow" if isAwaiting
-          else ("govuk-tag--turquoise" if isChecked
-          else ("govuk-tag--grey" if isDraft else "govuk-tag--blue")))
-        )
-      }) %}
+      {% if isSubmitted %}
+        {% set statusTagHtml = statusText %}
+      {% else %}
+        {% set statusTagHtml = govukTag({
+          text: statusText,
+          classes: (
+            "govuk-tag--yellow" if isAwaiting
+            else ("govuk-tag--turquoise" if isChecked
+            else ("govuk-tag--grey" if isDraft else "govuk-tag--teal"))
+          )
+        }) %}
+      {% endif %}
       {% set lastUpdatedText = formatDate(application.updatedIso) %}
       {% if isSubmitted and application.submittedIso %}
         {% set lastUpdatedText = "Submitted " + formatDate(application.submittedIso) %}

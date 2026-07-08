@@ -36,10 +36,14 @@
 
     {% set rows = [] %}
     {% for r in (tableRows or [tableRow]) %}
-      {% set statusTagHtml = govukTag({ text: r.statusText, classes: r.statusTagClasses }) %}
+      {% if r.statusText == "Submitted" %}
+        {% set statusHtml = r.statusText %}
+      {% else %}
+        {% set statusHtml = govukTag({ text: r.statusText, classes: r.statusTagClasses }) %}
+      {% endif %}
       {% set rows = (rows.push([
         { text: r.reference },
-        { html: statusTagHtml },
+        { html: statusHtml },
         { text: r.lastUpdatedText },
         { text: r.expiryText },
         { html: r.actionsHtml }

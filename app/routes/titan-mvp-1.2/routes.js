@@ -2057,11 +2057,9 @@ router.get("/titan-mvp-1.2/form-editor/location-answer", function (req, res) {
 });
 
 function getListingAdvancedSettingsHint(formData) {
-  const settings = formData.advancedSettings || {};
-  const checkBeforeSubmission =
-    settings.checkBeforeSubmission || settings.requiresApproval || "no";
-  const reusePreviousAnswers =
-    settings.reusePreviousAnswers || settings.allowCopies || "no";
+  const settings = getAdvancedSettings(formData);
+  const checkBeforeSubmission = settings.checkBeforeSubmission;
+  const reusePreviousAnswers = settings.reusePreviousAnswers;
   const whoCanCheckDescription = settings.whoCanCheckDescription || "";
   const parts = [];
 
@@ -2595,8 +2593,8 @@ const ADVANCED_SETTINGS_PAGES = {
     key: "reusePreviousAnswers",
     slug: "reuse-previous-answers",
     summaryLabel: "Reuse previous answers",
-    summaryValueYes: "Answers from a past submission can be copied forward",
-    summaryValueNo: "Every new form starts with blank answers",
+    summaryValueYes: "Reuse answers from a previous submission",
+    summaryValueNo: "Start each new form with blank answers",
     label: "Can people reuse answers from a previous submission?",
     hint:
       "Use when people often submit this form more than once with similar answers.",
@@ -2616,14 +2614,38 @@ function enableConfirmationEmailAndReferenceNumber(formData) {
   formData.referenceNumberEnabled = "yes";
 }
 
+function resolveAdvancedSettingsYesNo(...candidates) {
+  for (const value of candidates) {
+    if (value === "yes" || value === "no") return value;
+  }
+  return "no";
+}
+
+function setReusePreviousAnswers(formData, value) {
+  const selectedValue = value === "yes" ? "yes" : "no";
+  if (!formData.advancedSettings) {
+    formData.advancedSettings = {};
+  }
+  formData.advancedSettings.reusePreviousAnswers = selectedValue;
+  formData.advancedSettings.allowCopies = selectedValue;
+  formData.savedAnswersEnabled = selectedValue;
+  formData.reusePreviousAnswers = selectedValue;
+  return selectedValue;
+}
+
 function getAdvancedSettings(formData) {
   const settings = formData.advancedSettings || {};
   return {
-    checkBeforeSubmission:
-      settings.checkBeforeSubmission || settings.requiresApproval || "no",
+    checkBeforeSubmission: resolveAdvancedSettingsYesNo(
+      settings.checkBeforeSubmission,
+      settings.requiresApproval
+    ),
     whoCanCheckDescription: settings.whoCanCheckDescription || "",
-    reusePreviousAnswers:
-      settings.reusePreviousAnswers || settings.allowCopies || "no",
+    reusePreviousAnswers: resolveAdvancedSettingsYesNo(
+      settings.reusePreviousAnswers,
+      settings.allowCopies,
+      formData.savedAnswersEnabled
+    ),
   };
 }
 
@@ -3311,7 +3333,7 @@ router.post(
     }
 
     if (setting.slug === "reuse-previous-answers") {
-      formData.savedAnswersEnabled = selectedValue === "yes" ? "yes" : "no";
+      setReusePreviousAnswers(formData, selectedValue);
 
       if (selectedValue === "yes") {
         enableConfirmationEmailAndReferenceNumber(formData);
@@ -12915,14 +12937,14 @@ router.post(
     if (req.body.currentTab === "saved-answers") {
       const raw = req.body.savedAnswersEnabled;
       const isYes = raw === "yes" || (Array.isArray(raw) && raw.includes("yes"));
-      formData.savedAnswersEnabled = isYes ? "yes" : "no";
+      setReusePreviousAnswers(formData, isYes ? "yes" : "no");
       if (isYes) {
         formData.confirmationEmailEnabled = "yes";
         formData.referenceNumberEnabled = "yes";
       }
       console.log("[saved-answers POST] raw:", raw, "isYes:", isYes, "formData.savedAnswersEnabled:", formData.savedAnswersEnabled);
     } else if (req.body.savedAnswersEnabled) {
-      formData.savedAnswersEnabled = req.body.savedAnswersEnabled;
+      setReusePreviousAnswers(formData, req.body.savedAnswersEnabled);
     }
 
     // Determine which tab to redirect to based on form data
@@ -13666,13 +13688,13 @@ router.post(
     if (req.body.currentTab === "saved-answers") {
       const raw = req.body.savedAnswersEnabled;
       const isYes = raw === "yes" || (Array.isArray(raw) && raw.includes("yes"));
-      formData.savedAnswersEnabled = isYes ? "yes" : "no";
+      setReusePreviousAnswers(formData, isYes ? "yes" : "no");
       if (isYes) {
         formData.confirmationEmailEnabled = "yes";
         formData.referenceNumberEnabled = "yes";
       }
     } else if (req.body.savedAnswersEnabled) {
-      formData.savedAnswersEnabled = req.body.savedAnswersEnabled;
+      setReusePreviousAnswers(formData, req.body.savedAnswersEnabled);
     }
 
     let redirectTab = "page-settings";
