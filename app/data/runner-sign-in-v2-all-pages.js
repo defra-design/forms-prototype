@@ -15,9 +15,12 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
   const copyFormKey = SEED.submittedCopy.formKey;
   const copyApplicationId = SEED.submittedCopy.applicationId;
   const copyDraftId = SEED.copyDraft.applicationId;
+  const copyDeclarationRequiredId = SEED.copyDeclarationRequired.applicationId;
   const copyManageUrl = `/runner-sign-in-v2/forms/${enc(copyFormKey)}/${enc(copyApplicationId)}/manage`;
   const copyQuery = `formKey=${enc(copyFormKey)}&applicationId=${enc(copyApplicationId)}`;
   const copyEmailTriple = (path) => `${path}?${copyQuery}&next=${enc(copyManageUrl)}`;
+  const copyFormStep = (stepId, applicationId = copyDraftId) =>
+    `/runner-sign-in/forms/${enc(copyFormKey)}/${enc(applicationId)}/${stepId}?copied=1`;
 
   return [
     {
@@ -86,6 +89,21 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
         {
           text: "Check answers (copied)",
           href: `/runner-sign-in/forms/${enc(copyFormKey)}/${enc(copyDraftId)}/check-answers?copied=1`,
+        },
+        {
+          text: "Your previous submission (new or changed questions)",
+          href: `/runner-sign-in/intervention-copied?formKey=${enc(copyFormKey)}&applicationId=${enc(copyDeclarationRequiredId)}&step=declaration`,
+        },
+        { text: "Your details (copied form)", href: copyFormStep("details") },
+        { text: "Volunteer role (copied form)", href: copyFormStep("role") },
+        { text: "Declaration (copied form)", href: copyFormStep("declaration") },
+        {
+          text: "Declaration (answer again)",
+          href: copyFormStep("declaration", copyDeclarationRequiredId),
+        },
+        {
+          text: "Ready to submit (copied form)",
+          href: `/runner-sign-in-v2/forms/${enc(copyFormKey)}/${enc(copyDraftId)}/ready-to-submit`,
         },
         {
           text: "Manage your form (after copy)",
