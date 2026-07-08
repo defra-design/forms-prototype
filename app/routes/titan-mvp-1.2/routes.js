@@ -17116,12 +17116,14 @@ function seedRunnerSignInApplicationsPrototype() {
       expiryIso: "2026-05-18T23:59:00+01:00",
     },
     {
+      // All-pages deep-link fixture only — excluded from manage lists.
       id: "app-copy-volunteer-draft",
       formKey: "volunteer-application",
       formName: "Apply to volunteer",
       reference: "K2P-7N1-M4V",
       status: "Draft",
       step: "declaration",
+      excludeFromManage: true,
       answers: {
         fullName: "Alex Taylor",
         email: "alex.taylor@example.com",
@@ -17139,12 +17141,14 @@ function seedRunnerSignInApplicationsPrototype() {
       expiryIso: "2026-06-08T23:59:00+01:00",
     },
     {
+      // All-pages deep-link fixture only — excluded from manage lists.
       id: "app-copy-volunteer-declaration",
       formKey: "volunteer-application",
       formName: "Apply to volunteer",
       reference: "N4V-2C8-H6Q",
       status: "Draft",
       step: "declaration",
+      excludeFromManage: true,
       answers: {
         fullName: "Alex Taylor",
         email: "alex.taylor@example.com",
@@ -17252,6 +17256,13 @@ function ensureRunnerSignInApplications(req) {
   }
   for (const app of data.runnerSignInApplications) {
     ensureRunnerSignInChecking(app);
+    // Keep all-pages fixtures out of manage tables even for older sessions.
+    if (
+      app &&
+      (app.id === "app-copy-volunteer-draft" || app.id === "app-copy-volunteer-declaration")
+    ) {
+      app.excludeFromManage = true;
+    }
   }
   return data.runnerSignInApplications;
 }
@@ -23701,7 +23712,15 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/manage", function (
 
   if (original && runnerSignInV2DisplayStatusFor(original) === "Submitted") {
     tableRows.push(runnerSignInV2TableRowFor(original));
-    const copies = applications.filter((a) => a && a.copiedFrom && a.copiedFrom.applicationId === original.id);
+    const copies = applications.filter(
+      (a) =>
+        a &&
+        a.copiedFrom &&
+        a.copiedFrom.applicationId === original.id &&
+        // Hide all-pages fixtures from the submitted manage demo,
+        // but still show them when that fixture itself is the focused application.
+        (!a.excludeFromManage || a.id === application.id)
+    );
     copies.forEach((c) => tableRows.push(runnerSignInV2TableRowFor(c)));
   } else {
     // Fallback: just show the current application.
