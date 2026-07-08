@@ -59,9 +59,20 @@ const OVERVIEW_VARIANTS = [
     description: "Checker review required. Who can check the form is set.",
   },
   {
-    slug: "reuse-previous-answers-enabled",
-    title: "Reuse previous answers enabled",
+    slug: "reuse-previous-answers-off",
+    title: "Reuse previous answers off",
+    description: "Start each new form with blank answers.",
+  },
+  {
+    slug: "reuse-previous-answers-on",
+    title: "Reuse previous answers on",
     description: "Reuse answers from a previous submission.",
+  },
+  {
+    // Keep the older slug so existing handover links still work.
+    slug: "reuse-previous-answers-enabled",
+    title: "Reuse previous answers on (alias)",
+    description: "Same as ‘Reuse previous answers on’.",
   },
   {
     slug: "with-email-actions",
@@ -115,6 +126,15 @@ function buildSummaryRows(settings) {
     staticPageBase = STATIC_BASE,
   } = settings;
 
+  const checkBeforeChangeHref =
+    checkBeforeSubmission === "yes"
+      ? `${staticPageBase}/check-before-submission/yes-with-description`
+      : `${staticPageBase}/check-before-submission/no-selected`;
+  const reusePreviousAnswersChangeHref =
+    reusePreviousAnswers === "yes"
+      ? `${staticPageBase}/reuse-previous-answers/yes-selected`
+      : `${staticPageBase}/reuse-previous-answers/no-selected`;
+
   const rows = [
     {
       key: { text: CHECK_BEFORE_SUBMISSION_SETTING.summaryLabel },
@@ -127,7 +147,7 @@ function buildSummaryRows(settings) {
       actions: {
         items: [
           {
-            href: `${staticPageBase}/check-before-submission/no-selected`,
+            href: checkBeforeChangeHref,
             text: "Change",
             visuallyHiddenText: CHECK_BEFORE_SUBMISSION_SETTING.changeHiddenText,
           },
@@ -145,7 +165,7 @@ function buildSummaryRows(settings) {
       actions: {
         items: [
           {
-            href: `${staticPageBase}/reuse-previous-answers/no-selected`,
+            href: reusePreviousAnswersChangeHref,
             text: "Change",
             visuallyHiddenText: REUSE_PREVIOUS_ANSWERS_SETTING.changeHiddenText,
           },
@@ -220,8 +240,16 @@ function buildStaticAdvancedSettingsOverviewContext(variant) {
       "Their line manager or a colleague in the same team who is authorised to approve submissions.";
   }
 
-  if (variant === "reuse-previous-answers-enabled" || variant === "fully-configured") {
+  if (
+    variant === "reuse-previous-answers-on" ||
+    variant === "reuse-previous-answers-enabled" ||
+    variant === "fully-configured"
+  ) {
     reusePreviousAnswers = "yes";
+  }
+
+  if (variant === "reuse-previous-answers-off" || variant === "default") {
+    reusePreviousAnswers = "no";
   }
 
   if (variant === "with-email-actions" || variant === "fully-configured") {
@@ -292,6 +320,11 @@ function buildStaticAdvancedSettingsChangeContext(settingSlug, variant) {
     data.reusePreviousAnswers = "yes";
   }
 
+  const overviewStaticUrl =
+    settingSlug === "reuse-previous-answers"
+      ? `${STATIC_BASE}/${variant === "yes-selected" ? "reuse-previous-answers-on" : "reuse-previous-answers-off"}`
+      : `${STATIC_BASE}/default`;
+
   return {
     data,
     setting,
@@ -304,17 +337,22 @@ function buildStaticAdvancedSettingsChangeContext(settingSlug, variant) {
     staticPageBase: STATIC_BASE,
     staticIndexUrl: STATIC_BASE,
     livePageUrl: `/titan-mvp-1.2/form-editor/advanced-settings/${settingSlug}`,
-    overviewStaticUrl: `${STATIC_BASE}/default`,
+    overviewStaticUrl,
   };
 }
 
 function buildStaticAdvancedSettingsIndexContext() {
-  return {
-    form: { name: FORM_NAME },
-    overviewPages: OVERVIEW_VARIANTS.map((page) => ({
+  const overviewPages = OVERVIEW_VARIANTS
+    // Hide the alias from the index; keep the slug routable for older links.
+    .filter((page) => page.slug !== "reuse-previous-answers-enabled")
+    .map((page) => ({
       ...page,
       href: `${STATIC_BASE}/${page.slug}`,
-    })),
+    }));
+
+  return {
+    form: { name: FORM_NAME },
+    overviewPages,
     checkBeforeSubmissionPages: CHECK_BEFORE_SUBMISSION_VARIANTS.map((page) => ({
       ...page,
       href: `${STATIC_BASE}/check-before-submission/${page.slug}`,

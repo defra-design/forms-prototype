@@ -46,6 +46,22 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
         { text: "Check before submission", href: urls.formEditorCheckBeforeSubmission },
         { text: "Reuse previous answers", href: urls.formEditorReusePreviousAnswers },
         {
+          text: "Reuse previous answers — no selected (static)",
+          href: `${STATIC_BASE}/reuse-previous-answers/no-selected`,
+        },
+        {
+          text: "Reuse previous answers — yes selected (static)",
+          href: `${STATIC_BASE}/reuse-previous-answers/yes-selected`,
+        },
+        {
+          text: "Advanced settings overview — reuse off (static)",
+          href: `${STATIC_BASE}/reuse-previous-answers-off`,
+        },
+        {
+          text: "Advanced settings overview — reuse on (static)",
+          href: `${STATIC_BASE}/reuse-previous-answers-on`,
+        },
+        {
           text: "Email actions (live)",
           href: urls.formEditorConditionalMailboxRouting,
         },
@@ -80,6 +96,14 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
         {
           text: "Reuse previous answers — yes selected (static)",
           href: `${STATIC_BASE}/reuse-previous-answers/yes-selected`,
+        },
+        {
+          text: "Advanced settings overview — reuse off (static)",
+          href: `${STATIC_BASE}/reuse-previous-answers-off`,
+        },
+        {
+          text: "Advanced settings overview — reuse on (static)",
+          href: `${STATIC_BASE}/reuse-previous-answers-on`,
         },
         { text: "Manage your form (submitted example)", href: copyManageUrl },
         {
