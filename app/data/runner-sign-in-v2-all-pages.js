@@ -1,3 +1,6 @@
+const { SEED } = require("../lib/titan-mvp-1.2/runner-sign-in-v2-choose-journeys");
+const { STATIC_BASE } = require("./advanced-settings-static");
+
 function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, reviewToken, unexpectedPages }) {
   const enc = encodeURIComponent;
   const q = `formKey=${enc(formKey)}&applicationId=${enc(applicationId)}`;
@@ -8,6 +11,13 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
   };
   const checker = (path) =>
     `/runner-sign-in-v2/checker/${path}?token=${enc(reviewToken)}&prototype=1&allowApplicant=1`;
+
+  const copyFormKey = SEED.submittedCopy.formKey;
+  const copyApplicationId = SEED.submittedCopy.applicationId;
+  const copyDraftId = SEED.copyDraft.applicationId;
+  const copyManageUrl = `/runner-sign-in-v2/forms/${enc(copyFormKey)}/${enc(copyApplicationId)}/manage`;
+  const copyQuery = `formKey=${enc(copyFormKey)}&applicationId=${enc(copyApplicationId)}`;
+  const copyEmailTriple = (path) => `${path}?${copyQuery}&next=${enc(copyManageUrl)}`;
 
   return [
     {
@@ -53,6 +63,46 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
         { text: "Form submitted confirmation email", href: urls.emailFormSubmitted },
         { text: "Start a new application", href: urls.startNewForm },
         { text: "Manage your form (checked example)", href: urls.staticManageFormChecked },
+      ],
+    },
+    {
+      heading: "Copy a previous submission",
+      links: [
+        { text: "Advanced settings", href: urls.formEditorAdvancedSettings },
+        { text: "Reuse previous answers", href: urls.formEditorReusePreviousAnswers },
+        {
+          text: "Reuse previous answers — no selected (static)",
+          href: `${STATIC_BASE}/reuse-previous-answers/no-selected`,
+        },
+        {
+          text: "Reuse previous answers — yes selected (static)",
+          href: `${STATIC_BASE}/reuse-previous-answers/yes-selected`,
+        },
+        { text: "Manage your form (submitted example)", href: copyManageUrl },
+        {
+          text: "Copy answers confirmation",
+          href: `/runner-sign-in/applications/${enc(copyApplicationId)}/clone`,
+        },
+        {
+          text: "Check answers (copied)",
+          href: `/runner-sign-in/forms/${enc(copyFormKey)}/${enc(copyDraftId)}/check-answers?copied=1`,
+        },
+        {
+          text: "Manage your form (after copy)",
+          href: `/runner-sign-in-v2/forms/${enc(copyFormKey)}/${enc(copyDraftId)}/manage?cloned=1`,
+        },
+        {
+          text: "Form submitted",
+          href: `/runner-sign-in-v2/forms/${enc(copyFormKey)}/${enc(copyApplicationId)}/submitted`,
+        },
+        {
+          text: "Form submitted confirmation email (copied answers)",
+          href: copyEmailTriple("/runner-sign-in-v2/emails/form-submitted"),
+        },
+        {
+          text: "Form submitted email – public view (copied answers)",
+          href: copyEmailTriple("/runner-sign-in-v2/emails/form-submitted/public"),
+        },
       ],
     },
     {

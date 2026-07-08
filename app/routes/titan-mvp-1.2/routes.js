@@ -17093,6 +17093,29 @@ function seedRunnerSignInApplicationsPrototype() {
       expiryIso: "2026-05-18T23:59:00+01:00",
     },
     {
+      id: "app-copy-volunteer-draft",
+      formKey: "volunteer-application",
+      formName: "Apply to volunteer",
+      reference: "K2P-7N1-M4V",
+      status: "Draft",
+      step: "declaration",
+      answers: {
+        fullName: "Alex Taylor",
+        email: "alex.taylor@example.com",
+        volunteerRole: "Gardening",
+        declarationAccepted: "yes",
+      },
+      copiedFrom: {
+        applicationId: "app-1721152526408",
+        formKey: "volunteer-application",
+        formName: "Apply to volunteer",
+        reference: "FL3-5H4-L8N",
+        submittedIso: "2026-04-18T09:02:00+01:00",
+      },
+      updatedIso: "2026-05-08T10:05:00+01:00",
+      expiryIso: "2026-06-08T23:59:00+01:00",
+    },
+    {
       id: RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_APP_ID,
       formKey: RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_FORM_KEY,
       formName: "Apply to volunteer",
@@ -18321,6 +18344,8 @@ router.get("/runner-sign-in/forms/:formKey/:id/:step", function (req, res) {
   }
 
   application.step = stepDef.id;
+
+  setRunnerSignInV2ManageFocus(req, application.formKey, application.id);
 
   const copied = runnerSignInIsCopiedJourney(req.query, application);
   const copiedQuerySuffix = runnerSignInCopiedQuerySuffix(req.query, application);
