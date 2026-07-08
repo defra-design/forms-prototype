@@ -67,6 +67,7 @@ const RUNNER_SIGN_IN_V2_STATIC_CHECKED_APP_ID = "app-research-checked-grant";
 const RUNNER_SIGN_IN_V2_STATIC_CHECKED_REVIEW_TOKEN = "RSI-STATIC-CHECKED";
 const RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_APP_ID = "app-save-exit-demo";
 const RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_FORM_KEY = "volunteer-application";
+const RUNNER_SIGN_IN_V2_COPY_SUBMISSION_APP_ID = "app-1721152526408";
 
 // Add middleware to make terms available to all templates
 router.use((req, res, next) => {
@@ -18636,64 +18637,42 @@ router.get("/runner-sign-in/complete", function (req, res) {
   return res.redirect(`/runner-sign-in/what-do-you-want-to-do?next=${encodeURIComponent(next)}`);
 });
 
+function runnerSignInAllowSharedDeepLinkAccess(req) {
+  const data = ensureRunnerSignInSession(req);
+  // Shareable research links (All pages, Slack, etc.) should not force v1 sign-in.
+  data.runnerSignInV2PrototypeMode = true;
+  if (!data.runnerSignInAuthed) {
+    applyRunnerSignInV2EmailAuth(
+      req,
+      data.runnerSignInEmail || "you@example.com",
+      data.runnerSignInPhone || "07700 900000"
+    );
+  }
+}
+
 router.get("/runner-sign-in/check-answers-copied", function (req, res) {
   const data = ensureRunnerSignInSession(req);
-  if (!data.runnerSignInAuthed) {
-    // Prototype convenience: when navigating from runner-sign-in-v2 pages, don't force v1 sign-in.
-    if (runnerSignInV2PrototypeMode(req)) {
-      applyRunnerSignInV2EmailAuth(
-        req,
-        data.runnerSignInEmail || "you@example.com",
-        data.runnerSignInPhone || "07700 900000"
-      );
-    } else {
-      return res.redirect("/runner-sign-in/choose-method");
-    }
-  }
-  // Email journeys require phone confirmation
-  if (data.runnerSignInMethod === "email" && !data.runnerSignInPhoneConfirmed) {
-    return res.redirect("/runner-sign-in/confirm-phone");
-  }
-
+  runnerSignInAllowSharedDeepLinkAccess(req);
   return res.render("titan-mvp-1.2/runner-sign-in/check-answers-copied", { data });
 });
 
 router.post("/runner-sign-in/check-answers-copied", function (req, res) {
-  const data = ensureRunnerSignInSession(req);
-  if (!data.runnerSignInAuthed) {
-    if (runnerSignInV2PrototypeMode(req)) {
-      applyRunnerSignInV2EmailAuth(
-        req,
-        data.runnerSignInEmail || "you@example.com",
-        data.runnerSignInPhone || "07700 900000"
-      );
-    } else {
-      return res.redirect("/runner-sign-in/choose-method");
-    }
+  ensureRunnerSignInSession(req);
+  runnerSignInAllowSharedDeepLinkAccess(req);
+  const formKey = String(req.body.formKey || req.query.formKey || "").trim();
+  const applicationId = String(req.body.applicationId || req.query.applicationId || "").trim();
+  const step = String(req.body.step || req.query.step || "").trim();
+  let redirect = "/runner-sign-in/intervention-copied";
+  if (formKey && applicationId) {
+    redirect += `?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}`;
+    if (step) redirect += `&step=${encodeURIComponent(step)}`;
   }
-  if (data.runnerSignInMethod === "email" && !data.runnerSignInPhoneConfirmed) {
-    return res.redirect("/runner-sign-in/confirm-phone");
-  }
-  return res.redirect("/runner-sign-in/intervention-copied");
+  return res.redirect(redirect);
 });
 
 router.get("/runner-sign-in/intervention-copied", function (req, res) {
   const data = ensureRunnerSignInSession(req);
-  if (!data.runnerSignInAuthed) {
-    // Prototype convenience: when navigating from runner-sign-in-v2 pages, don't force v1 sign-in.
-    if (runnerSignInV2PrototypeMode(req)) {
-      applyRunnerSignInV2EmailAuth(
-        req,
-        data.runnerSignInEmail || "you@example.com",
-        data.runnerSignInPhone || "07700 900000"
-      );
-    } else {
-      return res.redirect("/runner-sign-in/choose-method");
-    }
-  }
-  if (data.runnerSignInMethod === "email" && !data.runnerSignInPhoneConfirmed) {
-    return res.redirect("/runner-sign-in/confirm-phone");
-  }
+  runnerSignInAllowSharedDeepLinkAccess(req);
 
   const formKey = String(req.query.formKey || "").trim();
   const applicationId = String(req.query.applicationId || "").trim();
@@ -18714,20 +18693,7 @@ router.get("/runner-sign-in/intervention-copied", function (req, res) {
 
 router.post("/runner-sign-in/intervention-copied", function (req, res) {
   const data = ensureRunnerSignInSession(req);
-  if (!data.runnerSignInAuthed) {
-    if (runnerSignInV2PrototypeMode(req)) {
-      applyRunnerSignInV2EmailAuth(
-        req,
-        data.runnerSignInEmail || "you@example.com",
-        data.runnerSignInPhone || "07700 900000"
-      );
-    } else {
-      return res.redirect("/runner-sign-in/choose-method");
-    }
-  }
-  if (data.runnerSignInMethod === "email" && !data.runnerSignInPhoneConfirmed) {
-    return res.redirect("/runner-sign-in/confirm-phone");
-  }
+  runnerSignInAllowSharedDeepLinkAccess(req);
 
   const bodyFormKey = String(req.body.formKey || "").trim();
   const bodyApplicationId = String(req.body.applicationId || "").trim();
@@ -22378,9 +22344,13 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
   }
 
   if (slug === "email-form-submitted") {
+    const target = runnerSignInV2FormSubmittedEmailTargetIds(req, formKey, applicationId);
+    const signInUrl = runnerSignInV2FormSubmittedEmailSignInUrl(target.formKey, target.applicationId);
     return res.render("titan-mvp-1.2/runner-sign-in-v2/emails/form-submitted", {
       ...base,
       toEmail: email,
+      formKey: target.formKey,
+      applicationId: target.applicationId,
       formName: application.formName || "Apply to volunteer",
       answers: runnerSignInV2VolunteerApplicationEmailAnswers(application),
       referenceNumber: "YCU-C8R-7KY",
@@ -22392,14 +22362,18 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
       helpEmail: "daniel.dasilveira@defra.gov.uk",
       helpResponseTime: "We aim to get back to you as soon as I can.",
       helpContactLinkText: "Online contact link",
-      helpContactLinkHref: "#",
+      helpContactLinkHref: signInUrl,
     });
   }
 
   if (slug === "email-form-submitted-public") {
+    const target = runnerSignInV2FormSubmittedEmailTargetIds(req, formKey, applicationId);
+    const signInUrl = runnerSignInV2FormSubmittedEmailSignInUrl(target.formKey, target.applicationId);
     return res.render("titan-mvp-1.2/runner-sign-in-v2/emails/form-submitted-public", {
       ...base,
       toEmail: email,
+      formKey: target.formKey,
+      applicationId: target.applicationId,
       formName: application.formName || "Apply to volunteer",
       answers: runnerSignInV2VolunteerApplicationEmailAnswers(application),
       referenceNumber: "YCU-C8R-7KY",
@@ -22410,7 +22384,7 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
       helpEmail: "daniel.dasilveira@defra.gov.uk",
       helpResponseTime: "We aim to get back to you as soon as I can.",
       helpContactLinkText: "Online contact link",
-      helpContactLinkHref: "#",
+      helpContactLinkHref: signInUrl,
     });
   }
 
@@ -24599,18 +24573,42 @@ function runnerSignInV2VolunteerApplicationEmailAnswers(application) {
   };
 }
 
+function runnerSignInV2FormSubmittedEmailTargetIds(req, formKey, applicationId) {
+  const fk = String(formKey || RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_FORM_KEY).trim();
+  const id = String(applicationId || "").trim();
+  const application = id ? runnerSignInV2FindApplication(req, fk, id) : null;
+  if (application && application.status === "Submitted") {
+    return { formKey: fk, applicationId: id };
+  }
+  return {
+    formKey: RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_FORM_KEY,
+    applicationId: RUNNER_SIGN_IN_V2_COPY_SUBMISSION_APP_ID,
+  };
+}
+
+function runnerSignInV2FormSubmittedEmailSignInUrl(formKey, applicationId) {
+  const manageUrl = runnerSignInV2ManagePath(formKey, applicationId);
+  return (
+    `/runner-sign-in-v2/sign-in/email?formKey=${encodeURIComponent(formKey)}` +
+    `&applicationId=${encodeURIComponent(applicationId)}` +
+    `&next=${encodeURIComponent(manageUrl)}`
+  );
+}
+
 function runnerSignInV2FormSubmittedEmailContext(req) {
   const data = ensureRunnerSignInSession(req);
   const toEmail = String(req.query.email || data.runnerSignInEmail || "").trim();
-  const formKey = String(req.query.formKey || "volunteer-application").trim();
+  const formKey = String(req.query.formKey || RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_FORM_KEY).trim();
   const applicationId = String(req.query.applicationId || "").trim();
-  const application = runnerSignInV2ResolveApplication(req, formKey, applicationId);
+  const target = runnerSignInV2FormSubmittedEmailTargetIds(req, formKey, applicationId);
+  const application = runnerSignInV2ResolveApplication(req, target.formKey, target.applicationId);
   const formName = (application && application.formName) || "Apply to volunteer";
   const answers = runnerSignInV2VolunteerApplicationEmailAnswers(application);
+  const signInUrl = runnerSignInV2FormSubmittedEmailSignInUrl(target.formKey, target.applicationId);
   return {
     toEmail,
-    formKey,
-    applicationId,
+    formKey: target.formKey,
+    applicationId: target.applicationId,
     application,
     formName,
     answers,
@@ -24626,7 +24624,9 @@ function runnerSignInV2FormSubmittedEmailContext(req) {
     helpEmail: String(req.query.helpEmail || "daniel.dasilveira@defra.gov.uk").trim(),
     helpResponseTime: String(req.query.helpResponseTime || "We aim to get back to you as soon as I can.").trim(),
     helpContactLinkText: String(req.query.helpContactLinkText || "Online contact link").trim(),
-    helpContactLinkHref: String(req.query.helpContactLinkHref || "#").trim(),
+    helpContactLinkHref: req.query.helpContactLinkHref
+      ? String(req.query.helpContactLinkHref).trim()
+      : signInUrl,
   };
 }
 
