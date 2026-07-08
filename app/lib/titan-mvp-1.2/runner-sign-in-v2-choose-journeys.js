@@ -5,6 +5,7 @@ const SEED = {
   awaitingCheck: { formKey: "apply-small-grant", applicationId: "app-1721152526407" },
   submittedCopy: { formKey: "volunteer-application", applicationId: "app-1721152526408" },
   copyDraft: { formKey: "volunteer-application", applicationId: "app-copy-volunteer-draft" },
+  copyDeclarationRequired: { formKey: "volunteer-application", applicationId: "app-copy-volunteer-declaration" },
 };
 
 // Must match RUNNER_SIGN_IN_V2_PROTOTYPE_KNOWN_RECOVER_PHONE in routes.js (07700900000).

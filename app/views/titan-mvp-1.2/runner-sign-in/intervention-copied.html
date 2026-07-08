@@ -45,6 +45,13 @@ Your previous submission – {{ serviceName }} – GOV.UK
     </ul>
 
     <form class="form" action="/runner-sign-in/intervention-copied" method="post">
+      {% if formKey and applicationId %}
+        <input type="hidden" name="formKey" value="{{ formKey }}">
+        <input type="hidden" name="applicationId" value="{{ applicationId }}">
+      {% endif %}
+      {% if step %}
+        <input type="hidden" name="step" value="{{ step }}">
+      {% endif %}
       <div class="govuk-button-group">
         {{ govukButton({ text: "Continue" }) }}
         {{ govukButton({

@@ -17116,6 +17116,28 @@ function seedRunnerSignInApplicationsPrototype() {
       expiryIso: "2026-06-08T23:59:00+01:00",
     },
     {
+      id: "app-copy-volunteer-declaration",
+      formKey: "volunteer-application",
+      formName: "Apply to volunteer",
+      reference: "N4V-2C8-H6Q",
+      status: "Draft",
+      step: "declaration",
+      answers: {
+        fullName: "Alex Taylor",
+        email: "alex.taylor@example.com",
+        volunteerRole: "Gardening",
+      },
+      copiedFrom: {
+        applicationId: "app-1721152526408",
+        formKey: "volunteer-application",
+        formName: "Apply to volunteer",
+        reference: "FL3-5H4-L8N",
+        submittedIso: "2026-04-18T09:02:00+01:00",
+      },
+      updatedIso: "2026-05-08T10:05:00+01:00",
+      expiryIso: "2026-06-08T23:59:00+01:00",
+    },
+    {
       id: RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_APP_ID,
       formKey: RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_FORM_KEY,
       formName: "Apply to volunteer",
@@ -18594,7 +18616,18 @@ router.get("/runner-sign-in/complete", function (req, res) {
 
 router.get("/runner-sign-in/check-answers-copied", function (req, res) {
   const data = ensureRunnerSignInSession(req);
-  if (!data.runnerSignInAuthed) return res.redirect("/runner-sign-in/choose-method");
+  if (!data.runnerSignInAuthed) {
+    // Prototype convenience: when navigating from runner-sign-in-v2 pages, don't force v1 sign-in.
+    if (runnerSignInV2PrototypeMode(req)) {
+      applyRunnerSignInV2EmailAuth(
+        req,
+        data.runnerSignInEmail || "you@example.com",
+        data.runnerSignInPhone || "07700 900000"
+      );
+    } else {
+      return res.redirect("/runner-sign-in/choose-method");
+    }
+  }
   // Email journeys require phone confirmation
   if (data.runnerSignInMethod === "email" && !data.runnerSignInPhoneConfirmed) {
     return res.redirect("/runner-sign-in/confirm-phone");
@@ -18605,7 +18638,17 @@ router.get("/runner-sign-in/check-answers-copied", function (req, res) {
 
 router.post("/runner-sign-in/check-answers-copied", function (req, res) {
   const data = ensureRunnerSignInSession(req);
-  if (!data.runnerSignInAuthed) return res.redirect("/runner-sign-in/choose-method");
+  if (!data.runnerSignInAuthed) {
+    if (runnerSignInV2PrototypeMode(req)) {
+      applyRunnerSignInV2EmailAuth(
+        req,
+        data.runnerSignInEmail || "you@example.com",
+        data.runnerSignInPhone || "07700 900000"
+      );
+    } else {
+      return res.redirect("/runner-sign-in/choose-method");
+    }
+  }
   if (data.runnerSignInMethod === "email" && !data.runnerSignInPhoneConfirmed) {
     return res.redirect("/runner-sign-in/confirm-phone");
   }
@@ -18614,21 +18657,84 @@ router.post("/runner-sign-in/check-answers-copied", function (req, res) {
 
 router.get("/runner-sign-in/intervention-copied", function (req, res) {
   const data = ensureRunnerSignInSession(req);
-  if (!data.runnerSignInAuthed) return res.redirect("/runner-sign-in/choose-method");
+  if (!data.runnerSignInAuthed) {
+    // Prototype convenience: when navigating from runner-sign-in-v2 pages, don't force v1 sign-in.
+    if (runnerSignInV2PrototypeMode(req)) {
+      applyRunnerSignInV2EmailAuth(
+        req,
+        data.runnerSignInEmail || "you@example.com",
+        data.runnerSignInPhone || "07700 900000"
+      );
+    } else {
+      return res.redirect("/runner-sign-in/choose-method");
+    }
+  }
   if (data.runnerSignInMethod === "email" && !data.runnerSignInPhoneConfirmed) {
     return res.redirect("/runner-sign-in/confirm-phone");
   }
-  return res.render("titan-mvp-1.2/runner-sign-in/intervention-copied", { data });
+
+  const formKey = String(req.query.formKey || "").trim();
+  const applicationId = String(req.query.applicationId || "").trim();
+  const step = String(req.query.step || "").trim();
+
+  // If provided, persist the target so POST can succeed without relying on querystring.
+  if (formKey && applicationId) {
+    data.runnerSignInCopiedInterventionTarget = { formKey, applicationId, step };
+  }
+
+  return res.render("titan-mvp-1.2/runner-sign-in/intervention-copied", {
+    data,
+    formKey,
+    applicationId,
+    step,
+  });
 });
 
 router.post("/runner-sign-in/intervention-copied", function (req, res) {
   const data = ensureRunnerSignInSession(req);
-  if (!data.runnerSignInAuthed) return res.redirect("/runner-sign-in/choose-method");
+  if (!data.runnerSignInAuthed) {
+    if (runnerSignInV2PrototypeMode(req)) {
+      applyRunnerSignInV2EmailAuth(
+        req,
+        data.runnerSignInEmail || "you@example.com",
+        data.runnerSignInPhone || "07700 900000"
+      );
+    } else {
+      return res.redirect("/runner-sign-in/choose-method");
+    }
+  }
   if (data.runnerSignInMethod === "email" && !data.runnerSignInPhoneConfirmed) {
     return res.redirect("/runner-sign-in/confirm-phone");
   }
-  // Prototype placeholder: continue to the main "Your forms" list.
-  return res.redirect("/runner-sign-in/applications");
+
+  const bodyFormKey = String(req.body.formKey || "").trim();
+  const bodyApplicationId = String(req.body.applicationId || "").trim();
+  const bodyStep = String(req.body.step || "").trim();
+
+  const remembered = data.runnerSignInCopiedInterventionTarget || {};
+  const formKey = bodyFormKey || remembered.formKey || "";
+  const applicationId = bodyApplicationId || remembered.applicationId || "";
+  const requestedStep = bodyStep || remembered.step || "";
+
+  if (!formKey || !applicationId) {
+    return res.redirect("/runner-sign-in/applications");
+  }
+
+  const applications = ensureRunnerSignInApplications(req);
+  const application = applications.find((a) => a && a.id === applicationId && a.formKey === formKey);
+  if (!application) {
+    return res.redirect("/runner-sign-in/applications");
+  }
+
+  const formDef = getRunnerSignInFormDef(formKey);
+  const resumeStepId = getRunnerSignInResumeStepId(application);
+  const stepId = requestedStep && getRunnerSignInStepDef(formDef, requestedStep)
+    ? requestedStep
+    : resumeStepId;
+
+  return res.redirect(
+    `/runner-sign-in/forms/${encodeURIComponent(formKey)}/${encodeURIComponent(applicationId)}/${encodeURIComponent(stepId)}?copied=1`
+  );
 });
 
 router.post("/runner-sign-in/complete", function (req, res) {
