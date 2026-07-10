@@ -21725,29 +21725,15 @@ const RUNNER_SIGN_IN_V2_UNEXPECTED_PAGES = {
   "wrong-security-code-locked-out": {
     title: "You entered the wrong security code too many times",
     journey: "Security code problems",
-    paragraphs: ["You will not be able to sign in for 2 hours."],
-    sections: [
-      {
-        heading: "What you can do",
-        paragraphs: [
-          "Wait 2 hours, then go back to the form you were trying to use and start again.",
-          "If you need to use it sooner, you can go back to the form and look for other ways to continue.",
-        ],
-      },
+    paragraphs: ["You will not be able to sign in for 2 hours.",
+      "Wait 2 hours, then go back to the form you were trying to use and try again.",
     ],
   },
   "too-many-security-codes": {
-    title: "You asked to resend the security code too many times",
+    title: "You've asked to resend the security code too many times",
     journey: "Security code problems",
-    paragraphs: ["You will not be able to sign in for 2 hours."],
-    sections: [
-      {
-        heading: "What you can do",
-        paragraphs: [
-          "Wait 2 hours, then go back to the form you were trying to use and start again.",
-          "If you need to use it sooner, you can go back to the form and look for other ways to continue.",
-        ],
-      },
+    paragraphs: ["You will not be able to sign in for 2 hours.",
+      "Wait 2 hours, then go back to the form you were trying to use and try again.",
     ],
   },
   "cannot-recover-online": {
