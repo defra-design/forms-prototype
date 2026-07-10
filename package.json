@@ -8,7 +8,8 @@
     "serve": "govuk-prototype-kit serve",
     "start": "govuk-prototype-kit start",
     "screenshots:saved-answers": "node scripts/screenshot-saved-answers-pages.js",
-    "screenshots:welsh-translation-sections": "node scripts/screenshot-welsh-translation-sections.js"
+    "screenshots:welsh-translation-sections": "node scripts/screenshot-welsh-translation-sections.js",
+    "export:runner-sign-in-v2-docx": "node scripts/export-runner-sign-in-v2-all-pages-docx.js"
   },
   "dependencies": {
     "@dwp/dwp-frontend": "^3.2.0",
@@ -29,6 +30,7 @@
     "govuk-one-login-service-header": "github:govuk-one-login/service-header#a823f1a5ddc2879945f7d4f2cce889d100d3441c",
     "govuk-prototype-kit": "^13.16.2",
     "hmrc-frontend": "^6.22.0",
+    "html-to-docx": "^1.8.0",
     "iframe-resizer": "4.4.2",
     "jquery": "^3.7.1",
     "js-yaml": "^4.1.0",
