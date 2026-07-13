@@ -1,7 +1,6 @@
 {% extends "layouts/runner.html" %}
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
-{% from "govuk/components/radios/macro.njk" import govukRadios %}
 {% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
 {% import "components/one-login-service-header/service-header.njk" as oneLoginHeader %}
 
@@ -31,13 +30,13 @@ You are about to clone this application – {{ serviceName }} – GOV.UK
 {% block content %}
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
-    <h1 class="govuk-heading-xl">You are about to copy answers from this form</h1>
+    <h1 class="govuk-heading-xl">Are you sure you want to copy answers from this form?</h1>
 
+    <p class="govuk-body">We’ll use the answers from <strong>{{ application.formName }}</strong> to start a new form. You can change any of the answers before you submit it.</p>
 
     {{ govukInsetText({
       text: "This form submission will not be changed or replaced."
     }) }}
-
     {{ govukSummaryList({
       rows: [
         { key: { text: "Form name" }, value: { text: application.formName } },
@@ -47,25 +46,16 @@ You are about to clone this application – {{ serviceName }} – GOV.UK
     }) }}
 
     <form class="form" action="/runner-sign-in/applications/{{ application.id }}/clone" method="post">
-      {{ govukRadios({
-        idPrefix: "clone-application",
-        name: "cloneApplication",
-        fieldset: {
-          legend: {
-            text: "Do you want to copy answers from this form?",
-            classes: "govuk-fieldset__legend--m"
-          }
-        },
-        hint: {
-          text: "If you copy answers from this form, we’ll use them to start a new form"
-        },
-        items: [
-          { value: "yes", text: "Yes, copy this form" },
-          { value: "no", text: "No" }
-        ]
-      }) }}
+      <input type="hidden" name="cloneApplication" value="yes">
 
-      {{ govukButton({ text: "Continue" }) }}
+      <div class="govuk-button-group">
+        {{ govukButton({ text: "Copy answers" }) }}
+        {{ govukButton({
+          text: "Cancel",
+          href: "/runner-sign-in/applications",
+          classes: "govuk-button--secondary"
+        }) }}
+      </div>
     </form>
   </div>
 </div>
