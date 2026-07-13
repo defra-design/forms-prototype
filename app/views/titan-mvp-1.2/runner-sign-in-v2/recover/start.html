@@ -26,8 +26,8 @@
     <h1 class="govuk-heading-l">Check your phone</h1>
     <p class="govuk-body">We need to make sure your sign-in details are correct.</p>
     {% if maskedMobile %}
-      {{ govukInsetText({ html: "We have sent a code to your phone number ending with <strong>" + (maskedMobile | e) + "</strong>" }) }}
-      <p class="govuk-body">It might take a few minutes to arrive. The code will expire after 15 minutes.</p>
+      {{ govukInsetText({ html: "We have sent a security code to your mobile phone number ending with <strong>" + (maskedMobile | e) + "</strong>" }) }}
+      <p class="govuk-body">It might take a few minutes to arrive. The security code will expire after 15 minutes.</p>
 
       <p class="govuk-body">
         <a class="govuk-link" href="/runner-sign-in-v2/texts/recover-security-code">View the text message (prototype only)</a>
@@ -38,7 +38,7 @@
         <input type="hidden" name="applicationId" value="{{ applicationId }}" />
         <input type="hidden" name="next" value="{{ next | e }}" />
         {{ v2.v2SecurityCodeInput({
-          labelText: "Enter the 6 digit code",
+          labelText: "Enter the 6 digit security code",
           errorMessage: { text: error.runnerSignInV2Code } if error and error.runnerSignInV2Code else false,
           value: values.runnerSignInV2Code
         }) }}
@@ -48,12 +48,12 @@
       {% set problemsHtml %}
         <p class="govuk-body">
           We can
-          <a class="govuk-link" href="/runner-sign-in-v2/recover/get-security-code?formKey={{ formKey | urlencode }}&amp;applicationId={{ applicationId | urlencode }}&amp;next={{ next | urlencode }}">send the code again</a> if the code is not working or you did not receive it.
+          <a class="govuk-link" href="/runner-sign-in-v2/recover/get-security-code?formKey={{ formKey | urlencode }}&amp;applicationId={{ applicationId | urlencode }}&amp;next={{ next | urlencode }}">send the security code again</a> if the security code is not working or you did not receive it.
         </p>
       {% endset %}
 
       {{ govukDetails({
-        summaryText: "Problems with the code?",
+        summaryText: "Problems with the security code?",
         html: problemsHtml
       }) }}
     {% endif %}

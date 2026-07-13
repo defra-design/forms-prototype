@@ -60,6 +60,7 @@ function runnerSignInV2BuildJourneyUrls({
     deleteDraft: `/runner-sign-in-v2/forms/${enc(formKey)}/${enc(applicationId)}/delete`,
     errorMessages: "/runner-sign-in-v2/error-messages",
     allPages: "/runner-sign-in-v2/all-pages",
+    allPagesStatic: "/runner-sign-in-v2/all-pages/static",
     formEditorAdvancedSettings: "/titan-mvp-1.2/form-editor/advanced-settings",
     formEditorCheckBeforeSubmission: "/titan-mvp-1.2/form-editor/advanced-settings/check-before-submission",
     formEditorReusePreviousAnswers: "/titan-mvp-1.2/form-editor/advanced-settings/reuse-previous-answers",

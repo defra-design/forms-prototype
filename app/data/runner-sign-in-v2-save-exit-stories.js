@@ -63,8 +63,8 @@ function buildRunnerSignInV2SaveExitStories(urls) {
             { label: "GIVEN", text: "I can see the Enter your mobile phone number page" },
             { label: "AND", text: "a valid email address was entered" },
             { label: "AND", text: "a valid OTP was successfully entered" },
-            { label: "WHEN", text: "I enter a valid UK mobile number (Google lib validation on phone component)" },
-            { label: "OR", text: "a valid international mobile number (Google lib validation on phone component)" },
+            { label: "WHEN", text: "I enter a valid mobile phone number (Google lib validation on phone component)" },
+            { label: "OR", text: "a valid international mobile phone number (Google lib validation on phone component)" },
             { label: "AND", text: "I select Continue" },
             { label: "THEN", text: "the Your progress has been saved page is displayed" },
             { label: "AND", text: "a save-and-exit email is sent to the email address I entered" },
@@ -245,7 +245,7 @@ function buildRunnerSignInV2SaveExitStories(urls) {
       id: "story-2",
       title: "Story 2 – Save and Exit when already signed in",
       summary:
-        "User is signed in while filling in the form. They choose Save and exit and receive an email link to return later.",
+        "User is signed in while filling in the form. They choose Save and exit and receive an email link to continue their form later.",
       flows: [
         {
           title: "Flow 1 – Display confirm email to save and exit",
@@ -263,12 +263,12 @@ function buildRunnerSignInV2SaveExitStories(urls) {
             { label: "GIVEN", text: "I can see the Confirm the email for your save link page" },
             { label: "AND", text: "a valid email address is entered" },
             { label: "WHEN", text: "I select Continue" },
-            { label: "THEN", text: "the We've emailed you a link to come back page is displayed" },
+            { label: "THEN", text: "the We've emailed you a link to continue your form later page is displayed" },
             { label: "AND", text: "a save-and-exit email is sent to the email address entered" },
             { label: "AND", text: "the in-progress submission is saved for 28 days" },
           ],
           links: [
-            { text: "We've emailed you a link to come back", href: preview(urls, "save-exit-with-sign-in-leave") },
+            { text: "We've emailed you a link to continue your form later", href: preview(urls, "save-exit-with-sign-in-leave") },
             { text: "Save and exit email (signed in)", href: preview(urls, "email-save-exit-with-sign-in") },
           ],
         },
@@ -298,9 +298,9 @@ function buildRunnerSignInV2SaveExitStories(urls) {
     },
     {
       id: "story-3",
-      title: "Story 3 – Sign in to resume saved progress",
+      title: "Story 3 – Sign in to continue saved progress",
       summary:
-        "User returns via the save-and-exit email or progress-saved screen and signs in to reach Manage your form.",
+        "User opens the save-and-exit email or progress-saved screen and signs in to continue their form later.",
       flows: [
         {
           title: "Flow 1 – Sign in from your progress has been saved screen",
@@ -534,7 +534,7 @@ function buildRunnerSignInV2SaveExitStories(urls) {
             { label: "WHEN", text: "I select Delete" },
             { label: "AND", text: "I confirm Yes, delete this draft" },
             { label: "THEN", text: "the submission is permanently removed from my dashboard" },
-            { label: "AND", text: "I cannot resume it via the save-and-exit email link for that submission" },
+            { label: "AND", text: "I cannot continue it via the save-and-exit email link for that submission" },
           ],
           links: [
             { text: "Delete draft confirmation", href: preview(urls, "delete-draft") },

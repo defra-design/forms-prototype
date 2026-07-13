@@ -32,7 +32,7 @@
     <p class="govuk-body">
       Your email might take a few minutes to arrive. If you do not get an email, check your spam folder.
     </p>
-    <p class="govuk-body">The code will expire after one hour.</p>
+    <p class="govuk-body">The security code will expire after 15 minutes.</p>
     <form method="post" action="/runner-sign-in-v2/recover/check-new-email" autocomplete="off" novalidate>
       <input type="hidden" name="formKey" value="{{ formKey }}" />
       <input type="hidden" name="applicationId" value="{{ applicationId }}" />
@@ -47,14 +47,14 @@
     {% set problemsHtml %}
       <p class="govuk-body">
         We can
-        <a class="govuk-link" href="/runner-sign-in-v2/recover/check-new-email?formKey={{ formKey | urlencode }}&amp;applicationId={{ applicationId | urlencode }}&amp;next={{ next | urlencode }}&amp;resend=1">send the code again</a>
+        <a class="govuk-link" href="/runner-sign-in-v2/recover/check-new-email?formKey={{ formKey | urlencode }}&amp;applicationId={{ applicationId | urlencode }}&amp;next={{ next | urlencode }}&amp;resend=1">send the security code again</a>
         or you can
         <a class="govuk-link" href="/runner-sign-in-v2/recover/new-email?formKey={{ formKey | urlencode }}&amp;applicationId={{ applicationId | urlencode }}&amp;next={{ next | urlencode }}">use a different email address</a>.
       </p>
     {% endset %}
 
     {{ govukDetails({
-      summaryText: "Problems with the code?",
+      summaryText: "Problems with the security code?",
       html: problemsHtml
     }) }}
   </div>

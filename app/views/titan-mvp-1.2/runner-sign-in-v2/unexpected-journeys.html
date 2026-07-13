@@ -95,7 +95,8 @@ Unexpected journeys - Runner sign-in v2 - GOV.UK
 
         <h3 class="govuk-heading-s">Suggested page language</h3>
         <p class="govuk-body"><strong>We cannot find a sign-in for that email address</strong></p>
-        <p class="govuk-body">Check the email address or create a sign-in if you have not used this form before.</p>
+        <p class="govuk-body">Check the email address and try again.</p>
+        <p class="govuk-body">If you have not used this form before, you can create a sign-in.</p>
         <p class="govuk-body">Primary action: <strong>Try again</strong>. Secondary link: <strong>Create a sign-in</strong>.</p>
 
         {{ journeyDocs.journeyPreviews([
@@ -117,9 +118,10 @@ Unexpected journeys - Runner sign-in v2 - GOV.UK
 
         <h3 class="govuk-heading-s">Suggested page language</h3>
         <ul class="govuk-list govuk-list--bullet">
-          <li><strong>Your security code has expired</strong> - send a new security code.</li>
-          <li><strong>You entered the wrong security code too many times</strong> - link to get a new code, or show a 2 hour lockout.</li>
-          <li><strong>You asked to resend the security code too many times</strong> - show a 2 hour lockout.</li>
+          <li><strong>Your security code has expired</strong> — Security codes expire after 15 minutes. Ask us to send a new security code, then enter it on the next page. Primary action: <strong>Send a new security code</strong>.</li>
+          <li><strong>You entered the wrong security code too many times</strong> — You need to get a new security code and try again.</li>
+          <li><strong>You entered the wrong security code too many times (locked out)</strong> — You will not be able to sign in for 2 hours. Wait 2 hours, then go back to the form you were trying to use and try again.</li>
+          <li><strong>You've asked to resend the security code too many times</strong> — You will not be able to sign in for 2 hours. Wait 2 hours, then go back to the form you were trying to use and try again.</li>
         </ul>
         <p class="govuk-body">Keep the channel specific: use <strong>email</strong> when creating or signing in, and <strong>phone</strong> when recovering a sign-in.</p>
 
@@ -127,7 +129,7 @@ Unexpected journeys - Runner sign-in v2 - GOV.UK
           { caption: "Security code problems", title: "Your security code has expired", href: "/runner-sign-in-v2/unexpected-journeys/security-code-expired" },
           { caption: "Security code problems", title: "You entered the wrong security code too many times (get a new code)", href: "/runner-sign-in-v2/unexpected-journeys/wrong-security-code-too-many-times" },
           { caption: "Security code problems", title: "You entered the wrong security code too many times (locked out)", href: "/runner-sign-in-v2/unexpected-journeys/wrong-security-code-locked-out" },
-          { caption: "Security code problems", title: "You asked to resend the security code too many times", href: "/runner-sign-in-v2/unexpected-journeys/too-many-security-codes" }
+          { caption: "Security code problems", title: "You've asked to resend the security code too many times", href: "/runner-sign-in-v2/unexpected-journeys/too-many-security-codes" }
         ]) }}
       </div>
     {% endset %}
@@ -137,19 +139,20 @@ Unexpected journeys - Runner sign-in v2 - GOV.UK
         {{ journeyDocs.journeyPath([
           { text: "I've forgotten my email address" },
           { text: "Enter your mobile phone number" },
-          { text: "We cannot find a sign-in for that mobile number", unexpected: true }
+          { text: "We cannot find a sign-in for that mobile phone number", unexpected: true }
         ]) }}
 
         <h3 class="govuk-heading-s">Use when</h3>
-        <p class="govuk-body">Someone enters a mobile number during recovery that is not linked to a sign-in for the form they are trying to use.</p>
+        <p class="govuk-body">Someone enters a mobile phone number during recovery that is not linked to a sign-in for the form they are trying to use.</p>
 
         <h3 class="govuk-heading-s">Suggested page language</h3>
-        <p class="govuk-body"><strong>We cannot find a sign-in for that mobile number</strong></p>
-        <p class="govuk-body">There is no sign-in for the mobile number they entered. They can create a sign-in or try another mobile number.</p>
-        <p class="govuk-body">Primary action: <strong>Create a sign-in</strong>. Secondary link: <strong>Try another mobile number</strong>.</p>
+        <p class="govuk-body"><strong>We cannot find a sign-in for that mobile phone number</strong></p>
+        <p class="govuk-body">There is no sign-in for the mobile phone number they entered.</p>
+        <p class="govuk-body">You'll need to create a sign-in to use this form.</p>
+        <p class="govuk-body">Primary action: <strong>Create a sign-in</strong>. Secondary link: <strong>Try another mobile phone number</strong>.</p>
 
         {{ journeyDocs.journeyPreviews([
-          { caption: "No sign-in found for a mobile number", title: "We cannot find a sign-in for that mobile number", href: "/runner-sign-in-v2/static/recover-no-sign-in-for-mobile" }
+          { caption: "No sign-in found for a mobile phone number", title: "We cannot find a sign-in for that mobile phone number", href: "/runner-sign-in-v2/static/recover-no-sign-in-for-mobile" }
         ]) }}
       </div>
     {% endset %}
@@ -164,11 +167,12 @@ Unexpected journeys - Runner sign-in v2 - GOV.UK
         ]) }}
 
         <h3 class="govuk-heading-s">Use when</h3>
-        <p class="govuk-body">Someone cannot use the mobile number they gave when they created their sign-in, or cannot confirm a new email address.</p>
+        <p class="govuk-body">Someone cannot use the mobile phone number they gave when they created their sign-in, or cannot confirm a new email address.</p>
 
         <h3 class="govuk-heading-s">Suggested page language</h3>
         <p class="govuk-body"><strong>We cannot recover your sign-in online</strong></p>
-        <p class="govuk-body">You can start a new form or contact us if you need access to a saved form.</p>
+        <p class="govuk-body">You can start a new form.</p>
+        <p class="govuk-body">Contact us if you need access to a form you have already saved.</p>
         <p class="govuk-body">Primary action: <strong>Start a new form</strong>. Secondary link: <strong>Contact us</strong>.</p>
 
         {{ journeyDocs.journeyPreviews([
@@ -190,12 +194,12 @@ Unexpected journeys - Runner sign-in v2 - GOV.UK
 
         <h3 class="govuk-heading-s">Suggested page language</h3>
         <ul class="govuk-list govuk-list--bullet">
-          <li><strong>Your link to return to this form has expired</strong> - sign in from the form start page.</li>
-          <li><strong>This review link has expired</strong> - ask the applicant to send a new invite.</li>
+          <li><strong>Your link has expired</strong> — Go to the form start page and sign in again. Primary action: <strong>Go to the form start page</strong>.</li>
+          <li><strong>This link has expired</strong> — The applicant needs to send you a new invite before you can check their form. Primary action: <strong>Back to GOV.UK</strong>.</li>
         </ul>
 
         {{ journeyDocs.journeyPreviews([
-          { caption: "Expired save or review links", title: "Your link to return to this form has expired", href: "/runner-sign-in-v2/unexpected-journeys/save-link-expired" },
+          { caption: "Expired save or review links", title: "Your link has expired", href: "/runner-sign-in-v2/unexpected-journeys/save-link-expired" },
           { caption: "Expired save or review links", title: "This review link has expired", href: "/runner-sign-in-v2/unexpected-journeys/review-link-expired" }
         ]) }}
       </div>
@@ -246,7 +250,7 @@ Unexpected journeys - Runner sign-in v2 - GOV.UK
           content: { html: securityCodeHtml }
         },
         {
-          heading: { text: "No sign-in found for a mobile number" },
+          heading: { text: "No sign-in found for a mobile phone number" },
           summary: { text: "Recover sign-in journey" },
           content: { html: recoverPhoneNotFoundHtml }
         },

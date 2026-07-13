@@ -16,12 +16,12 @@
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
     <span class="govuk-caption-l">Recover my sign-in</span>
-    <h1 class="govuk-heading-l">We cannot find a sign-in for that mobile number</h1>
+    <h1 class="govuk-heading-l">We cannot find a sign-in for that mobile phone number</h1>
     <p class="govuk-body">There is no sign-in for <strong>{{ mobile }}</strong>.</p>
     <p class="govuk-body">You'll need to create a sign-in to use this form.</p>
 
     {{ govukInsetText({
-      text: "Sign-in accounts are linked to the form you are using. A mobile number used for another service will not work here."
+      text: "Sign-in accounts are linked to the form you are using. A mobile phone number used for another service will not work here."
     }) }}
 
     {{ govukButton({
@@ -30,7 +30,7 @@
     }) }}
 
     <p class="govuk-body">
-      <a class="govuk-link" href="{{ recoverPhoneUrl }}">Try another mobile number</a>
+      <a class="govuk-link" href="{{ recoverPhoneUrl }}">Try another mobile phone number</a>
     </p>
   </div>
 </div>

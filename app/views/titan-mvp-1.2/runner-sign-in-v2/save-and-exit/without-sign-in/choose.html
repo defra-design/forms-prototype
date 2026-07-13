@@ -20,24 +20,22 @@
 
     <p class="govuk-body">You need to sign in to save your progress for 28 days.</p>
 
-    <h2 class="govuk-heading-m">You’ll need</h2>
-    <ul class="govuk-list govuk-list--bullet">
-      <li>an email address</li>
-      <li>a mobile phone number</li>
-    </ul>
+    <p class="govuk-body govuk-!-margin-bottom-6">You'll need an email address and a mobile phone number. If you've not used this form before, create sign-in details before you start.</p>
 
-    <div class="govuk-button-group">
+    <h2 class="govuk-heading-m">New users</h2>
+
     {{ govukButton({
-      text: "Create your sign-in",
+      text: "Create sign-in details",
       href: createSignInUrl
     }) }}
 
+    <div>
+      <h2 class="govuk-heading-m">Returning users</h2>
       {{ govukButton({
         text: "Sign in",
         href: signInUrl,
         classes: "govuk-button--secondary"
       }) }}
-    </div>
     </div>
   </div>
 </div>

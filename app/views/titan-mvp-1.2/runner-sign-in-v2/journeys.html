@@ -57,7 +57,7 @@
 
     {% set createSignInHtml %}
       <div class="journey-docs__section">
-        <p class="govuk-body">Someone creates a sign-in before continuing with their form. Security codes are sent by <strong>email</strong>. The mobile number is used if they forget their email address.</p>
+        <p class="govuk-body">Someone creates a sign-in before continuing with their form. Security codes are sent by <strong>email</strong>. The mobile phone number is used if they forget their email address.</p>
         {{ journeyDocs.journeyPath([
           { text: "Form start page", href: urls.formStartPage },
           { text: "Sign in to use this form", href: urls.whySignIn },
@@ -100,7 +100,7 @@
           { text: "Enter your email address", href: urls.signInEmail },
           { text: "I've forgotten my email address", href: urls.recoverPhone, branch: true },
           { text: "Enter your mobile phone number", href: urls.recoverPhone },
-          { text: "No sign-in found for mobile number", href: urls.staticRecoverNoSignInForMobile },
+          { text: "No sign-in found for mobile phone number", href: urls.staticRecoverNoSignInForMobile },
           { text: "Get security code", href: urls.recoverGetCode },
           { text: "Check your phone", href: urls.recoverStart },
           { text: "Enter your new email address", href: urls.recoverNewEmail },
@@ -109,7 +109,7 @@
         ]) }}
         {{ journeyDocs.journeyPreviews([
           { caption: "Recover sign-in", title: "Enter mobile phone number", href: urls.recoverPhone, previewHref: urls.preview.recoverPhone },
-          { caption: "Recover sign-in", title: "No sign-in found for mobile number", href: urls.staticRecoverNoSignInForMobile },
+          { caption: "Recover sign-in", title: "No sign-in found for mobile phone number", href: urls.staticRecoverNoSignInForMobile },
           { caption: "Recover sign-in", title: "Get security code (phone)", href: urls.recoverGetCode, previewHref: urls.preview.recoverGetCode },
           { caption: "Recover sign-in", title: "Check your phone", href: urls.recoverStart, previewHref: urls.preview.recoverStart },
           { caption: "Recover sign-in", title: "Enter new email address", href: urls.recoverNewEmail, previewHref: urls.preview.recoverNewEmail }
@@ -119,11 +119,11 @@
 
     {% set saveExitWithSignInHtml %}
       <div class="journey-docs__section">
-        <p class="govuk-body">Someone is signed in and chooses <strong>Save and exit</strong>. We email them a link to return to their form.</p>
+        <p class="govuk-body">Someone is signed in and chooses <strong>Save and exit</strong>. We email them a link to continue their form later.</p>
         {{ journeyDocs.journeyPath([
           { text: "Filling in the form", href: urls.formStartPage },
           { text: "Confirm email to save and exit", href: urls.saveExitConfirmEmail },
-          { text: "We've emailed you a link to come back", href: urls.saveExitWithSignInLeave },
+          { text: "We've emailed you a link to continue your form later", href: urls.saveExitWithSignInLeave },
           { text: "Save and exit email", href: urls.emailSaveExitWithSignIn },
           { text: "Welcome back", href: urls.saveExitWithSignInResume },
           { text: "Sign in from email link", href: urls.signInEmail },
@@ -170,7 +170,7 @@
           { text: "Security", href: urls.security }
         ]) }}
         <h3 class="govuk-heading-s govuk-!-margin-top-6">Change email address</h3>
-        <p class="govuk-body">Verify with a security code sent to the registered <strong>phone number</strong>, then confirm the new email address.</p>
+        <p class="govuk-body">Verify with a security code sent to the registered <strong>mobile phone number</strong>, then confirm the new email address.</p>
         {{ journeyDocs.journeyPath([
           { text: "Security", href: urls.security },
           { text: "Get security code (phone)", href: urls.changeEmailGetCode },
@@ -180,13 +180,13 @@
           { text: "Check your email", href: urls.changeEmailCheckNewEmail },
           { text: "Security", href: urls.security }
         ]) }}
-        <h3 class="govuk-heading-s govuk-!-margin-top-6">Change phone number</h3>
+        <h3 class="govuk-heading-s govuk-!-margin-top-6">Change mobile phone number</h3>
         <p class="govuk-body">Verify with a security code sent to the registered <strong>email address</strong>, then enter a new mobile phone number.</p>
         {{ journeyDocs.journeyPath([
           { text: "Security", href: urls.security },
           { text: "Get security code (email)", href: urls.changePhoneGetCode },
           { text: "Check your email", href: urls.changePhoneCheckEmail },
-          { text: "Enter new phone number", href: urls.changePhoneNewPhone },
+          { text: "Enter new mobile phone number", href: urls.changePhoneNewPhone },
           { text: "Security", href: urls.security }
         ]) }}
         {{ journeyDocs.journeyPreviews([
@@ -196,9 +196,9 @@
           { caption: "Change email", title: "Enter new email address", href: urls.changeEmailNewEmail, previewHref: urls.preview.changeEmailNewEmail },
           { caption: "Change email", title: "Enter new email address (same as current error)", href: urls.staticChangeEmailNewEmailSameAsCurrent, previewHref: urls.preview.changeEmailNewEmailSameAsCurrent },
           { caption: "Change email", title: "Check your email", href: urls.changeEmailCheckNewEmail, previewHref: urls.preview.changeEmailCheckNewEmail },
-          { caption: "Change phone", title: "Get security code (email)", href: urls.changePhoneGetCode, previewHref: urls.preview.changePhoneGetCode },
-          { caption: "Change phone", title: "Check your email", href: urls.changePhoneCheckEmail, previewHref: urls.preview.changePhoneCheckEmail },
-          { caption: "Change phone", title: "Enter new phone number", href: urls.changePhoneNewPhone, previewHref: urls.preview.changePhoneNewPhone }
+          { caption: "Change mobile phone number", title: "Get security code (email)", href: urls.changePhoneGetCode, previewHref: urls.preview.changePhoneGetCode },
+          { caption: "Change mobile phone number", title: "Check your email", href: urls.changePhoneCheckEmail, previewHref: urls.preview.changePhoneCheckEmail },
+          { caption: "Change mobile phone number", title: "Enter new mobile phone number", href: urls.changePhoneNewPhone, previewHref: urls.preview.changePhoneNewPhone }
         ]) }}
       </div>
     {% endset %}
@@ -302,7 +302,7 @@
         },
         {
           heading: { text: "Save and exit (signed in)" },
-          summary: { text: "Confirm email and resume link" },
+          summary: { text: "Confirm email and continue link" },
           content: { html: saveExitWithSignInHtml }
         },
         {
@@ -312,7 +312,7 @@
         },
         {
           heading: { text: "Security" },
-          summary: { text: "View, change email and change phone number" },
+          summary: { text: "View, change email and change mobile phone number" },
           content: { html: securityHtml }
         },
         {

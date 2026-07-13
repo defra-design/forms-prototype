@@ -5,7 +5,7 @@
 {% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
 {% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
 
-{% block pageTitle %}Change phone number – GOV.UK{% endblock %}
+{% block pageTitle %}Change mobile phone number – GOV.UK{% endblock %}
 
 {% block beforeContent %}
   {{ govukBackLink({ href: checkEmailUrl, text: "Back" }) }}
@@ -19,7 +19,7 @@
     {% if error and error.runnerSignInV2Mobile %}
       {{ govukErrorSummary({ titleText: "There is a problem", errorList: [{ text: error.runnerSignInV2Mobile, href: "#v2-mobile" }] }) }}
     {% endif %}
-    <span class="govuk-caption-l">Change phone number</span>
+    <span class="govuk-caption-l">Change mobile phone number</span>
     <h1 class="govuk-heading-l">Enter your new mobile phone number</h1>
     <p class="govuk-body">If you forget your sign-in details, we will send a 6 digit security code to this number.</p>
 

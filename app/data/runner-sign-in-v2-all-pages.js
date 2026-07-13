@@ -29,6 +29,7 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
         { text: "Start page", href: "/runner-sign-in-v2/start-page" },
         { text: "Choose a journey", href: "/runner-sign-in-v2/choose-journey" },
         { text: "All pages", href: urls.allPages || "/runner-sign-in-v2/all-pages" },
+        { text: "All pages (static)", href: urls.allPagesStatic || "/runner-sign-in-v2/all-pages/static" },
         { text: "Journeys", href: "/runner-sign-in-v2/journeys" },
         { text: "Journey flowcharts", href: "/runner-sign-in-v2/journey-flowcharts" },
         { text: "Unexpected journeys", href: "/runner-sign-in-v2/unexpected-journeys" },
@@ -171,7 +172,7 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
       links: [
         { text: "Enter your mobile phone number", href: urls.recoverPhone },
         {
-          text: "No sign-in found for mobile number",
+          text: "No sign-in found for mobile phone number",
           href: urls.staticRecoverNoSignInForMobile,
         },
         { text: "Get security code", href: urls.recoverGetCode },
@@ -185,7 +186,7 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
       heading: "Save and exit (signed in)",
       links: [
         { text: "Confirm email to save and exit", href: urls.saveExitConfirmEmail },
-        { text: "We've emailed you a link to come back", href: urls.saveExitWithSignInLeave },
+        { text: "We've emailed you a link to continue your form later", href: urls.saveExitWithSignInLeave },
         { text: "Save and exit email", href: urls.emailSaveExitWithSignIn || urls.emailSaveExit },
         { text: "Welcome back (from email)", href: urls.saveExitWithSignInResume },
         { text: "Sign in from email link", href: urls.signInEmail },
@@ -198,7 +199,7 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
         { text: "Create a sign-in", href: urls.saveExitCreate },
         { text: "Check your email", href: urls.saveExitWithoutSignInCheckEmail },
         { text: "Your progress has been saved", href: urls.saveExitCreated || "/runner-sign-in-v2/journeys/preview/save-exit-progress-saved" },
-        { text: "We've emailed you a link to resume", href: urls.saveExitLeave },
+        { text: "We've emailed you a link to continue your form later", href: urls.saveExitLeave },
         { text: "Save and exit email", href: urls.emailSaveExitWithoutSignIn || `${urls.emailSaveExit}&variant=without-sign-in` },
         { text: "Welcome back (from email)", href: urls.saveExitWithoutSignInResume },
         { text: "Delete draft confirmation", href: urls.deleteDraft },
@@ -216,9 +217,9 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
           href: urls.staticChangeEmailNewEmailSameAsCurrent,
         },
         { text: "Change email: check your email", href: urls.changeEmailCheckNewEmail },
-        { text: "Change phone: get security code (email)", href: urls.changePhoneGetCode },
-        { text: "Change phone: check your email", href: urls.changePhoneCheckEmail },
-        { text: "Change phone: enter new phone number", href: urls.changePhoneNewPhone },
+        { text: "Change mobile phone number: get security code (email)", href: urls.changePhoneGetCode },
+        { text: "Change mobile phone number: check your email", href: urls.changePhoneCheckEmail },
+        { text: "Change mobile phone number: enter new mobile phone number", href: urls.changePhoneNewPhone },
       ],
     },
     {
@@ -266,4 +267,227 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
   ];
 }
 
-module.exports = { buildRunnerSignInV2AllPagesSections };
+function buildRunnerSignInV2AllPagesStaticSections(urls, { unexpectedPages }) {
+  const p = urls.preview || {};
+  const preview = (slug) => `/runner-sign-in-v2/journeys/preview/${encodeURIComponent(slug)}`;
+  const mailboxStatic = "/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing/static";
+
+  return [
+    {
+      heading: "Prototype",
+      links: [
+        { text: "Start page", href: "/runner-sign-in-v2/start-page" },
+        { text: "Choose a journey", href: "/runner-sign-in-v2/choose-journey" },
+        { text: "All pages (live links)", href: urls.allPages || "/runner-sign-in-v2/all-pages" },
+        { text: "Journeys", href: "/runner-sign-in-v2/journeys" },
+        { text: "Journey flowcharts", href: "/runner-sign-in-v2/journey-flowcharts" },
+        { text: "Unexpected journeys", href: "/runner-sign-in-v2/unexpected-journeys" },
+        { text: "Validation error messages", href: urls.errorMessages || "/runner-sign-in-v2/error-messages" },
+      ],
+    },
+    {
+      heading: "Form designer (advanced settings)",
+      links: [
+        { text: "Advanced settings", href: STATIC_BASE },
+        { text: "Check before submission", href: `${STATIC_BASE}/check-before-submission/yes-with-description` },
+        { text: "Reuse previous answers", href: `${STATIC_BASE}/reuse-previous-answers/yes-selected` },
+        {
+          text: "Reuse previous answers — no selected",
+          href: `${STATIC_BASE}/reuse-previous-answers/no-selected`,
+        },
+        {
+          text: "Reuse previous answers — yes selected",
+          href: `${STATIC_BASE}/reuse-previous-answers/yes-selected`,
+        },
+        {
+          text: "Advanced settings overview — reuse off",
+          href: `${STATIC_BASE}/reuse-previous-answers-off`,
+        },
+        {
+          text: "Advanced settings overview — reuse on",
+          href: `${STATIC_BASE}/reuse-previous-answers-on`,
+        },
+        { text: "Email actions", href: mailboxStatic },
+      ],
+    },
+    {
+      heading: "Form",
+      links: [
+        { text: "Form start page", href: preview("form-start-page") },
+        { text: "Sign in to use this form", href: p.whySignIn },
+        { text: "Manage your form", href: p.manage },
+        { text: "Ready to submit", href: p.readyToSubmit },
+        { text: "Form submitted", href: preview("form-submitted") },
+        { text: "Form submitted confirmation email", href: p.emailFormSubmitted },
+        { text: "Start a new application", href: preview("form-start-page") },
+        { text: "Manage your form (checked example)", href: urls.staticManageFormChecked },
+      ],
+    },
+    {
+      heading: "Copy a previous submission",
+      links: [
+        { text: "Advanced settings", href: STATIC_BASE },
+        { text: "Reuse previous answers", href: `${STATIC_BASE}/reuse-previous-answers/yes-selected` },
+        {
+          text: "Reuse previous answers — no selected",
+          href: `${STATIC_BASE}/reuse-previous-answers/no-selected`,
+        },
+        {
+          text: "Reuse previous answers — yes selected",
+          href: `${STATIC_BASE}/reuse-previous-answers/yes-selected`,
+        },
+        {
+          text: "Advanced settings overview — reuse off",
+          href: `${STATIC_BASE}/reuse-previous-answers-off`,
+        },
+        {
+          text: "Advanced settings overview — reuse on",
+          href: `${STATIC_BASE}/reuse-previous-answers-on`,
+        },
+        { text: "Manage your form (submitted example)", href: preview("manage-submitted") },
+        { text: "Copy answers confirmation", href: preview("copy-clone") },
+        { text: "Check answers (copied)", href: preview("copy-check-answers") },
+        {
+          text: "Your previous submission (new or changed questions)",
+          href: preview("copy-intervention"),
+        },
+        { text: "Your details (copied form)", href: preview("copy-form-step-details") },
+        { text: "Volunteer role (copied form)", href: preview("copy-form-step-role") },
+        { text: "Declaration (copied form)", href: preview("copy-form-step-declaration") },
+        {
+          text: "Declaration (answer again)",
+          href: preview("copy-form-step-declaration-answer-again"),
+        },
+        { text: "Ready to submit (copied form)", href: p.readyToSubmit },
+        { text: "Manage your form (after copy)", href: p.manage },
+        { text: "Form submitted", href: preview("form-submitted") },
+        { text: "Form submitted confirmation email (copied answers)", href: p.emailFormSubmitted },
+        {
+          text: "Form submitted email – public view (copied answers)",
+          href: p.emailFormSubmittedPublic,
+        },
+      ],
+    },
+    {
+      heading: "Create a sign-in",
+      links: [
+        { text: "Enter your email address", href: p.createEmail },
+        { text: "Check your email", href: p.createCheckEmail },
+        { text: "Get security code", href: p.createGetCode },
+        { text: "Enter your mobile phone number", href: p.createMobile },
+        { text: "Your sign-in has been created", href: preview("create-sign-in-created") },
+      ],
+    },
+    {
+      heading: "Sign in",
+      links: [
+        { text: "Enter your email address", href: p.signInEmail },
+        { text: "Check your email", href: p.signInCheckEmail },
+        { text: "Get security code", href: preview("sign-in-get-security-code") },
+        { text: "You have signed out", href: preview("sign-out") },
+      ],
+    },
+    {
+      heading: "Recover a sign-in",
+      links: [
+        { text: "Enter your mobile phone number", href: p.recoverPhone },
+        {
+          text: "No sign-in found for mobile phone number",
+          href: urls.staticRecoverNoSignInForMobile,
+        },
+        { text: "Get security code", href: p.recoverGetCode },
+        { text: "Check your phone", href: p.recoverStart },
+        { text: "Check your phone (alternate)", href: preview("recover-check-mobile") },
+        { text: "Enter your new email address", href: p.recoverNewEmail },
+        { text: "Check your email", href: p.recoverCheckNewEmail },
+      ],
+    },
+    {
+      heading: "Save and exit (signed in)",
+      links: [
+        { text: "Confirm email to save and exit", href: p.saveExitConfirmEmail },
+        { text: "We've emailed you a link to continue your form later", href: preview("save-exit-with-sign-in-leave") },
+        { text: "Save and exit email", href: preview("email-save-exit-with-sign-in") },
+        { text: "Welcome back (from email)", href: p.saveExitResumeWithSignIn },
+        { text: "Sign in from email link", href: p.signInEmail },
+      ],
+    },
+    {
+      heading: "Save and exit (without signing in)",
+      links: [
+        { text: "Sign in to save your progress", href: p.saveExitChoose },
+        { text: "Create a sign-in", href: p.saveExitCreate },
+        { text: "Check your email", href: p.saveExitCheckEmail },
+        { text: "Your progress has been saved", href: p.saveExitProgressSaved },
+        { text: "We've emailed you a link to continue your form later", href: preview("save-exit-without-sign-in-leave") },
+        { text: "Save and exit email", href: preview("email-save-exit-without-sign-in") },
+        { text: "Welcome back (from email)", href: p.saveExitResumeWithoutSignIn },
+        { text: "Delete draft confirmation", href: p.deleteDraft },
+      ],
+    },
+    {
+      heading: "Security",
+      links: [
+        { text: "Security", href: p.security },
+        { text: "Change email: get security code (phone)", href: p.changeEmailGetCode },
+        { text: "Change email: check your phone", href: p.changeEmailCheckPhone },
+        { text: "Change email: enter new email address", href: p.changeEmailNewEmail },
+        {
+          text: "Change email: enter new email address (same as current error)",
+          href: urls.staticChangeEmailNewEmailSameAsCurrent,
+        },
+        { text: "Change email: check your email", href: p.changeEmailCheckNewEmail },
+        { text: "Change mobile phone number: get security code (email)", href: p.changePhoneGetCode },
+        { text: "Change mobile phone number: check your email", href: p.changePhoneCheckEmail },
+        { text: "Change mobile phone number: enter new mobile phone number", href: p.changePhoneNewPhone },
+      ],
+    },
+    {
+      heading: "Checker",
+      links: [
+        { text: "Invite a checker", href: p.checkerInvite },
+        { text: "Checker invite sent", href: preview("checker-invite-sent") },
+        { text: "Checker invite email", href: p.emailCheckerInvite },
+        { text: "Checker landing page", href: preview("checker-landing") },
+        { text: "Sign in to check answers", href: p.checkerWhySignIn },
+        { text: "Check your email", href: preview("checker-check-email") },
+        { text: "Check answers", href: preview("checker-check-answers") },
+        { text: "Change answers", href: preview("checker-change-answers") },
+        { text: "Check complete", href: preview("checker-complete") },
+        { text: "Applicant notified email", href: preview("email-applicant-form-checked") },
+      ],
+    },
+    {
+      heading: "Emails",
+      links: [
+        { text: "Save and exit email (signed in)", href: preview("email-save-exit-with-sign-in") },
+        { text: "Save and exit email (without sign-in)", href: preview("email-save-exit-without-sign-in") },
+        { text: "Security code email", href: p.emailConfirmation },
+        { text: "Sign-in created email", href: preview("email-one-login-created") },
+        { text: "Checker invite email", href: p.emailCheckerInvite },
+        { text: "Applicant form checked email", href: preview("email-applicant-form-checked") },
+        { text: "Form submitted email (copied answers)", href: p.emailFormSubmitted },
+        { text: "Form submitted email – public view (copied answers)", href: p.emailFormSubmittedPublic },
+      ],
+    },
+    {
+      heading: "Text messages",
+      links: [
+        { text: "Security code text (recover sign-in)", href: urls.textRecoverSecurityCode },
+        { text: "Security code text (change email address)", href: urls.textChangeEmailSecurityCode },
+      ],
+    },
+    {
+      heading: "Unexpected journeys",
+      links: unexpectedPages.map((page) => ({
+        text: page.title,
+        href: page.href,
+      })),
+    },
+  ];
+}
+
+module.exports = {
+  buildRunnerSignInV2AllPagesSections,
+  buildRunnerSignInV2AllPagesStaticSections,
+};

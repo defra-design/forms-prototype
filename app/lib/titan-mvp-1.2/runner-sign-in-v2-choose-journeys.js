@@ -40,7 +40,7 @@ function runnerSignInV2ChooseJourneyRadioItems(selected) {
     },
     {
       value: "credential-recovery-not-found",
-      text: "Credential recovery – mobile number not linked to sign-in",
+      text: "Credential recovery – mobile phone number not linked to sign-in",
       hint: {
         text: "Users enter a mobile phone number that is not linked to a sign-in for this form and are told to create a sign-in instead.",
       },

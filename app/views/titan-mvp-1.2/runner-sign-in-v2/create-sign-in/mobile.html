@@ -3,7 +3,6 @@
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 {% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
-{% from "govuk/components/details/macro.njk" import govukDetails %}
 {% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
 
 {% block pageTitle %}Enter your mobile phone number – GOV.UK{% endblock %}
@@ -41,16 +40,6 @@
       {{ govukButton({ text: "Continue" }) }}
     </form>
 
-    {# {% set noUkHtml %}
-      <p class="govuk-body">
-        You need a UK mobile number to recover your sign-in in this prototype.
-      </p>
-    {% endset %}
-
-    {{ govukDetails({
-      summaryText: "I do not have a UK mobile phone number",
-      html: noUkHtml
-    }) }} #}
   </div>
 </div>
 {% endblock %}

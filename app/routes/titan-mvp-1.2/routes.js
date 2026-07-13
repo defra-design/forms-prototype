@@ -6,7 +6,7 @@ const lists = require("../../routes/lists");
 const sections = require("../../routes/sections");
 const terms = require("../../data/dictionary.json");
 const runnerSignInV2JourneyFlows = require("../../data/runner-sign-in-v2-journey-flows");
-const { buildRunnerSignInV2AllPagesSections } = require("../../data/runner-sign-in-v2-all-pages");
+const { buildRunnerSignInV2AllPagesSections, buildRunnerSignInV2AllPagesStaticSections } = require("../../data/runner-sign-in-v2-all-pages");
 const { buildRunnerSignInV2SaveExitStories } = require("../../data/runner-sign-in-v2-save-exit-stories");
 const {
   buildStaticConditionalMailboxContext,
@@ -32,6 +32,7 @@ const {
   runnerSignInV2ResolveJourneyFlows,
 } = require("../../lib/titan-mvp-1.2/runner-sign-in-v2-journey-urls");
 const {
+  SEED,
   runnerSignInV2ChooseJourneyRadioItems,
   runnerSignInV2ChooseJourneyRedirect,
   runnerSignInV2PrepareChooseJourneySession,
@@ -21273,6 +21274,7 @@ const RUNNER_SIGN_IN_V2_STATIC_RECOVER_NO_SIGN_IN_FOR_MOBILE_PATH =
 const RUNNER_SIGN_IN_V2_PROTOTYPE_KNOWN_RECOVER_PHONE = "07700900000";
 
 function runnerSignInV2RecoverNoSignInForMobileContext(req, { formKey, applicationId, next, mobile }) {
+  runnerSignInV2ClearAuthForPreview(req);
   const data = ensureRunnerSignInSession(req);
   const manageUrl = formKey && applicationId ? runnerSignInV2ManagePath(formKey, applicationId) : "";
   const resolvedNext = next || manageUrl;
@@ -21719,7 +21721,7 @@ const RUNNER_SIGN_IN_V2_UNEXPECTED_PAGES = {
     title: "You entered the wrong security code too many times",
     journey: "Security code problems",
     paragraphsHtml: [
-      "<p class=\"govuk-body\">You need to <a class=\"govuk-link\" href=\"/runner-sign-in-v2/create-sign-in/get-security-code\">get a new code</a> and try again.</p>",
+      "<p class=\"govuk-body\">You need to <a class=\"govuk-link\" href=\"/runner-sign-in-v2/create-sign-in/get-security-code\">get a new security code</a> and try again.</p>",
     ],
   },
   "wrong-security-code-locked-out": {
@@ -21750,8 +21752,8 @@ const RUNNER_SIGN_IN_V2_UNEXPECTED_PAGES = {
     ],
   },
   "no-sign-in-found-for-mobile": {
-    title: "We cannot find a sign-in for that mobile number",
-    journey: "No sign-in found for a mobile number",
+    title: "We cannot find a sign-in for that mobile phone number",
+    journey: "No sign-in found for a mobile phone number",
     staticHref: RUNNER_SIGN_IN_V2_STATIC_RECOVER_NO_SIGN_IN_FOR_MOBILE_PATH,
   },
   "save-link-expired": {
@@ -21802,6 +21804,90 @@ const RUNNER_SIGN_IN_V2_UNEXPECTED_PAGES = {
   },
 };
 
+function runnerSignInV2ClearAuthForPreview(req, { phone } = {}) {
+  const data = ensureRunnerSignInSession(req);
+  data.runnerSignInAuthed = false;
+  delete data.runnerSignInEmail;
+  delete data.runnerSignInMethod;
+  data.runnerSignInPhoneConfirmed = false;
+  delete data.runnerSignInV2PendingEmail;
+  delete data.runnerSignInV2PendingMobile;
+  delete data.runnerSignInV2CreateSignInEmailConfirmed;
+  delete data.runnerSignInV2SignInPendingEmail;
+  delete data.runnerSignInV2RecoverNewEmail;
+  delete data.runnerSignInV2Error;
+  delete data.runnerSignInError;
+  delete data.runnerSignInV2SaveAndExitAccountCreated;
+  delete data.runnerSignInV2RedirectApplicationsToManage;
+  delete data.runnerSignInV2FocusFormKey;
+  delete data.runnerSignInV2FocusApplicationId;
+  delete data.runnerSignInV2ManageUrl;
+  delete data.runnerSignInV2SecurityUrl;
+  if (phone !== undefined) {
+    if (phone) data.runnerSignInPhone = String(phone).trim();
+    else delete data.runnerSignInPhone;
+  } else {
+    delete data.runnerSignInPhone;
+  }
+}
+
+const RUNNER_SIGN_IN_V2_JOURNEY_PREVIEW_SIGNED_IN = new Set([
+  "manage",
+  "manage-submitted",
+  "security",
+  "change-email-get-security-code",
+  "change-phone-get-security-code",
+  "change-email-check-phone",
+  "change-email-new-email",
+  "change-email-check-new-email",
+  "change-phone-check-email",
+  "change-phone-new-phone",
+  "save-exit-with-sign-in-leave",
+  "save-exit-confirm-email",
+  "form-submitted",
+  "delete-draft",
+  "checker-invite",
+  "checker-invite-sent",
+  "ready-to-submit",
+  "create-sign-in-created",
+  "copy-clone",
+]);
+
+const RUNNER_SIGN_IN_V2_JOURNEY_PREVIEW_ACCOUNT_CREATED = new Set(["save-exit-progress-saved"]);
+
+function runnerSignInV2ApplyJourneyPreviewAuth(req, slug, { email, phone, formKey, applicationId }) {
+  const demoEmail = email || "you@example.com";
+  const demoPhone = phone || "07700 900000";
+
+  if (RUNNER_SIGN_IN_V2_JOURNEY_PREVIEW_ACCOUNT_CREATED.has(slug)) {
+    saveRunnerSignInV2AccountWithoutSignIn(req, demoEmail, demoPhone);
+    if (formKey && applicationId) setRunnerSignInV2ManageFocus(req, formKey, applicationId);
+    return;
+  }
+
+  if (RUNNER_SIGN_IN_V2_JOURNEY_PREVIEW_SIGNED_IN.has(slug)) {
+    applyRunnerSignInV2EmailAuth(req, demoEmail, demoPhone);
+    if (formKey && applicationId) setRunnerSignInV2ManageFocus(req, formKey, applicationId);
+    return;
+  }
+
+  runnerSignInV2ClearAuthForPreview(req);
+}
+
+function runnerSignInV2ApplyFieldErrorPreviewAuth(req, item, { formKey, applicationId, email, phone }) {
+  const demoEmail = email || "you@example.com";
+  const demoPhone = phone || "07700 900000";
+  const template = String((item && item.template) || "");
+
+  if (template.includes("security/") || template.includes("with-sign-in/confirm-email")) {
+    applyRunnerSignInV2EmailAuth(req, demoEmail, demoPhone);
+    if (formKey && applicationId) setRunnerSignInV2ManageFocus(req, formKey, applicationId);
+    return;
+  }
+
+  runnerSignInV2ClearAuthForPreview(req);
+}
+
 function runnerSignInV2JourneyPreviewPath(slug) {
   return `/runner-sign-in-v2/journeys/preview/${encodeURIComponent(slug)}`;
 }
@@ -21835,6 +21921,12 @@ function runnerSignInV2JourneyPreviewBase(req) {
 router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
   const slug = String(req.params.slug || "").trim();
   const base = runnerSignInV2JourneyPreviewBase(req);
+  runnerSignInV2ApplyJourneyPreviewAuth(req, slug, {
+    email: base.email,
+    phone: base.phone,
+    formKey: base.formKey,
+    applicationId: base.applicationId,
+  });
   const { data, formKey, applicationId, manageUrl, securityUrl, application, email, phone, journeyPreview, journeysUrl } =
     base;
   const enc = (value) => encodeURIComponent(value);
@@ -22389,6 +22481,282 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
     return res.redirect("/runner-sign-in-v2/static/manage-form-checked");
   }
 
+  if (slug === "form-start-page") {
+    const formDef = getRunnerSignInFormDef(formKey);
+    const optionalSignIn = isRunnerSignInFormSignInOptionalUntilSaveAndExit(formKey);
+    const isSaveExitDemo = isRunnerSignInV2SaveAndExitDemoApplication(application);
+    const firstStepId = getRunnerSignInFirstStepId(formDef);
+    const backUrl = `/runner-sign-in-v2/forms/${enc(formKey)}/${enc(applicationId)}/start-page`;
+    let startNowUrl;
+    if (isSaveExitDemo && firstStepId) {
+      startNowUrl = runnerSignInFormStepUrl(application, firstStepId);
+    } else {
+      startNowUrl = triple("/runner-sign-in-v2/why-sign-in", manageUrl);
+    }
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/form-start-page", {
+      data,
+      application,
+      chooserUrl: "#",
+      optionalSignIn,
+      isSaveExitDemo,
+      journeyPreview,
+    });
+  }
+
+  if (slug === "sign-in-get-security-code") {
+    data.runnerSignInV2SignInPendingEmail = email;
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/sign-in/get-security-code", {
+      ...base,
+      next: manageUrl,
+      backUrl: triple("/runner-sign-in-v2/sign-in/check-email", manageUrl),
+      formAction: triple("/runner-sign-in-v2/sign-in/get-security-code", manageUrl),
+    });
+  }
+
+  if (slug === "create-sign-in-created") {
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/create-sign-in/created", {
+      ...base,
+      continueUrl: manageUrl,
+      isSaveAndExitJourney: false,
+      signInUrl: triple("/runner-sign-in-v2/sign-in/email", manageUrl),
+      userEmail: email,
+    });
+  }
+
+  if (slug === "recover-check-mobile") {
+    data.runnerSignInPhone = phone;
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/recover/check-mobile", {
+      ...base,
+      next: manageUrl,
+      maskedMobile: runnerSignInV2MaskedMobile(data) || "0000",
+      backUrl: triple("/runner-sign-in-v2/recover/start", manageUrl),
+      formAction: triple("/runner-sign-in-v2/recover/check-mobile", manageUrl),
+      resend: false,
+    });
+  }
+
+  if (slug === "sign-out") {
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/sign-out", {
+      data,
+      signInUrl: triple("/runner-sign-in-v2/sign-in/email", manageUrl),
+    });
+  }
+
+  if (slug === "manage-submitted") {
+    applyRunnerSignInV2EmailAuth(req, email, phone);
+    setRunnerSignInV2ManageFocus(req, formKey, applicationId);
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/manage-form", {
+      data,
+      application,
+      formKey,
+      applicationId,
+      journeyPreview,
+      tableRow: {
+        reference: application.reference || "YCU-C8R-7KY",
+        statusText: "Submitted",
+        statusTagClasses: "govuk-tag--green",
+        lastUpdatedText: "Submitted today",
+        expiryText: "—",
+        actionsHtml: '<a class="govuk-link" href="#">Copy</a>',
+      },
+      tableRows: [],
+      query: {},
+      v2PrimaryAction: "copy",
+      v2StatusLabel: "Submitted",
+      v2StatusTagClasses: "govuk-tag--green",
+      lastUpdatedText: "Submitted today",
+      expiryText: "—",
+      continueUrl: "#",
+      checkAnswersUrl: "#",
+      cloneUrl: "#",
+      saveExitWithSignInUrl: "#",
+      saveExitWithoutSignInUrl: "#",
+      checkerInviteUrl: "#",
+      checkerStartUrl: "#",
+      checkerInviteEmailPreviewUrl: "#",
+      checkingRequired: false,
+      startNewUrl: "#",
+    });
+  }
+
+  if (slug === "checker-landing") {
+    const token = RUNNER_SIGN_IN_V2_STATIC_CHECKED_REVIEW_TOKEN;
+    runnerSignInV2EnsureCheckerReviewEntry(req, token, ensureReviewStore(req));
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/checker/landing", {
+      data: {},
+      formName: application.formName || "Apply for a small grant",
+      continueUrl: "#",
+      tokenValid: true,
+    });
+  }
+
+  if (slug === "checker-invite-sent") {
+    applyRunnerSignInV2EmailAuth(req, email, phone);
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/checker/invite-sent", {
+      ...base,
+      checkerEmail: "checker@example.com",
+      manageUrl: "#",
+      saveExitUrl: "#",
+    });
+  }
+
+  if (slug === "checker-check-email") {
+    const token = RUNNER_SIGN_IN_V2_STATIC_CHECKED_REVIEW_TOKEN;
+    const reviewStore = ensureReviewStore(req);
+    const entry = runnerSignInV2EnsureCheckerReviewEntry(req, token, reviewStore);
+    if (entry) {
+      entry.checkerV2EmailConfirmed = true;
+      reviewStore.set(token, entry);
+    }
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/checker/check-email", {
+      data: {},
+      token,
+      allowApplicant: true,
+      checkerEmail: (entry && entry.checkerInviteEmail) || "checker@example.com",
+      backUrl: runnerSignInV2JourneyPreviewPath("checker-why-sign-in"),
+      error: {},
+      values: {},
+    });
+  }
+
+  if (slug === "checker-check-answers") {
+    const token = RUNNER_SIGN_IN_V2_STATIC_CHECKED_REVIEW_TOKEN;
+    const reviewStore = ensureReviewStore(req);
+    const entry = runnerSignInV2EnsureCheckerReviewEntry(req, token, reviewStore);
+    if (entry) {
+      entry.checkerV2EmailConfirmed = true;
+      entry.checkerV2CodeOk = true;
+      entry.dataSnapshot = entry.dataSnapshot || {
+        contactName: "Jane Smith",
+        contactEmail: email,
+        phoneNumber: phone,
+        organisationName: "Green Fields Community Group",
+        organisationType: "Community group",
+        amountRequested: "£12,500",
+        projectSummary: "A community garden and outdoor learning space.",
+      };
+      reviewStore.set(token, entry);
+    }
+    return renderRunnerSignInV2CheckerCheckAnswers(req, res, {
+      token,
+      entry,
+      error: null,
+    });
+  }
+
+  if (slug === "checker-change-answers") {
+    const token = RUNNER_SIGN_IN_V2_STATIC_CHECKED_REVIEW_TOKEN;
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/checker/change-answers", {
+      data: {},
+      backUrl: runnerSignInV2JourneyPreviewPath("checker-check-answers"),
+      checkAnswersUrl: runnerSignInV2JourneyPreviewPath("checker-check-answers"),
+    });
+  }
+
+  if (slug === "checker-complete") {
+    const token = RUNNER_SIGN_IN_V2_STATIC_CHECKED_REVIEW_TOKEN;
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/checker/save-and-exit", {
+      data: {},
+      token,
+      formName: application.formName || "Apply for a small grant",
+      allowApplicant: true,
+    });
+  }
+
+  if (slug === "email-applicant-form-checked") {
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/emails/applicant-form-checked", {
+      toEmail: email,
+      formName: application.formName || "Apply for a small grant",
+      readyToSubmitUrl: `${PUBLIC_BASE_URL}${runnerSignInV2JourneyPreviewPath("ready-to-submit")}`,
+    });
+  }
+
+  if (slug === "email-one-login-created") {
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/emails/one-login-created", {
+      toEmail: email,
+      formKey,
+      applicationId,
+      application,
+      formName: application.formName,
+      manageUrl: `${PUBLIC_BASE_URL}${manageUrl}`,
+    });
+  }
+
+  if (slug === "copy-clone") {
+    applyRunnerSignInV2EmailAuth(req, email, phone);
+    const applications = ensureRunnerSignInApplications(req);
+    const copyApplication = applications.find((a) => a && a.id === SEED.submittedCopy.applicationId);
+    if (!copyApplication) return res.redirect(journeysUrl);
+    return res.render("titan-mvp-1.2/runner-sign-in/clone-application", {
+      data,
+      application: copyApplication,
+      formatDate: formatRunnerSignInDate,
+      submittedOnText: copyApplication.submittedIso
+        ? formatRunnerSignInSubmittedDateTime(copyApplication.submittedIso)
+        : "Not provided",
+    });
+  }
+
+  if (slug === "copy-check-answers") {
+    runnerSignInAllowSharedDeepLinkAccess(req);
+    const applications = ensureRunnerSignInApplications(req);
+    const copyApplication = applications.find((a) => a && a.id === SEED.copyDraft.applicationId);
+    if (!copyApplication) return res.redirect(journeysUrl);
+    const formDef = getRunnerSignInFormDef(SEED.copyDraft.formKey);
+    return res.render("titan-mvp-1.2/runner-sign-in/forms/check-answers", {
+      data,
+      application: copyApplication,
+      formDef,
+      copied: true,
+      copiedQuerySuffix: "?copied=1",
+    });
+  }
+
+  if (slug === "copy-intervention") {
+    runnerSignInAllowSharedDeepLinkAccess(req);
+    return res.render("titan-mvp-1.2/runner-sign-in/intervention-copied", {
+      data,
+      formKey: SEED.copyDeclarationRequired.formKey,
+      applicationId: SEED.copyDeclarationRequired.applicationId,
+      step: "declaration",
+    });
+  }
+
+  if (
+    slug === "copy-form-step-details" ||
+    slug === "copy-form-step-role" ||
+    slug === "copy-form-step-declaration" ||
+    slug === "copy-form-step-declaration-answer-again"
+  ) {
+    runnerSignInAllowSharedDeepLinkAccess(req);
+    const stepId = slug === "copy-form-step-details"
+      ? "details"
+      : slug === "copy-form-step-role"
+        ? "role"
+        : "declaration";
+    const applicationId =
+      slug === "copy-form-step-declaration-answer-again"
+        ? SEED.copyDeclarationRequired.applicationId
+        : SEED.copyDraft.applicationId;
+    const applications = ensureRunnerSignInApplications(req);
+    const copyApplication = applications.find((a) => a && a.id === applicationId);
+    if (!copyApplication) return res.redirect(journeysUrl);
+    const formDef = getRunnerSignInFormDef(SEED.copyDraft.formKey);
+    const stepDef = getRunnerSignInStepDef(formDef, stepId);
+    if (!stepDef) return res.redirect(journeysUrl);
+    const optionalSignIn = isRunnerSignInFormSignInOptionalUntilSaveAndExit(copyApplication.formKey);
+    return res.render(stepDef.template, {
+      data,
+      application: copyApplication,
+      formDef,
+      stepDef,
+      copied: true,
+      copiedQuerySuffix: "?copied=1",
+      optionalSignIn,
+      backHref: "#",
+    });
+  }
+
   return res.redirect("/runner-sign-in-v2/journeys");
 });
 
@@ -22440,6 +22808,33 @@ router.get("/runner-sign-in-v2/all-pages", function (req, res) {
     unexpectedPages,
   });
   return res.render("titan-mvp-1.2/runner-sign-in-v2/all-pages", {
+    data,
+    pageSections,
+  });
+});
+
+router.get("/runner-sign-in-v2/all-pages/static.html", function (req, res) {
+  return res.redirect("/runner-sign-in-v2/all-pages/static");
+});
+
+router.get("/runner-sign-in-v2/all-pages/static", function (req, res) {
+  const data = ensureRunnerSignInSession(req);
+  if (typeof data.runnerSignInV2PrototypeMode === "undefined") {
+    data.runnerSignInV2PrototypeMode = true;
+  }
+  const pageUrls = runnerSignInV2DocsUrls();
+  const unexpectedPages = Object.keys(RUNNER_SIGN_IN_V2_UNEXPECTED_PAGES).map((slug) => {
+    const page = RUNNER_SIGN_IN_V2_UNEXPECTED_PAGES[slug];
+    return {
+      slug,
+      href: page.staticHref || `/runner-sign-in-v2/unexpected-journeys/${slug}`,
+      title: page.title,
+    };
+  });
+  const pageSections = buildRunnerSignInV2AllPagesStaticSections(pageUrls, {
+    unexpectedPages,
+  });
+  return res.render("titan-mvp-1.2/runner-sign-in-v2/all-pages-static", {
     data,
     pageSections,
   });
@@ -22511,8 +22906,10 @@ router.get("/runner-sign-in-v2/unexpected-journeys/:slug", function (req, res) {
     if (ctx) return res.render(page.template, ctx);
   }
 
+  runnerSignInV2ClearAuthForPreview(req);
+
   return res.render("titan-mvp-1.2/runner-sign-in-v2/unexpected-page", {
-    data,
+    data: ensureRunnerSignInSession(req),
     page,
   });
 });
@@ -22586,6 +22983,12 @@ function runnerSignInV2FieldErrorPreviewContext(req, slug) {
   if (typeof item.setupSession === "function") {
     item.setupSession(data);
   }
+  runnerSignInV2ApplyFieldErrorPreviewAuth(req, item, {
+    formKey,
+    applicationId,
+    email: "you@example.com",
+    phone: "07700 900000",
+  });
 
   const next = item.template.includes("save-and-exit") ? leaveUrl : manageUrl;
   const enc = (value) => encodeURIComponent(value);

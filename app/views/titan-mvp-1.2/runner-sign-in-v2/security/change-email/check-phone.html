@@ -27,8 +27,8 @@
     <span class="govuk-caption-l">Change email address</span>
     <h1 class="govuk-heading-l">Check your phone</h1>
     <p class="govuk-body">We need to check it’s you before you can change your email address.</p>
-    {{ govukInsetText({ html: "We have sent a code to your phone number ending with <strong>" + (maskedMobile | e) + "</strong>" }) }}
-    <p class="govuk-body">It might take a few minutes to arrive. The code will expire after 15 minutes.</p>
+    {{ govukInsetText({ html: "We have sent a security code to your mobile phone number ending with <strong>" + (maskedMobile | e) + "</strong>" }) }}
+    <p class="govuk-body">It might take a few minutes to arrive. The security code will expire after 15 minutes.</p>
 
     <p class="govuk-body">
       <a class="govuk-link" href="/runner-sign-in-v2/texts/change-email-security-code">View the text message (prototype only)</a>
@@ -47,13 +47,13 @@
     {% set problemsHtml %}
       <p class="govuk-body">
         We can
-        <a class="govuk-link" href="{{ getSecurityCodeUrl }}">send the code again</a>
-        if the code is not working or you did not receive it.
+        <a class="govuk-link" href="{{ getSecurityCodeUrl }}">send the security code again</a>
+        if the security code is not working or you did not receive it.
       </p>
     {% endset %}
 
     {{ govukDetails({
-      summaryText: "Problems with the code?",
+      summaryText: "Problems with the security code?",
       html: problemsHtml
     }) }}
   </div>

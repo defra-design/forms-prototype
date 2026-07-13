@@ -31,13 +31,13 @@ module.exports = {
   },
   create: {
     title: "Creating a sign-in",
-    description: "Email verification, then mobile number for recovery.",
+    description: "Email verification, then mobile phone number for recovery.",
     nodes: [
       { id: "start", label: "Form start page", tone: "hub", pageKey: "formStartPage" },
       { id: "why", label: "Sign in to use this form", tone: "main", pageKey: "whySignIn" },
       { id: "email", label: "Enter email address", tone: "main", pageKey: "createEmail" },
       { id: "check", label: "Check your email", tone: "main", pageKey: "createCheckEmail" },
-      { id: "mobile", label: "Enter mobile number", tone: "main", pageKey: "createMobile" },
+      { id: "mobile", label: "Enter mobile phone number", tone: "main", pageKey: "createMobile" },
       { id: "manage", label: "Manage your form", tone: "hub", pageKey: "manage" },
       { id: "dup", label: "Already have a sign-in", tone: "unexpected", pageKey: "unexpected:email-already-has-sign-in" },
       { id: "expired", label: "Code expired", tone: "unexpected", pageKey: "unexpected:security-code-expired" },
@@ -79,10 +79,10 @@ module.exports = {
     nodes: [
       { id: "signin", label: "Sign in: enter email", tone: "main", pageKey: "signInEmail" },
       { id: "branch", label: "Forgotten email address", tone: "branch", pageKey: "signInEmail" },
-      { id: "phone", label: "Enter mobile number", tone: "main", pageKey: "recoverPhone" },
+      { id: "phone", label: "Enter mobile phone number", tone: "main", pageKey: "recoverPhone" },
       {
         id: "notfound",
-        label: "No sign-in for mobile",
+        label: "No sign-in for mobile phone number",
         tone: "unexpected",
         pageKey: "unexpected:no-sign-in-found-for-mobile",
       },
@@ -139,7 +139,7 @@ module.exports = {
       { id: "choose", label: "Save and exit", tone: "main", pageKey: "saveExitChoose" },
       { id: "create", label: "Create a sign-in", tone: "main", pageKey: "saveExitCreate" },
       { id: "check", label: "Check your email", tone: "main", pageKey: "saveExitWithoutSignInCheckEmail" },
-      { id: "mobile", label: "Enter mobile number", tone: "main", pageKey: "createMobileSaveExit" },
+      { id: "mobile", label: "Enter mobile phone number", tone: "main", pageKey: "createMobileSaveExit" },
       { id: "created", label: "Progress saved", tone: "main", pageKey: "saveExitCreated" },
       { id: "resume", label: "Welcome back", tone: "main", pageKey: "saveExitWithoutSignInResume" },
       { id: "signin", label: "Sign in from email", tone: "main", pageKey: "signInEmail" },
@@ -197,7 +197,7 @@ module.exports = {
   },
   "security-phone": {
     title: "Security: change phone",
-    description: "Verify by email, then enter new mobile number.",
+    description: "Verify by email, then enter new mobile phone number.",
     nodes: [
       { id: "manage", label: "Manage your form", tone: "hub", pageKey: "manage" },
       { id: "security", label: "Security", tone: "main", pageKey: "security" },
@@ -301,7 +301,7 @@ module.exports = {
       { id: "norecover", label: "Cannot recover online", tone: "unexpected", pageKey: "unexpected:cannot-recover-online" },
       {
         id: "mobilenotfound",
-        label: "No sign-in for mobile",
+        label: "No sign-in for mobile phone number",
         tone: "unexpected",
         pageKey: "unexpected:no-sign-in-found-for-mobile",
       },

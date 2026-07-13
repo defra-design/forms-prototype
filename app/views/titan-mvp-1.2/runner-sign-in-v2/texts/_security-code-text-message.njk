@@ -5,7 +5,7 @@
   - caption (string): journey caption above the heading
   - code (string): security code, defaults to 123456
   - fromName (string): sender name, defaults to Submit form to Defra
-  - toLabel (string): recipient label, defaults to Mobile number
+  - toLabel (string): recipient label, defaults to Mobile phone number
   - formNameEn (string): English form name in message body
   - formNameCy (string): Welsh form name in message body
   - variant (string): "recover" (default) or "change-email"
@@ -13,7 +13,7 @@
 {% macro securityCodeTextMessage(params) %}
   {% set _code = params.code if params.code else "123456" %}
   {% set _from = params.fromName if params.fromName else "Submit form to Defra" %}
-  {% set _to = params.toLabel if params.toLabel else "Mobile number" %}
+  {% set _to = params.toLabel if params.toLabel else "Mobile phone number" %}
   {% set _formNameEn = params.formNameEn if params.formNameEn else "Apply for a grant" %}
   {% set _formNameCy = params.formNameCy if params.formNameCy else "Gwneud cais am grant" %}
   {% set _variant = params.variant if params.variant else "recover" %}
@@ -115,7 +115,7 @@
               <span class="text-message-code">{{ _code }}</span> is your security code for completing your '{{ _formNameEn }}' form.
             {% endif %}
           </p>
-          <p class="govuk-body">Your code expires in 15 minutes.</p>
+          <p class="govuk-body">Your security code expires in 15 minutes.</p>
         </div>
         <div class="text-message-block">
           <p class="govuk-body">

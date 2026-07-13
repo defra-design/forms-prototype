@@ -2,7 +2,7 @@
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
 
-{% block pageTitle %}Resume your form – GOV.UK{% endblock %}
+{% block pageTitle %}Continue your form later – GOV.UK{% endblock %}
 
 {% block beforeContent %}{% endblock %}
 
@@ -13,7 +13,7 @@
   <div class="govuk-grid-column-two-thirds">
     <span class="govuk-caption-l">Save and exit</span>
     <h1 class="govuk-heading-l">Welcome back</h1>
-    <p class="govuk-body">You opened the link from your save and exit email. Sign in to resume your form.</p>
+    <p class="govuk-body">You opened the link from your save and exit email. Sign in to continue your form later.</p>
     {{ govukButton({
       text: "Sign in to continue",
       href: signInUrl,

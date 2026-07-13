@@ -27,7 +27,7 @@
     <span class="govuk-caption-l">Change email address</span>
     <h1 class="govuk-heading-l">Check your email</h1>
     {{ govukInsetText({ html: "We have sent an email to: <strong>" + (email | e) + "</strong>" }) }}
-    <p class="govuk-body">It might take a few minutes to arrive. The code will expire after 15 minutes.</p>
+    <p class="govuk-body">It might take a few minutes to arrive. The security code will expire after 15 minutes.</p>
 
     <form method="post" action="{{ formAction }}" autocomplete="off" novalidate>
       <input type="hidden" name="formKey" value="{{ formKey }}" />
@@ -42,14 +42,14 @@
     {% set problemsHtml %}
       <p class="govuk-body">
         We can
-        <a class="govuk-link" href="{{ resendUrl }}">send the code again</a>
+        <a class="govuk-link" href="{{ resendUrl }}">send the security code again</a>
         or you can
         <a class="govuk-link" href="{{ newEmailUrl }}">use a different email address</a>.
       </p>
     {% endset %}
 
     {{ govukDetails({
-      summaryText: "Problems with the code?",
+      summaryText: "Problems with the security code?",
       html: problemsHtml
     }) }}
   </div>

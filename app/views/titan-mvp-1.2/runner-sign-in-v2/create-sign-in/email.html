@@ -34,15 +34,6 @@
         value: values.runnerSignInV2Email,
         errorMessage: { text: error.runnerSignInV2Email } if error and error.runnerSignInV2Email else false
       }) }}
-      <h2 class="govuk-heading-m govuk-!-margin-top-6">Agree to the terms and conditions</h2>
-      <p class="govuk-body">
-        By continuing, you confirm that you agree to our
-        <a class="govuk-link" target="_blank" rel="noreferrer noopener" href="/runner-sign-in/terms">terms and conditions (opens in new tab)</a>.
-      </p>
-      <p class="govuk-body">
-        To find out how we use your personal information, see our
-        <a class="govuk-link" target="_blank" rel="noreferrer noopener" href="/runner-sign-in/privacy">privacy notice (opens in new tab)</a>.
-      </p>
       {{ govukButton({ text: "Continue" }) }}
     </form>
 

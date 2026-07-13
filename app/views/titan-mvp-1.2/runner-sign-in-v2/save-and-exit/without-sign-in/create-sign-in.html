@@ -21,7 +21,7 @@
     {% endif %}
     <span class="govuk-caption-l">Save and exit</span>
     <h1 class="govuk-heading-l">Create a sign-in to save your progress</h1>
-    <p class="govuk-body">To come back later you need an email address and a UK mobile number (used only if you recover your sign-in).</p>
+    <p class="govuk-body">To continue your form later you need an email address and a mobile phone number (used only if you recover your sign-in).</p>
     <form method="post" action="/runner-sign-in-v2/save-and-exit/without-sign-in/create-sign-in" novalidate>
       <input type="hidden" name="formKey" value="{{ formKey }}" />
       <input type="hidden" name="applicationId" value="{{ applicationId }}" />
@@ -36,7 +36,7 @@
         errorMessage: { text: error.runnerSignInV2Email } if error and error.runnerSignInV2Email else false
       }) }}
       {{ govukInput({
-        label: { text: "UK mobile phone number" },
+        label: { text: "Mobile phone number" },
         id: "v2-mobile",
         name: "runnerSignInV2Mobile",
         type: "tel",
