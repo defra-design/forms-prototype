@@ -225,21 +225,36 @@ Check your answers – {{ formDef.formName }} – GOV.UK
           </p>
         {% endif %}
 
-        <form method="post" action="{{ baseHref }}/send-for-checking">
+        {% if inviteCheckerUrl %}
           <div class="govuk-button-group">
             {{ govukButton({
               text: "Invite someone to check your form",
-              classes: "govuk-button--primary govuk-!-margin-top-4 govuk-!-margin-bottom-0"
+              classes: "govuk-button--primary govuk-!-margin-top-4 govuk-!-margin-bottom-0",
+              href: inviteCheckerUrl
             }) }}
             {{ govukButton({
               text: "Save and exit",
               classes: "govuk-button--secondary",
-              href: "/runner-sign-in/applications"
+              href: saveAndExitUrl or "/runner-sign-in/applications"
             }) }}
           </div>
-        </form>
+        {% else %}
+          <form method="post" action="{{ baseHref }}/send-for-checking">
+            <div class="govuk-button-group">
+              {{ govukButton({
+                text: "Invite someone to check your form",
+                classes: "govuk-button--primary govuk-!-margin-top-4 govuk-!-margin-bottom-0"
+              }) }}
+              {{ govukButton({
+                text: "Save and exit",
+                classes: "govuk-button--secondary",
+                href: "/runner-sign-in/applications"
+              }) }}
+            </div>
+          </form>
+        {% endif %}
 
-        {% if checkingStatus == "awaiting_check" %}
+        {% if checkingStatus == "awaiting_check" and not inviteCheckerUrl %}
           <p class="govuk-body govuk-!-margin-top-4">
             <a class="govuk-link" href="{{ baseHref }}/send-for-checking">Manage checking</a>
           </p>

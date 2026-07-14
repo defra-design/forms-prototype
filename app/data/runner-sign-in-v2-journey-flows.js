@@ -10,7 +10,7 @@ module.exports = {
       { id: "form", label: "Continue form (no sign-in)", tone: "branch", pageKey: "formStartPage" },
       { id: "manage", label: "Manage your form", tone: "hub", pageKey: "manage" },
       { id: "security", label: "Security", tone: "main", pageKey: "security" },
-      { id: "checker", label: "Invite checker", tone: "main", pageKey: "checkerInvite" },
+      { id: "checker", label: "Check answers / invite", tone: "main", pageKey: "applicantCheckAnswers" },
       { id: "save", label: "Save and exit", tone: "main", pageKey: "saveExitChoose" },
       { id: "submit", label: "Ready to submit", tone: "branch", pageKey: "readyToSubmit" },
     ],
@@ -231,9 +231,10 @@ module.exports = {
   },
   checker: {
     title: "Checker journey",
-    description: "Applicant invites someone to check answers.",
+    description: "Applicant checks their answers, then invites someone to review them.",
     nodes: [
       { id: "manage", label: "Manage your form", tone: "hub", pageKey: "manage" },
+      { id: "cya", label: "Check your answers", tone: "main", pageKey: "applicantCheckAnswers" },
       { id: "invite", label: "Invite a checker", tone: "main", pageKey: "checkerInvite" },
       { id: "email", label: "Checker invite email", tone: "main", pageKey: "emailCheckerInvite" },
       { id: "why", label: "Sign in to check answers", tone: "main", pageKey: "checkerWhySignIn" },
@@ -245,7 +246,8 @@ module.exports = {
       { id: "codes", label: "Security code problem", tone: "unexpected", pageKey: "unexpected:wrong-security-code-too-many-times" },
     ],
     edges: [
-      { from: "manage", to: "invite" },
+      { from: "manage", to: "cya" },
+      { from: "cya", to: "invite" },
       { from: "invite", to: "email" },
       { from: "email", to: "why" },
       { from: "email", to: "expired" },

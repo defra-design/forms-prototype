@@ -3,6 +3,7 @@ const SEED = {
   inProgress: { formKey: "report-local-issue", applicationId: "app-1721152526404", step: "when" },
   inProgressRefund: { formKey: "request-refund", applicationId: "app-1721152526405", step: "bank-details" },
   awaitingCheck: { formKey: "apply-small-grant", applicationId: "app-1721152526407" },
+  readyToInvite: { formKey: "apply-small-grant", applicationId: "app-checker-ready-to-invite" },
   submittedCopy: { formKey: "volunteer-application", applicationId: "app-1721152526408" },
   copyDraft: { formKey: "volunteer-application", applicationId: "app-copy-volunteer-draft" },
   copyDeclarationRequired: { formKey: "volunteer-application", applicationId: "app-copy-volunteer-declaration" },

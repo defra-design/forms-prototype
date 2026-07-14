@@ -65,7 +65,12 @@
       {% set protoHtml %}
         <p class="govuk-body">Jump into the checker journey for this application.</p>
         <ul class="govuk-list govuk-list--bullet">
-          {# <li><a class="govuk-link" href="{{ checkerInviteUrl }}">Invite a checker (applicant journey)</a></li> #}
+          {% if checkAnswersUrl %}
+            <li><a class="govuk-link" href="{{ checkAnswersUrl }}">Check your answers (before invite)</a></li>
+          {% endif %}
+          {% if checkerInviteUrl %}
+            <li><a class="govuk-link" href="{{ checkerInviteUrl }}">Invite a checker</a></li>
+          {% endif %}
           {% if checkerStartUrl %}
             <li><a class="govuk-link" href="{{ checkerStartUrl }}" target="_blank" rel="noreferrer noopener">Open checker journey (opens in new tab)</a></li>
           {% endif %}

@@ -1,27 +1,165 @@
 {% extends "layouts/runner-sign-in-v2.html" %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 {% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
 {% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
 
 {% block pageTitle %}Invite sent – GOV.UK{% endblock %}
 
-{% block beforeContent %}{% endblock %}
+{% block head %}
+  {{ super() }}
+  <style>
+    .govuk-button-group > form {
+      display: contents;
+    }
+  </style>
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ href: checkAnswersUrl or manageUrl, text: "Back" }) }}
+{% endblock %}
 
 {% block header %}{{ v2.v2ServiceHeader("") }}{% endblock %}
 
 {% block content %}
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
-    {% set bannerHtml %}<h3 class="govuk-notification-banner__heading">Invite sent to {{ checkerEmail }}</h3><p class="govuk-body govuk-!-margin-bottom-0">We’ll let you know when they’ve finished checking.</p>{% endset %}
+    {% if inviteResent %}
+      {% set bannerHtml %}
+        <h3 class="govuk-notification-banner__heading">Invite sent again to {{ checkerEmail }}</h3>
+        <p class="govuk-body govuk-!-margin-bottom-0">We’ll let you know when they’ve finished checking.</p>
+      {% endset %}
+    {% else %}
+      {% set bannerHtml %}
+        <h3 class="govuk-notification-banner__heading">Invite sent to {{ checkerEmail }}</h3>
+        <p class="govuk-body govuk-!-margin-bottom-0">We’ll let you know when they’ve finished checking.</p>
+      {% endset %}
+    {% endif %}
     {{ govukNotificationBanner({ type: "success", html: bannerHtml }) }}
 
+    {% if inviteThrottled %}
+      {% set throttledHtml %}
+        <p class="govuk-notification-banner__heading">You need to wait before sending again</p>
+        <p class="govuk-body govuk-!-margin-bottom-0">
+          You can send again in <span id="resend-countdown-banner">{{ inviteCooldownRemainingSeconds or 0 }}</span> seconds.
+        </p>
+      {% endset %}
+      {{ govukNotificationBanner({ html: throttledHtml }) }}
+    {% endif %}
+
+    <span class="govuk-caption-l">{{ application.formName }}</span>
     <h1 class="govuk-heading-l">What happens next</h1>
-    <p class="govuk-body">The checker will confirm their email, enter a security code, then review your answers.</p>
+
+    <p class="govuk-body">
+      The checker will confirm their email, enter a security code, then review your answers.
+      They can view your answers but cannot change them.
+    </p>
+
+    {{ govukSummaryList({
+      rows: [
+        {
+          key: { text: "Sent to" },
+          value: { text: checkerEmail }
+        },
+        {
+          key: { text: "Status" },
+          value: { text: inviteSentAtText or "Awaiting check" }
+        }
+      ]
+    }) }}
 
     <div class="govuk-button-group">
-      {{ govukButton({ text: "Back to Manage your form", href: manageUrl }) }}
-      {{ govukButton({ text: "Save and exit", href: saveExitUrl, classes: "govuk-button--secondary" }) }}
+      <form method="post" action="/runner-sign-in-v2/forms/{{ application.formKey }}/{{ application.id }}/checker/invite-sent/resend">
+        {% if inviteCooldownRemainingSeconds and inviteCooldownRemainingSeconds > 0 %}
+          <button
+            type="submit"
+            class="govuk-button govuk-!-margin-bottom-0"
+            data-module="govuk-button"
+            disabled
+            aria-disabled="true"
+            data-resend-remaining="{{ inviteCooldownRemainingSeconds }}"
+            id="resend-button"
+          >
+            Send again
+          </button>
+        {% else %}
+          {{ govukButton({
+            text: "Send again",
+            classes: "govuk-!-margin-bottom-0",
+            attributes: { id: "resend-button" }
+          }) }}
+        {% endif %}
+      </form>
+
+      <span class="govuk-body govuk-!-margin-bottom-0 govuk-!-margin-right-2">or</span>
+      <a class="govuk-link" href="{{ changePersonUrl }}">send to a different person</a>
     </div>
+
+    {% if inviteCooldownRemainingSeconds and inviteCooldownRemainingSeconds > 0 %}
+      <p id="resend-help" class="govuk-hint govuk-!-margin-top-1">
+        You can send again in <span id="resend-countdown">{{ inviteCooldownRemainingSeconds }}</span> seconds.
+      </p>
+    {% endif %}
+
+    <h2 class="govuk-heading-m">When they’ve finished</h2>
+    <p class="govuk-body">We’ll email you when the check is complete. You can then submit the form.</p>
+    {{ govukInsetText({
+      text: "We’ll send the email to " + (applicantEmail or "you@example.com") + "."
+    }) }}
+
+    <h2 class="govuk-heading-m">If changes are needed</h2>
+    <p class="govuk-body">
+      If they ask for changes, update your answers and send the form for checking again.
+    </p>
+    {{ govukButton({
+      text: "Return to your form",
+      classes: "govuk-button--secondary",
+      href: returnToFormUrl or checkAnswersUrl
+    }) }}
+
+    <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+
+    {{ govukButton({ text: "Save and exit", href: saveExitUrl, classes: "govuk-button--secondary" }) }}
+
+    <p class="govuk-body govuk-!-margin-top-4">
+      <a class="govuk-link" href="{{ checkerInviteEmailPreviewUrl }}">View checker email (prototype only)</a>
+    </p>
   </div>
 </div>
+
+{% if inviteCooldownRemainingSeconds and inviteCooldownRemainingSeconds > 0 %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var resendButton = document.getElementById("resend-button");
+    var helpCountdown = document.getElementById("resend-countdown");
+    var bannerCountdown = document.getElementById("resend-countdown-banner");
+    var helpText = document.getElementById("resend-help");
+    var remainingAttr = resendButton ? resendButton.getAttribute("data-resend-remaining") : null;
+    var remaining = remainingAttr ? Number.parseInt(remainingAttr, 10) : 0;
+    if (Number.isNaN(remaining) || remaining < 0) remaining = 0;
+
+    if (resendButton && resendButton.disabled && remaining > 0) {
+      var tick = function () {
+        if (helpCountdown) helpCountdown.textContent = String(remaining);
+        if (bannerCountdown) bannerCountdown.textContent = String(remaining);
+
+        if (remaining <= 0) {
+          resendButton.disabled = false;
+          resendButton.removeAttribute("aria-disabled");
+          resendButton.removeAttribute("data-resend-remaining");
+          if (helpText && helpText.parentNode) helpText.parentNode.removeChild(helpText);
+          return;
+        }
+
+        remaining -= 1;
+        window.setTimeout(tick, 1000);
+      };
+
+      tick();
+    }
+  });
+</script>
+{% endif %}
 {% endblock %}
