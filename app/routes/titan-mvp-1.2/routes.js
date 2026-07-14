@@ -17086,6 +17086,26 @@ function seedRunnerSignInApplicationsPrototype() {
       expiryIso: "2026-06-06T23:59:00+01:00",
     },
     {
+      // All-pages / journeys deep-link: applicant check answers before invite.
+      id: "app-checker-ready-to-invite",
+      formKey: "apply-small-grant",
+      formName: "Apply for a small grant",
+      reference: "R4M-8H2-K6P",
+      status: "Draft",
+      step: "declaration",
+      excludeFromManage: true,
+      answers: {
+        organisationName: "Green Fields Community Group",
+        organisationType: "Community group",
+        amountRequested: "12500",
+        projectSummary: "A community garden and outdoor learning space.",
+        declarationAccepted: "yes",
+      },
+      checking: { required: true, status: "not_started" },
+      updatedIso: "2026-05-08T11:20:00+01:00",
+      expiryIso: "2026-06-08T23:59:00+01:00",
+    },
+    {
       id: "app-1721152526406",
       formKey: "apply-small-grant",
       formName: "Apply for a small grant",
@@ -17255,12 +17275,21 @@ function ensureRunnerSignInApplications(req) {
   if (!Array.isArray(data.runnerSignInApplications)) {
     data.runnerSignInApplications = seedRunnerSignInApplicationsPrototype();
   }
+  const seeded = seedRunnerSignInApplicationsPrototype();
+  for (const seedApp of seeded) {
+    if (!seedApp || !seedApp.id) continue;
+    if (!data.runnerSignInApplications.some((a) => a && a.id === seedApp.id)) {
+      data.runnerSignInApplications.push(JSON.parse(JSON.stringify(seedApp)));
+    }
+  }
   for (const app of data.runnerSignInApplications) {
     ensureRunnerSignInChecking(app);
     // Keep all-pages fixtures out of manage tables even for older sessions.
     if (
       app &&
-      (app.id === "app-copy-volunteer-draft" || app.id === "app-copy-volunteer-declaration")
+      (app.id === "app-copy-volunteer-draft" ||
+        app.id === "app-copy-volunteer-declaration" ||
+        app.id === "app-checker-ready-to-invite")
     ) {
       app.excludeFromManage = true;
     }
@@ -17870,12 +17899,22 @@ router.get("/runner-sign-in/forms/:formKey/:id/check-answers", function (req, re
   }
 
   const copied = runnerSignInIsCopiedJourney(req.query, application);
+  const inviteCheckerUrl =
+    application.checking &&
+    application.checking.required &&
+    String(application.checking.status || "not_started") !== "checked"
+      ? `/runner-sign-in-v2/forms/${encodeURIComponent(application.formKey)}/${encodeURIComponent(application.id)}/checker/invite`
+      : null;
   return res.render("titan-mvp-1.2/runner-sign-in/forms/check-answers", {
     data,
     application,
     formDef,
     copied,
     copiedQuerySuffix: runnerSignInCopiedQuerySuffix(req.query, application),
+    inviteCheckerUrl,
+    saveAndExitUrl: data.runnerSignInV2RedirectApplicationsToManage
+      ? `/runner-sign-in-v2/save-and-exit/with-sign-in/confirm-email?formKey=${encodeURIComponent(application.formKey)}&applicationId=${encodeURIComponent(application.id)}`
+      : "/runner-sign-in/applications",
   });
 });
 
@@ -17961,6 +18000,14 @@ router.post("/runner-sign-in/forms/:formKey/:id/send-for-checking", function (re
     return res.redirect(runnerSignInCheckAnswersUrl(application, req.query));
   }
 
+  // In the v2 manage context, invite uses the simpler v2 invite page.
+  if (data.runnerSignInV2RedirectApplicationsToManage) {
+    setRunnerSignInV2ManageFocus(req, application.formKey, application.id);
+    return res.redirect(
+      `/runner-sign-in-v2/forms/${encodeURIComponent(application.formKey)}/${encodeURIComponent(application.id)}/checker/invite`
+    );
+  }
+
   return res.redirect(`/runner-sign-in/forms/${encodeURIComponent(application.formKey)}/${encodeURIComponent(application.id)}/send-for-checking`);
 });
 
@@ -17982,6 +18029,14 @@ router.get("/runner-sign-in/forms/:formKey/:id/send-for-checking", function (req
   ensureRunnerSignInChecking(application);
   if (!application.checking || !application.checking.required) {
     return res.redirect(runnerSignInCheckAnswersUrl(application, req.query));
+  }
+
+  // In the v2 manage context, invite uses the simpler v2 invite page.
+  if (data.runnerSignInV2RedirectApplicationsToManage) {
+    setRunnerSignInV2ManageFocus(req, application.formKey, application.id);
+    return res.redirect(
+      `/runner-sign-in-v2/forms/${encodeURIComponent(application.formKey)}/${encodeURIComponent(application.id)}/checker/invite`
+    );
   }
 
   // Ensure token + details exist once checking is started
@@ -21848,6 +21903,7 @@ const RUNNER_SIGN_IN_V2_JOURNEY_PREVIEW_SIGNED_IN = new Set([
   "delete-draft",
   "checker-invite",
   "checker-invite-sent",
+  "applicant-check-answers",
   "ready-to-submit",
   "create-sign-in-created",
   "copy-clone",
@@ -22368,14 +22424,88 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
     });
   }
 
+  if (slug === "applicant-check-answers") {
+    applyRunnerSignInV2EmailAuth(req, email, phone);
+    data.runnerSignInV2RedirectApplicationsToManage = true;
+    const grantFormKey = SEED.readyToInvite.formKey;
+    const grantApplicationId = SEED.readyToInvite.applicationId;
+    setRunnerSignInV2ManageFocus(req, grantFormKey, grantApplicationId);
+    const applications = ensureRunnerSignInApplications(req);
+    const grantApplication = applications.find((a) => a && a.id === grantApplicationId);
+    if (!grantApplication) return res.redirect(journeysUrl);
+    ensureRunnerSignInChecking(grantApplication);
+    grantApplication.checking.status = "not_started";
+    const formDef = getRunnerSignInFormDef(grantFormKey);
+    return res.render("titan-mvp-1.2/runner-sign-in/forms/check-answers", {
+      data,
+      application: grantApplication,
+      formDef,
+      copied: false,
+      copiedQuerySuffix: "",
+      inviteCheckerUrl: runnerSignInV2JourneyPreviewPath("checker-invite"),
+      saveAndExitUrl: manageUrl,
+    });
+  }
+
   if (slug === "checker-invite") {
     applyRunnerSignInV2EmailAuth(req, email, phone);
-    setRunnerSignInV2ManageFocus(req, formKey, applicationId);
+    const grantFormKey = SEED.readyToInvite.formKey;
+    const grantApplicationId = SEED.readyToInvite.applicationId;
+    setRunnerSignInV2ManageFocus(req, grantFormKey, grantApplicationId);
+    const applications = ensureRunnerSignInApplications(req);
+    const grantApplication = applications.find((a) => a && a.id === grantApplicationId);
+    if (!grantApplication) return res.redirect(journeysUrl);
+    ensureRunnerSignInChecking(grantApplication);
+    grantApplication.checking.status = "not_started";
+    delete grantApplication.checking.inviteEmail;
+    delete grantApplication.checking.invitedAtIso;
+    const saveExitUrl = `/runner-sign-in-v2/save-and-exit/with-sign-in/confirm-email?formKey=${encodeURIComponent(grantFormKey)}&applicationId=${encodeURIComponent(grantApplicationId)}`;
     return res.render("titan-mvp-1.2/runner-sign-in-v2/checker/invite", {
       ...base,
+      application: grantApplication,
+      formKey: grantFormKey,
+      applicationId: grantApplicationId,
       next: manageUrl,
-      backUrl: manageUrl,
-      values: { runnerSignInV2CheckerEmail: "checker@example.com" },
+      backUrl: runnerSignInV2JourneyPreviewPath("applicant-check-answers"),
+      saveExitUrl,
+      inviteSentUrl: runnerSignInV2JourneyPreviewPath("checker-invite-sent"),
+      values: {
+        runnerSignInV2CheckerEmail: "checker@example.com",
+        runnerSignInV2CheckerEmailConfirm: "checker@example.com",
+      },
+    });
+  }
+
+  if (slug === "checker-invite-sent") {
+    applyRunnerSignInV2EmailAuth(req, email, phone);
+    const grantFormKey = SEED.readyToInvite.formKey;
+    const grantApplicationId = SEED.readyToInvite.applicationId;
+    setRunnerSignInV2ManageFocus(req, grantFormKey, grantApplicationId);
+    const applications = ensureRunnerSignInApplications(req);
+    const grantApplication = applications.find((a) => a && a.id === grantApplicationId);
+    if (!grantApplication) return res.redirect(journeysUrl);
+    ensureRunnerSignInChecking(grantApplication);
+    grantApplication.checking.status = "awaiting_check";
+    grantApplication.checking.inviteEmail = "checker@example.com";
+    grantApplication.checking.invitedAtIso = grantApplication.checking.invitedAtIso || new Date().toISOString();
+    const saveExitUrl = `/runner-sign-in-v2/save-and-exit/with-sign-in/confirm-email?formKey=${encodeURIComponent(grantFormKey)}&applicationId=${encodeURIComponent(grantApplicationId)}`;
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/checker/invite-sent", {
+      ...base,
+      application: grantApplication,
+      formKey: grantFormKey,
+      applicationId: grantApplicationId,
+      checkerEmail: "checker@example.com",
+      manageUrl: runnerSignInV2ManagePath(grantFormKey, grantApplicationId),
+      saveExitUrl,
+      checkAnswersUrl: runnerSignInV2JourneyPreviewPath("applicant-check-answers"),
+      returnToFormUrl: runnerSignInV2JourneyPreviewPath("applicant-check-answers"),
+      changePersonUrl: runnerSignInV2JourneyPreviewPath("checker-invite"),
+      checkerInviteEmailPreviewUrl: `/runner-sign-in-v2/emails/checker-invite-v2?formKey=${encodeURIComponent(grantFormKey)}&applicationId=${encodeURIComponent(grantApplicationId)}`,
+      applicantEmail: email,
+      inviteSentAtText: runnerSignInV2InviteSentAtText(grantApplication),
+      inviteCooldownRemainingSeconds: 0,
+      inviteResent: false,
+      inviteThrottled: false,
     });
   }
 
@@ -22420,6 +22550,7 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
     return res.render("titan-mvp-1.2/runner-sign-in-v2/emails/email-confirmation-code", {
       ...base,
       code: "123456",
+      formName: application.formName,
     });
   }
 
@@ -22587,16 +22718,6 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
       formName: application.formName || "Apply for a small grant",
       continueUrl: "#",
       tokenValid: true,
-    });
-  }
-
-  if (slug === "checker-invite-sent") {
-    applyRunnerSignInV2EmailAuth(req, email, phone);
-    return res.render("titan-mvp-1.2/runner-sign-in-v2/checker/invite-sent", {
-      ...base,
-      checkerEmail: "checker@example.com",
-      manageUrl: "#",
-      saveExitUrl: "#",
     });
   }
 
@@ -25054,7 +25175,13 @@ router.get("/runner-sign-in-v2/emails/form-submitted", function (req, res) {
 
 router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/checker/invite", function (req, res) {
   const data = ensureRunnerSignInSession(req);
-  if (!data.runnerSignInAuthed) return res.redirect("/runner-sign-in-v2/start-page");
+  if (!data.runnerSignInAuthed) {
+    if (runnerSignInV2PrototypeMode(req)) {
+      applyRunnerSignInV2EmailAuth(req, data.runnerSignInEmail || "you@example.com", data.runnerSignInPhone || "07700 900000");
+    } else {
+      return res.redirect("/runner-sign-in-v2/start-page");
+    }
+  }
   const application =
     runnerSignInV2FindApplication(req, req.params.formKey, req.params.applicationId) ||
     runnerSignInV2EnsureApplication(req, req.params.formKey, req.params.applicationId);
@@ -25063,19 +25190,51 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/checker/invite", fu
   if (!application.checking || !application.checking.required) {
     return res.redirect(runnerSignInV2ManagePath(application.formKey, application.id));
   }
-  const manageUrl = runnerSignInV2ManagePath(application.formKey, application.id);
+
+  const changePerson = req.query.change === "1" || req.query.change === "true";
+  const hasInvite =
+    String(application.checking.status || "") === "awaiting_check" &&
+    Boolean(String(application.checking.inviteEmail || "").trim());
+  if (hasInvite && !changePerson) {
+    return res.redirect(
+      `/runner-sign-in-v2/forms/${encodeURIComponent(application.formKey)}/${encodeURIComponent(application.id)}/checker/invite-sent`
+    );
+  }
+
+  const checkAnswersUrl = runnerSignInCheckAnswersUrl(application, req.query);
+  const saveExitUrl = `/runner-sign-in-v2/save-and-exit/with-sign-in/confirm-email?formKey=${encodeURIComponent(application.formKey)}&applicationId=${encodeURIComponent(application.id)}`;
+  const pending = data.runnerSignInV2CheckerInviteValues || {};
+  const emailValue = changePerson
+    ? ""
+    : pending.runnerSignInV2CheckerEmail !== undefined
+      ? pending.runnerSignInV2CheckerEmail
+      : (application.checking && application.checking.inviteEmail) || "";
+  const confirmValue = changePerson
+    ? ""
+    : pending.runnerSignInV2CheckerEmailConfirm || "";
+  delete data.runnerSignInV2CheckerInviteValues;
   return res.render("titan-mvp-1.2/runner-sign-in-v2/checker/invite", {
     data,
     application,
-    backUrl: manageUrl,
+    backUrl: checkAnswersUrl,
+    saveExitUrl,
     error: data.runnerSignInV2Error || {},
-    values: { runnerSignInV2CheckerEmail: (application.checking && application.checking.inviteEmail) || "" },
+    values: {
+      runnerSignInV2CheckerEmail: emailValue,
+      runnerSignInV2CheckerEmailConfirm: confirmValue,
+    },
   });
 });
 
 router.post("/runner-sign-in-v2/forms/:formKey/:applicationId/checker/invite", function (req, res) {
   const data = ensureRunnerSignInSession(req);
-  if (!data.runnerSignInAuthed) return res.redirect("/runner-sign-in-v2/start-page");
+  if (!data.runnerSignInAuthed) {
+    if (runnerSignInV2PrototypeMode(req)) {
+      applyRunnerSignInV2EmailAuth(req, data.runnerSignInEmail || "you@example.com", data.runnerSignInPhone || "07700 900000");
+    } else {
+      return res.redirect("/runner-sign-in-v2/start-page");
+    }
+  }
   const applications = ensureRunnerSignInApplications(req);
   const application = applications.find((a) => a.id === req.params.applicationId && a.formKey === req.params.formKey);
   if (!application) return res.redirect("/runner-sign-in-v2/start-page");
@@ -25084,15 +25243,33 @@ router.post("/runner-sign-in-v2/forms/:formKey/:applicationId/checker/invite", f
     return res.redirect(runnerSignInV2ManagePath(application.formKey, application.id));
   }
   const email = String(req.body.runnerSignInV2CheckerEmail || "").trim();
+  const emailConfirm = String(req.body.runnerSignInV2CheckerEmailConfirm || "").trim();
+  const invitePath = `/runner-sign-in-v2/forms/${encodeURIComponent(application.formKey)}/${encodeURIComponent(application.id)}/checker/invite`;
+
+  data.runnerSignInV2CheckerInviteValues = {
+    runnerSignInV2CheckerEmail: email,
+    runnerSignInV2CheckerEmailConfirm: emailConfirm,
+  };
+
   if (!email) {
     data.runnerSignInV2Error = { runnerSignInV2CheckerEmail: "Enter the checker’s email address" };
-    return res.redirect(`/runner-sign-in-v2/forms/${encodeURIComponent(application.formKey)}/${encodeURIComponent(application.id)}/checker/invite`);
+    return res.redirect(invitePath);
   }
   if (!isRunnerSignInV2ProbablyEmail(email)) {
     data.runnerSignInV2Error = { runnerSignInV2CheckerEmail: "Enter an email address in the correct format, like name@example.com" };
-    return res.redirect(`/runner-sign-in-v2/forms/${encodeURIComponent(application.formKey)}/${encodeURIComponent(application.id)}/checker/invite`);
+    return res.redirect(invitePath);
   }
+  if (!emailConfirm) {
+    data.runnerSignInV2Error = { runnerSignInV2CheckerEmailConfirm: "Confirm the checker’s email address" };
+    return res.redirect(invitePath);
+  }
+  if (email.toLowerCase() !== emailConfirm.toLowerCase()) {
+    data.runnerSignInV2Error = { runnerSignInV2CheckerEmailConfirm: "Email addresses must match" };
+    return res.redirect(invitePath);
+  }
+
   delete data.runnerSignInV2Error;
+  delete data.runnerSignInV2CheckerInviteValues;
   if (!application.checking.reviewToken) application.checking.reviewToken = createRunnerSignInReviewToken();
   if (!application.checking.referenceNumber) application.checking.referenceNumber = createRunnerV4StyleReferenceNumber();
   if (!application.checking.memorableWord) application.checking.memorableWord = createRunnerSignInMemorableWord();
@@ -25119,28 +25296,112 @@ router.post("/runner-sign-in-v2/forms/:formKey/:applicationId/checker/invite", f
     checkerV2CodeOk: false,
   });
 
+  setRunnerSignInV2ManageFocus(req, application.formKey, application.id);
+
   return res.redirect(
     `/runner-sign-in-v2/forms/${encodeURIComponent(application.formKey)}/${encodeURIComponent(application.id)}/checker/invite-sent?checkerEmail=${encodeURIComponent(email)}`
   );
 });
 
+function runnerSignInV2InviteCooldownRemainingSeconds(application) {
+  const RESEND_COOLDOWN_SECONDS = 30;
+  const lastSentIso = application && application.checking && application.checking.invitedAtIso;
+  if (!lastSentIso) return 0;
+  const d = new Date(lastSentIso);
+  if (Number.isNaN(d.getTime())) return 0;
+  const remainingMs = RESEND_COOLDOWN_SECONDS * 1000 - (Date.now() - d.getTime());
+  if (remainingMs <= 0) return 0;
+  return Math.ceil(remainingMs / 1000);
+}
+
+function runnerSignInV2InviteSentAtText(application) {
+  const iso = application && application.checking && application.checking.invitedAtIso;
+  if (!iso) return "Awaiting check";
+  const formatted = formatRunnerSignInSubmittedDateTime(iso);
+  return formatted ? `Sent ${formatted}` : "Awaiting check";
+}
+
 router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/checker/invite-sent", function (req, res) {
   const data = ensureRunnerSignInSession(req);
-  if (!data.runnerSignInAuthed) return res.redirect("/runner-sign-in-v2/start-page");
+  if (!data.runnerSignInAuthed) {
+    if (runnerSignInV2PrototypeMode(req)) {
+      applyRunnerSignInV2EmailAuth(req, data.runnerSignInEmail || "you@example.com", data.runnerSignInPhone || "07700 900000");
+    } else {
+      return res.redirect("/runner-sign-in-v2/start-page");
+    }
+  }
   const application =
     runnerSignInV2FindApplication(req, req.params.formKey, req.params.applicationId) ||
     runnerSignInV2EnsureApplication(req, req.params.formKey, req.params.applicationId);
   if (!application) return res.redirect("/runner-sign-in-v2/start-page");
-  const checkerEmail = String(req.query.checkerEmail || (application.checking && application.checking.inviteEmail) || "").trim();
+  ensureRunnerSignInChecking(application);
+  if (!application.checking || !application.checking.required) {
+    return res.redirect(runnerSignInV2ManagePath(application.formKey, application.id));
+  }
+
+  const checkerEmail = String(
+    req.query.checkerEmail || (application.checking && application.checking.inviteEmail) || ""
+  ).trim();
+  if (!checkerEmail) {
+    return res.redirect(
+      `/runner-sign-in-v2/forms/${encodeURIComponent(application.formKey)}/${encodeURIComponent(application.id)}/checker/invite`
+    );
+  }
+
   const manageUrl = runnerSignInV2ManagePath(application.formKey, application.id);
   const saveExitUrl = `/runner-sign-in-v2/save-and-exit/with-sign-in/confirm-email?formKey=${encodeURIComponent(application.formKey)}&applicationId=${encodeURIComponent(application.id)}`;
+  const checkAnswersUrl = runnerSignInCheckAnswersUrl(application, req.query);
+  const changePersonUrl = `/runner-sign-in-v2/forms/${encodeURIComponent(application.formKey)}/${encodeURIComponent(application.id)}/checker/invite?change=1`;
+  const checkerInviteEmailPreviewUrl = `/runner-sign-in-v2/emails/checker-invite-v2?formKey=${encodeURIComponent(application.formKey)}&applicationId=${encodeURIComponent(application.id)}`;
+  const inviteCooldownRemainingSeconds = runnerSignInV2InviteCooldownRemainingSeconds(application);
+
   return res.render("titan-mvp-1.2/runner-sign-in-v2/checker/invite-sent", {
     data,
     application,
     checkerEmail,
     manageUrl,
     saveExitUrl,
+    checkAnswersUrl,
+    returnToFormUrl: checkAnswersUrl,
+    changePersonUrl,
+    checkerInviteEmailPreviewUrl,
+    applicantEmail: data.runnerSignInEmail || "you@example.com",
+    inviteSentAtText: runnerSignInV2InviteSentAtText(application),
+    inviteCooldownRemainingSeconds,
+    inviteResent: req.query.inviteResent === "1" || req.query.inviteResent === "true",
+    inviteThrottled: req.query.inviteThrottled === "1" || req.query.inviteThrottled === "true",
   });
+});
+
+router.post("/runner-sign-in-v2/forms/:formKey/:applicationId/checker/invite-sent/resend", function (req, res) {
+  const data = ensureRunnerSignInSession(req);
+  if (!data.runnerSignInAuthed) {
+    if (runnerSignInV2PrototypeMode(req)) {
+      applyRunnerSignInV2EmailAuth(req, data.runnerSignInEmail || "you@example.com", data.runnerSignInPhone || "07700 900000");
+    } else {
+      return res.redirect("/runner-sign-in-v2/start-page");
+    }
+  }
+  const applications = ensureRunnerSignInApplications(req);
+  const application = applications.find((a) => a.id === req.params.applicationId && a.formKey === req.params.formKey);
+  if (!application) return res.redirect("/runner-sign-in-v2/start-page");
+  ensureRunnerSignInChecking(application);
+  if (!application.checking || !application.checking.required) {
+    return res.redirect(runnerSignInV2ManagePath(application.formKey, application.id));
+  }
+
+  const base = `/runner-sign-in-v2/forms/${encodeURIComponent(application.formKey)}/${encodeURIComponent(application.id)}/checker/invite-sent`;
+  const remaining = runnerSignInV2InviteCooldownRemainingSeconds(application);
+  if (remaining > 0) {
+    return res.redirect(`${base}?inviteThrottled=1`);
+  }
+
+  application.checking.invitedAtIso = new Date().toISOString();
+  application.checking.status = "awaiting_check";
+  const checkerEmail = String(application.checking.inviteEmail || "").trim();
+  return res.redirect(
+    `${base}?inviteResent=1${checkerEmail ? `&checkerEmail=${encodeURIComponent(checkerEmail)}` : ""}`
+  );
 });
 
 router.get("/runner-sign-in-v2/checker/why-sign-in", function (req, res) {

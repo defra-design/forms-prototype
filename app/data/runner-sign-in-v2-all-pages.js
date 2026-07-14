@@ -225,8 +225,12 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
     {
       heading: "Checker",
       links: [
+        { text: "Check your answers", href: urls.applicantCheckAnswers },
         { text: "Invite a checker", href: urls.checkerInvite },
-        { text: "Checker invite sent", href: `${urls.checkerInvite}/invite-sent?checkerEmail=checker@example.com` },
+        {
+          text: "Checker invite sent",
+          href: `/runner-sign-in-v2/forms/${enc(SEED.readyToInvite.formKey)}/${enc(SEED.readyToInvite.applicationId)}/checker/invite-sent?checkerEmail=checker@example.com`,
+        },
         { text: "Checker invite email", href: urls.emailCheckerInvite },
         { text: "Checker landing page", href: checker("start") },
         { text: "Sign in to check answers", href: urls.checkerWhySignIn },
@@ -445,6 +449,7 @@ function buildRunnerSignInV2AllPagesStaticSections(urls, { unexpectedPages }) {
     {
       heading: "Checker",
       links: [
+        { text: "Check your answers", href: p.applicantCheckAnswers },
         { text: "Invite a checker", href: p.checkerInvite },
         { text: "Checker invite sent", href: preview("checker-invite-sent") },
         { text: "Checker invite email", href: p.emailCheckerInvite },

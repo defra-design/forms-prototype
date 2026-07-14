@@ -205,9 +205,10 @@
 
     {% set checkerHtml %}
       <div class="journey-docs__section">
-        <p class="govuk-body">An applicant invites someone to check their answers. The checker signs in with email and a security code, reviews the form, and submits their check.</p>
+        <p class="govuk-body">An applicant checks their answers, then invites someone to review them. The checker signs in with email and a security code, reviews the form, and submits their check.</p>
         {{ journeyDocs.journeyPath([
           { text: "Manage your form", href: urls.manage },
+          { text: "Check your answers", href: urls.applicantCheckAnswers },
           { text: "Invite a checker", href: urls.checkerInvite },
           { text: "Checker invite email", href: urls.emailCheckerInvite },
           { text: "Sign in to check answers", href: urls.checkerWhySignIn },
@@ -217,6 +218,7 @@
           { text: "Applicant notified email", href: urls.emailCheckerInvite }
         ]) }}
         {{ journeyDocs.journeyPreviews([
+          { caption: "Checker", title: "Check your answers", href: urls.applicantCheckAnswers, previewHref: urls.preview.applicantCheckAnswers },
           { caption: "Checker", title: "Invite a checker", href: urls.checkerInvite, previewHref: urls.preview.checkerInvite },
           { caption: "Checker", title: "Checker invite email", href: urls.emailCheckerInvite, previewHref: urls.preview.emailCheckerInvite },
           { caption: "Checker", title: "Sign in to check answers", href: urls.checkerWhySignIn, previewHref: urls.preview.checkerWhySignIn }
