@@ -70,11 +70,20 @@ function runnerSignInV2BuildJourneyUrls({
     checkerInvite: `/runner-sign-in-v2/forms/apply-small-grant/app-checker-ready-to-invite/checker/invite`,
     checkerWhySignIn: `/runner-sign-in-v2/checker/why-sign-in?token=${enc(staticCheckedReviewToken)}`,
     checkerStart: checkerStartPath,
+    checkerViewOrganisation: journeyPreviewPath
+      ? journeyPreviewPath("checker-view-organisation")
+      : `/runner-sign-in-v2/journeys/preview/checker-view-organisation`,
     emailSaveExit: triple("/runner-sign-in-v2/emails/save-and-exit", manageUrl),
     emailCheckerInvite: triple("/runner-sign-in-v2/emails/checker-invite-v2", manageUrl),
     emailApplicantFormChecked: `/runner-sign-in-v2/emails/applicant-form-checked?formKey=${enc(formKey)}&applicationId=${enc(applicationId)}`,
     emailFormSubmitted: triple("/runner-sign-in-v2/emails/form-submitted", manageUrl),
     emailFormSubmittedPublic: triple("/runner-sign-in-v2/emails/form-submitted/public", manageUrl),
+    emailFormSubmittedCheckedPublic: journeyPreviewPath
+      ? journeyPreviewPath("email-form-submitted-checked-public")
+      : "/runner-sign-in-v2/emails/form-submitted-checked/public",
+    emailFormSubmittedCheckedTeam: journeyPreviewPath
+      ? journeyPreviewPath("email-form-submitted-checked-team")
+      : "/runner-sign-in-v2/emails/form-submitted-checked/team",
     textRecoverSecurityCode: "/runner-sign-in-v2/texts/recover-security-code",
     textChangeEmailSecurityCode: "/runner-sign-in-v2/texts/change-email-security-code",
     staticManageFormChecked: "/runner-sign-in-v2/static/manage-form-checked",
@@ -134,12 +143,15 @@ function runnerSignInV2BuildJourneyUrls({
           applicantCheckAnswers: journeyPreviewPath("applicant-check-answers"),
           checkerInvite: journeyPreviewPath("checker-invite"),
           checkerWhySignIn: journeyPreviewPath("checker-why-sign-in"),
+          checkerViewOrganisation: journeyPreviewPath("checker-view-organisation"),
           readyToSubmit: journeyPreviewPath("ready-to-submit"),
           emailSaveExit: journeyPreviewPath("email-save-exit"),
           emailConfirmation: journeyPreviewPath("email-confirmation"),
           emailCheckerInvite: journeyPreviewPath("email-checker-invite"),
           emailFormSubmitted: journeyPreviewPath("email-form-submitted"),
           emailFormSubmittedPublic: journeyPreviewPath("email-form-submitted-public"),
+          emailFormSubmittedCheckedPublic: journeyPreviewPath("email-form-submitted-checked-public"),
+          emailFormSubmittedCheckedTeam: journeyPreviewPath("email-form-submitted-checked-team"),
           manageFormChecked: journeyPreviewPath("manage-form-checked"),
           saveExitCheckEmail: journeyPreviewPath("save-exit-check-email"),
           saveExitResumeWithSignIn: journeyPreviewPath("save-exit-resume-with-sign-in"),

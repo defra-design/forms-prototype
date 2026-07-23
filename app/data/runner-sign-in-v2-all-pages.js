@@ -236,6 +236,10 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
         { text: "Sign in to check answers", href: urls.checkerWhySignIn },
         { text: "Check your email", href: checker("check-email") },
         { text: "Check answers", href: checker("check-answers") },
+        {
+          text: "View form page (organisation)",
+          href: `/runner-sign-in-v2/checker/view/organisation?token=${enc(reviewToken)}&prototype=1&allowApplicant=1`,
+        },
         { text: "Change answers", href: checker("change-answers") },
         { text: "Check complete", href: checker("complete/success") },
         { text: "Applicant notified email", href: urls.emailApplicantFormChecked },
@@ -252,6 +256,8 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
         { text: "Applicant form checked email", href: urls.emailApplicantFormChecked },
         { text: "Form submitted email (copied answers)", href: urls.emailFormSubmitted },
         { text: "Form submitted email – public view (copied answers)", href: urls.emailFormSubmittedPublic },
+        { text: "Form submitted email – public view (checked)", href: urls.emailFormSubmittedCheckedPublic },
+        { text: "Form submitted email – processing team (checked)", href: urls.emailFormSubmittedCheckedTeam },
       ],
     },
     {
@@ -457,6 +463,7 @@ function buildRunnerSignInV2AllPagesStaticSections(urls, { unexpectedPages }) {
         { text: "Sign in to check answers", href: p.checkerWhySignIn },
         { text: "Check your email", href: preview("checker-check-email") },
         { text: "Check answers", href: preview("checker-check-answers") },
+        { text: "View form page (organisation)", href: preview("checker-view-organisation") },
         { text: "Change answers", href: preview("checker-change-answers") },
         { text: "Check complete", href: preview("checker-complete") },
         { text: "Applicant notified email", href: preview("email-applicant-form-checked") },
@@ -473,6 +480,8 @@ function buildRunnerSignInV2AllPagesStaticSections(urls, { unexpectedPages }) {
         { text: "Applicant form checked email", href: preview("email-applicant-form-checked") },
         { text: "Form submitted email (copied answers)", href: p.emailFormSubmitted },
         { text: "Form submitted email – public view (copied answers)", href: p.emailFormSubmittedPublic },
+        { text: "Form submitted email – public view (checked)", href: p.emailFormSubmittedCheckedPublic },
+        { text: "Form submitted email – processing team (checked)", href: p.emailFormSubmittedCheckedTeam },
       ],
     },
     {

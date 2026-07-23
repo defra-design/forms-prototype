@@ -215,13 +215,15 @@
           { text: "Enter checker email", href: urls.checkerStart },
           { text: "Check your email", href: urls.checkerStart },
           { text: "Check answers", href: urls.checkerStart },
+          { text: "View form page", href: urls.checkerViewOrganisation },
           { text: "Applicant notified email", href: urls.emailCheckerInvite }
         ]) }}
         {{ journeyDocs.journeyPreviews([
           { caption: "Checker", title: "Check your answers", href: urls.applicantCheckAnswers, previewHref: urls.preview.applicantCheckAnswers },
           { caption: "Checker", title: "Invite a checker", href: urls.checkerInvite, previewHref: urls.preview.checkerInvite },
           { caption: "Checker", title: "Checker invite email", href: urls.emailCheckerInvite, previewHref: urls.preview.emailCheckerInvite },
-          { caption: "Checker", title: "Sign in to check answers", href: urls.checkerWhySignIn, previewHref: urls.preview.checkerWhySignIn }
+          { caption: "Checker", title: "Sign in to check answers", href: urls.checkerWhySignIn, previewHref: urls.preview.checkerWhySignIn },
+          { caption: "Checker", title: "View form page", href: urls.checkerViewOrganisation, previewHref: urls.preview.checkerViewOrganisation }
         ]) }}
       </div>
     {% endset %}
@@ -243,6 +245,8 @@
           { caption: "Manage form", title: "Delete draft", href: urls.deleteDraft, previewHref: urls.preview.deleteDraft },
           { caption: "Manage form", title: "Ready to submit", href: urls.readyToSubmit, previewHref: urls.preview.readyToSubmit },
           { caption: "Manage form", title: "Form submitted", href: urls.formSubmitted },
+          { caption: "Manage form", title: "Form submitted email (checked)", href: urls.emailFormSubmittedCheckedPublic, previewHref: urls.preview.emailFormSubmittedCheckedPublic },
+          { caption: "Manage form", title: "Form submitted email – processing team (checked)", href: urls.emailFormSubmittedCheckedTeam, previewHref: urls.preview.emailFormSubmittedCheckedTeam },
           { caption: "Manage form", title: "Checked (static example)", href: "/runner-sign-in-v2/static/manage-form-checked", previewHref: urls.preview.manageFormChecked }
         ]) }}
       </div>
@@ -277,6 +281,8 @@
           { caption: "Emails", title: "Security code", href: urls.emailConfirmation, previewHref: urls.preview.emailConfirmation },
           { caption: "Emails", title: "Form submitted (copied answers)", href: urls.emailFormSubmitted, previewHref: urls.preview.emailFormSubmitted },
           { caption: "Emails", title: "Form submitted – public view (copied answers)", href: urls.emailFormSubmittedPublic, previewHref: urls.preview.emailFormSubmittedPublic },
+          { caption: "Emails", title: "Form submitted – public view (checked)", href: urls.emailFormSubmittedCheckedPublic, previewHref: urls.preview.emailFormSubmittedCheckedPublic },
+          { caption: "Emails", title: "Form submitted – processing team (checked)", href: urls.emailFormSubmittedCheckedTeam, previewHref: urls.preview.emailFormSubmittedCheckedTeam },
           { caption: "Emails", title: "Checker invite", href: urls.emailCheckerInvite, previewHref: urls.preview.emailCheckerInvite },
           { caption: "Emails", title: "Form checked (applicant)", href: urls.emailApplicantFormChecked, previewHref: urls.emailApplicantFormChecked }
         ]) }}

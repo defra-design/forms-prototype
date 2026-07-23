@@ -4429,6 +4429,150 @@ router.get("/titan-mvp-1.2/page-overview", function (req, res) {
   });
 });
 
+// Conceptual exploration: conditional identifiable labels on multiple responses
+const SAMPLE_CONDITIONS_FOR_LABELS = [
+  {
+    id: "cond-animal-cow",
+    text: "'Animal type' is 'Cow'",
+  },
+  {
+    id: "cond-animal-pet",
+    text: "'Animal type' is 'Pet'",
+  },
+  {
+    id: "cond-urgency-high",
+    text: "'Is this urgent?' is 'Yes'",
+  },
+];
+
+function getConditionalLabelsSettings(req) {
+  const formData = req.session.data || {};
+  const defaults = {
+    hasGuidance: false,
+    pageHeading: "",
+    allowMultipleResponses: true,
+    minResponseCount: "2",
+    maxResponseCount: "5",
+    questionSetName: "Issue",
+    conditionalLabels: [
+      {
+        id: "label-1",
+        label: "Cow",
+        conditionId: "cond-animal-cow",
+        conditionText: "'Animal type' is 'Cow'",
+      },
+    ],
+  };
+
+  return {
+    ...defaults,
+    ...(formData.conditionalLabelsSettings || {}),
+  };
+}
+
+function buildConditionSelectItems(settings) {
+  const usedIds = new Set(
+    (settings.conditionalLabels || []).map((item) => item.conditionId)
+  );
+
+  return [
+    { value: "", text: "Select a condition" },
+    ...SAMPLE_CONDITIONS_FOR_LABELS.map((condition) => ({
+      value: condition.id,
+      text: condition.text,
+      disabled: usedIds.has(condition.id),
+    })),
+  ];
+}
+
+router.get(
+  "/titan-mvp-1.2/form-editor/page-settings-conditional-labels",
+  function (req, res) {
+    const formData = req.session.data || {};
+    const settings = getConditionalLabelsSettings(req);
+
+    res.render(
+      "titan-mvp-1.2/form-editor/page-settings-conditional-labels.html",
+      {
+        form: {
+          name: formData.formName || "Form name",
+        },
+        settings,
+        conditionSelectItems: buildConditionSelectItems(settings),
+      }
+    );
+  }
+);
+
+router.post(
+  "/titan-mvp-1.2/form-editor/page-settings-conditional-labels",
+  function (req, res) {
+    const formData = req.session.data || {};
+    const action = req.body.action;
+    const settings = getConditionalLabelsSettings(req);
+
+    settings.hasGuidance = req.body.guidance === "guidance";
+    settings.pageHeading = req.body.pageHeading || "";
+    settings.allowMultipleResponses =
+      req.body.allowMultipleResponses === "true" ||
+      (Array.isArray(req.body.allowMultipleResponses) &&
+        req.body.allowMultipleResponses.includes("true"));
+    settings.minResponseCount = req.body.minResponseCount || "";
+    settings.maxResponseCount = req.body.maxResponseCount || "";
+    settings.questionSetName = req.body.questionSetName || "Issue";
+
+    const ids = [].concat(req.body.conditionalLabelIds || []);
+    const labels = [].concat(req.body.conditionalLabelValues || []);
+    const conditionIds = [].concat(req.body.conditionalLabelConditionIds || []);
+    const conditionTexts = [].concat(
+      req.body.conditionalLabelConditionTexts || []
+    );
+
+    settings.conditionalLabels = ids.map((id, index) => ({
+      id,
+      label: labels[index] || "",
+      conditionId: conditionIds[index] || "",
+      conditionText: conditionTexts[index] || "",
+    }));
+
+    const removeId = req.body.removeConditionalLabelId;
+    if (removeId) {
+      settings.conditionalLabels = settings.conditionalLabels.filter(
+        (item) => String(item.id) !== String(removeId)
+      );
+    }
+
+    if (action === "add-conditional-label") {
+      const conditionId = req.body.newConditionId;
+      const label = (req.body.newConditionalLabel || "").trim();
+      const condition = SAMPLE_CONDITIONS_FOR_LABELS.find(
+        (item) => item.id === conditionId
+      );
+
+      if (condition && label) {
+        const alreadyUsed = settings.conditionalLabels.some(
+          (item) => item.conditionId === conditionId
+        );
+        if (!alreadyUsed) {
+          settings.conditionalLabels.push({
+            id: `label-${Date.now()}`,
+            label,
+            conditionId: condition.id,
+            conditionText: condition.text,
+          });
+        }
+      }
+    }
+
+    formData.conditionalLabelsSettings = settings;
+    req.session.data = formData;
+
+    res.redirect(
+      "/titan-mvp-1.2/form-editor/page-settings-conditional-labels"
+    );
+  }
+);
+
 // Edit page
 router.get("/titan-mvp-1.2/edit-page/:pageId", function (req, res) {
   const pageId = req.params.pageId;
@@ -4663,6 +4807,7 @@ router.post("/titan-mvp-1.2/page-overview", function (req, res) {
   currentPage.setName = currentPage.allowMultipleResponses
     ? questionSetName
     : "";
+  currentPage.questionSetName = currentPage.setName;
   currentPage.minResponseCount = currentPage.allowMultipleResponses
     ? minResponseCount
     : "";
@@ -17971,7 +18116,10 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/submitted", functio
     runnerSignInV2EnsureApplication(req, req.params.formKey, req.params.applicationId);
   if (!application) return res.redirect("/runner-sign-in-v2/start-page");
   setRunnerSignInV2ManageFocus(req, application.formKey, application.id);
-  const confirmationEmailUrl = `/runner-sign-in-v2/emails/form-submitted?formKey=${encodeURIComponent(application.formKey)}&applicationId=${encodeURIComponent(application.id)}`;
+  const checkingRequired = Boolean(application.checking && application.checking.required);
+  const confirmationEmailUrl = checkingRequired
+    ? `/runner-sign-in-v2/emails/form-submitted-checked/public?formKey=${encodeURIComponent(application.formKey)}&applicationId=${encodeURIComponent(application.id)}`
+    : `/runner-sign-in-v2/emails/form-submitted?formKey=${encodeURIComponent(application.formKey)}&applicationId=${encodeURIComponent(application.id)}`;
   return res.render("titan-mvp-1.2/runner-sign-in-v2/form-submitted", {
     data,
     application,
@@ -21506,6 +21654,60 @@ function runnerSignInV2CheckerCheckAnswersDisplay(entry) {
   };
 }
 
+const RUNNER_SIGN_IN_V2_CHECKER_VIEW_STEPS = new Set(["contact", "organisation", "amount", "summary"]);
+
+function runnerSignInV2CheckerViewPagePath(token, step) {
+  return `/runner-sign-in-v2/checker/view/${encodeURIComponent(step)}?token=${encodeURIComponent(token)}`;
+}
+
+function runnerSignInV2CheckerViewPageUrls(req, token) {
+  const append = (step) =>
+    runnerSignInV2CheckerAppendAllowApplicant(req, runnerSignInV2CheckerViewPagePath(token, step));
+  return {
+    viewContactUrl: append("contact"),
+    viewOrganisationUrl: append("organisation"),
+    viewAmountUrl: append("amount"),
+    viewSummaryUrl: append("summary"),
+  };
+}
+
+function runnerSignInV2CheckerViewPageTitle(step) {
+  if (step === "contact") return "Contact details";
+  if (step === "organisation") return "Organisation details";
+  if (step === "amount") return "Amount requested";
+  if (step === "summary") return "Project summary";
+  return "View answer";
+}
+
+function runnerSignInV2CheckerAmountInputValue(amountRequested) {
+  return String(amountRequested || "")
+    .replace(/^£\s*/, "")
+    .replace(/,/g, "")
+    .trim();
+}
+
+function renderRunnerSignInV2CheckerViewPage(req, res, { token, entry, step, checkAnswersUrl }) {
+  const display = runnerSignInV2CheckerCheckAnswersDisplay(entry);
+  return res.render("titan-mvp-1.2/runner-sign-in-v2/checker/view-page", {
+    data: {},
+    token,
+    step,
+    allowApplicant: runnerSignInV2CheckerAllowApplicant(req),
+    pageTitle: runnerSignInV2CheckerViewPageTitle(step),
+    formName: display.formName,
+    contactName: display.contactName,
+    contactEmail: display.contactEmail,
+    phoneNumber: display.phoneNumber,
+    organisationName: display.organisationName,
+    organisationType: display.organisationType,
+    amountRequested: display.amountRequested,
+    amountValue: runnerSignInV2CheckerAmountInputValue(display.amountRequested),
+    projectSummary: display.projectSummary,
+    backUrl: checkAnswersUrl,
+    checkAnswersUrl,
+  });
+}
+
 function runnerSignInV2CheckedOnDisplay(iso) {
   if (!iso) return "Not provided";
   const d = new Date(iso);
@@ -21532,7 +21734,7 @@ function runnerSignInV2CheckerDeclarationConfirmed(body) {
   return d === "confirmed";
 }
 
-function renderRunnerSignInV2CheckerCheckAnswers(req, res, { token, entry, error }) {
+function renderRunnerSignInV2CheckerCheckAnswers(req, res, { token, entry, error, viewUrls }) {
   const display = runnerSignInV2CheckerCheckAnswersDisplay(entry);
   return res.render("titan-mvp-1.2/runner-sign-in-v2/checker/check-answers", {
     data: {},
@@ -21540,6 +21742,7 @@ function renderRunnerSignInV2CheckerCheckAnswers(req, res, { token, entry, error
     allowApplicant: runnerSignInV2CheckerAllowApplicant(req),
     error: error || null,
     ...display,
+    ...(viewUrls || runnerSignInV2CheckerViewPageUrls(req, token)),
     backUrl: runnerSignInV2CheckerAppendAllowApplicant(req, `/runner-sign-in-v2/checker/check-email?token=${encodeURIComponent(token)}`),
     changeAnswersUrl: runnerSignInV2CheckerAppendAllowApplicant(req, `/runner-sign-in-v2/checker/change-answers?token=${encodeURIComponent(token)}`),
   });
@@ -22608,6 +22811,79 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
     });
   }
 
+  if (slug === "email-form-submitted-checked-public") {
+    const grantFormKey = "apply-small-grant";
+    const grantApplicationId = "app-checker-ready-to-invite";
+    const grantApplication = runnerSignInV2EnsureApplication(req, grantFormKey, grantApplicationId);
+    const signInUrl = runnerSignInV2FormSubmittedEmailSignInUrl(grantFormKey, grantApplicationId);
+    const display = runnerSignInV2CheckerCheckAnswersDisplay({
+      formName: (grantApplication && grantApplication.formName) || "Apply for a small grant",
+      dataSnapshot: (grantApplication && grantApplication.answers) || {},
+    });
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/emails/form-submitted-checked-public", {
+      ...base,
+      toEmail: email,
+      formKey: grantFormKey,
+      applicationId: grantApplicationId,
+      formName: display.formName,
+      isCheckedSubmission: true,
+      showCopiedAnswersNote: false,
+      answers: {
+        contactName: display.contactName,
+        contactEmail: display.contactEmail,
+        phoneNumber: display.phoneNumber,
+        organisationName: display.organisationName,
+        organisationType: display.organisationType,
+        amountRequested: display.amountRequested,
+        projectSummary: display.projectSummary,
+      },
+      checkedByContact: "checker@example.com",
+      checkedOnText: "11 June 2026",
+      checkedDeclarationText: "Agreed by the person checking the form",
+      referenceNumber: "P7D-2K9-Q4M",
+      submittedAt: "11:10am on Tuesday 7 July 2026",
+      whatHappensNext: "We'll review your application and contact you if we need more information.",
+      helpTelephone: "N/A",
+      helpEmail: "daniel.dasilveira@defra.gov.uk",
+      helpResponseTime: "We aim to get back to you as soon as I can.",
+      helpContactLinkText: "Online contact link",
+      helpContactLinkHref: signInUrl,
+    });
+  }
+
+  if (slug === "email-form-submitted-checked-team") {
+    const grantFormKey = "apply-small-grant";
+    const grantApplicationId = "app-checker-ready-to-invite";
+    const grantApplication = runnerSignInV2EnsureApplication(req, grantFormKey, grantApplicationId);
+    const display = runnerSignInV2CheckerCheckAnswersDisplay({
+      formName: (grantApplication && grantApplication.formName) || "Apply for a small grant",
+      dataSnapshot: (grantApplication && grantApplication.answers) || {},
+    });
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/emails/form-submitted-checked-team", {
+      ...base,
+      formKey: grantFormKey,
+      applicationId: grantApplicationId,
+      formName: display.formName,
+      teamEmail: "grants-processing@defra.gov.uk",
+      answers: {
+        contactName: display.contactName,
+        contactEmail: display.contactEmail,
+        phoneNumber: display.phoneNumber,
+        organisationName: display.organisationName,
+        organisationType: display.organisationType,
+        amountRequested: display.amountRequested,
+        projectSummary: display.projectSummary,
+      },
+      checkedByContact: "checker@example.com",
+      checkedOnText: "11 June 2026",
+      checkedDeclarationText: "Agreed by the person checking the form",
+      referenceNumber: "P7D-2K9-Q4M",
+      submittedAt: "11:10am on 7 July 2026",
+      linkExpiresAt: "11:10am on Wednesday 7 April 2027",
+      downloadCsvHref: "#",
+    });
+  }
+
   if (slug === "manage-form-checked") {
     return res.redirect("/runner-sign-in-v2/static/manage-form-checked");
   }
@@ -22762,6 +23038,12 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
       token,
       entry,
       error: null,
+      viewUrls: {
+        viewContactUrl: runnerSignInV2JourneyPreviewPath("checker-view-contact"),
+        viewOrganisationUrl: runnerSignInV2JourneyPreviewPath("checker-view-organisation"),
+        viewAmountUrl: runnerSignInV2JourneyPreviewPath("checker-view-amount"),
+        viewSummaryUrl: runnerSignInV2JourneyPreviewPath("checker-view-summary"),
+      },
     });
   }
 
@@ -22770,6 +23052,39 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
     return res.render("titan-mvp-1.2/runner-sign-in-v2/checker/change-answers", {
       data: {},
       backUrl: runnerSignInV2JourneyPreviewPath("checker-check-answers"),
+      checkAnswersUrl: runnerSignInV2JourneyPreviewPath("checker-check-answers"),
+    });
+  }
+
+  const checkerViewPreviewStepBySlug = {
+    "checker-view-page": "organisation",
+    "checker-view-organisation": "organisation",
+    "checker-view-contact": "contact",
+    "checker-view-amount": "amount",
+    "checker-view-summary": "summary",
+  };
+  if (checkerViewPreviewStepBySlug[slug]) {
+    const token = RUNNER_SIGN_IN_V2_STATIC_CHECKED_REVIEW_TOKEN;
+    const reviewStore = ensureReviewStore(req);
+    const entry = runnerSignInV2EnsureCheckerReviewEntry(req, token, reviewStore);
+    if (entry) {
+      entry.checkerV2EmailConfirmed = true;
+      entry.checkerV2CodeOk = true;
+      entry.dataSnapshot = entry.dataSnapshot || {
+        contactName: "Jane Smith",
+        contactEmail: email,
+        phoneNumber: phone,
+        organisationName: "Green Fields Community Group",
+        organisationType: "Community group",
+        amountRequested: "£12,500",
+        projectSummary: "A community garden and outdoor learning space.",
+      };
+      reviewStore.set(token, entry);
+    }
+    return renderRunnerSignInV2CheckerViewPage(req, res, {
+      token,
+      entry,
+      step: checkerViewPreviewStepBySlug[slug],
       checkAnswersUrl: runnerSignInV2JourneyPreviewPath("checker-check-answers"),
     });
   }
@@ -24735,8 +25050,13 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/ready-to-submit", f
     (entry && entry.reviewedAtIso) || (application.checking && application.checking.checkedAtIso) || null;
   const checkedOnText = runnerSignInV2CheckedOnDisplay(checkedAtIso);
   const checkedByContact =
-    String((application.checking && application.checking.checkedBy) || (entry && entry.checkedBy) || "").trim() ||
-    "Not provided";
+    String(
+      (application.checking && application.checking.checkedBy) ||
+        (entry && entry.checkedBy) ||
+        (entry && entry.checkerInviteEmail) ||
+        (application.checking && application.checking.inviteEmail) ||
+        ""
+    ).trim() || "Not provided";
   const checkedDeclarationText =
     entry && entry.reviewDeclarationComplete
       ? "Agreed by the person checking the form"
@@ -25173,6 +25493,114 @@ router.get("/runner-sign-in-v2/emails/form-submitted", function (req, res) {
   );
 });
 
+router.get("/runner-sign-in-v2/emails/form-submitted-checked/public", function (req, res) {
+  const data = ensureRunnerSignInSession(req);
+  const toEmail = String(req.query.email || data.runnerSignInEmail || "you@example.com").trim();
+  const formKey = String(req.query.formKey || "apply-small-grant").trim();
+  const applicationId = String(req.query.applicationId || "app-checker-ready-to-invite").trim();
+  const application = runnerSignInV2ResolveApplication(req, formKey, applicationId);
+  const display = runnerSignInV2CheckerCheckAnswersDisplay({
+    formName: (application && application.formName) || "Apply for a small grant",
+    dataSnapshot: (application && application.answers) || {},
+  });
+  const checkedAtIso =
+    (application && application.checking && application.checking.checkedAtIso) || null;
+  const checkedByContact =
+    String(
+      (application && application.checking && application.checking.checkedBy) ||
+        (application && application.checking && application.checking.inviteEmail) ||
+        req.query.checkedBy ||
+        "checker@example.com"
+    ).trim() || "checker@example.com";
+  const checkedOnText = checkedAtIso
+    ? runnerSignInV2CheckedOnDisplay(checkedAtIso)
+    : String(req.query.checkedOn || "11 June 2026").trim();
+  const signInUrl = runnerSignInV2FormSubmittedEmailSignInUrl(formKey, applicationId);
+  return res.render("titan-mvp-1.2/runner-sign-in-v2/emails/form-submitted-checked-public", {
+    toEmail,
+    formKey,
+    applicationId,
+    application,
+    formName: display.formName,
+    isCheckedSubmission: true,
+    showCopiedAnswersNote: false,
+    answers: {
+      contactName: display.contactName,
+      contactEmail: display.contactEmail,
+      phoneNumber: display.phoneNumber,
+      organisationName: display.organisationName,
+      organisationType: display.organisationType,
+      amountRequested: display.amountRequested,
+      projectSummary: display.projectSummary,
+    },
+    checkedByContact,
+    checkedOnText,
+    checkedDeclarationText: String(
+      req.query.checkedDeclaration || "Agreed by the person checking the form"
+    ).trim(),
+    referenceNumber: String(req.query.referenceNumber || (application && application.reference) || "P7D-2K9-Q4M").trim(),
+    submittedAt: String(req.query.submittedAt || "11:10am on Tuesday 7 July 2026").trim(),
+    whatHappensNext: String(
+      req.query.whatHappensNext ||
+        "We'll review your application and contact you if we need more information."
+    ).trim(),
+    helpTelephone: String(req.query.helpTelephone || "N/A").trim(),
+    helpEmail: String(req.query.helpEmail || "daniel.dasilveira@defra.gov.uk").trim(),
+    helpResponseTime: String(req.query.helpResponseTime || "We aim to get back to you as soon as I can.").trim(),
+    helpContactLinkText: String(req.query.helpContactLinkText || "Online contact link").trim(),
+    helpContactLinkHref: req.query.helpContactLinkHref
+      ? String(req.query.helpContactLinkHref).trim()
+      : signInUrl,
+  });
+});
+
+router.get("/runner-sign-in-v2/emails/form-submitted-checked/team", function (req, res) {
+  const formKey = String(req.query.formKey || "apply-small-grant").trim();
+  const applicationId = String(req.query.applicationId || "app-checker-ready-to-invite").trim();
+  const application = runnerSignInV2ResolveApplication(req, formKey, applicationId);
+  const display = runnerSignInV2CheckerCheckAnswersDisplay({
+    formName: (application && application.formName) || "Apply for a small grant",
+    dataSnapshot: (application && application.answers) || {},
+  });
+  const checkedAtIso =
+    (application && application.checking && application.checking.checkedAtIso) || null;
+  const checkedByContact =
+    String(
+      (application && application.checking && application.checking.checkedBy) ||
+        (application && application.checking && application.checking.inviteEmail) ||
+        req.query.checkedBy ||
+        "checker@example.com"
+    ).trim() || "checker@example.com";
+  const checkedOnText = checkedAtIso
+    ? runnerSignInV2CheckedOnDisplay(checkedAtIso)
+    : String(req.query.checkedOn || "11 June 2026").trim();
+  return res.render("titan-mvp-1.2/runner-sign-in-v2/emails/form-submitted-checked-team", {
+    formKey,
+    applicationId,
+    application,
+    formName: display.formName,
+    teamEmail: String(req.query.teamEmail || "grants-processing@defra.gov.uk").trim(),
+    answers: {
+      contactName: display.contactName,
+      contactEmail: display.contactEmail,
+      phoneNumber: display.phoneNumber,
+      organisationName: display.organisationName,
+      organisationType: display.organisationType,
+      amountRequested: display.amountRequested,
+      projectSummary: display.projectSummary,
+    },
+    checkedByContact,
+    checkedOnText,
+    checkedDeclarationText: String(
+      req.query.checkedDeclaration || "Agreed by the person checking the form"
+    ).trim(),
+    referenceNumber: String(req.query.referenceNumber || (application && application.reference) || "P7D-2K9-Q4M").trim(),
+    submittedAt: String(req.query.submittedAt || "11:10am on 7 July 2026").trim(),
+    linkExpiresAt: String(req.query.linkExpiresAt || "11:10am on Wednesday 7 April 2027").trim(),
+    downloadCsvHref: String(req.query.downloadCsvHref || "#").trim(),
+  });
+});
+
 router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/checker/invite", function (req, res) {
   const data = ensureRunnerSignInSession(req);
   if (!data.runnerSignInAuthed) {
@@ -25577,6 +26005,33 @@ router.get("/runner-sign-in-v2/checker/check-answers", function (req, res) {
   return renderRunnerSignInV2CheckerCheckAnswers(req, res, { token, entry });
 });
 
+router.get("/runner-sign-in-v2/checker/view/:step", function (req, res) {
+  const data = ensureRunnerSignInSession(req);
+  const token = String(req.query.token || "").trim();
+  const step = String(req.params.step || "").trim();
+  if (!token) {
+    return res.redirect("/runner-sign-in-v2/checker/start");
+  }
+  if (!RUNNER_SIGN_IN_V2_CHECKER_VIEW_STEPS.has(step)) {
+    return res.redirect(
+      runnerSignInV2CheckerAppendAllowApplicant(req, `/runner-sign-in-v2/checker/check-answers?token=${encodeURIComponent(token)}`)
+    );
+  }
+  if (data.runnerSignInAuthed && !runnerSignInV2CheckerAllowApplicant(req)) {
+    return res.render("titan-mvp-1.2/runner-sign-in/check/applicant-blocked", { data, signOutLink: "/titan-mvp-1.2/roles/sign-out" });
+  }
+  const reviewStore = ensureReviewStore(req);
+  const entry = token ? reviewStore.get(token) : null;
+  if (!entry || !entry.checkerV2 || !entry.checkerV2CodeOk) {
+    return res.redirect(runnerSignInV2CheckerAppendAllowApplicant(req, `/runner-sign-in-v2/checker/start?token=${encodeURIComponent(token)}`));
+  }
+  const checkAnswersUrl = runnerSignInV2CheckerAppendAllowApplicant(
+    req,
+    `/runner-sign-in-v2/checker/check-answers?token=${encodeURIComponent(token)}`
+  );
+  return renderRunnerSignInV2CheckerViewPage(req, res, { token, entry, step, checkAnswersUrl });
+});
+
 router.get("/runner-sign-in-v2/checker/change-answers", function (req, res) {
   const token = String(req.query.token || "").trim();
   return res.render("titan-mvp-1.2/runner-sign-in-v2/checker/change-answers", {
@@ -25608,7 +26063,10 @@ router.post("/runner-sign-in-v2/checker/complete", function (req, res) {
   }
   entry.reviewDeclarationComplete = true;
   entry.reviewedAtIso = new Date().toISOString();
-  entry.checkedBy = "Checker";
+  entry.checkedBy =
+    String(entry.checkerInviteEmail || "").trim() ||
+    String((entry.checkerV2 && entry.checkerV2.email) || "").trim() ||
+    "checker@example.com";
   reviewStore.set(token, entry);
 
   const applications = ensureRunnerSignInApplications(req);
