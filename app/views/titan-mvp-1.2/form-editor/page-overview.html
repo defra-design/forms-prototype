@@ -180,20 +180,23 @@ navigationItems: [
                           <form action="/titan-mvp-1.2/page-overview" method="post" id="pageSettingsForm">
                             <h1 class="govuk-heading-l">Settings</h1>
 
+                            {% set hasPaymentQuestions = false %}
+                            {% for question in currentPage.questions %}
+                              {% if question.type == "payment" %}
+                                {% set hasPaymentQuestions = true %}
+                              {% endif %}
+                            {% endfor %}
+
                             <!-- Question Settings -->
                             <div class="govuk-form-group">
-                              {% if currentPage.questions.length < 2 %} <fieldset class="govuk-fieldset"
-                                aria-describedby="contact-hint">
+                              {% if currentPage.questions.length < 2 %}
+                              <fieldset class="govuk-fieldset">
                                 <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
                                   <h1 class="govuk-fieldset__heading">
                                     Page heading and guidance text
                                   </h1>
                                 </legend>
-                                <div id="contact-hint" class="govuk-hint">
-                                  Add a page heading if you have multiple questions on a page or add guidance to help
-                                  users answer questions
-                                </div>
-                                {% endif %}
+                              {% endif %}
 
                                 {% if currentPage.questions.length > 1 %}
                                 {# When more than one question exists, simply show the inputs automatically #}
@@ -230,6 +233,74 @@ navigationItems: [
                                     }) }}
                                   </div>
                                 </div>
+
+                                {% if not hasPaymentQuestions %}
+                                <div class="govuk-form-group govuk-!-margin-top-6">
+                                  <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+                                    <input type="hidden" name="allowMultipleResponses" value="false">
+                                    <div class="govuk-checkboxes__item">
+                                      <input class="govuk-checkboxes__input" id="allow-multiple-responses"
+                                        name="allowMultipleResponses" type="checkbox" value="true"
+                                        data-aria-controls="responses-settings" aria-controls="responses-settings"
+                                        aria-expanded="false" {% if currentPage.allowMultipleResponses %}checked{% endif %}>
+                                      <label class="govuk-label govuk-checkboxes__label" for="allow-multiple-responses">
+                                        Allow multiple responses to questions on this page
+                                      </label>
+                                    </div>
+                                    <div class="govuk-checkboxes__conditional govuk-checkboxes__conditional--hidden"
+                                      id="responses-settings">
+                                      <div class="govuk-form-group">
+                                        <fieldset class="govuk-fieldset" role="group"
+                                          aria-describedby="response-range-hint">
+                                          <legend class="govuk-fieldset__legend">
+                                            <span class="govuk-fieldset__heading">
+                                              Set the minimum and maximum number of responses you will accept
+                                            </span>
+                                          </legend>
+                                          <div id="response-range-hint" class="govuk-hint">
+                                            The range must be between 1 and 200
+                                          </div>
+                                          <div class="govuk-date-input" id="response-range">
+                                            <div class="govuk-date-input__item">
+                                              <div class="govuk-form-group">
+                                                <label class="govuk-label govuk-date-input__label govuk-!-font-weight-bold"
+                                                  for="min-response-count">Min</label>
+                                                <input class="govuk-input govuk-date-input__input govuk-input--width-2"
+                                                  id="min-response-count" name="minResponseCount" type="text"
+                                                  inputmode="numeric"
+                                                  value="{{ currentPage.minResponseCount or '' }}">
+                                              </div>
+                                            </div>
+                                            <div class="govuk-date-input__item">
+                                              <div class="govuk-form-group">
+                                                <label class="govuk-label govuk-date-input__label govuk-!-font-weight-bold"
+                                                  for="max-response-count">Max</label>
+                                                <input class="govuk-input govuk-date-input__input govuk-input--width-2"
+                                                  id="max-response-count" name="maxResponseCount" type="text"
+                                                  inputmode="numeric"
+                                                  value="{{ currentPage.maxResponseCount or '' }}">
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </fieldset>
+                                      </div>
+
+                                      {{ govukInput({
+                                      label: {
+                                      text: "Give the responses an identifiable name or label",
+                                      classes: "govuk-label--s"
+                                      },
+                                      hint: {
+                                      text: "Use a word to describe what these questions are asking about. For example, ‘Cow’, ‘Pet’. This will be used to categorise the answers, for example ‘Cow 1’, ‘Cow 2’."
+                                      },
+                                      id: "question-set-name",
+                                      name: "questionSetName",
+                                      value: currentPage.questionSetName or currentPage.setName or ""
+                                      }) }}
+                                    </div>
+                                  </div>
+                                </div>
+                                {% endif %}
                                 {% else %}
                                 {# When only one question exists, show a checkbox that toggles the guidance fields #}
                                 <div class="govuk-checkboxes" data-module="govuk-checkboxes">
@@ -281,6 +352,70 @@ navigationItems: [
                                       }) }}
                                     </div>
                                   </div>
+
+                                  {% if not hasPaymentQuestions %}
+                                  <input type="hidden" name="allowMultipleResponses" value="false">
+                                  <div class="govuk-checkboxes__item">
+                                    <input class="govuk-checkboxes__input" id="allow-multiple-responses"
+                                      name="allowMultipleResponses" type="checkbox" value="true"
+                                      data-aria-controls="responses-settings" aria-controls="responses-settings"
+                                      aria-expanded="false" {% if currentPage.allowMultipleResponses %}checked{% endif %}>
+                                    <label class="govuk-label govuk-checkboxes__label" for="allow-multiple-responses">
+                                      Allow multiple responses to questions on this page
+                                    </label>
+                                  </div>
+                                  <div class="govuk-checkboxes__conditional govuk-checkboxes__conditional--hidden"
+                                    id="responses-settings">
+                                    <div class="govuk-form-group">
+                                      <fieldset class="govuk-fieldset" role="group"
+                                        aria-describedby="response-range-hint">
+                                        <legend class="govuk-fieldset__legend">
+                                          <span class="govuk-fieldset__heading">
+                                            Set the minimum and maximum number of responses you will accept
+                                          </span>
+                                        </legend>
+                                        <div id="response-range-hint" class="govuk-hint">
+                                          The range must be between 1 and 200
+                                        </div>
+                                        <div class="govuk-date-input" id="response-range">
+                                          <div class="govuk-date-input__item">
+                                            <div class="govuk-form-group">
+                                              <label class="govuk-label govuk-date-input__label govuk-!-font-weight-bold"
+                                                for="min-response-count">Min</label>
+                                              <input class="govuk-input govuk-date-input__input govuk-input--width-2"
+                                                id="min-response-count" name="minResponseCount" type="text"
+                                                inputmode="numeric"
+                                                value="{{ currentPage.minResponseCount or '' }}">
+                                            </div>
+                                          </div>
+                                          <div class="govuk-date-input__item">
+                                            <div class="govuk-form-group">
+                                              <label class="govuk-label govuk-date-input__label govuk-!-font-weight-bold"
+                                                for="max-response-count">Max</label>
+                                              <input class="govuk-input govuk-date-input__input govuk-input--width-2"
+                                                id="max-response-count" name="maxResponseCount" type="text"
+                                                inputmode="numeric"
+                                                value="{{ currentPage.maxResponseCount or '' }}">
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </fieldset>
+                                    </div>
+
+                                    {{ govukInput({
+                                    label: {
+                                    text: "Give the responses an identifiable name or label",
+                                    classes: "govuk-label--s"
+                                    },
+                                    hint: {
+                                    text: "Use a word to describe what these questions are asking about. For example, ‘Cow’, ‘Pet’. This will be used to categorise the answers, for example ‘Cow 1’, ‘Cow 2’."
+                                    },
+                                    id: "question-set-name",
+                                    name: "questionSetName",
+                                    value: currentPage.questionSetName or currentPage.setName or ""
+                                    }) }}
+                                  </div>
+                                  {% endif %}
                                 </div>
                                 {% endif %}
 
@@ -364,107 +499,14 @@ navigationItems: [
                               </div>
                             </div> #}
 
-                            {% set hasPaymentQuestions = false %}
-                            {% for question in currentPage.questions %}
-                              {% if question.type == "payment" %}
-                                {% set hasPaymentQuestions = true %}
-                              {% endif %}
-                            {% endfor %}
-
-                            {% if not hasPaymentQuestions %}
-                            <div class="govuk-!-margin-top-6">
-                              <div class="govuk-form-group">
-                                <fieldset class="govuk-fieldset" aria-describedby="multiple-responses-hint">
-                                  <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
-                                    <h1 class="govuk-fieldset__heading">
-                                      Multiple responses
-                                    </h1>
-                                  </legend>
-                                  <div id="multiple-responses-hint" class="govuk-hint">
-                                    For scenarios where users need to give multiple responses to the same
-                                    question(s)
-                                  </div>
-                                  <div class="govuk-checkboxes" data-module="govuk-checkboxes">
-                                    <!-- Add a hidden field for a default value -->
-                                    <input type="hidden" name="allowMultipleResponses" value="false">
-                                    <div class="govuk-checkboxes__item">
-                                      <input class="govuk-checkboxes__input" id="allow-multiple-responses"
-                                        name="allowMultipleResponses" type="checkbox" value="true"
-                                        aria-controls="responses-settings" aria-expanded="false" {% if
-                                        currentPage.allowMultipleResponses %}checked{% endif %}>
-                                      <label class="govuk-label govuk-checkboxes__label" for="allow-multiple-responses">
-                                        Allow multiple responses to questions on this page
-                                      </label>
-                                    </div>
-                                    <!-- Conditional Response Settings Section -->
-                                    <!-- Conditional settings -->
-                                    <div class="govuk-checkboxes__conditional govuk-checkboxes__conditional--hidden"
-                                      id="responses-settings">
-                                      <div class="govuk-form-group">
-                                        <fieldset class="govuk-fieldset" role="group"
-                                          aria-describedby="response-range-hint">
-                                          <legend class="govuk-fieldset__legend govuk-fieldset__legend">
-                                            <h1 class="govuk-fieldset__heading">
-                                              Set the minimum and maximum times a user can answer questions
-                                            </h1>
-                                          </legend>
-                                          <div id="response-range-hint" class="govuk-hint">
-                                            The range must be between 2 and 25
-                                          </div>
-                                          <div class="govuk-date-input" id="response-range">
-                                            <div class="govuk-date-input__item">
-                                              <div class="govuk-form-group">
-                                                <label class="govuk-label govuk-date-input__label"
-                                                  for="min-response-count">Min</label>
-                                                <input class="govuk-input govuk-date-input__input govuk-input--width-2"
-                                                  id="min-response-count" name="minResponseCount" type="text"
-                                                  inputmode="numeric">
-                                              </div>
-                                            </div>
-                                            <div class="govuk-date-input__item">
-                                              <div class="govuk-form-group">
-                                                <label class="govuk-label govuk-date-input__label"
-                                                  for="max-response-count">Max</label>
-                                                <input class="govuk-input govuk-date-input__input govuk-input--width-2"
-                                                  id="max-response-count" name="maxResponseCount" type="text"
-                                                  inputmode="numeric">
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </fieldset>
-                                      </div>
-
-                                      <!-- Set Name Input for the response group -->
-                                      {{ govukInput({
-                                      label: {
-                                      text: commonTerms.form_editor.page_settings.question_set_name,
-                                      classes: "govuk-label",
-                                      isPageHeading: true
-                                      },
-                                      hint: {
-                                      text: "Use a word to describe what these questions are asking about. For
-                                      example,
-                                      'cow', 'pet'. This will be
-                                      used to categorize the answers, for example 'cow 1', 'cow 2'"
-                                      },
-                                      id: "question-set-name",
-                                      name: "questionSetName",
-                                      value: currentPage.questionSetName or ""
-                                      }) }}
-                                    </div>
-                                  </div>
-                                </fieldset>
-                              </div>
-                            </div>
-                            {% endif %}
-
 
                             <div class="govuk-button-group govuk-!-margin-top-6">
                               <button class="govuk-button" type="submit" name="saveChanges">
                                 {{ commonTerms.form_editor.common.save }}
                               </button>
-
-
+                              <a class="govuk-link" href="/titan-mvp-1.2/form-editor/page-settings-conditional-labels">
+                                Explore conditional labels (concept)
+                              </a>
                             </div>
                           </form>
 
@@ -1509,6 +1551,10 @@ navigationItems: [
       addAnotherSetText: document.querySelector("#add-another-set-button span")
     };
 
+    if (!domElements.multipleResponsesCheckbox || !domElements.responsesSettings) {
+      return;
+    }
+
     initQuestionSetNameLogic();
 
     // -------------------------------------
@@ -1522,11 +1568,12 @@ navigationItems: [
 
       // Attach event listeners
       domElements.multipleResponsesCheckbox.addEventListener("change", toggleVisibility);
-      domElements.setNameInput.addEventListener("input", updateDynamicCaptionAndButton);
-
-      // Optional: highlight the caption & button on focus
-      domElements.setNameInput.addEventListener("focus", applyHighlight);
-      domElements.setNameInput.addEventListener("blur", removeHighlight);
+      if (domElements.setNameInput) {
+        domElements.setNameInput.addEventListener("input", updateDynamicCaptionAndButton);
+        // Optional: highlight the caption & button on focus
+        domElements.setNameInput.addEventListener("focus", applyHighlight);
+        domElements.setNameInput.addEventListener("blur", removeHighlight);
+      }
     }
 
     // -----------------------------------------
@@ -1537,8 +1584,12 @@ navigationItems: [
       // Show or hide the conditional block
       domElements.responsesSettings.classList.toggle("govuk-checkboxes__conditional--hidden", !isChecked);
       // Show/hide the dynamic caption and "Add another" button
-      domElements.dynamicCaption.style.display = isChecked ? "inline-block" : "none";
-      domElements.addAnotherSetButton.style.display = isChecked ? "inline-block" : "none";
+      if (domElements.dynamicCaption) {
+        domElements.dynamicCaption.style.display = isChecked ? "inline-block" : "none";
+      }
+      if (domElements.addAnotherSetButton) {
+        domElements.addAnotherSetButton.style.display = isChecked ? "inline-block" : "none";
+      }
 
       // Re-run update logic if user just checked the box
       if (isChecked) {
@@ -1550,17 +1601,28 @@ navigationItems: [
     // 3. Update the caption & "Add another" button text
     // ------------------------------------------------
     function updateDynamicCaptionAndButton() {
+      if (!domElements.setNameInput) {
+        return;
+      }
       // If the user typed something, display that. Otherwise show placeholders.
       const setName = domElements.setNameInput.value.trim();
       if (setName) {
         // For example: "Cow 1"
-        domElements.dynamicCaption.textContent = `${setName} 1`;
+        if (domElements.dynamicCaption) {
+          domElements.dynamicCaption.textContent = `${setName} 1`;
+        }
         // "Add another cow"
-        domElements.addAnotherSetText.textContent = setName;
+        if (domElements.addAnotherSetText) {
+          domElements.addAnotherSetText.textContent = setName;
+        }
       } else {
         // If nothing typed, fallback to placeholders
-        domElements.dynamicCaption.textContent = "Question set name";
-        domElements.addAnotherSetText.textContent = "[question set name]";
+        if (domElements.dynamicCaption) {
+          domElements.dynamicCaption.textContent = "Question set name";
+        }
+        if (domElements.addAnotherSetText) {
+          domElements.addAnotherSetText.textContent = "[question set name]";
+        }
       }
     }
 
@@ -1568,13 +1630,21 @@ navigationItems: [
     // 4. Optional highlight logic on focus/blur
     // ---------------------------------------
     function applyHighlight() {
-      domElements.dynamicCaption.classList.add("highlight");
-      domElements.addAnotherSetText.classList.add("highlight");
+      if (domElements.dynamicCaption) {
+        domElements.dynamicCaption.classList.add("highlight");
+      }
+      if (domElements.addAnotherSetText) {
+        domElements.addAnotherSetText.classList.add("highlight");
+      }
     }
 
     function removeHighlight() {
-      domElements.dynamicCaption.classList.remove("highlight");
-      domElements.addAnotherSetText.classList.remove("highlight");
+      if (domElements.dynamicCaption) {
+        domElements.dynamicCaption.classList.remove("highlight");
+      }
+      if (domElements.addAnotherSetText) {
+        domElements.addAnotherSetText.classList.remove("highlight");
+      }
     }
   });
 </script>

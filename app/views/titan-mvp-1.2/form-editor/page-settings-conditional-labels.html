@@ -1,0 +1,303 @@
+{% extends "layouts/main.html" %}
+{% from "components/service-header/macro.njk" import serviceHeader %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/select/macro.njk" import govukSelect %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+
+{% set pageName = "Conditional response labels (concept) - " + (form.name or "Form") %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+containerClasses: containerClasses,
+accountName: "Chris Smith",
+homepageLink: "/",
+signOutLink: "/titan-mvp-1.2/onboarding/sign-out-confirmation",
+activeLinkId: "nav-editor",
+navigationItems: [
+{ href: "/titan-mvp-1.2/library", text: "Forms library", id: "nav-library" },
+{ href: "/titan-mvp-1.2/form-overview/index", text: "Overview", id: "nav-overview" },
+{ href: "/titan-mvp-1.2/form-editor/listing", text: "Editor", id: "nav-editor" }
+]
+}) }}
+
+<div class="x-govuk-masthead x-govuk-masthead--large">
+  <div class="govuk-width-container">
+    {{ govukBackLink({
+    classes: "govuk-back-link--inverse govuk-!-margin-bottom-0",
+    text: "Back to page overview",
+    href: "/titan-mvp-1.2/page-overview"
+    }) }}
+
+    <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"
+      style="border-bottom: 1px solid white; margin-bottom: 0" />
+
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-full-from-desktop">
+        <h1 class="x-govuk-masthead__title">
+          {{ form.name or "Form" }}
+        </h1>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {{ govukInsetText({
+      html: "<strong>Concept exploration</strong> — explore whether users can change the identifiable response label based on a condition from an earlier answer. This page is separate from the live page settings."
+    }) }}
+
+    <form action="/titan-mvp-1.2/form-editor/page-settings-conditional-labels" method="post" id="conditional-labels-form">
+      <h1 class="govuk-heading-l">Settings</h1>
+
+      <div class="govuk-form-group">
+        <fieldset class="govuk-fieldset">
+          <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
+            <h2 class="govuk-fieldset__heading">
+              Page heading and guidance text
+            </h2>
+          </legend>
+
+          <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+            <div class="govuk-checkboxes__item">
+              <input class="govuk-checkboxes__input" id="guidance" name="guidance" type="checkbox"
+                value="guidance" data-aria-controls="conditional-guidance" {% if settings.hasGuidance %}checked{% endif %}>
+              <label class="govuk-label govuk-checkboxes__label" for="guidance">
+                Add a page heading, guidance or both
+              </label>
+            </div>
+            <div class="govuk-checkboxes__conditional govuk-checkboxes__conditional--hidden" id="conditional-guidance">
+              {{ govukInput({
+                label: { text: "Page heading", classes: "govuk-label--m" },
+                hint: { text: "Page headings should be a statement and not a question. For example, ‘Passport information’" },
+                id: "page-heading-input",
+                name: "pageHeading",
+                value: settings.pageHeading or ""
+              }) }}
+            </div>
+
+            <input type="hidden" name="allowMultipleResponses" value="false">
+            <div class="govuk-checkboxes__item">
+              <input class="govuk-checkboxes__input" id="allow-multiple-responses" name="allowMultipleResponses"
+                type="checkbox" value="true" data-aria-controls="responses-settings"
+                {% if settings.allowMultipleResponses %}checked{% endif %}>
+              <label class="govuk-label govuk-checkboxes__label" for="allow-multiple-responses">
+                Allow multiple responses to questions on this page
+              </label>
+            </div>
+
+            <div class="govuk-checkboxes__conditional govuk-checkboxes__conditional--hidden" id="responses-settings">
+              <div class="govuk-form-group">
+                <fieldset class="govuk-fieldset" role="group" aria-describedby="response-range-hint">
+                  <legend class="govuk-fieldset__legend">
+                    <span class="govuk-fieldset__heading">
+                      Set the minimum and maximum number of responses you will accept
+                    </span>
+                  </legend>
+                  <div id="response-range-hint" class="govuk-hint">
+                    The range must be between 1 and 200
+                  </div>
+                  <div class="govuk-date-input" id="response-range">
+                    <div class="govuk-date-input__item">
+                      <div class="govuk-form-group">
+                        <label class="govuk-label govuk-date-input__label govuk-!-font-weight-bold" for="min-response-count">Min</label>
+                        <input class="govuk-input govuk-date-input__input govuk-input--width-2"
+                          id="min-response-count" name="minResponseCount" type="text" inputmode="numeric"
+                          value="{{ settings.minResponseCount or '2' }}">
+                      </div>
+                    </div>
+                    <div class="govuk-date-input__item">
+                      <div class="govuk-form-group">
+                        <label class="govuk-label govuk-date-input__label govuk-!-font-weight-bold" for="max-response-count">Max</label>
+                        <input class="govuk-input govuk-date-input__input govuk-input--width-2"
+                          id="max-response-count" name="maxResponseCount" type="text" inputmode="numeric"
+                          value="{{ settings.maxResponseCount or '5' }}">
+                      </div>
+                    </div>
+                  </div>
+                </fieldset>
+              </div>
+
+              {{ govukInput({
+                label: {
+                  text: "Give the responses an identifiable name or label",
+                  classes: "govuk-label--s"
+                },
+                hint: {
+                  text: "Use a word to describe what these questions are asking about. For example, ‘Cow’, ‘Pet’. This will be used to categorise the answers, for example ‘Cow 1’, ‘Cow 2’. This is the default label."
+                },
+                id: "question-set-name",
+                name: "questionSetName",
+                value: settings.questionSetName or "Issue",
+                attributes: { "data-preview-default-label": "true" }
+              }) }}
+
+              <div class="govuk-!-margin-top-6" id="conditional-labels-section">
+                <h3 class="govuk-heading-s">Use a different label depending on a condition</h3>
+                <p class="govuk-hint">
+                  Attach a condition so the identifiable label changes based on an earlier answer.
+                  For example, if ‘Animal type’ is ‘Cow’, use ‘Cow’ instead of ‘{{ settings.questionSetName or "Issue" }}’.
+                </p>
+
+                <div id="conditional-labels-list" class="govuk-!-margin-bottom-4">
+                  {% if settings.conditionalLabels and settings.conditionalLabels.length %}
+                    {% for item in settings.conditionalLabels %}
+                    <div class="govuk-summary-card govuk-!-margin-bottom-3" data-conditional-label-id="{{ item.id }}">
+                      <div class="govuk-summary-card__title-wrapper">
+                        <h4 class="govuk-summary-card__title">Label: {{ item.label }}</h4>
+                        <ul class="govuk-summary-card__actions">
+                          <li class="govuk-summary-card__action">
+                            <button type="submit" class="govuk-link govuk-body" name="removeConditionalLabelId" value="{{ item.id }}"
+                              style="background: none; border: none; padding: 0; cursor: pointer; color: #d4351c;">
+                              Remove<span class="govuk-visually-hidden"> {{ item.label }}</span>
+                            </button>
+                          </li>
+                        </ul>
+                      </div>
+                      <div class="govuk-summary-card__content">
+                        <dl class="govuk-summary-list">
+                          <div class="govuk-summary-list__row">
+                            <dt class="govuk-summary-list__key">When</dt>
+                            <dd class="govuk-summary-list__value">{{ item.conditionText }}</dd>
+                          </div>
+                        </dl>
+                        <input type="hidden" name="conditionalLabelIds[]" value="{{ item.id }}">
+                        <input type="hidden" name="conditionalLabelValues[]" value="{{ item.label }}">
+                        <input type="hidden" name="conditionalLabelConditionIds[]" value="{{ item.conditionId }}">
+                        <input type="hidden" name="conditionalLabelConditionTexts[]" value="{{ item.conditionText }}">
+                      </div>
+                    </div>
+                    {% endfor %}
+                  {% else %}
+                    <p class="govuk-body" id="no-conditional-labels">No conditional labels added yet.</p>
+                  {% endif %}
+                </div>
+
+                <div id="add-conditional-label-form" class="govuk-!-margin-bottom-4"
+                  style="display: none; border-left: 5px solid #008938; padding: 15px; background: #fff; outline: 1px solid #b1b4b6;">
+                  {{ govukSelect({
+                    label: { text: "Select a condition", classes: "govuk-label--s" },
+                    hint: { text: "Choose an existing condition, or create one from the Conditions tab." },
+                    id: "new-condition-id",
+                    name: "newConditionId",
+                    items: conditionSelectItems
+                  }) }}
+
+                  {{ govukInput({
+                    label: { text: "Label to use when this condition is met", classes: "govuk-label--s" },
+                    hint: { text: "For example, ‘Cow’ or ‘Pet’" },
+                    id: "new-conditional-label",
+                    name: "newConditionalLabel",
+                    classes: "govuk-!-width-one-half"
+                  }) }}
+
+                  <div class="govuk-button-group">
+                    <button type="submit" class="govuk-button" name="action" value="add-conditional-label">
+                      Add conditional label
+                    </button>
+                    <a href="#" class="govuk-link" id="cancel-add-conditional-label">Cancel</a>
+                  </div>
+                </div>
+
+                <button type="button" class="govuk-button govuk-button--secondary" id="show-add-conditional-label">
+                  Add a conditional label
+                </button>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+
+      <div class="govuk-button-group govuk-!-margin-top-6">
+        <button class="govuk-button" type="submit" name="action" value="save">
+          Save changes
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="govuk-grid-column-one-third">
+    <div style="outline: solid 1px #008938; padding: 20px; box-shadow: 5px 10px #008938; position: sticky; top: 20px;">
+      <p class="govuk-body-s" style="margin: -20px -20px 20px; background: #cce2d8; color: #005a30; padding: 2px 8px; text-align: center;">
+        Preview
+      </p>
+
+      <p class="govuk-caption-m" id="preview-caption">{{ settings.questionSetName or "Issue" }} 1</p>
+      <h2 class="govuk-heading-l">What is the problem?</h2>
+      <p class="govuk-body">Example question content for this response set.</p>
+      <button type="button" class="govuk-button govuk-button--secondary" disabled>
+        Add another <span id="preview-add-another">{{ (settings.questionSetName or "Issue") | lower }}</span>
+      </button>
+
+      {% if settings.conditionalLabels and settings.conditionalLabels.length %}
+      <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+      <h3 class="govuk-heading-s">If a condition is met</h3>
+      <ul class="govuk-list govuk-list--bullet" id="preview-condition-examples">
+        {% for item in settings.conditionalLabels %}
+        <li>
+          <span class="govuk-!-font-weight-bold">{{ item.label }} 1</span>
+          <span class="govuk-hint govuk-!-margin-bottom-0" style="display: block;">when {{ item.conditionText }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block pageScripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var showButton = document.getElementById("show-add-conditional-label");
+    var addForm = document.getElementById("add-conditional-label-form");
+    var cancelLink = document.getElementById("cancel-add-conditional-label");
+    var defaultLabelInput = document.getElementById("question-set-name");
+    var previewCaption = document.getElementById("preview-caption");
+    var previewAddAnother = document.getElementById("preview-add-another");
+
+    if (showButton && addForm) {
+      showButton.addEventListener("click", function () {
+        addForm.style.display = "block";
+        showButton.style.display = "none";
+        var conditionSelect = document.getElementById("new-condition-id");
+        if (conditionSelect) {
+          conditionSelect.focus();
+        }
+      });
+    }
+
+    if (cancelLink && addForm && showButton) {
+      cancelLink.addEventListener("click", function (event) {
+        event.preventDefault();
+        addForm.style.display = "none";
+        showButton.style.display = "inline-block";
+        var labelInput = document.getElementById("new-conditional-label");
+        var conditionSelect = document.getElementById("new-condition-id");
+        if (labelInput) labelInput.value = "";
+        if (conditionSelect) conditionSelect.value = "";
+      });
+    }
+
+    function updatePreviewDefault() {
+      if (!defaultLabelInput || !previewCaption) return;
+      var label = defaultLabelInput.value.trim() || "Issue";
+      previewCaption.textContent = label + " 1";
+      if (previewAddAnother) {
+        previewAddAnother.textContent = label.toLowerCase();
+      }
+    }
+
+    if (defaultLabelInput) {
+      defaultLabelInput.addEventListener("input", updatePreviewDefault);
+      updatePreviewDefault();
+    }
+  });
+</script>
+{% endblock %}
