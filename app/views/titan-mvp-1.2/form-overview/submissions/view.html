@@ -1,0 +1,160 @@
+{% extends "layouts/main.html" %}
+{% from "components/service-header/macro.njk" import serviceHeader %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+
+{% set formName = form.name or "Components" %}
+{% set submissionId = submissionId or "ZTS-2UA-XLR" %}
+{% set submittedOn = submittedOn or "23 July 2026 at 12:48pm" %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+accountName: "Chris Smith",
+homepageLink: "/",
+signOutLink: "/titan-mvp-1.2/onboarding/sign-out-confirmation",
+navigationItems: [
+{
+href: "/titan-mvp-1.2/library",
+text: "Forms library",
+id: "nav-library"
+},
+{
+href: "/titan-mvp-1.2/form-overview/{{ form.id }}",
+text: "Overview",
+id: "nav-overview"
+},
+{
+href: "/titan-mvp-1.2/form-overview/submissions",
+text: "Responses",
+id: "nav-submissions"
+},
+{
+href: "/titan-mvp-1.2/form-editor/listing",
+text: "Editor",
+id: "nav-editor"
+}
+],
+activeLinkId: "nav-submissions"
+}) }}
+{% endblock %}
+
+{% block pageTitle %}
+{{ pageName or ("Form submission – " ~ formName ~ " – Form Designer") }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+
+    <span class="govuk-caption-l">Really really really really really really really really long form name</span>
+    <h1 class="govuk-heading-l">Form submission</h1>
+    <p class="govuk-body">Reference number: {{ submissionId }}</p>
+    <p class="govuk-body">Submitted on {{ submittedOn }}</p>
+
+    {% set geospatialHtml %}
+      Added 3 locations<br>
+      <a class="govuk-link" href="#">Review map</a>
+    {% endset %}
+
+    {% set fileUploadHtml %}
+      1 file uploaded<br>
+      <a class="govuk-link" href="/titan-mvp-1.2/form-overview/submissions/attachments-download/index?submissionId={{ submissionId }}">Download files</a>
+    {% endset %}
+
+    {% set addressHtml %}
+      131 Chester Road<br>
+      Chester Road<br>
+      NORTHWICH<br>
+      Cheshire<br>
+      CW8 4AA
+    {% endset %}
+
+    {{ govukSummaryList({
+      classes: "govuk-!-margin-top-6",
+      rows: [
+        {
+          key: { text: "Text field" },
+          value: { text: "Enrique Chase" }
+        },
+        {
+          key: { text: "Multiline text field" },
+          value: {
+            text: "Bucket as one service is uploading and another service is downloading. File upload have been working successfully from epr-register-enrol-frontend service, recently we have added download functionality in epr-register-enrol-management-fe service. It all works fine locally ,but on CDP Environment epr-register-enrol-management-fe throwing error due to access issues. can you please look into this ?"
+          }
+        },
+        {
+          key: { text: "Number field" },
+          value: { text: "3" }
+        },
+        {
+          key: { text: "Date parts field" },
+          value: { text: "1 January 2001" }
+        },
+        {
+          key: { text: "Yes/No field" },
+          value: { text: "Yes" }
+        },
+        {
+          key: { text: "Email address field" },
+          value: { text: "enrique.chase@defra.gov.uk" }
+        },
+        {
+          key: { text: "Telephone number field" },
+          value: { text: "01234 567890" }
+        },
+        {
+          key: { text: "UK address field" },
+          value: { html: addressHtml }
+        },
+        {
+          key: { text: "Radios field" },
+          value: { text: "Sole trader" }
+        },
+        {
+          key: { text: "Select field" },
+          value: { text: "Algeria" }
+        },
+        {
+          key: { text: "Checkboxes field" },
+          value: { text: "Arabian, Palomine, Shetland" }
+        },
+        {
+          key: { text: "Month year field" },
+          value: { text: "January 2001" }
+        },
+        {
+          key: { text: "Autocomplete field" },
+          value: { text: "Portuguese" }
+        },
+        {
+          key: { text: "Easting Northing field" },
+          value: { text: "424403, 502383" }
+        },
+        {
+          key: { text: "Latitude longitude field" },
+          value: { text: "54.0502994, -1.2409447" }
+        },
+        {
+          key: { text: "OS grid reference field" },
+          value: { text: "NY 73091 05954" }
+        },
+        {
+          key: { text: "National Grid field number field" },
+          value: { text: "NG 1234 5678" }
+        },
+        {
+          key: { text: "Geospatial field" },
+          value: { html: geospatialHtml }
+        },
+        {
+          key: { text: "File upload field" },
+          value: { html: fileUploadHtml }
+        }
+      ]
+    }) }}
+
+  </div>
+</div>
+{% endblock %}

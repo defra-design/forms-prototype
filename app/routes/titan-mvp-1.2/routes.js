@@ -5100,6 +5100,39 @@ router.get("/titan-mvp-1.2/form-overview/submissions", (req, res) => {
   });
 });
 
+// Single submission view
+router.get("/titan-mvp-1.2/form-overview/submissions/view", (req, res) => {
+  const formData = req.session.data || {};
+  const form = {
+    id: formData.formId || "example-form",
+    name: formData.formName || "Components"
+  };
+
+  res.render("titan-mvp-1.2/form-overview/submissions/view", {
+    form,
+    submissionId: req.query.submissionId || "ZTS-2UA-XLR",
+    submittedOn: req.query.submittedOn || "23 July 2026 at 12:48pm",
+    pageName: `Form submission – ${form.name} – Form Designer`
+  });
+});
+
+// Single submission view — ID as H1
+router.get("/titan-mvp-1.2/form-overview/submissions/view-id", (req, res) => {
+  const formData = req.session.data || {};
+  const form = {
+    id: formData.formId || "example-form",
+    name: formData.formName || "Components"
+  };
+  const submissionId = req.query.submissionId || "ZTS-2UA-XLR";
+
+  res.render("titan-mvp-1.2/form-overview/submissions/view-id", {
+    form,
+    submissionId,
+    submittedOn: req.query.submittedOn || "23 July 2026 at 12:48pm",
+    pageName: `${submissionId} – ${form.name} – Form Designer`
+  });
+});
+
 // Improved submissions page route
 router.get("/titan-mvp-1.2/form-overview/submissions/improved", (req, res) => {
   // Get the form data from the session
