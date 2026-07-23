@@ -1,0 +1,22 @@
+{% extends "layouts/main.html" %}
+
+{% block pageTitle %}
+Form submitted – {{ formName or "Apply for a small grant" }}
+{% endblock %}
+
+{% block head %}
+  {{ super() }}
+  {% include "titan-mvp-1.2/runner-sign-in-v2/emails/_form-submitted-email-styles.njk" %}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <div class="email-message">
+      <div class="email-message-body">
+        {% include "titan-mvp-1.2/runner-sign-in-v2/emails/_form-submitted-email-body.njk" %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -28,8 +28,34 @@
     padding: 0 4px;
   }
 
+  .email-govuk-header {
+    background-color: #1d70b8;
+    margin: 0 -20px 20px;
+    padding: 10px 20px;
+  }
+
+  .email-govuk-header svg {
+    display: block;
+    fill: #ffffff;
+  }
+
   .email-message-body .govuk-header {
     margin: 0 -20px 20px;
-    border-bottom: 10px solid #ffffff;
+    border-bottom: none;
+    background-color: #0b0c0c;
+  }
+
+  .email-message-body .govuk-header__container {
+    border-bottom: none !important;
+    margin-bottom: 0 !important;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  .email-message-body .govuk-header::after,
+  .email-message-body .govuk-header__container::after {
+    display: none !important;
+    content: none !important;
+    border: none !important;
   }
 </style>
