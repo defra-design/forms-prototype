@@ -1,0 +1,50 @@
+{% extends "layouts/runner-sign-in-v2-baseline.html" %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% import "titan-mvp-1.2/runner-sign-in-v2-baseline/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}All pages (static) – Runner sign-in v2 baseline – GOV.UK{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ href: "/runner-sign-in-v2-baseline/start-page", text: "Back" }) }}
+{% endblock %}
+
+{% block header %}
+  {{ v2.v2ServiceHeader("start") }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <span class="govuk-caption-l">Runner sign-in v2 baseline</span>
+    <h1 class="govuk-heading-xl">All pages (static)</h1>
+    <p class="govuk-body">Links to every page in this prototype, grouped by journey. Each link opens a static preview with example data, without needing to complete a journey first.</p>
+    <p class="govuk-body">Each preview sets the correct signed-in or signed-out header for that page, so you can review screens in the right context.</p>
+    <p class="govuk-body">
+      See also
+      <a class="govuk-link" href="/runner-sign-in-v2-baseline/error-messages">validation error messages</a>,
+      <a class="govuk-link" href="/titan-mvp-1.2/form-editor/advanced-settings/static">form editor advanced settings (static)</a>,
+      and
+      <a class="govuk-link" href="/runner-sign-in-v2-baseline/texts/recover-security-code">text messages</a>.
+    </p>
+    <p class="govuk-body">
+      For live journey links that require session state, see
+      <a class="govuk-link" href="/runner-sign-in-v2-baseline/all-pages">all pages (live links)</a>.
+    </p>
+  </div>
+</div>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% for section in pageSections %}
+      <h2 class="govuk-heading-m{% if not loop.first %} govuk-!-margin-top-8{% endif %}">{{ section.heading }}</h2>
+      <ul class="govuk-list">
+        {% for link in section.links %}
+          <li>
+            <a class="govuk-link" href="{{ link.href }}">{{ link.text }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

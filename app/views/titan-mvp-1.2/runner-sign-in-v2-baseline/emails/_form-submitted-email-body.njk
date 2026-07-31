@@ -1,0 +1,130 @@
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% set formTitle = formName or "Apply to volunteer" %}
+{% set referenceNumber = referenceNumber or "YCU-C8R-7KY" %}
+{% set previousReference = previousReference or "FL3-5H4-L8N" %}
+{% set submittedAt = submittedAt or "11:10am on Tuesday 7 July 2026" %}
+{% set whatHappensNext = whatHappensNext or "We'll review your application and contact you if we need more information." %}
+{% set helpTelephone = helpTelephone or "N/A" %}
+{% set helpEmail = helpEmail or "daniel.dasilveira@defra.gov.uk" %}
+{% set helpResponseTime = helpResponseTime or "We aim to get back to you as soon as I can." %}
+{% set helpContactLinkText = helpContactLinkText or "Online contact link" %}
+{% set helpContactLinkHref = helpContactLinkHref or "#" %}
+{% set answers = answers or {} %}
+{% set isCheckedSubmission = isCheckedSubmission == true or isCheckedSubmission == "true" %}
+{% set fullName = answers.fullName or answers.contactName or "Alex Taylor" %}
+{% set emailAddress = answers.email or answers.contactEmail or toEmail or "alex.taylor@example.com" %}
+{% set volunteerRole = answers.volunteerRole or "Gardening" %}
+{% set phoneNumber = answers.phoneNumber or "07700 900123" %}
+{% set organisationName = answers.organisationName or "Riverside Community Garden" %}
+{% set organisationType = answers.organisationType or "Charity" %}
+{% set amountRequested = answers.amountRequested or "£6,500" %}
+{% set projectSummary = answers.projectSummary or "Rainwater harvesting equipment and community workshops for local primary schools." %}
+{% set declarationAccepted = "Accepted" if answers.declarationAccepted == "yes" else "Accepted" %}
+{% set checkedByContact = checkedByContact or "checker@example.com" %}
+{% set checkedOnText = checkedOnText or "11 June 2026" %}
+{% set checkedDeclarationText = checkedDeclarationText or "Agreed by the person checking the form" %}
+
+<h1 class="govuk-heading-l govuk-!-margin-top-6">Form submitted</h1>
+
+{{ govukInsetText({
+  text: "Your reference number: " ~ referenceNumber
+}) }}
+
+<p class="govuk-body">We received your form submission for ‘{{ formTitle }}’ at {{ submittedAt }}.</p>
+
+{% if showCopiedAnswersNote != false and not isCheckedSubmission %}
+  <p class="govuk-body">Form submitted using answers from a previous submission (previous reference: {{ previousReference }}).</p>
+
+{% endif %}
+
+<h2 class="govuk-heading-m">What happens next</h2>
+<p class="govuk-body">{{ whatHappensNext }}</p>
+
+<h2 class="govuk-heading-m">Get help</h2>
+{# <p class="govuk-body">{{ helpTelephone }}</p> #}
+<p class="govuk-body">
+  <a class="govuk-link" href="mailto:{{ helpEmail }}">{{ helpEmail }}</a>
+</p>
+<p class="govuk-body">We aim to get back to you within 10 working days.</p>
+
+<h2 class="govuk-heading-m">Your answers</h2>
+<p class="govuk-body">Find a copy of your answers at the bottom of this email.</p>
+
+  <div class="govuk-inset-text">
+    <a class="govuk-link" href="{{ helpContactLinkHref }}">Sign in</a> to use these answers in a new submission.
+  </div>
+
+  <p class="govuk-body">Do not reply to this email. We do not monitor replies to this email address.</p>
+  <p class="govuk-body">From Defra</p>
+
+<hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
+
+{% if isCheckedSubmission %}
+  <h2 class="govuk-heading-s">Name</h2>
+  <p class="govuk-body">{{ fullName }}</p>
+
+  <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+
+  <h2 class="govuk-heading-s">Email</h2>
+  <p class="govuk-body">{{ emailAddress }}</p>
+
+  <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+
+  <h2 class="govuk-heading-s">Mobile phone number</h2>
+  <p class="govuk-body">{{ phoneNumber }}</p>
+
+  <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+
+  <h2 class="govuk-heading-s">Organisation name</h2>
+  <p class="govuk-body">{{ organisationName }}</p>
+
+  <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+
+  <h2 class="govuk-heading-s">Organisation type</h2>
+  <p class="govuk-body">{{ organisationType }}</p>
+
+  <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+
+  <h2 class="govuk-heading-s">Amount requested</h2>
+  <p class="govuk-body">{{ amountRequested }}</p>
+
+  <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+
+  <h2 class="govuk-heading-s">Project summary</h2>
+  <p class="govuk-body">{{ projectSummary }}</p>
+
+  <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+
+  <h2 class="govuk-heading-m">Details of the person who checked your form</h2>
+
+  <h2 class="govuk-heading-s">Checked by</h2>
+  <p class="govuk-body">{{ checkedByContact }}</p>
+
+  <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+
+  <h2 class="govuk-heading-s">Checked on</h2>
+  <p class="govuk-body">{{ checkedOnText }}</p>
+
+  <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+
+  <h2 class="govuk-heading-s">Declaration</h2>
+  <p class="govuk-body">{{ checkedDeclarationText }}</p>
+{% else %}
+  <h2 class="govuk-heading-s">Full name</h2>
+  <p class="govuk-body">{{ fullName }}</p>
+
+  <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+
+  <h2 class="govuk-heading-s">Email address</h2>
+  <p class="govuk-body">{{ emailAddress }}</p>
+
+  <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+
+  <h2 class="govuk-heading-s">Volunteer role</h2>
+  <p class="govuk-body">{{ volunteerRole }}</p>
+
+  <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+
+  <h2 class="govuk-heading-s">Declaration</h2>
+  <p class="govuk-body">{{ declarationAccepted }}</p>
+{% endif %}

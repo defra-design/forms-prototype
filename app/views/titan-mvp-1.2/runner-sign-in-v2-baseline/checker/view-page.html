@@ -1,0 +1,112 @@
+{% extends "layouts/runner-sign-in-v2-baseline.html" %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% from "govuk/components/textarea/macro.njk" import govukTextarea %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% import "titan-mvp-1.2/runner-sign-in-v2-baseline/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}{{ pageTitle }} – GOV.UK{% endblock %}
+
+{% block header %}
+  {{ v2.v2ServiceHeader("start", { showServiceNav: false, formName: formName }) }}
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ href: backUrl, text: "Back" }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {{ govukInsetText({
+      text: "You’re viewing the applicant’s answer. You cannot change it."
+    }) }}
+
+    {% if step == "contact" %}
+      <h1 class="govuk-heading-l">Contact details</h1>
+
+      {{ govukInput({
+        id: "contactName",
+        name: "contactName",
+        label: { text: "Name" },
+        value: contactName,
+        attributes: { readonly: "readonly", disabled: "disabled" }
+      }) }}
+
+      {{ govukInput({
+        id: "contactEmail",
+        name: "contactEmail",
+        label: { text: "Email address" },
+        value: contactEmail,
+        attributes: { readonly: "readonly", disabled: "disabled" }
+      }) }}
+
+      {{ govukInput({
+        id: "phoneNumber",
+        name: "phoneNumber",
+        label: { text: "Mobile phone number" },
+        classes: "govuk-input--width-20",
+        value: phoneNumber,
+        attributes: { readonly: "readonly", disabled: "disabled" }
+      }) }}
+
+    {% elseif step == "organisation" %}
+      {{ govukInput({
+        id: "organisationName",
+        name: "organisationName",
+        label: { text: "Organisation name", classes: "govuk-label--l", isPageHeading: true },
+        value: organisationName,
+        attributes: { readonly: "readonly", disabled: "disabled" }
+      }) }}
+
+      {{ govukRadios({
+        idPrefix: "organisationType",
+        name: "organisationType",
+        fieldset: {
+          legend: {
+            text: "What type of organisation is it?",
+            classes: "govuk-fieldset__legend--m"
+          }
+        },
+        items: [
+          { value: "Community group", text: "Community group", checked: organisationType == "Community group", disabled: true },
+          { value: "Charity", text: "Charity", checked: organisationType == "Charity", disabled: true },
+          { value: "Small business", text: "Small business", checked: organisationType == "Small business", disabled: true },
+          { value: "Other", text: "Other", checked: organisationType == "Other", disabled: true }
+        ]
+      }) }}
+
+    {% elseif step == "amount" %}
+      {{ govukInput({
+        id: "amountRequested",
+        name: "amountRequested",
+        classes: "govuk-input--width-10",
+        label: { text: "How much are you asking for?", classes: "govuk-label--l", isPageHeading: true },
+        hint: { text: "Enter the amount in pounds. For example, 1500." },
+        prefix: { text: "£" },
+        inputmode: "numeric",
+        value: amountValue,
+        attributes: { readonly: "readonly", disabled: "disabled" }
+      }) }}
+
+    {% elseif step == "summary" %}
+      {{ govukTextarea({
+        id: "projectSummary",
+        name: "projectSummary",
+        label: { text: "Briefly describe what you’ll use the grant for", classes: "govuk-label--l", isPageHeading: true },
+        hint: { text: "2 or 3 sentences is enough." },
+        value: projectSummary,
+        attributes: { readonly: "readonly", disabled: "disabled" }
+      }) }}
+    {% endif %}
+
+    {{ govukButton({
+      text: "Back to check answers",
+      href: checkAnswersUrl,
+      classes: "govuk-!-margin-top-2"
+    }) }}
+  </div>
+</div>
+{% endblock %}

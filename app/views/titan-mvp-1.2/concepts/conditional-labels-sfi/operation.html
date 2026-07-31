@@ -1,0 +1,108 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/textarea/macro.njk" import govukTextarea %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+
+{% block pageTitle %}
+{{ entry.label }} – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+{{ govukPhaseBanner({
+  tag: { text: "Concept" },
+  html: 'Prototype exploration — <a class="govuk-link" href="/titan-mvp-1.2/concepts/conditional-labels-sfi">about this journey</a>'
+}) }}
+
+{{ govukNotificationBanner({
+  titleText: "Important",
+  html: "This is a preview of a live form. Do not enter personal information."
+}) }}
+
+{% if previousEntry %}
+<p class="govuk-body govuk-!-margin-bottom-2">
+  <a class="govuk-link" href="/titan-mvp-1.2/concepts/conditional-labels-sfi/operation/{{ index - 1 }}">
+    Go back to add another {{ previousEntry.label }}
+  </a>
+</p>
+{% endif %}
+
+{{ govukBackLink({
+  text: "Back",
+  href: backHref
+}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% if error %}
+      {% set errorList = [] %}
+      {% if error.parcels %}{% set errorList = (errorList.push({ text: error.parcels, href: "#parcels" }), errorList) %}{% endif %}
+      {% if error.description %}{% set errorList = (errorList.push({ text: error.description, href: "#description" }), errorList) %}{% endif %}
+      {{ govukErrorSummary({ titleText: "There is a problem", errorList: errorList }) }}
+    {% endif %}
+
+    <p class="govuk-caption-l">{{ pageContext }}</p>
+    <h1 class="govuk-heading-l">{{ entry.label }}</h1>
+
+    <p class="govuk-body">
+      Your notice should include who will do the work, what work is planned, where it will happen, when it will take place, and how it will be done.
+    </p>
+
+    <p class="govuk-body">
+      Natural England cannot give consent based on your SFI agreement details alone. You must describe the specific work you plan to carry out.
+    </p>
+
+    <p class="govuk-body">
+      You can provide detail of another wildlife on arable or horticultural land SFI action code on the next page.
+    </p>
+
+    <form class="form" action="/titan-mvp-1.2/concepts/conditional-labels-sfi/operation/{{ index }}" method="post">
+      {% if fromAddedAnswers %}
+      <input type="hidden" name="fromAddedAnswers" value="true">
+      {% endif %}
+      <div class="govuk-form-group">
+        <label class="govuk-label govuk-label--m" for="action-code-display">
+          SFI action code
+        </label>
+        <div id="action-code-display" class="govuk-inset-text govuk-!-margin-top-2">
+          {{ entry.label }}
+        </div>
+      </div>
+
+      {{ govukTextarea({
+        name: "parcels",
+        id: "parcels",
+        label: {
+          text: "Give the full parcel numbers of where this action will take place",
+          isPageHeading: false,
+          classes: "govuk-label--m"
+        },
+        hint: {
+          text: "If it applies to more than one parcel, separate each number with a comma. For example: AB12345678, CD12345678"
+        },
+        errorMessage: { text: error.parcels } if error and error.parcels else null,
+        value: entry.parcels
+      }) }}
+
+      {{ govukTextarea({
+        name: "description",
+        id: "description",
+        label: {
+          text: "Describe how you will carry out this action on the affected parcel numbers",
+          isPageHeading: false,
+          classes: "govuk-label--m"
+        },
+        hint: {
+          text: "If you will carry out the action differently across the parcel numbers, then explain this difference clearly"
+        },
+        errorMessage: { text: error.description } if error and error.description else null,
+        value: entry.description
+      }) }}
+
+      {{ govukButton({ text: "Continue" }) }}
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends "layouts/runner-sign-in-v2-baseline.html" %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/select/macro.njk" import govukSelect %}
+{% from "govuk/components/details/macro.njk" import govukDetails %}
+{% import "titan-mvp-1.2/runner-sign-in-v2-baseline/_macros.njk" as v2 with context %}
+{% import "titan-mvp-1.2/runner-sign-in-v2-baseline/_journey-docs.njk" as journeyDocs %}
+
+{% block pageTitle %}Journey flowcharts – Runner sign-in v2 baseline – GOV.UK{% endblock %}
+
+{% block head %}
+  {{ super() }}
+  {{ journeyDocs.journeyFlowchartStyles() }}
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ href: urls.journeys, text: "Back to journeys" }) }}
+{% endblock %}
+
+{% block header %}
+  {{ v2.v2ServiceHeader("start") }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <span class="govuk-caption-l">Runner sign-in v2 baseline</span>
+    <h1 class="govuk-heading-xl">Journey flowcharts</h1>
+
+    <p class="govuk-body">
+      Interactive flowcharts for expected journeys and unexpected error branches.
+      Click a blue-underlined node to open the related prototype page in a new tab.
+      Abstract steps (for example “Email links”) are not linked.
+    </p>
+
+    <p class="govuk-body">
+      For page previews and step links, see
+      <a class="govuk-link" href="{{ urls.journeys }}">sign-in journeys</a>,
+      <a class="govuk-link" href="{{ urls.errorMessages }}">validation error messages</a>,
+      and
+      <a class="govuk-link" href="{{ urls.unexpectedJourneys }}">unexpected journeys</a>.
+    </p>
+  </div>
+</div>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-full">
+    {{ govukSelect({
+      id: "journey-flowchart-select",
+      name: "journey",
+      label: { text: "Select journey" },
+      items: journeySelectItems
+    }) }}
+
+    <div class="journey-flowchart__panel govuk-!-margin-top-6">
+      <div class="journey-flowchart__header">
+        <h2 class="govuk-heading-m govuk-!-margin-bottom-0" id="journey-flowchart-title">Overview</h2>
+        <span class="journey-flowchart__step-count" id="journey-flowchart-step-count"></span>
+      </div>
+      <p class="govuk-body" id="journey-flowchart-description"></p>
+      <div class="journey-flowchart__diagram" id="journey-flowchart-diagram" aria-live="polite"></div>
+
+      <div class="journey-flowchart__legend" aria-label="Flowchart legend">
+        <div class="journey-flowchart__legend-item">
+          <span class="journey-flowchart__legend-swatch journey-flowchart__legend-swatch--hub" aria-hidden="true"></span>
+          Hub (shared page)
+        </div>
+        <div class="journey-flowchart__legend-item">
+          <span class="journey-flowchart__legend-swatch" aria-hidden="true"></span>
+          Main step
+        </div>
+        <div class="journey-flowchart__legend-item">
+          <span class="journey-flowchart__legend-swatch journey-flowchart__legend-swatch--branch" aria-hidden="true"></span>
+          Branch
+        </div>
+        <div class="journey-flowchart__legend-item">
+          <span class="journey-flowchart__legend-swatch journey-flowchart__legend-swatch--unexpected" aria-hidden="true"></span>
+          Unexpected
+        </div>
+      </div>
+    </div>
+
+    {% set glanceHtml %}
+      {% for item in journeyGlanceItems %}
+        <h3 class="govuk-heading-s">{{ item.title }}</h3>
+        <p class="govuk-body-s">{{ item.description }}</p>
+        <p class="govuk-body-s">{{ item.path }}</p>
+      {% endfor %}
+    {% endset %}
+
+    {{ govukDetails({
+      summaryText: "All journeys at a glance",
+      html: glanceHtml
+    }) }}
+  </div>
+</div>
+{% endblock %}
+
+{% block pageScripts %}
+  <script>
+    window.RUNNER_SIGN_IN_V2_JOURNEY_FLOWS = {{ journeyFlows | dump | safe }};
+  </script>
+  <script src="/public/javascripts/runner-sign-in-v2-baseline-journey-flowcharts.js"></script>
+{% endblock %}

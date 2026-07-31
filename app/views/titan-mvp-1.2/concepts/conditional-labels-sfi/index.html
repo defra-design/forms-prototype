@@ -1,0 +1,48 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+
+{% block pageTitle %}
+Conditional labels SFI journey (concept) – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+{{ govukPhaseBanner({
+  tag: { text: "Concept" },
+  html: 'Prototype exploration of <a class="govuk-link" href="/titan-mvp-1.2/form-editor/page-settings-conditional-labels">conditional identifiable labels</a> applied to an SFI consent journey.'
+}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <span class="govuk-caption-xl">Give notice and get consent for a planned activity on a SSSI</span>
+    <h1 class="govuk-heading-xl">Conditional identifiable labels — SFI journey mock</h1>
+
+    <p class="govuk-body">
+      This walkthrough shows how repeat pages could use labels from an earlier answer instead of generic numbering like “SFI operation 1”.
+    </p>
+
+    {{ govukInsetText({
+      html: "<strong>What to look for</strong><ul class='govuk-list govuk-list--bullet govuk-!-margin-bottom-0'><li>After adding each action, you see a <strong>“You have added X answers”</strong> summary page</li><li>Each row uses the SFI action code as the label (for example, <strong>AB1 Nectar flower mix</strong>) instead of generic “SFI operation 1”</li><li>Use <strong>Add another</strong> to provide details for the next selected code</li></ul>"
+    }) }}
+
+    <h2 class="govuk-heading-m">Try the journey</h2>
+    <ol class="govuk-list govuk-list--number">
+      <li>Select which SFI action codes need Natural England consent</li>
+      <li>Add details for the first code, then review the added answers summary</li>
+      <li>Use Add another to complete remaining codes, then Continue to check answers</li>
+    </ol>
+
+    {{ govukButton({
+      text: "Start journey",
+      href: "/titan-mvp-1.2/concepts/conditional-labels-sfi/select-codes",
+      isStartButton: true
+    }) }}
+
+    <p class="govuk-body govuk-!-margin-top-6">
+      <a class="govuk-link" href="/titan-mvp-1.2/form-editor/page-settings-conditional-labels">Back to editor concept settings</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

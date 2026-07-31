@@ -1,0 +1,68 @@
+{% extends "layouts/runner-sign-in-v2-baseline.html" %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+{% import "titan-mvp-1.2/runner-sign-in-v2-baseline/_macros.njk" as v2 with context %}
+{% import "titan-mvp-1.2/runner-sign-in-v2-baseline/_journey-docs.njk" as journeyDocs %}
+
+{% block pageTitle %}
+{{ errorItem.title }} – Validation error – GOV.UK
+{% endblock %}
+
+{% block head %}
+  {{ super() }}
+  {{ journeyDocs.journeyDocsStyles() }}
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ href: "/runner-sign-in-v2-baseline/error-messages", text: "Back to validation error messages" }) }}
+{% endblock %}
+
+{% block header %}
+  {{ v2.v2ServiceHeader("start") }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-full">
+    {% set devHtml %}
+      <dl class="govuk-summary-list govuk-summary-list--no-border govuk-!-margin-bottom-0">
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">Journey</dt>
+          <dd class="govuk-summary-list__value">{{ errorItem.journey }}</dd>
+        </div>
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">Page</dt>
+          <dd class="govuk-summary-list__value">{{ errorItem.page }}</dd>
+        </div>
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">Field name</dt>
+          <dd class="govuk-summary-list__value"><code>{{ errorItem.field }}</code></dd>
+        </div>
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">Error message</dt>
+          <dd class="govuk-summary-list__value"><strong>{{ errorItem.error[errorItem.field] }}</strong></dd>
+        </div>
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">Use when</dt>
+          <dd class="govuk-summary-list__value">{{ errorItem.useWhen }}</dd>
+        </div>
+      </dl>
+    {% endset %}
+
+    {{ govukNotificationBanner({
+      type: "information",
+      titleText: "Developer reference",
+      html: devHtml
+    }) }}
+
+    <h2 class="govuk-heading-m govuk-!-margin-top-6">Page preview</h2>
+    <p class="govuk-body">
+      <a class="govuk-link" href="{{ previewUrl }}" target="_blank" rel="noreferrer noopener">Open preview in a new tab</a>
+    </p>
+
+    <div class="journey-docs__frame-wrap">
+      <iframe class="journey-docs__frame" title="Error message preview: {{ errorItem.title | e }}" src="{{ previewUrl }}" loading="lazy"></iframe>
+    </div>
+  </div>
+</div>
+{% endblock %}

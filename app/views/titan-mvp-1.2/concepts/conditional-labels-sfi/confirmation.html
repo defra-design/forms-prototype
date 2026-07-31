@@ -1,0 +1,39 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/panel/macro.njk" import govukPanel %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% block pageTitle %}
+Notice sent – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+{{ govukPhaseBanner({
+  tag: { text: "Concept" },
+  html: 'Prototype exploration — <a class="govuk-link" href="/titan-mvp-1.2/concepts/conditional-labels-sfi">about this journey</a>'
+}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {{ govukPanel({
+      titleText: "Notice sent",
+      html: "Your reference number<br><strong>NE-2026-001234</strong>"
+    }) }}
+
+    <p class="govuk-body">
+      We have sent your notice to Natural England. You will receive a confirmation email shortly.
+    </p>
+
+    {{ govukButton({
+      text: "Start again",
+      href: "/titan-mvp-1.2/concepts/conditional-labels-sfi/select-codes",
+      classes: "govuk-button--secondary"
+    }) }}
+
+    <p class="govuk-body govuk-!-margin-top-6">
+      <a class="govuk-link" href="/titan-mvp-1.2/form-editor/page-settings-conditional-labels">Back to editor concept settings</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

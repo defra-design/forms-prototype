@@ -1,0 +1,118 @@
+{% extends "layouts/runner-sign-in-v2-baseline.html" %}
+{% from "components/declaration-checkboxes/macro.njk" import declarationCheckboxes %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% import "titan-mvp-1.2/runner-sign-in-v2-baseline/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}Check this form – GOV.UK{% endblock %}
+
+{% block header %}
+  {{ v2.v2ServiceHeader("start", { showServiceNav: false, formName: formName }) }}
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ href: backUrl, text: "Back" }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">Check this form</h1>
+
+    {{ govukSummaryList({
+      rows: [
+        {
+          key: { text: "Form" },
+          value: { text: formName }
+        },
+        {
+          key: { text: "Requested by" },
+          value: { text: applicantEmail }
+        }
+      ]
+    }) }}
+
+    {% if error and error.declarationError %}
+      {{ govukErrorSummary({
+        titleText: "There is a problem",
+        errorList: [
+          { text: error.declarationError, href: "#declaration-checkbox" }
+        ]
+      }) }}
+    {% endif %}
+
+    <h2 class="govuk-heading-m">Contact details</h2>
+    <dl class="govuk-summary-list govuk-!-margin-bottom-6">
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Name</dt>
+        <dd class="govuk-summary-list__value">{{ contactName }}</dd>
+        <dd class="govuk-summary-list__actions"><a class="govuk-link" href="{{ viewContactUrl }}">View<span class="govuk-visually-hidden"> name</span></a></dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Email</dt>
+        <dd class="govuk-summary-list__value">{{ contactEmail }}</dd>
+        <dd class="govuk-summary-list__actions"><a class="govuk-link" href="{{ viewContactUrl }}">View<span class="govuk-visually-hidden"> email</span></a></dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Mobile phone number</dt>
+        <dd class="govuk-summary-list__value">{{ phoneNumber }}</dd>
+        <dd class="govuk-summary-list__actions"><a class="govuk-link" href="{{ viewContactUrl }}">View<span class="govuk-visually-hidden"> mobile phone number</span></a></dd>
+      </div>
+    </dl>
+
+    <h2 class="govuk-heading-m">Application details</h2>
+    <dl class="govuk-summary-list govuk-!-margin-bottom-7">
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Organisation name</dt>
+        <dd class="govuk-summary-list__value">{{ organisationName }}</dd>
+        <dd class="govuk-summary-list__actions"><a class="govuk-link" href="{{ viewOrganisationUrl }}">View<span class="govuk-visually-hidden"> organisation name</span></a></dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Organisation type</dt>
+        <dd class="govuk-summary-list__value">{{ organisationType }}</dd>
+        <dd class="govuk-summary-list__actions"><a class="govuk-link" href="{{ viewOrganisationUrl }}">View<span class="govuk-visually-hidden"> organisation type</span></a></dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Amount requested</dt>
+        <dd class="govuk-summary-list__value">{{ amountRequested }}</dd>
+        <dd class="govuk-summary-list__actions"><a class="govuk-link" href="{{ viewAmountUrl }}">View<span class="govuk-visually-hidden"> amount requested</span></a></dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Project summary</dt>
+        <dd class="govuk-summary-list__value">{{ projectSummary }}</dd>
+        <dd class="govuk-summary-list__actions"><a class="govuk-link" href="{{ viewSummaryUrl }}">View<span class="govuk-visually-hidden"> project summary</span></a></dd>
+      </div>
+    </dl>
+
+    <p class="govuk-body govuk-!-margin-bottom-6">
+      {# <a class="govuk-link" href="{{ changeAnswersUrl }}">Change answers</a>
+    </p> #}
+
+    <form class="form" method="post" action="/runner-sign-in-v2-baseline/checker/complete">
+      <input type="hidden" name="token" value="{{ token }}" />
+      {% if allowApplicant %}
+        <input type="hidden" name="allowApplicant" value="1" />
+      {% endif %}
+      {{ declarationCheckboxes({
+        name: "declaration",
+        fieldset: {
+          legend: {
+            text: "Declaration",
+            isPageHeading: false,
+            classes: "govuk-fieldset__legend--m"
+          }
+        },
+        content: { html: "<p>I confirm that I have checked this form and declare that, to the best of my knowledge, the answers are correct.</p>" },
+        errorMessage: { text: error.declarationError } if error and error.declarationError else "",
+        items: [
+          { value: "confirmed", text: "I understand and agree with this declaration", id: "declaration-checkbox" }
+        ]
+      }) }}
+
+      {{ govukButton({ text: "Confirm and submit" }) }}
+    </form>
+  </div>
+</div>
+{% endblock %}

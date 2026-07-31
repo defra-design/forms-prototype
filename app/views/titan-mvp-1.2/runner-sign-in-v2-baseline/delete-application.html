@@ -1,0 +1,45 @@
+{% extends "layouts/runner-sign-in-v2-baseline.html" %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% import "titan-mvp-1.2/runner-sign-in-v2-baseline/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}
+Delete draft – Manage your form – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ text: "Back", href: manageUrl }) }}
+{% endblock %}
+
+{% block header %}
+  {{ v2.v2ServiceHeader("forms") }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <form method="post" action="/runner-sign-in-v2-baseline/forms/{{ formKey | urlencode }}/{{ applicationId | urlencode }}/delete" class="form" novalidate>
+      <input type="hidden" name="targetApplicationId" value="{{ application.id }}" />
+      {{ govukRadios({
+        idPrefix: "deleteApplication",
+        name: "deleteApplication",
+        fieldset: {
+          legend: {
+            text: "Are you sure you want to delete this draft?",
+            classes: "govuk-fieldset__legend--l",
+            isPageHeading: true
+          }
+        },
+        hint: { text: application.formName + " (" + application.reference + ")" },
+        items: [
+          { value: "yes", text: "Yes, delete this draft" },
+          { value: "no", text: "No, keep this draft" }
+        ]
+      }) }}
+
+      {{ govukButton({ text: "Continue" }) }}
+    </form>
+  </div>
+</div>
+{% endblock %}

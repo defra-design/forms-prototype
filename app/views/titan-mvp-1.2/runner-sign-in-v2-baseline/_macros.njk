@@ -1,0 +1,74 @@
+{% import "components/one-login-service-header/service-header.njk" as oneLoginHeader %}
+{% from "govuk/components/header/macro.njk" import govukHeader %}
+
+{% macro v2ServiceHeader(activeNav, options) %}
+  {# Prefer an explicit formName, then anything in the current render context #}
+  {% set currentFormName = "" %}
+  {% if options and options.formName %}
+    {% set currentFormName = options.formName %}
+  {% elseif application and application.formName %}
+    {% set currentFormName = application.formName %}
+  {% elseif formDef and formDef.formName %}
+    {% set currentFormName = formDef.formName %}
+  {% endif %}
+
+  {% if data and data.runnerSignInAuthed %}
+    {% set manageHref = data.runnerSignInV2BaselineManageUrl or "/runner-sign-in-v2-baseline/start-page" %}
+    {% set securityHref = data.runnerSignInV2BaselineSecurityUrl or manageHref %}
+    {% set showServiceNav = true if (not options) else (options.showServiceNav is not defined or options.showServiceNav) %}
+    {% set navItems = [
+      { href: manageHref, text: "Start", active: activeNav == "start" },
+      { href: manageHref, text: "All forms (classic)" }
+    ] %}
+
+    {# Once in the "manage" area, mirror the v4 service nav #}
+    {% if activeNav != "start" %}
+      {% set navItems = [
+        { href: manageHref, text: "Forms", active: activeNav == "forms" },
+        { href: securityHref, text: "Security", active: activeNav == "security" }
+      ] %}
+    {% endif %}
+
+    {{ oneLoginHeader.govukOneLoginServiceHeader({
+      signOutLink: "/runner-sign-in-v2-baseline/sign-out",
+      homepageLink: manageHref,
+      oneLoginLink: manageHref,
+      oneLoginLinkText: (data.runnerSignInEmail or "you@example.com"),
+      serviceNavigationParams: ({
+        serviceName: (currentFormName if currentFormName else ("Manage your form" if activeNav == "start" else "Manage your forms")),
+        navigation: navItems
+      } if showServiceNav else null)
+    }) }}
+  {% else %}
+    {% if currentFormName %}
+      {{ govukHeader({
+        serviceName: currentFormName,
+        serviceUrl: (options.serviceUrl if (options and options.serviceUrl) else "#")
+      }) }}
+    {% else %}
+      {{ govukHeader() }}
+    {% endif %}
+  {% endif %}
+{% endmacro %}
+
+{% macro v2SecurityCodeInput(params) %}
+  {% from "govuk/components/input/macro.njk" import govukInput %}
+  {{ govukInput({
+    label: {
+      text: params.labelText or "Enter the 6 digit security code",
+      classes: params.labelClasses
+    },
+    classes: "govuk-input--width-10 govuk-!-font-weight-bold",
+    id: params.id or "v2-code",
+    name: params.name or "runnerSignInV2BaselineCode",
+    type: "text",
+    spellcheck: false,
+    autocomplete: "one-time-code",
+    attributes: {
+      inputmode: "numeric",
+      maxlength: "6"
+    },
+    value: params.value,
+    errorMessage: params.errorMessage or false
+  }) }}
+{% endmacro %}

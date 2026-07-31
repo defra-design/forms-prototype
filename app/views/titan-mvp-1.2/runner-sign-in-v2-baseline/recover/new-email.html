@@ -1,0 +1,43 @@
+{% extends "layouts/runner-sign-in-v2-baseline.html" %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% import "titan-mvp-1.2/runner-sign-in-v2-baseline/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}Recover my sign-in: new email – GOV.UK{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ href: backUrl, text: "Back" }) }}
+{% endblock %}
+
+{% block header %}{{ v2.v2ServiceHeader("") }}{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% if error and error.runnerSignInV2BaselineNewEmail %}
+      {{ govukErrorSummary({ titleText: "There is a problem", errorList: [{ text: error.runnerSignInV2BaselineNewEmail, href: "#v2-new-email" }] }) }}
+    {% endif %}
+    <span class="govuk-caption-l">Recover my sign-in</span>
+    <h1 class="govuk-heading-l">Add your new email address</h1>
+    <p class="govuk-body">We’ll send a security code to this email to confirm it.</p>
+    <form method="post" action="/runner-sign-in-v2-baseline/recover/new-email" novalidate>
+      <input type="hidden" name="formKey" value="{{ formKey }}" />
+      <input type="hidden" name="applicationId" value="{{ applicationId }}" />
+      <input type="hidden" name="next" value="{{ next | e }}" />
+      {{ govukInput({
+        label: { text: "New email address" },
+        id: "v2-new-email",
+        name: "runnerSignInV2BaselineNewEmail",
+        type: "email",
+        autocomplete: "email",
+        spellcheck: false,
+        value: values.runnerSignInV2BaselineNewEmail,
+        errorMessage: { text: error.runnerSignInV2BaselineNewEmail } if error and error.runnerSignInV2BaselineNewEmail else false
+      }) }}
+      {{ govukButton({ text: "Continue" }) }}
+    </form>
+  </div>
+</div>
+{% endblock %}

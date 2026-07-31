@@ -106,6 +106,10 @@ Start – Runner sign-in v2 – GOV.UK
   <div class="govuk-grid-column-two-thirds">
     <h1 class="govuk-heading-xl">Sign in to your form prototype - v2</h1>
 
+    <p class="govuk-body">
+      This is the live v2 prototype (same links as before). A frozen copy of the version shared with engineers is at
+      <a class="govuk-link" href="/runner-sign-in-v2-baseline/start-page">runner sign-in v2 baseline</a>.
+    </p>
     {# <p class="govuk-body">
       Use these seeded examples to reliably test the main journeys.
     </p> #}
@@ -331,13 +335,13 @@ Start – Runner sign-in v2 – GOV.UK
       <ul class="govuk-list">
         <li class="govuk-!-margin-bottom-2">
           {{ govukButton({
-            text: "Create a sign-in",
-            href: "/runner-sign-in-v2/create-sign-in/email?formKey=" + (formKey | urlencode) + "&applicationId=" + (applicationId | urlencode) + "&next=" + (manageUrl | urlencode)
+            text: "Sign in (new user)",
+            href: "/runner-sign-in-v2/sign-in/email?formKey=" + (formKey | urlencode) + "&applicationId=" + (applicationId | urlencode) + "&next=" + (manageUrl | urlencode)
           }) }}
         </li>
         <li class="govuk-!-margin-bottom-2">
           {{ govukButton({
-            text: "Sign in",
+            text: "Sign in (existing — use you@example.com)",
             classes: "govuk-button--secondary",
             href: "/runner-sign-in-v2/sign-in/email?formKey=" + (formKey | urlencode) + "&applicationId=" + (applicationId | urlencode) + "&next=" + (manageUrl | urlencode)
           }) }}

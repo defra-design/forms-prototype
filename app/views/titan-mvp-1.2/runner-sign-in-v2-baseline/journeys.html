@@ -1,11 +1,11 @@
-{% extends "layouts/runner-sign-in-v2.html" %}
+{% extends "layouts/runner-sign-in-v2-baseline.html" %}
 {% from "govuk/components/accordion/macro.njk" import govukAccordion %}
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 {% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
-{% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
-{% import "titan-mvp-1.2/runner-sign-in-v2/_journey-docs.njk" as journeyDocs %}
+{% import "titan-mvp-1.2/runner-sign-in-v2-baseline/_macros.njk" as v2 with context %}
+{% import "titan-mvp-1.2/runner-sign-in-v2-baseline/_journey-docs.njk" as journeyDocs %}
 
-{% block pageTitle %}Sign-in journeys – Runner sign-in v2 – GOV.UK{% endblock %}
+{% block pageTitle %}Sign-in journeys – Runner sign-in v2 baseline – GOV.UK{% endblock %}
 
 {% block head %}
   {{ super() }}
@@ -23,11 +23,11 @@
 {% block content %}
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
-    <span class="govuk-caption-l">Runner sign-in v2</span>
+    <span class="govuk-caption-l">Runner sign-in v2 baseline</span>
     <h1 class="govuk-heading-xl">Creating or signing in</h1>
 
     <p class="govuk-body">
-      Use this page to review the main journeys and pages in the runner sign-in v2 prototype.
+      Use this page to review the main journeys and pages in the runner sign-in v2 baseline prototype.
       Each section shows the expected step order and links to open the pages.
     </p>
 
@@ -57,39 +57,37 @@
 
     {% set createSignInHtml %}
       <div class="journey-docs__section">
-        <p class="govuk-body">Someone signs in with an email address we have not seen before. After the security code we ask for a recovery mobile phone number, then they continue with their form.</p>
+        <p class="govuk-body">Someone creates a sign-in before continuing with their form. Security codes are sent by <strong>email</strong>. The mobile phone number is used if they forget their email address.</p>
         {{ journeyDocs.journeyPath([
           { text: "Form start page", href: urls.formStartPage },
           { text: "Sign in to use this form", href: urls.whySignIn },
-          { text: "Enter your email address", href: urls.signInEmail },
-          { text: "Check your email", href: urls.signInCheckEmail },
-          { text: "Enter your mobile phone number", href: urls.signInMobile },
+          { text: "Enter your email address", href: urls.createEmail },
+          { text: "Check your email", href: urls.createCheckEmail },
+          { text: "Enter your mobile phone number", href: urls.createMobile },
           { text: "Manage your form", href: urls.manage }
         ]) }}
         {{ journeyDocs.journeyPreviews([
-          { caption: "Sign in", title: "Enter your email address", href: urls.signInEmail, previewHref: urls.preview.signInEmail },
-          { caption: "Sign in", title: "Check your email", href: urls.signInCheckEmail, previewHref: urls.preview.signInCheckEmail },
-          { caption: "Sign in", title: "Enter your mobile phone number", href: urls.signInMobile, previewHref: urls.preview.signInMobile },
-          { caption: "Sign in", title: "Get security code", href: urls.signInGetCode, previewHref: urls.preview.signInGetCode }
+          { caption: "Create a sign-in", title: "Enter your email address", href: urls.createEmail, previewHref: urls.preview.createEmail },
+          { caption: "Create a sign-in", title: "Check your email", href: urls.createCheckEmail, previewHref: urls.preview.createCheckEmail },
+          { caption: "Create a sign-in", title: "Enter your mobile phone number", href: urls.createMobile, previewHref: urls.preview.createMobile },
+          { caption: "Create a sign-in", title: "Get security code", href: urls.createGetCode, previewHref: urls.preview.createGetCode }
         ]) }}
       </div>
     {% endset %}
 
     {% set signInHtml %}
       <div class="journey-docs__section">
-        <p class="govuk-body">Someone signs in with their email address. We send a security code by email. If they already have a recovery phone number, they continue straight after the code. If not, we ask for a mobile phone number.</p>
+        <p class="govuk-body">Someone signs in with the email address they used when they created their sign-in. We send a security code to their email.</p>
         {{ journeyDocs.journeyPath([
           { text: "Sign in to use this form", href: urls.whySignIn },
           { text: "Enter your email address", href: urls.signInEmail },
           { text: "Check your email", href: urls.signInCheckEmail },
-          { text: "Enter your mobile phone number (if needed)", href: urls.signInMobile },
           { text: "Manage your form", href: urls.manage },
           { text: "Sign out", href: urls.signOut }
         ]) }}
         {{ journeyDocs.journeyPreviews([
           { caption: "Sign in", title: "Enter your email address", href: urls.signInEmail, previewHref: urls.preview.signInEmail },
           { caption: "Sign in", title: "Check your email", href: urls.signInCheckEmail, previewHref: urls.preview.signInCheckEmail },
-          { caption: "Sign in", title: "Enter your mobile phone number", href: urls.signInMobile, previewHref: urls.preview.signInMobile },
           { caption: "Signed in", title: "Manage your form", href: urls.manage, previewHref: urls.preview.manage }
         ]) }}
       </div>
@@ -141,14 +139,14 @@
 
     {% set saveExitWithoutSignInHtml %}
       <div class="journey-docs__section">
-        <p class="govuk-body">Someone fills in a form without signing in first, then chooses <strong>Save and exit</strong>. They sign in with email (and a recovery phone number if needed), then continue later from the link in their email.</p>
+        <p class="govuk-body">Someone fills in a form without signing in first, then chooses <strong>Save and exit</strong>. They create a sign-in but are not signed in until they follow the link in their email.</p>
         {{ journeyDocs.journeyPath([
           { text: "Form start page", href: urls.formStartPage },
           { text: "Continue without signing in", href: urls.formStartPage },
           { text: "Save and exit", href: urls.saveExitChoose },
-          { text: "Sign in", href: urls.saveExitCreate },
+          { text: "Create a sign-in", href: urls.saveExitCreate },
           { text: "Check your email", href: urls.saveExitWithoutSignInCheckEmail },
-          { text: "Enter mobile phone number (if needed)", href: urls.createMobileSaveExit },
+          { text: "Enter mobile phone number", href: urls.createMobileSaveExit },
           { text: "Your progress has been saved", href: urls.saveExitCreated, branch: true },
           { text: "Welcome back", href: urls.saveExitWithoutSignInResume },
           { text: "Sign in from email", href: urls.signInEmail },
@@ -156,7 +154,7 @@
         ]) }}
         {{ journeyDocs.journeyPreviews([
           { caption: "Save and exit without sign-in", title: "Choose save and exit", href: urls.saveExitChoose, previewHref: urls.preview.saveExitChoose },
-          { caption: "Save and exit without sign-in", title: "Sign in", href: urls.saveExitCreate, previewHref: urls.preview.saveExitCreate },
+          { caption: "Save and exit without sign-in", title: "Create a sign-in", href: urls.saveExitCreate, previewHref: urls.preview.saveExitCreate },
           { caption: "Save and exit without sign-in", title: "Check your email", href: urls.saveExitWithoutSignInCheckEmail, previewHref: urls.preview.saveExitCheckEmail },
           { caption: "Save and exit without sign-in", title: "Progress saved", href: urls.saveExitCreated, previewHref: urls.preview.saveExitProgressSaved },
           { caption: "Save and exit without sign-in", title: "Welcome back", href: urls.saveExitWithoutSignInResume, previewHref: urls.preview.saveExitResumeWithoutSignIn }
@@ -249,7 +247,7 @@
           { caption: "Manage form", title: "Form submitted", href: urls.formSubmitted },
           { caption: "Manage form", title: "Form submitted email (checked)", href: urls.emailFormSubmittedCheckedPublic, previewHref: urls.preview.emailFormSubmittedCheckedPublic },
           { caption: "Manage form", title: "Form submitted email – processing team (checked)", href: urls.emailFormSubmittedCheckedTeam, previewHref: urls.preview.emailFormSubmittedCheckedTeam },
-          { caption: "Manage form", title: "Checked (static example)", href: "/runner-sign-in-v2/static/manage-form-checked", previewHref: urls.preview.manageFormChecked }
+          { caption: "Manage form", title: "Checked (static example)", href: "/runner-sign-in-v2-baseline/static/manage-form-checked", previewHref: urls.preview.manageFormChecked }
         ]) }}
       </div>
     {% endset %}
@@ -295,14 +293,14 @@
       id: "runner-sign-in-v2-journeys",
       items: [
         {
-          heading: { text: "Sign in (new user)" },
-          summary: { text: "Email, check email, recovery phone if needed, manage form" },
+          heading: { text: "Creating a sign-in" },
+          summary: { text: "Email, check email, mobile phone number, manage form" },
           content: { html: createSignInHtml },
           expanded: true
         },
         {
-          heading: { text: "Sign in" },
-          summary: { text: "Email and check email; recovery phone only if missing" },
+          heading: { text: "Signing in" },
+          summary: { text: "Email and check email" },
           content: { html: signInHtml }
         },
         {
@@ -317,7 +315,7 @@
         },
         {
           heading: { text: "Save and exit (without signing in first)" },
-          summary: { text: "Sign in from the form when saving" },
+          summary: { text: "Create sign-in from the form" },
           content: { html: saveExitWithoutSignInHtml }
         },
         {

@@ -1,0 +1,34 @@
+{% extends "layouts/runner-sign-in-v2-baseline.html" %}
+{% from "govuk/components/panel/macro.njk" import govukPanel %}
+{% import "titan-mvp-1.2/runner-sign-in-v2-baseline/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}Check complete – GOV.UK{% endblock %}
+
+{% block beforeContent %}{% endblock %}
+
+{% block header %}
+  {{ v2.v2ServiceHeader("start", { showServiceNav: false, formName: formName }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {{ govukPanel({
+      titleText: "Check complete",
+      html: "You’ve completed your part of the form."
+    }) }}
+
+    <h2 class="govuk-heading-m govuk-!-margin-top-6">What happens next</h2>
+
+    <p class="govuk-body govuk-!-margin-top-6">
+      We’ve emailed the applicant to let them know they can now submit the form.
+    </p>
+
+    <p class="govuk-body" style="margin-top: 40px!important;">
+      <a class="govuk-link" style="color: gray!important;" href="/runner-sign-in-v2-baseline/emails/applicant-form-checked?token={{ token | urlencode }}{% if allowApplicant %}&allowApplicant=1{% endif %}">
+        Preview the email sent to the applicant (prototype only)
+      </a>
+    </p>
+  </div>
+</div>
+{% endblock %}

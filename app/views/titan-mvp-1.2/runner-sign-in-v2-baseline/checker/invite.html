@@ -1,0 +1,90 @@
+{% extends "layouts/runner-sign-in-v2-baseline.html" %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
+{% import "titan-mvp-1.2/runner-sign-in-v2-baseline/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}Get someone to check the form – GOV.UK{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ href: backUrl, text: "Back" }) }}
+{% endblock %}
+
+{% block header %}{{ v2.v2ServiceHeader("") }}{% endblock %}
+
+{% block content %}
+{% set errorList = [] %}
+{% if error and error.runnerSignInV2BaselineCheckerEmail %}
+  {% set errorList = (errorList.push({ text: error.runnerSignInV2BaselineCheckerEmail, href: "#checker-email" }), errorList) %}
+{% endif %}
+{% if error and error.runnerSignInV2BaselineCheckerEmailConfirm %}
+  {% set errorList = (errorList.push({ text: error.runnerSignInV2BaselineCheckerEmailConfirm, href: "#checker-email-confirm" }), errorList) %}
+{% endif %}
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% if errorList.length %}
+      {{ govukErrorSummary({ titleText: "There is a problem", errorList: errorList }) }}
+    {% endif %}
+
+    <span class="govuk-caption-l">{{ application.formName }}</span>
+    <h1 class="govuk-heading-l">Get someone to check the form</h1>
+
+    {{ govukWarningText({
+      text: "Your form has not been submitted yet. Someone needs to check your answers before you can submit it.",
+      iconFallbackText: "Warning"
+    }) }}
+
+    <h2 class="govuk-heading-m">Who can check your form</h2>
+    <p class="govuk-body">They must be a registered vet.</p>
+
+    <p class="govuk-body">
+      Enter the checker’s email address. We’ll send them a link to confirm their email, enter a security code, then review your answers.
+      They can view your answers but cannot change them.
+    </p>
+
+    <form method="post" action="{{ formAction or ('/runner-sign-in-v2-baseline/forms/' + application.formKey + '/' + application.id + '/checker/invite') }}" novalidate>
+      {{ govukInput({
+        label: { text: "Checker’s email address" },
+        id: "checker-email",
+        name: "runnerSignInV2BaselineCheckerEmail",
+        type: "email",
+        autocomplete: "email",
+        spellcheck: false,
+        value: values.runnerSignInV2BaselineCheckerEmail,
+        errorMessage: { text: error.runnerSignInV2BaselineCheckerEmail } if error and error.runnerSignInV2BaselineCheckerEmail else false
+      }) }}
+
+      {{ govukInput({
+        label: { text: "Confirm email address" },
+        id: "checker-email-confirm",
+        name: "runnerSignInV2BaselineCheckerEmailConfirm",
+        type: "email",
+        autocomplete: "email",
+        spellcheck: false,
+        value: values.runnerSignInV2BaselineCheckerEmailConfirm,
+        errorMessage: { text: error.runnerSignInV2BaselineCheckerEmailConfirm } if error and error.runnerSignInV2BaselineCheckerEmailConfirm else false
+      }) }}
+
+      <div class="govuk-button-group">
+        {% if inviteSentUrl %}
+          {{ govukButton({ text: "Send invite", href: inviteSentUrl }) }}
+        {% else %}
+          {{ govukButton({ text: "Send invite" }) }}
+        {% endif %}
+        {{ govukButton({
+          text: "Save and exit",
+          classes: "govuk-button--secondary",
+          href: saveExitUrl or "/runner-sign-in-v2-baseline/start-page"
+        }) }}
+      </div>
+    </form>
+
+    <p class="govuk-body govuk-!-margin-top-4">
+      <a class="govuk-link" href="/runner-sign-in-v2-baseline/emails/checker-invite-v2?formKey={{ application.formKey | urlencode }}&amp;applicationId={{ application.id | urlencode }}">View checker email (prototype only)</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

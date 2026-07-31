@@ -1,0 +1,58 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/checkboxes/macro.njk" import govukCheckboxes %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+
+{% block pageTitle %}
+Which SFI action codes involve operations that need Natural England consent? – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+{{ govukPhaseBanner({
+  tag: { text: "Concept" },
+  html: 'Prototype exploration — <a class="govuk-link" href="/titan-mvp-1.2/concepts/conditional-labels-sfi">about this journey</a>'
+}) }}
+
+{{ govukNotificationBanner({
+  titleText: "Important",
+  html: "This is a preview of a live form. Do not enter personal information."
+}) }}
+
+{{ govukBackLink({
+  text: "Back",
+  href: "/titan-mvp-1.2/concepts/conditional-labels-sfi/added-answers" if addingMore else "/titan-mvp-1.2/concepts/conditional-labels-sfi"
+}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% if error and error.actionCodes %}
+      {{ govukErrorSummary({
+        titleText: "There is a problem",
+        errorList: [{ text: error.actionCodes, href: "#action-codes" }]
+      }) }}
+    {% endif %}
+
+    <form class="form" action="/titan-mvp-1.2/concepts/conditional-labels-sfi/select-codes" method="post">
+      {{ govukCheckboxes({
+        name: "actionCodes",
+        id: "action-codes",
+        fieldset: {
+          legend: {
+            text: "Which SFI action codes involve operations that need Natural England consent?",
+            isPageHeading: true,
+            classes: "govuk-fieldset__legend--l"
+          }
+        },
+        hint: { text: "Select another action code to add." if addingMore else "Select all that apply." },
+        errorMessage: { text: error.actionCodes } if error and error.actionCodes else null,
+        items: checkboxItems
+      }) }}
+
+      {{ govukButton({ text: "Continue" }) }}
+    </form>
+  </div>
+</div>
+{% endblock %}

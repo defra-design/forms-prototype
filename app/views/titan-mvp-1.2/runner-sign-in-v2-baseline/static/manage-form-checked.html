@@ -1,0 +1,52 @@
+{% extends "layouts/runner-sign-in-v2-baseline.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/table/macro.njk" import govukTable %}
+{% from "govuk/components/tag/macro.njk" import govukTag %}
+{% import "titan-mvp-1.2/runner-sign-in-v2-baseline/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}Manage your form – {{ application.formName }} – GOV.UK{% endblock %}
+
+{% block beforeContent %}{% endblock %}
+
+{% block header %}
+  {{ v2.v2ServiceHeader("forms", { formName: application.formName }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-full">
+    <span class="govuk-caption-l">Manage your form</span>
+    <h1 class="govuk-heading-xl">{{ application.formName }}</h1>
+
+    {{ govukButton({
+      text: "Start a new form",
+      href: startNewUrl,
+      classes: "govuk-button--secondary"
+    }) }}
+
+    {% set statusTagHtml = govukTag({ text: "Checked", classes: "govuk-tag--turquoise" }) %}
+    {% set actionsHtml %}
+      <a class="govuk-link" href="{{ reviewSubmitUrl }}">Review and submit</a>
+      <span class="govuk-body govuk-!-margin-left-2 govuk-!-margin-right-2">|</span>
+      <a class="govuk-link" href="{{ deleteUrl }}">Delete</a>
+    {% endset %}
+
+    {{ govukTable({
+      head: [
+        { text: "Reference number" },
+        { text: "Status" },
+        { text: "Last updated" },
+        { text: "Saved until" },
+        { text: "Actions" }
+      ],
+      rows: [[
+        { text: application.reference },
+        { html: statusTagHtml },
+        { text: lastUpdatedText },
+        { text: expiryText },
+        { html: actionsHtml }
+      ]]
+    }) }}
+  </div>
+</div>
+{% endblock %}

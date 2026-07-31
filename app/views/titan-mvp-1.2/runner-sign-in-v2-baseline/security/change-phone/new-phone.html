@@ -1,0 +1,43 @@
+{% extends "layouts/runner-sign-in-v2-baseline.html" %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% import "titan-mvp-1.2/runner-sign-in-v2-baseline/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}Change mobile phone number – GOV.UK{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ href: checkEmailUrl, text: "Back" }) }}
+{% endblock %}
+
+{% block header %}{{ v2.v2ServiceHeader("security") }}{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% if error and error.runnerSignInV2BaselineMobile %}
+      {{ govukErrorSummary({ titleText: "There is a problem", errorList: [{ text: error.runnerSignInV2BaselineMobile, href: "#v2-mobile" }] }) }}
+    {% endif %}
+    <span class="govuk-caption-l">Change mobile phone number</span>
+    <h1 class="govuk-heading-l">Enter your new mobile phone number</h1>
+    <p class="govuk-body">If you forget your sign-in details, we will send a 6 digit security code to this number.</p>
+
+    <form method="post" action="{{ formAction }}" novalidate>
+      <input type="hidden" name="formKey" value="{{ formKey }}" />
+      <input type="hidden" name="applicationId" value="{{ applicationId }}" />
+      {{ govukInput({
+        label: { text: "Mobile phone number" },
+        id: "v2-mobile",
+        name: "runnerSignInV2BaselineMobile",
+        type: "tel",
+        autocomplete: "tel",
+        classes: "govuk-input--width-20",
+        value: values.runnerSignInV2BaselineMobile,
+        errorMessage: { text: error.runnerSignInV2BaselineMobile } if error and error.runnerSignInV2BaselineMobile else false
+      }) }}
+      {{ govukButton({ text: "Continue" }) }}
+    </form>
+  </div>
+</div>
+{% endblock %}

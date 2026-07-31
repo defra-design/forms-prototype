@@ -1,0 +1,42 @@
+{% extends "layouts/runner-sign-in-v2-baseline.html" %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% import "titan-mvp-1.2/runner-sign-in-v2-baseline/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}Save and exit: confirm email – GOV.UK{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ href: backUrl, text: "Back" }) }}
+{% endblock %}
+
+{% block header %}{{ v2.v2ServiceHeader("") }}{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% if error and error.runnerSignInV2BaselineResumeEmail %}
+      {{ govukErrorSummary({ titleText: "There is a problem", errorList: [{ text: error.runnerSignInV2BaselineResumeEmail, href: "#resume-email" }] }) }}
+    {% endif %}
+    <span class="govuk-caption-l">Save and exit</span>
+    <h1 class="govuk-heading-l">Confirm the email for your save link</h1>
+    <p class="govuk-body">We’ll email you a link to continue your form.</p>
+    <form method="post" action="/runner-sign-in-v2-baseline/save-and-exit/with-sign-in/confirm-email" novalidate>
+      <input type="hidden" name="formKey" value="{{ formKey }}" />
+      <input type="hidden" name="applicationId" value="{{ applicationId }}" />
+      {{ govukInput({
+        label: { text: "Email address" },
+        id: "resume-email",
+        name: "runnerSignInV2BaselineResumeEmail",
+        type: "email",
+        autocomplete: "email",
+        spellcheck: false,
+        value: values.runnerSignInV2BaselineResumeEmail,
+        errorMessage: { text: error.runnerSignInV2BaselineResumeEmail } if error and error.runnerSignInV2BaselineResumeEmail else false
+      }) }}
+      {{ govukButton({ text: "Continue" }) }}
+    </form>
+  </div>
+</div>
+{% endblock %}

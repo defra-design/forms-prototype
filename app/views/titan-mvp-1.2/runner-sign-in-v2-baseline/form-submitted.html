@@ -1,0 +1,39 @@
+{% extends "layouts/runner-sign-in-v2-baseline.html" %}
+{% from "govuk/components/panel/macro.njk" import govukPanel %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% import "titan-mvp-1.2/runner-sign-in-v2-baseline/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}Form submitted – GOV.UK{% endblock %}
+
+{% block beforeContent %}{% endblock %}
+
+{% block header %}{{ v2.v2ServiceHeader("forms", { showServiceNav: false }) }}{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {{ govukPanel({
+      titleText: "Form submitted"
+    }) }}
+
+    <p class="govuk-body">We have sent you a confirmation email.</p>
+
+  {% if confirmationEmailUrl %}
+    <p class="govuk-body">
+      <a class="govuk-link" href="{{ confirmationEmailUrl }}">View confirmation email prototype</a>
+    </p>
+  {% endif %}
+
+    <h2 class="govuk-heading-m">What happens next</h2>
+
+    <p class="govuk-body">We’ll review your {{ application.formName }} submission.</p>
+    <p class="govuk-body">We’ll contact you if we need more information.</p>
+
+    {{ govukButton({
+      text: "Back to manage your form",
+      href: manageUrl
+    }) }}
+  </div>
+</div>
+{% endblock %}
+

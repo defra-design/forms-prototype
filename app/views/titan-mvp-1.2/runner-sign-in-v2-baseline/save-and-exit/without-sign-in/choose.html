@@ -1,0 +1,42 @@
+{% extends "layouts/runner-sign-in-v2-baseline.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% import "titan-mvp-1.2/runner-sign-in-v2-baseline/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}Sign in to save your progress – GOV.UK{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ href: backUrl, text: "Back" }) }}
+{% endblock %}
+
+{% block header %}
+  {{ v2.v2ServiceHeader("", { formName: application.formName }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">Sign in to save your progress</h1>
+
+    <p class="govuk-body">You need to sign in to save your progress for 28 days.</p>
+
+    <p class="govuk-body govuk-!-margin-bottom-6">You'll need an email address and a mobile phone number. If you've not used this form before, create sign-in details before you start.</p>
+
+    <h2 class="govuk-heading-m">New users</h2>
+
+    {{ govukButton({
+      text: "Create sign-in details",
+      href: createSignInUrl
+    }) }}
+
+    <div>
+      <h2 class="govuk-heading-m">Returning users</h2>
+      {{ govukButton({
+        text: "Sign in",
+        href: signInUrl,
+        classes: "govuk-button--secondary"
+      }) }}
+    </div>
+  </div>
+</div>
+{% endblock %}

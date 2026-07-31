@@ -1,0 +1,128 @@
+{% extends "layouts/main.html" %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+
+{% block pageTitle %}
+Checker invite email – prototype
+{% endblock %}
+
+{% block head %}
+  {{ super() }}
+  <style>
+    .email-message {
+      border: 1px solid #b1b4b6;
+      padding: 20px;
+      background: #ffffff;
+    }
+
+    .email-message-meta {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .email-message-meta th,
+    .email-message-meta td {
+      padding: 8px 0;
+      border-bottom: 1px solid #b1b4b6;
+      vertical-align: top;
+      text-align: left;
+    }
+
+    .email-message-meta th {
+      width: 90px;
+      font-weight: 700;
+    }
+
+    .placeholder-no-brackets {
+      display: inline-block;
+      padding: 0 4px;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l govuk-!-margin-top-6">
+      Checker invite{% if formName %} for <strong>'{{ formName }}'</strong>{% endif %}
+    </h1>
+
+    <div class="email-message">
+      <table class="email-message-meta">
+        <tbody>
+          <tr>
+            <th scope="row">From</th>
+            <td>Forms prototype</td>
+          </tr>
+          <tr>
+            <th scope="row">To</th>
+            <td>
+              {% if toEmail %}
+                {{ toEmail }}
+              {% else %}
+                <span class="placeholder-no-brackets" style="background: #fd0;">Email address</span>
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">Subject</th>
+            <td>Please check this form{% if formName %}: {{ formName }}{% endif %}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="email-message-body govuk-!-margin-top-2 govuk-!-margin-bottom-0">
+        {% if checkerUrl %}
+          <p class="govuk-body">
+            Someone has asked you to check their answers before they can submit a form{% if formName %} (<strong>{{ formName }}</strong>){% endif %}.
+          </p>
+
+          {{ govukInsetText({
+            html: "<p class=\"govuk-body govuk-!-margin-bottom-0\">Open the checker journey: <a class=\"govuk-link\" href=\"" ~ checkerUrl ~ "\">" ~ checkerUrl ~ "</a></p>"
+          }) }}
+
+          <p class="govuk-body">When you open the link you’ll need to:</p>
+          <ul class="govuk-list govuk-list--bullet">
+            <li>create a sign-in, or sign in if you already have one — use the <strong>same email address this message was sent to</strong></li>
+            <li>confirm your email address using the security code we send you</li>
+          </ul>
+
+          <p class="govuk-body">
+            You’ll be able to review their answers. In this prototype they cannot edit the applicant’s answers for you.
+          </p>
+
+          <p class="govuk-body">Do not forward this email or share the link with anyone else.</p>
+
+          <hr class="govuk-section-break govuk-section-break--visible govuk-!-margin-bottom-4 govuk-!-margin-top-4">
+
+          <p class="govuk-body govuk-!-margin-bottom-6">Do not reply to this email - it’s an automatic message from an unmonitored account.</p>
+
+          <hr class="govuk-section-break govuk-section-break--visible govuk-!-margin-bottom-4 govuk-!-margin-top-4">
+
+          <h2 class="govuk-heading-m">Gwahoddiad i wirio ffurflen</h2>
+          <p class="govuk-body">
+            Mae rhywun wedi gofyn i chi wirio ei atebion cyn y gallant gyflwyno ffurflen{% if formName %} (<strong>{{ formName }}</strong>){% endif %}.
+          </p>
+
+          {{ govukInsetText({
+            html: "<p class=\"govuk-body govuk-!-margin-bottom-0\">Agor y daith wirio: <a class=\"govuk-link\" href=\"" ~ checkerUrl ~ "\">" ~ checkerUrl ~ "</a></p>"
+          }) }}
+
+          <p class="govuk-body">Pan fyddwch yn agor y ddolen bydd angen i chi:</p>
+          <ul class="govuk-list govuk-list--bullet">
+            <li>greu mewngofnodi, neu fewngofnodi os oes gennych un yn barod — defnyddiwch yr un cyfeiriad e-bost â’r neges hon</li>
+            <li>cadarnhau eich cyfeiriad e-bost gan ddefnyddio’r cod diogelwch y byddwn yn ei anfon atoch</li>
+          </ul>
+
+          <p class="govuk-body">Peidiwch â hail-anfon yr e-bost hwn na rhannu’r ddolen ag unrhyw un arall.</p>
+
+          <hr class="govuk-section-break govuk-section-break--visible govuk-!-margin-bottom-4 govuk-!-margin-top-4">
+
+          <p class="govuk-body govuk-!-margin-bottom-6">Peidiwch ag ymateb i’r e-bost hwn – mae’n neges awtomatig o gyfrif heb ei fonitro.</p>
+        {% else %}
+          <p class="govuk-body">This preview needs a valid checker link. Open it from a form that has checking enabled.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

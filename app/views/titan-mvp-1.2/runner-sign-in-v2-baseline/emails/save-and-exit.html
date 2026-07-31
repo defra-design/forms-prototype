@@ -1,0 +1,124 @@
+{% extends "layouts/main.html" %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+
+{% block pageTitle %}
+Save and exit email – prototype
+{% endblock %}
+
+{% block head %}
+  {{ super() }}
+  <style>
+    .email-message {
+      border: 1px solid #b1b4b6;
+      padding: 20px;
+      background: #ffffff;
+    }
+
+    .email-message-meta {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .email-message-meta th,
+    .email-message-meta td {
+      padding: 8px 0;
+      border-bottom: 1px solid #b1b4b6;
+      vertical-align: top;
+      text-align: left;
+    }
+
+    .email-message-meta th {
+      width: 90px;
+      font-weight: 700;
+    }
+
+    .placeholder-no-brackets {
+      display: inline-block;
+      padding: 0 4px;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l govuk-!-margin-top-6">
+      Save and exit{% if formName %} for <strong>'{{ formName }}'</strong>{% endif %}
+    </h1>
+
+    <div class="email-message">
+      <table class="email-message-meta">
+        <tbody>
+          <tr>
+            <th scope="row">From</th>
+            <td>Forms prototype</td>
+          </tr>
+          <tr>
+            <th scope="row">To</th>
+            <td>
+              {% if toEmail %}
+                {{ toEmail }}
+              {% else %}
+                <span class="placeholder-no-brackets" style="background: #fd0;">Email address</span>
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">Subject</th>
+            <td>Form progress saved{% if formName %}: {{ formName }}{% endif %}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="email-message-body govuk-!-margin-top-2 govuk-!-margin-bottom-0">
+        {% if resumeUrl %}
+
+        <h1 class="govuk-heading-l govuk-!-margin-top-4">Form progress saved</h1>
+
+        <p class="govuk-body">Your progress with '{{ formName }}' has been saved.</p>
+
+
+          <p class="govuk-body">
+            Sign in using the link below to continue{% if formName %} your <strong>{{ formName }}</strong> form{% else %} your form{% endif %}.
+          </p>
+
+          {% if variant == "without-sign-in" %}
+            <p class="govuk-body">Use the same email address or mobile phone number you used when you created your sign-in.</p>
+          {% endif %}
+
+          {{ govukInsetText({
+            html: "<p class=\"govuk-body govuk-!-margin-bottom-0\"><a class=\"govuk-link\" href=\"" ~ resumeUrl ~ "\">Continue with your form</a></p>"
+          }) }}
+
+
+          <p class="govuk-body">If you do not sign in within 28 days, your saved information will be deleted.</p>
+
+          <hr class="govuk-section-break govuk-section-break--visible govuk-!-padding-bottom-6">
+
+          <h2 class="govuk-heading-l govuk-!-margin-top-6">Cynnydd ffurflen wedi’i arbed</h2>
+
+          <p class="govuk-body">Mae eich cynnydd gyda ‘{{ formName }}’ wedi’i arbed.</p>
+
+          <p class="govuk-body">
+            Mewngofnodwch gan ddefnyddio’r ddolen isod i barhau{% if formName %} â’ch ffurflen <strong>{{ formName }}</strong>{% else %} â’ch ffurflen{% endif %}.
+          </p>
+
+          {% if variant == "without-sign-in" %}
+            <p class="govuk-body">Defnyddiwch yr un cyfeiriad e-bost neu rif ffôn a ddefnyddioch wrth greu eich mewngofnodi.</p>
+          {% endif %}
+
+          {{ govukInsetText({
+            html: "<p class=\"govuk-body govuk-!-margin-bottom-0\"><a class=\"govuk-link\" href=\"" ~ resumeUrl ~ "\">Parhau â’ch ffurflen</a></p>"
+          }) }}
+
+          <p class="govuk-body">Os na fyddwch yn mewngofnodi o fewn 28 diwrnod, bydd eich gwybodaeth a arbedwyd yn cael ei dileu.</p>
+
+          <hr class="govuk-section-break govuk-section-break--visible govuk-!-padding-bottom-6">
+        {% else %}
+          <p class="govuk-body">This preview needs a valid resume link. Open it from a save and exit journey with a form key and application ID.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

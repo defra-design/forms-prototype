@@ -1,0 +1,32 @@
+{% extends "layouts/main.html" %}
+
+{% block pageTitle %}
+Form submitted email – prototype
+{% endblock %}
+
+{% block head %}
+  {{ super() }}
+  {% include "titan-mvp-1.2/runner-sign-in-v2-baseline/emails/_form-submitted-email-styles.njk" %}
+{% endblock %}
+
+{% block content %}
+{% set formTitle = formName or "DxT design survey" %}
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l govuk-!-margin-top-6">
+      Form submitted{% if formTitle %} for <strong>'{{ formTitle }}'</strong>{% endif %}
+    </h1>
+
+    <p class="govuk-body">
+      <a class="govuk-link" href="/runner-sign-in-v2-baseline/all-pages">All pages</a>
+      ·
+      <a class="govuk-link" href="/titan-mvp-1.2/form-editor/advanced-settings/reuse-previous-answers">Reuse previous answers setting</a>
+      ·
+      <a class="govuk-link" href="/runner-sign-in-v2-baseline/emails/form-submitted/public?formKey={{ formKey | urlencode }}&amp;applicationId={{ applicationId | urlencode }}">Public view</a>
+    </p>
+
+    {% include "titan-mvp-1.2/runner-sign-in-v2-baseline/emails/_form-submitted-email-content.njk" %}
+  </div>
+</div>
+{% endblock %}

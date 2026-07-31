@@ -1,0 +1,52 @@
+{% extends "layouts/runner-sign-in-v2-baseline.html" %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% import "titan-mvp-1.2/runner-sign-in-v2-baseline/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}Save and exit: create a sign-in – GOV.UK{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ href: backUrl, text: "Back" }) }}
+{% endblock %}
+
+{% block header %}{{ v2.v2ServiceHeader("") }}{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% if errorSummaryList and errorSummaryList.length %}
+      {{ govukErrorSummary({ titleText: "There is a problem", errorList: errorSummaryList }) }}
+    {% endif %}
+    <span class="govuk-caption-l">Save and exit</span>
+    <h1 class="govuk-heading-l">Create a sign-in to save your progress</h1>
+    <p class="govuk-body">To continue your form later you need an email address and a mobile phone number (used only if you recover your sign-in).</p>
+    <form method="post" action="/runner-sign-in-v2-baseline/save-and-exit/without-sign-in/create-sign-in" novalidate>
+      <input type="hidden" name="formKey" value="{{ formKey }}" />
+      <input type="hidden" name="applicationId" value="{{ applicationId }}" />
+      {{ govukInput({
+        label: { text: "Email address" },
+        id: "v2-email",
+        name: "runnerSignInV2BaselineEmail",
+        type: "email",
+        autocomplete: "email",
+        spellcheck: false,
+        value: values.runnerSignInV2BaselineEmail,
+        errorMessage: { text: error.runnerSignInV2BaselineEmail } if error and error.runnerSignInV2BaselineEmail else false
+      }) }}
+      {{ govukInput({
+        label: { text: "Mobile phone number" },
+        id: "v2-mobile",
+        name: "runnerSignInV2BaselineMobile",
+        type: "tel",
+        autocomplete: "tel",
+        classes: "govuk-input--width-20",
+        value: values.runnerSignInV2BaselineMobile,
+        errorMessage: { text: error.runnerSignInV2BaselineMobile } if error and error.runnerSignInV2BaselineMobile else false
+      }) }}
+      {{ govukButton({ text: "Continue" }) }}
+    </form>
+  </div>
+</div>
+{% endblock %}

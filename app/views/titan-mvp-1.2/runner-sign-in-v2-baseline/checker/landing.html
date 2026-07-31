@@ -1,0 +1,37 @@
+{% extends "layouts/runner-sign-in-v2-baseline.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% block pageTitle %}Check someone’s form – GOV.UK{% endblock %}
+
+{% block beforeContent %}{% endblock %}
+
+{% block header %}
+  {{ govukHeader({ serviceName: formName, serviceUrl: "https://www.gov.uk/" }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% if not tokenValid %}
+      <h1 class="govuk-heading-l">This link is invalid or has expired</h1>
+      <p class="govuk-body">Ask the applicant to send the invite again.</p>
+    {% else %}
+      <h1 class="govuk-heading-l">You’ve been asked to check a form</h1>
+      {{ govukSummaryList({
+        rows: [
+          {
+            key: { text: "Form" },
+            value: { text: formName }
+          },
+          {
+            key: { text: "Requested by" },
+            value: { text: ("applicant@example.com") }
+          }
+        ]
+      }) }}
+      <p class="govuk-body">You'll need to sign in to check the form.</p>
+      {{ govukButton({ text: "Sign in", href: continueUrl }) }}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

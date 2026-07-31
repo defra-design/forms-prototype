@@ -1,0 +1,50 @@
+{% extends "layouts/runner-sign-in-v2-baseline.html" %}
+
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% import "titan-mvp-1.2/runner-sign-in-v2-baseline/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}
+{{ application.formName }} – GOV.UK
+{% endblock %}
+
+{% block header %}
+  {{ v2.v2ServiceHeader("form-start", { showServiceNav: false, serviceUrl: chooserUrl }) }}
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({
+    text: "Back",
+    href: "/runner-sign-in-v2-baseline/start-page"
+  }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-xl">{{ application.formName }}</h1>
+
+    <p class="govuk-body">
+      Use this service to complete the form.
+    </p>
+
+    {{ govukButton({
+      text: "Start now",
+      href: chooserUrl,
+      isStartButton: true
+    }) }}
+
+    {% if isSaveExitDemo or optionalSignIn %}
+      <h2 class="govuk-heading-m govuk-!-margin-top-6">Before you start</h2>
+      <p class="govuk-body">You can fill in this form without signing in. You’ll need a sign-in only if you want to save your progress and come back later.</p>
+    {% else %}
+      <h2 class="govuk-heading-m govuk-!-margin-top-6">What you’ll need</h2>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>an email address</li>
+        <li>a mobile phone number (used to recover your sign-in)</li>
+      </ul>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+

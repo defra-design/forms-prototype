@@ -1,0 +1,72 @@
+{% extends "layouts/runner-sign-in-v2-baseline.html" %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+{% import "titan-mvp-1.2/runner-sign-in-v2-baseline/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}Security – GOV.UK{% endblock %}
+
+{% block beforeContent %}{% endblock %}
+
+{% block header %}{{ v2.v2ServiceHeader("security") }}{% endblock %}
+
+{% block content %}
+{% set _email = data.runnerSignInEmail %}
+{% set _phone = data.runnerSignInPhone or "07700 900000" %}
+{% set _changeEmailUrl = "/runner-sign-in-v2-baseline/forms/" + (formKey | urlencode) + "/" + (applicationId | urlencode) + "/security/change-email/get-security-code" %}
+{% set _changePhoneUrl = "/runner-sign-in-v2-baseline/forms/" + (formKey | urlencode) + "/" + (applicationId | urlencode) + "/security/change-phone/get-security-code" %}
+{% set _deleteSignInUrl = "/runner-sign-in-v2-baseline/forms/" + (formKey | urlencode) + "/" + (applicationId | urlencode) + "/security/delete-sign-in/check-email" %}
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">Security</h1>
+
+    {% if query and query.emailChanged %}
+      {{ govukNotificationBanner({ type: "success", html: "<p class=\"govuk-notification-banner__heading\">Email address changed</p>" }) }}
+    {% endif %}
+    {% if query and query.phoneChanged %}
+      {{ govukNotificationBanner({ type: "success", html: "<p class=\"govuk-notification-banner__heading\">Mobile phone number changed</p>" }) }}
+    {% endif %}
+
+    <div class="govuk-summary-card">
+      <div class="govuk-summary-card__title-wrapper">
+        <h2 class="govuk-summary-card__title">Your sign-in details</h2>
+      </div>
+      <div class="govuk-summary-card__content">
+        {{ govukSummaryList({
+          rows: [
+            {
+              key: { text: "Email address" },
+              value: { text: _email },
+              actions: {
+                items: [
+                  { href: _changeEmailUrl, text: "Change", visuallyHiddenText: "email address" }
+                ]
+              }
+            },
+            {
+              key: { text: "Mobile phone number" },
+              value: { text: _phone },
+              actions: {
+                items: [
+                  { href: _changePhoneUrl, text: "Change", visuallyHiddenText: "mobile phone number" }
+                ]
+              }
+            }
+          ]
+        }) }}
+      </div>
+    </div>
+
+    <h2 class="govuk-heading-m govuk-!-margin-top-8">Delete your sign-in</h2>
+
+    <p class="govuk-body">
+      This will permanently delete your sign-in. You’ll no longer be able to access the forms you’ve used with it.
+    </p>
+
+    <p class="govuk-body">
+      <a class="govuk-link" href="{{ _deleteSignInUrl }}">Delete your sign-in</a>
+    </p>
+
+  </div>
+</div>
+{% endblock %}

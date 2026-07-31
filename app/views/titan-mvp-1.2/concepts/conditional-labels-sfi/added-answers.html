@@ -1,0 +1,98 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+
+{% set answerLabel = "SFI action" %}
+{% set answerLabelPlural = "SFI actions" %}
+
+{% block pageTitle %}
+You have added {{ completedEntries.length }} {% if completedEntries.length == 1 %}{{ answerLabel }}{% else %}{{ answerLabelPlural }}{% endif %} – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+{{ govukPhaseBanner({
+  tag: { text: "Concept" },
+  html: 'Prototype exploration — <a class="govuk-link" href="/titan-mvp-1.2/concepts/conditional-labels-sfi">about this journey</a>'
+}) }}
+
+{{ govukNotificationBanner({
+  titleText: "Important",
+  html: "This is a preview of a live form. Do not enter personal information."
+}) }}
+
+{{ govukBackLink({
+  text: "Back",
+  href: backHref
+}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% if error and error.continue %}
+      {{ govukErrorSummary({
+        titleText: "There is a problem",
+        errorList: [{ text: error.continue, href: "#continue-button" }]
+      }) }}
+    {% endif %}
+
+    <h1 class="govuk-heading-l">
+      You have added {{ completedEntries.length }} {% if completedEntries.length == 1 %}{{ answerLabel }}{% else %}{{ answerLabelPlural }}{% endif %}
+    </h1>
+
+    <dl class="govuk-summary-list govuk-!-margin-bottom-6">
+      {% for entry in completedEntries %}
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+          {{ entry.label }}
+        </dt>
+        <dd class="govuk-summary-list__value">
+          {{ entry.parcels }}
+        </dd>
+        <dd class="govuk-summary-list__actions">
+          <ul class="govuk-summary-list__actions-list">
+            <li class="govuk-summary-list__actions-list-item">
+              <a class="govuk-link" href="/titan-mvp-1.2/concepts/conditional-labels-sfi/operation/{{ entry.index }}?from=added-answers">
+                Change<span class="govuk-visually-hidden"> {{ entry.label }}</span>
+              </a>
+            </li>
+            <li class="govuk-summary-list__actions-list-item">
+              <button type="submit" class="govuk-link govuk-body" form="added-answers-form" name="removeCodeId" value="{{ entry.codeId }}"
+                style="background: none; border: none; padding: 0; cursor: pointer;">
+                Remove<span class="govuk-visually-hidden"> {{ entry.label }}</span>
+              </button>
+            </li>
+          </ul>
+        </dd>
+      </div>
+      {% endfor %}
+    </dl>
+
+    <form id="added-answers-form" class="form" action="/titan-mvp-1.2/concepts/conditional-labels-sfi/added-answers" method="post">
+      <div class="govuk-button-group">
+        {{ govukButton({
+          text: "Continue",
+          name: "action",
+          value: "continue",
+          attributes: { id: "continue-button" }
+        }) }}
+
+        {{ govukButton({
+          text: "Add another " ~ answerLabel,
+          name: "action",
+          value: "add-another",
+          classes: "govuk-button--secondary"
+        }) }}
+
+        {{ govukButton({
+          text: "Save and exit",
+          name: "action",
+          value: "save-exit",
+          classes: "govuk-button--secondary"
+        }) }}
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,314 @@
+{% macro journeyDocsStyles() %}
+  <style>
+    .journey-docs__path {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .journey-docs__step {
+      border: 1px solid #b1b4b6;
+      padding: 10px;
+      max-width: 170px;
+      min-height: 54px;
+      background: #ffffff;
+    }
+
+    .journey-docs__step--branch {
+      border-color: #1d70b8;
+      border-left: 5px solid #1d70b8;
+    }
+
+    .journey-docs__step--unexpected {
+      border-color: #d4351c;
+      border-left: 5px solid #d4351c;
+    }
+
+    .journey-docs__arrow {
+      font-weight: 700;
+    }
+
+    .journey-docs__section {
+      border-left: 5px solid #1d70b8;
+      padding-left: 15px;
+      margin-bottom: 10px;
+    }
+
+    .journey-docs__preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 30px;
+      margin-top: 20px;
+    }
+
+    .journey-docs__preview {
+      border-top: 1px solid #b1b4b6;
+      padding-top: 15px;
+    }
+
+    .journey-docs__frame-wrap {
+      width: 100%;
+      height: 480px;
+      overflow: auto;
+      border: 1px solid #b1b4b6;
+      background: #ffffff;
+    }
+
+    .journey-docs__frame {
+      width: 100%;
+      height: 480px;
+      border: 0;
+      display: block;
+      background: #ffffff;
+    }
+  </style>
+{% endmacro %}
+
+{% macro journeyFlowchartStyles() %}
+  <style>
+    .journey-flowchart__panel {
+      border: 1px solid #b1b4b6;
+      padding: 20px;
+      background: #ffffff;
+    }
+
+    .journey-flowchart__header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .journey-flowchart__step-count {
+      color: #505a5f;
+      font-size: 16px;
+    }
+
+    .journey-flowchart__diagram {
+      overflow-x: auto;
+      margin-top: 20px;
+      border-top: 1px solid #b1b4b6;
+      padding-top: 20px;
+    }
+
+    .journey-flowchart__svg {
+      display: block;
+      min-width: 100%;
+    }
+
+    .journey-flowchart__edge {
+      stroke: #505a5f;
+      stroke-width: 1.5;
+    }
+
+    .journey-flowchart__edge--unexpected {
+      stroke: #d4351c;
+      stroke-width: 2;
+    }
+
+    .journey-flowchart__arrow-head {
+      fill: #505a5f;
+    }
+
+    .journey-flowchart__node {
+      fill: #ffffff;
+      stroke: #b1b4b6;
+      stroke-width: 1;
+    }
+
+    .journey-flowchart__node--hub {
+      fill: #e8f0f8;
+      stroke: #1d70b8;
+      stroke-width: 2;
+    }
+
+    .journey-flowchart__node--branch {
+      fill: #f3f2f1;
+      stroke: #1d70b8;
+      stroke-width: 1;
+    }
+
+    .journey-flowchart__node--unexpected {
+      fill: #fef2f2;
+      stroke: #d4351c;
+      stroke-width: 2;
+    }
+
+    .journey-flowchart__label {
+      fill: #0b0c0c;
+      font-family: "GDS Transport", arial, sans-serif;
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    .journey-flowchart__label--link {
+      fill: #1d70b8;
+    }
+
+    .journey-flowchart__node-link {
+      cursor: pointer;
+    }
+
+    .journey-flowchart__node-link:hover .journey-flowchart__node,
+    .journey-flowchart__node-link:focus .journey-flowchart__node {
+      stroke-width: 2;
+    }
+
+    .journey-flowchart__node-link:hover .journey-flowchart__label--link,
+    .journey-flowchart__node-link:focus .journey-flowchart__label--link {
+      text-decoration: underline;
+    }
+
+    .journey-flowchart__node-link:focus {
+      outline: 3px solid #ffdd00;
+      outline-offset: 2px;
+    }
+
+    .journey-flowchart__legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .journey-flowchart__legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 16px;
+    }
+
+    .journey-flowchart__legend-swatch {
+      width: 28px;
+      height: 18px;
+      border-radius: 2px;
+      border: 1px solid #b1b4b6;
+      background: #ffffff;
+    }
+
+    .journey-flowchart__legend-swatch--hub {
+      background: #e8f0f8;
+      border-color: #1d70b8;
+    }
+
+    .journey-flowchart__legend-swatch--branch {
+      background: #f3f2f1;
+      border-color: #1d70b8;
+    }
+
+    .journey-flowchart__legend-swatch--unexpected {
+      background: #fef2f2;
+      border-color: #d4351c;
+    }
+  </style>
+{% endmacro %}
+
+{% macro journeyPath(steps) %}
+  <div class="journey-docs__path">
+    {% for step in steps %}
+      <div class="journey-docs__step{% if step.branch %} journey-docs__step--branch{% endif %}{% if step.unexpected %} journey-docs__step--unexpected{% endif %}">
+        {% if step.href %}
+          <p class="govuk-body-s govuk-!-margin-bottom-0">
+            <a class="govuk-link govuk-link--no-visited-state" href="{{ step.href }}" target="_blank" rel="noreferrer noopener">{{ step.text }}</a>
+          </p>
+        {% else %}
+          <p class="govuk-body-s govuk-!-margin-bottom-0">{{ step.text }}</p>
+        {% endif %}
+      </div>
+      {% if not loop.last %}
+        <span class="journey-docs__arrow" aria-hidden="true">→</span>
+      {% endif %}
+    {% endfor %}
+  </div>
+{% endmacro %}
+
+{% macro journeyPreviews(pages) %}
+  <div class="journey-docs__preview-grid">
+    {% for page in pages %}
+      {% set frameSrc = page.previewHref or page.href %}
+      {% set linkHref = page.href or frameSrc %}
+      <div class="journey-docs__preview">
+        {% if page.caption or page.journey %}
+          <p class="govuk-body-s govuk-!-margin-bottom-1">{{ page.caption or page.journey }}</p>
+        {% endif %}
+        <h3 class="govuk-heading-s govuk-!-margin-bottom-2">
+          <a class="govuk-link govuk-link--no-visited-state" href="{{ linkHref }}" target="_blank" rel="noreferrer noopener">{{ page.title }}</a>
+        </h3>
+        <div class="journey-docs__frame-wrap">
+          <iframe
+            class="journey-docs__frame"
+            src="{{ frameSrc }}"
+            title="{{ page.title }}"
+            loading="eager"
+          ></iframe>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endmacro %}
+
+{% macro journeyStoryFlow(flow) %}
+  <div class="govuk-!-margin-bottom-6">
+    <h3 class="govuk-heading-s">{{ flow.title }}</h3>
+    {% if flow.lines %}
+      {% for line in flow.lines %}
+        <p class="govuk-body govuk-!-margin-bottom-1"><strong>{{ line.label }}</strong> {{ line.text }}</p>
+      {% endfor %}
+    {% else %}
+      {% if flow.given %}
+        <p class="govuk-body govuk-!-margin-bottom-1"><strong>GIVEN</strong> {{ flow.given }}</p>
+      {% endif %}
+      {% if flow.when %}
+        <p class="govuk-body govuk-!-margin-bottom-1"><strong>WHEN</strong> {{ flow.when }}</p>
+      {% endif %}
+      {% if flow.then %}
+        <p class="govuk-body govuk-!-margin-bottom-1"><strong>THEN</strong> {{ flow.then }}</p>
+      {% endif %}
+    {% endif %}
+    {% if flow.errorText %}
+      <p class="govuk-body govuk-!-margin-bottom-1">Error message: <strong>{{ flow.errorText }}</strong></p>
+    {% endif %}
+    {% if flow.links %}
+      <p class="govuk-body govuk-!-margin-bottom-1">Prototype:</p>
+      <ul class="govuk-list govuk-list--bullet">
+        {% for link in flow.links %}
+          <li><a class="govuk-link" href="{{ link.href }}">{{ link.text }}</a></li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    {% if flow.notes %}
+      {% for note in flow.notes %}
+        <p class="govuk-body-s govuk-!-margin-top-2 govuk-!-margin-bottom-1">{{ note }}</p>
+      {% endfor %}
+    {% endif %}
+  </div>
+{% endmacro %}
+
+{% macro journeyStoryAdditionalAc(block) %}
+  <div class="govuk-!-margin-top-6 govuk-!-margin-bottom-6">
+    <h3 class="govuk-heading-s">{{ block.title }}</h3>
+    {% if block.intro %}
+      <p class="govuk-body">{{ block.intro }}</p>
+    {% endif %}
+    {% if block.items %}
+      <ul class="govuk-list govuk-list--bullet">
+        {% for item in block.items %}
+          <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    {% if block.links %}
+      <ul class="govuk-list govuk-list--bullet">
+        {% for link in block.links %}
+          <li><a class="govuk-link" href="{{ link.href }}">{{ link.text }}</a></li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </div>
+{% endmacro %}
+
+{% macro journeyPreviewLoaderScript() %}{% endmacro %}
