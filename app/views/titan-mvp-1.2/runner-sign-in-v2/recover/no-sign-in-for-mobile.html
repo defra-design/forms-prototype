@@ -18,14 +18,14 @@
     <span class="govuk-caption-l">Recover my sign-in</span>
     <h1 class="govuk-heading-l">We cannot find a sign-in for that mobile phone number</h1>
     <p class="govuk-body">There is no sign-in for <strong>{{ mobile }}</strong>.</p>
-    <p class="govuk-body">You'll need to create a sign-in to use this form.</p>
+    <p class="govuk-body">You'll need to sign in with your email address to use this form.</p>
 
     {{ govukInsetText({
       text: "Sign-in accounts are linked to the form you are using. A mobile phone number used for another service will not work here."
     }) }}
 
     {{ govukButton({
-      text: "Create a sign-in",
+      text: "Sign in",
       href: createSignInUrl
     }) }}
 

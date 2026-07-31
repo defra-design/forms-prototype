@@ -1,0 +1,405 @@
+{% extends "layouts/runner-sign-in-v2-baseline.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+{% from "govuk/components/tag/macro.njk" import govukTag %}
+{% import "titan-mvp-1.2/runner-sign-in-v2-baseline/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}
+Start – Runner sign-in v2 baseline – GOV.UK
+{% endblock %}
+
+{% block head %}
+  {{ super() }}
+  <style>
+    .proto-mode-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
+    }
+
+    .proto-mode-toggle {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 0;
+    }
+
+    .proto-mode-toggle__switch {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .proto-mode-toggle__input {
+      position: absolute;
+      opacity: 0;
+      width: 1px;
+      height: 1px;
+      margin: 0;
+    }
+
+    .proto-mode-toggle__track {
+      width: 44px;
+      height: 24px;
+      border-radius: 999px;
+      background: #ffffff;
+      border: 2px solid #6f777b;
+      box-sizing: border-box;
+      display: inline-flex;
+      align-items: center;
+      padding: 2px;
+      transition: background-color 120ms ease, border-color 120ms ease;
+    }
+
+    .proto-mode-toggle__thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 999px;
+      background: #6f777b;
+      transform: translateX(0);
+      transition: transform 120ms ease, background-color 120ms ease;
+    }
+
+    .proto-mode-toggle__input:checked + .proto-mode-toggle__track {
+      background: #1d70b8;
+      border-color: #1d70b8;
+    }
+
+    .proto-mode-toggle__input:checked + .proto-mode-toggle__track .proto-mode-toggle__thumb {
+      background: #ffffff;
+      transform: translateX(20px);
+    }
+
+    .proto-mode-toggle__input:focus-visible + .proto-mode-toggle__track {
+      outline: 3px solid #fd0;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 3px #0b0c0c;
+    }
+
+    .proto-mode-toggle__state {
+      font-weight: 400;
+      color: #0b0c0c;
+    }
+
+    /* Keep GOV.UK body typography but align with 24px switch */
+    .proto-mode-toggle__state.govuk-body {
+      margin: 0;
+      line-height: 24px;
+    }
+  </style>
+{% endblock %}
+
+{% block beforeContent %}{% endblock %}
+
+{% block header %}
+  {{ v2.v2ServiceHeader("start") }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-xl">Sign in to your form prototype - v2 baseline</h1>
+
+    <p class="govuk-body">
+      Frozen snapshot of the runner sign-in v2 prototype as shared with engineers.
+      Iterate on the live version at
+      <a class="govuk-link" href="/runner-sign-in-v2/start-page">runner sign-in v2</a>.
+    </p>
+    {# <p class="govuk-body">
+      Use these seeded examples to reliably test the main journeys.
+    </p> #}
+    <p class="govuk-body">
+      <a class="govuk-link" href="/runner-sign-in-v2-baseline/reset">Clear cache and reset examples</a>
+    </p>
+    <p class="govuk-body">
+      <a class="govuk-link" href="/runner-sign-in-v2-baseline/choose-journey">Choose a journey</a>
+    </p>
+    <p class="govuk-body">
+      <a class="govuk-link" href="/runner-sign-in-v2-baseline/all-pages">All pages</a>,
+      <a class="govuk-link" href="/runner-sign-in-v2-baseline/all-pages/static">All pages (static)</a>
+    </p>
+    <p class="govuk-body">
+      <a class="govuk-link" href="/runner-sign-in-v2-baseline/journeys">Review sign-in journeys</a>
+    </p>
+    <p class="govuk-body">
+      <a class="govuk-link" href="/runner-sign-in-v2-baseline/journey-flowcharts">View journey flowcharts</a>
+    </p>
+    <p class="govuk-body">
+      <a class="govuk-link" href="/runner-sign-in-v2-baseline/unexpected-journeys">Review unexpected journeys</a>
+    </p>
+    <p class="govuk-body">
+      <a class="govuk-link" href="/runner-sign-in-v2-baseline/error-messages">Validation error messages</a>
+    </p>
+    <p class="govuk-body">
+      <a class="govuk-link" href="/runner-sign-in-v2-baseline/sign-out">You have signed out</a>
+      ·
+      <a class="govuk-link" href="/runner-sign-in-v2-baseline/emails/form-submitted?formKey=volunteer-application&applicationId=app-save-exit-demo">Form submitted email</a>
+    </p>
+    <p class="govuk-body">
+      <a class="govuk-link" href="/titan-mvp-1.2/form-editor/advanced-settings">Form editor – advanced settings</a>
+    </p>
+    <div class="proto-mode-row">
+      {# <div>
+        {% if data and data.runnerSignInV2BaselinePrototypeMode %}
+          {{ govukTag({ text: "Prototype mode: on", classes: "govuk-tag--green" }) }}
+        {% else %}
+          {{ govukTag({ text: "Prototype mode: off", classes: "govuk-tag--grey" }) }}
+        {% endif %}
+      </div> #}
+
+      <div class="proto-mode-toggle" data-module="proto-mode-toggle">
+      <label class="proto-mode-toggle__switch" for="protoModeSwitch">
+        <input
+          class="proto-mode-toggle__input"
+          type="checkbox"
+          id="protoModeSwitch"
+          {% if data and data.runnerSignInV2BaselinePrototypeMode %}checked{% endif %}
+        >
+        <span class="proto-mode-toggle__track" aria-hidden="true">
+          <span class="proto-mode-toggle__thumb"></span>
+        </span>
+        <span class="proto-mode-toggle__state govuk-body" aria-hidden="true">
+          {% if data and data.runnerSignInV2BaselinePrototypeMode %}Prototype mode on{% else %}Prototype mode off{% endif %}
+        </span>
+        <span class="govuk-visually-hidden">Prototype mode</span>
+      </label>
+
+      <noscript>
+        <span class="govuk-body">
+          <a class="govuk-link" href="/runner-sign-in-v2-baseline/prototype/on">Turn on</a>
+          <span class="govuk-!-margin-left-2 govuk-!-margin-right-2">|</span>
+          <a class="govuk-link" href="/runner-sign-in-v2-baseline/prototype/off">Turn off</a>
+        </span>
+      </noscript>
+      </div>
+    </div>
+    {{ govukInsetText({
+      html: "<p class=\"govuk-body\">Prototype mode is for faster testing. When it’s <strong>on</strong>, the Manage hub will auto sign you in and time-limited review/invite links won’t expire. When it’s <strong>off</strong>, sign-in is required again and any prototype sign-in details are cleared.</p>"
+    }) }}
+
+    {# Pick one seeded example per testing scenario #}
+    {% set submittedApp = null %}
+    {% set inProgressApp = null %}
+    {% set awaitingCheckApp = null %}
+    {% set notStartedApp = null %}
+    {% for app in seedApplications %}
+      {% if (not submittedApp) and (app.hint == "Submitted") %}
+        {% set submittedApp = app %}
+      {% endif %}
+      {% if (not awaitingCheckApp) and (app.hint == "Awaiting check") %}
+        {% set awaitingCheckApp = app %}
+      {% endif %}
+      {% if (not notStartedApp) and (app.hint == "Not yet started") %}
+        {% set notStartedApp = app %}
+      {% endif %}
+      {% if (not inProgressApp) and (app.hint == "In progress") %}
+        {% set inProgressApp = app %}
+      {% endif %}
+    {% endfor %}
+
+    <h2 class="govuk-heading-m">1) Copy a form I’ve submitted previously</h2>
+    <p class="govuk-body">
+      Uses <strong>Apply to volunteer</strong> (no checker required).<br>
+      <strong>Button</strong>: opens the <strong>Manage your form</strong> hub (where you’ll see <strong>Copy</strong>).<br>
+      <strong>Link</strong>: opens the form’s <strong>start page</strong>.
+    </p>
+    <p class="govuk-body">
+      <a class="govuk-link" href="/titan-mvp-1.2/form-editor/advanced-settings/reuse-previous-answers">Reuse previous answers setting</a>
+      ·
+      <a class="govuk-link" href="/runner-sign-in-v2-baseline/emails/form-submitted?formKey=volunteer-application&applicationId=app-save-exit-demo">Form submitted email</a>
+    </p>
+    {% if copyJourneyApp %}
+      {{ govukButton({
+        text: "Form manager page (submitted example)",
+        classes: "govuk-button--secondary",
+        href: "/runner-sign-in-v2-baseline/forms/" + (copyJourneyApp.formKey | urlencode) + "/" + (copyJourneyApp.id | urlencode) + "/manage"
+      }) }}
+      <p class="govuk-body">
+        <a class="govuk-link" href="/runner-sign-in-v2-baseline/forms/{{ copyJourneyApp.formKey | urlencode }}/{{ copyJourneyApp.id | urlencode }}/start-page">Open start page</a>
+        <span class="govuk-!-margin-left-1">for {{ copyJourneyApp.formName }} — {{ copyJourneyApp.reference }}</span>
+        <span class="govuk-!-margin-left-2">{{ govukTag({ text: "Submitted", classes: "govuk-tag--green" }) }}</span>
+      </p>
+    {% else %}
+      {{ govukInsetText({ text: "No copy journey example found. Use “Clear cache and reset examples” to restore the default set." }) }}
+    {% endif %}
+
+    <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+
+    <h2 class="govuk-heading-m">2) Continue a form I’ve started but not submitted yet</h2>
+    <p class="govuk-body">
+      <strong>Button</strong>: opens the <strong>Manage your form</strong> hub (where you’ll see <strong>Continue</strong>).<br>
+      <strong>Link</strong>: opens the form’s <strong>start page</strong>.
+    </p>
+    {% if inProgressApp %}
+      {{ govukButton({
+        text: "Form manager page (in-progress example)",
+        classes: "govuk-button--secondary",
+        href: "/runner-sign-in-v2-baseline/forms/" + (inProgressApp.formKey | urlencode) + "/" + (inProgressApp.id | urlencode) + "/manage"
+      }) }}
+      <p class="govuk-body">
+        <a class="govuk-link" href="/runner-sign-in-v2-baseline/forms/{{ inProgressApp.formKey | urlencode }}/{{ inProgressApp.id | urlencode }}/start-page">Open start page</a>
+        <span class="govuk-!-margin-left-1">for {{ inProgressApp.formName }} — {{ inProgressApp.reference }}</span>
+        <span class="govuk-!-margin-left-2">{{ govukTag({ text: "In progress", classes: "govuk-tag--teal" }) }}</span>
+      </p>
+    {% else %}
+      {{ govukInsetText({ text: "No in-progress example found. Use “Reset seeded examples” to restore the default set." }) }}
+    {% endif %}
+
+    <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+
+    <h2 class="govuk-heading-m">3) Complete a form that needs to be sent to get checked</h2>
+    <p class="govuk-body">
+      <strong>Button</strong>: opens the <strong>Manage your form</strong> hub (where the checking actions live).<br>
+      <strong>Link</strong>: opens the form’s <strong>start page</strong>.
+    </p>
+    {% if awaitingCheckApp %}
+      {{ govukButton({
+        text: "Form manager page (awaiting-check example)",
+        classes: "govuk-button--secondary",
+        href: "/runner-sign-in-v2-baseline/forms/" + (awaitingCheckApp.formKey | urlencode) + "/" + (awaitingCheckApp.id | urlencode) + "/manage"
+      }) }}
+      <p class="govuk-body">
+        <a class="govuk-link" href="/runner-sign-in-v2-baseline/forms/{{ awaitingCheckApp.formKey | urlencode }}/{{ awaitingCheckApp.id | urlencode }}/start-page">Open start page</a>
+        <span class="govuk-!-margin-left-1">for {{ awaitingCheckApp.formName }} — {{ awaitingCheckApp.reference }}</span>
+        <span class="govuk-!-margin-left-2">{{ govukTag({ text: "Awaiting check", classes: "govuk-tag--yellow" }) }}</span>
+      </p>
+    {% else %}
+      {{ govukInsetText({ text: "No awaiting-check example found. Use “Reset seeded examples” to restore the default set." }) }}
+    {% endif %}
+
+    <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+
+    <h2 class="govuk-heading-m">Research preview: manage page after check</h2>
+    <p class="govuk-body">
+      Static page for participants — no sign-in or checker simulation required.
+    </p>
+    <p class="govuk-body">
+      <a class="govuk-link" href="/runner-sign-in-v2-baseline/static/manage-form-checked">Manage your form (checked)</a>
+    </p>
+
+    <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+
+    <h2 class="govuk-heading-m">4) Start a form I’ve not started or submitted before</h2>
+    <p class="govuk-body">
+      <strong>Button</strong>: opens the form’s <strong>start page</strong> (to begin).<br>
+      <strong>Link</strong>: also opens the form’s <strong>start page</strong>.
+    </p>
+    {% if notStartedApp %}
+      {{ govukButton({
+        text: "Open start page (not-started example)",
+        classes: "govuk-button--secondary",
+        href: "/runner-sign-in-v2-baseline/forms/" + (notStartedApp.formKey | urlencode) + "/" + (notStartedApp.id | urlencode) + "/start-page"
+      }) }}
+      <p class="govuk-body">
+        <a class="govuk-link" href="/runner-sign-in-v2-baseline/forms/{{ notStartedApp.formKey | urlencode }}/{{ notStartedApp.id | urlencode }}/start-page">Open start page</a>
+        <span class="govuk-!-margin-left-1">for {{ notStartedApp.formName }} — {{ notStartedApp.reference }}</span>
+        <span class="govuk-!-margin-left-2">{{ govukTag({ text: "Not yet started", classes: "govuk-tag--grey" }) }}</span>
+      </p>
+    {% else %}
+      {{ govukInsetText({ text: "No not-started example found. Use “Clear cache and reset examples” to restore the default set." }) }}
+    {% endif %}
+
+    <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+
+    <h2 class="govuk-heading-m">5) Save and exit without signing in first</h2>
+    <p class="govuk-body">
+      Uses <strong>Apply to volunteer</strong> (no checker required). Sign-in is optional until you choose <strong>Save and exit</strong>, then you’ll be asked to create a sign-in or sign in.<br>
+      <strong>Button</strong>: opens the form’s <strong>start page</strong> (signed out, fresh demo).<br>
+      <strong>Link</strong>: also opens the form’s <strong>start page</strong>. Choose <strong>Continue without signing in</strong> on the next screen.
+    </p>
+    {% if saveAndExitDemoApp %}
+      {{ govukButton({
+        text: "Open start page (save and exit demo)",
+        classes: "govuk-button--secondary",
+        href: saveAndExitDemoStartUrl
+      }) }}
+      <p class="govuk-body">
+        <a class="govuk-link" href="{{ saveAndExitDemoStartUrl }}">Open start page</a>
+        <span class="govuk-!-margin-left-1">for {{ saveAndExitDemoApp.formName }} — {{ saveAndExitDemoApp.reference }}</span>
+        <span class="govuk-!-margin-left-2">{{ govukTag({ text: "Not yet started", classes: "govuk-tag--grey" }) }}</span>
+      </p>
+    {% else %}
+      {{ govukInsetText({ text: "No save-and-exit demo found. Use “Clear cache and reset examples” to restore the default set." }) }}
+    {% endif %}
+
+    {% if formKey and applicationId %}
+      <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+      <h2 class="govuk-heading-m">Mini-journeys for this form</h2>
+      <p class="govuk-body">Form: <strong>{{ formKey }}</strong> · Reference context: <strong>{{ applicationId }}</strong></p>
+
+      <ul class="govuk-list">
+        <li class="govuk-!-margin-bottom-2">
+          {{ govukButton({
+            text: "Create a sign-in",
+            href: "/runner-sign-in-v2-baseline/create-sign-in/email?formKey=" + (formKey | urlencode) + "&applicationId=" + (applicationId | urlencode) + "&next=" + (manageUrl | urlencode)
+          }) }}
+        </li>
+        <li class="govuk-!-margin-bottom-2">
+          {{ govukButton({
+            text: "Sign in",
+            classes: "govuk-button--secondary",
+            href: "/runner-sign-in-v2-baseline/sign-in/email?formKey=" + (formKey | urlencode) + "&applicationId=" + (applicationId | urlencode) + "&next=" + (manageUrl | urlencode)
+          }) }}
+        </li>
+        <li class="govuk-!-margin-bottom-2">
+          {{ govukButton({
+            text: "Recover my sign-in",
+            classes: "govuk-button--secondary",
+            href: "/runner-sign-in-v2-baseline/recover/phone?formKey=" + (formKey | urlencode) + "&applicationId=" + (applicationId | urlencode) + "&next=" + (manageUrl | urlencode)
+          }) }}
+        </li>
+        <li class="govuk-!-margin-bottom-2">
+          {{ govukButton({
+            text: "Go to Manage your form",
+            classes: "govuk-button--secondary",
+            href: manageUrl
+          }) }}
+        </li>
+      </ul>
+    {% endif %}
+
+    {# {% set protoHtml %}
+      <p class="govuk-body">
+        This is the <strong>runner sign-in v2 baseline</strong> prototype: one start page, then modular mini-journeys (create account, sign in, recover, save and exit, get someone to check).
+      </p>
+      {{ govukInsetText({
+        html: "<p class=\"govuk-body govuk-!-margin-bottom-0\">In a full service, whether you see this page first depends on a <strong>per-form sign-in toggle</strong> (sign-in required from the start vs optional until save and exit). That toggle is <strong>not wired in this pass</strong>.</p>"
+      }) }}
+    {% endset %}
+
+    <div class="govuk-!-margin-top-8">
+      {{ govukNotificationBanner({
+        type: "information",
+        titleText: "Prototype options",
+        html: protoHtml
+      }) }} #}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script>
+    (function () {
+      var el = document.querySelector('[data-module="proto-mode-toggle"]');
+      if (!el) return;
+      var input = el.querySelector('#protoModeSwitch');
+      if (!input) return;
+
+      function redirect() {
+        var returnTo = window.location.pathname + window.location.search;
+        var base = input.checked ? '/runner-sign-in-v2-baseline/prototype/on' : '/runner-sign-in-v2-baseline/prototype/off';
+        window.location.href = base + '?returnTo=' + encodeURIComponent(returnTo);
+      }
+
+      input.addEventListener('change', redirect);
+    })();
+  </script>
+{% endblock %}

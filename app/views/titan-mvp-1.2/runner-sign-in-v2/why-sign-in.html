@@ -20,30 +20,19 @@ Sign in – form name – GOV.UK
   <div class="govuk-grid-column-two-thirds">
     <h1 class="govuk-heading-l">Sign in to use this form</h1>
 
-    <p class="govuk-body govuk-!-margin-bottom-6">You'll need an email address and a mobile phone number. If you've not used this form before, create sign-in details before you start.</p>
-
-
-    <h2 class="govuk-heading-m">New users</h2>
+    <p class="govuk-body">Sign in with your email address. We’ll send you a security code to check it’s you.</p>
+    <p class="govuk-body govuk-!-margin-bottom-6">If you have not signed in before, we’ll ask for a mobile phone number so you can recover your sign-in later.</p>
 
     {{ govukButton({
-      text: "Create sign-in details",
-      href: "/runner-sign-in-v2/create-sign-in/email?formKey=" + (formKey | urlencode) + "&applicationId=" + (applicationId | urlencode) + "&next=" + (next | urlencode)
+      text: "Sign in",
+      href: "/runner-sign-in-v2/sign-in/email?formKey=" + (formKey | urlencode) + "&applicationId=" + (applicationId | urlencode) + "&next=" + (next | urlencode)
     }) }}
-
-    <div>
-      <h2 class="govuk-heading-m">Returning users</h2>
-      {{ govukButton({
-        text: "Sign in",
-        href: "/runner-sign-in-v2/sign-in/email?formKey=" + (formKey | urlencode) + "&applicationId=" + (applicationId | urlencode) + "&next=" + (next | urlencode),
-        classes: "govuk-button--secondary"
-      }) }}
-    </div>
 {#
     {% if optionalSignIn and continueWithoutSignInUrl %}
       <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
       <h2 class="govuk-heading-m">Other ways to use this service</h2>
       <p class="govuk-body">
-        You can start filling in this form without signing in. If you want to save your progress and come back later, you’ll need to sign in or create a sign-in when you choose <strong>Save and exit</strong>.
+        You can start filling in this form without signing in. If you want to save your progress and come back later, you’ll need to sign in when you choose <strong>Save and exit</strong>.
       </p>
       <p class="govuk-body">
         <a class="govuk-link" href="{{ continueWithoutSignInUrl }}">Continue without signing in</a>
@@ -52,4 +41,3 @@ Sign in – form name – GOV.UK
   </div>
 </div>
 {% endblock %}
-

@@ -66,6 +66,17 @@ router.get("/__meta", (req, res) => {
   });
 });
 
+// View-file URLs for choose-journey render without journeyItems — use the routed page.
+router.get(
+  [
+    "/titan-mvp-1.2/runner-sign-in-v2/choose-journey",
+    "/titan-mvp-1.2/runner-sign-in-v2/choose-journey.html",
+  ],
+  function (req, res) {
+    return res.redirect(301, "/runner-sign-in-v2/choose-journey");
+  }
+);
+
 // Import and use titan-mvp-1.2 routes
 router.use("/titan-mvp-1.2", require("./routes/titan-mvp-1.2/routes.js"));
 // Also mount titan-mvp-1.2 routes at root for legacy URLs (e.g. /runner-v5/*)

@@ -12,24 +12,26 @@ const SEED = {
 // Must match RUNNER_SIGN_IN_V2_PROTOTYPE_KNOWN_RECOVER_PHONE in routes.js (07700900000).
 const PROTOTYPE_RECOVER_PHONE_DISPLAY = "07700 900 000";
 const PROTOTYPE_UNKNOWN_RECOVER_PHONE_DISPLAY = "07123 456789";
+const PROTOTYPE_EXISTING_SIGN_IN_EMAIL = "you@example.com";
+const PROTOTYPE_EXISTING_SIGN_IN_PHONE = "07700 900000";
 
 function runnerSignInV2ChooseJourneyRadioItems(selected) {
   const items = [
     {
-      value: "create",
-      text: "Create a sign-in",
+      value: "signin-new",
+      text: "Sign in (new user)",
       hint: {
-        text: "Users create a sign-in with email verification and a mobile phone number for recovery, then continue to manage their form.",
+        text: "Users enter an email we have not seen before, verify with a security code, then give a recovery mobile phone number before continuing.",
       },
-      checked: selected === "create",
+      checked: selected === "signin-new" || selected === "create",
     },
     {
-      value: "signin",
-      text: "Sign in",
+      value: "signin-existing",
+      text: "Sign in (existing account)",
       hint: {
-        text: "Users sign in with the email address they used when they created their sign-in. We send a security code to their email.",
+        text: "Users sign in with an email that already has a recovery phone number. After the security code they go straight to manage their form. Prototype email: you@example.com.",
       },
-      checked: selected === "signin",
+      checked: selected === "signin-existing" || selected === "signin",
     },
     {
       value: "credential-recovery",
@@ -43,7 +45,7 @@ function runnerSignInV2ChooseJourneyRadioItems(selected) {
       value: "credential-recovery-not-found",
       text: "Credential recovery – mobile phone number not linked to sign-in",
       hint: {
-        text: "Users enter a mobile phone number that is not linked to a sign-in for this form and are told to create a sign-in instead.",
+        text: "Users enter a mobile phone number that is not linked to a sign-in for this form and are told to sign in with email instead.",
       },
       checked: selected === "credential-recovery-not-found",
     },
@@ -59,7 +61,7 @@ function runnerSignInV2ChooseJourneyRadioItems(selected) {
       value: "save-exit-unsigned",
       text: "Save and exit (without signing in first)",
       hint: {
-        text: "Users fill in a form without signing in, then create a sign-in when they choose Save and exit. They sign in later using the link in their email.",
+        text: "Users fill in a form without signing in, then sign in when they choose Save and exit. New users also give a recovery phone number. They continue later using the link in their email.",
       },
       checked: selected === "save-exit-unsigned",
     },
@@ -132,8 +134,10 @@ function runnerSignInV2ChooseJourneyRedirect(
 
   switch (journeyId) {
     case "create":
+    case "signin-new":
       return formStart(SEED.notStarted.formKey, SEED.notStarted.applicationId);
     case "signin":
+    case "signin-existing":
       return formStart(SEED.inProgress.formKey, SEED.inProgress.applicationId);
     case "credential-recovery-not-found":
       return "/runner-sign-in-v2/static/recover-no-sign-in-for-mobile";
@@ -174,16 +178,31 @@ function runnerSignInV2ChooseJourneyRedirect(
 }
 
 function runnerSignInV2PrepareChooseJourneySession(req, journeyId, helpers) {
-  const { clearAuth, signIn, prepareSaveAndExitDemo, setFocus, seedRecoverPhone, seedRecoverPhoneNotFound } = helpers;
+  const {
+    clearAuth,
+    signIn,
+    prepareSaveAndExitDemo,
+    setFocus,
+    seedRecoverPhone,
+    seedRecoverPhoneNotFound,
+    seedExistingAccount,
+  } = helpers;
 
   switch (journeyId) {
     case "create":
-    case "signin":
+    case "signin-new":
     case "recover":
     case "save-exit-unsigned":
       clearAuth();
       if (journeyId === "save-exit-unsigned") {
         prepareSaveAndExitDemo();
+      }
+      return;
+    case "signin":
+    case "signin-existing":
+      clearAuth();
+      if (typeof seedExistingAccount === "function") {
+        seedExistingAccount(PROTOTYPE_EXISTING_SIGN_IN_EMAIL, PROTOTYPE_EXISTING_SIGN_IN_PHONE);
       }
       return;
     case "credential-recovery":
@@ -225,6 +244,8 @@ function runnerSignInV2PrepareChooseJourneySession(req, journeyId, helpers) {
 module.exports = {
   SEED,
   PROTOTYPE_RECOVER_PHONE_DISPLAY,
+  PROTOTYPE_EXISTING_SIGN_IN_EMAIL,
+  PROTOTYPE_EXISTING_SIGN_IN_PHONE,
   runnerSignInV2ChooseJourneyRadioItems,
   runnerSignInV2ChooseJourneyRedirect,
   runnerSignInV2PrepareChooseJourneySession,

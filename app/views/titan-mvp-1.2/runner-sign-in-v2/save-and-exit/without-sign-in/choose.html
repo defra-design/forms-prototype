@@ -19,24 +19,13 @@
     <h1 class="govuk-heading-l">Sign in to save your progress</h1>
 
     <p class="govuk-body">You need to sign in to save your progress for 28 days.</p>
-
-    <p class="govuk-body govuk-!-margin-bottom-6">You'll need an email address and a mobile phone number. If you've not used this form before, create sign-in details before you start.</p>
-
-    <h2 class="govuk-heading-m">New users</h2>
+    <p class="govuk-body">Sign in with your email address. We’ll send you a security code to check it’s you.</p>
+    <p class="govuk-body govuk-!-margin-bottom-6">If you have not signed in before, we’ll ask for a mobile phone number so you can recover your sign-in later.</p>
 
     {{ govukButton({
-      text: "Create sign-in details",
-      href: createSignInUrl
+      text: "Sign in",
+      href: signInUrl
     }) }}
-
-    <div>
-      <h2 class="govuk-heading-m">Returning users</h2>
-      {{ govukButton({
-        text: "Sign in",
-        href: signInUrl,
-        classes: "govuk-button--secondary"
-      }) }}
-    </div>
   </div>
 </div>
 {% endblock %}

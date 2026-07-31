@@ -1,6 +1,7 @@
 {% extends "layouts/runner-sign-in-v2.html" %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
 {% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
 
 {% block pageTitle %}
@@ -34,24 +35,13 @@ Sign in to check this form – GOV.UK
     }) }}
 
     <p class="govuk-body">You need to sign in so we can confirm who you are before you see the applicant’s answers.</p>
-
-    <p class="govuk-body govuk-!-margin-bottom-6">You'll need an email address and a mobile phone number. If you've not used this form before, create sign-in details before you start.</p>
-
-    <h2 class="govuk-heading-m">New users</h2>
+    <p class="govuk-body">Sign in with your email address. We’ll send you a security code to check it’s you.</p>
+    <p class="govuk-body govuk-!-margin-bottom-6">If you have not signed in before, we’ll ask for a mobile phone number so you can recover your sign-in later.</p>
 
     {{ govukButton({
-      text: "Create sign-in details",
-      href: "/runner-sign-in-v2/create-sign-in/email?formKey=" + (formKey | urlencode) + "&applicationId=" + (applicationId | urlencode) + "&next=" + (next | urlencode)
+      text: "Sign in",
+      href: "/runner-sign-in-v2/sign-in/email?formKey=" + (formKey | urlencode) + "&applicationId=" + (applicationId | urlencode) + "&next=" + (next | urlencode)
     }) }}
-
-    <div>
-      <h2 class="govuk-heading-m">Returning users</h2>
-      {{ govukButton({
-        text: "Sign in",
-        href: "/runner-sign-in-v2/sign-in/email?formKey=" + (formKey | urlencode) + "&applicationId=" + (applicationId | urlencode) + "&next=" + (next | urlencode),
-        classes: "govuk-button--secondary"
-      }) }}
-    </div>
   </div>
 </div>
 {% endblock %}

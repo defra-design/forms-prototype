@@ -34,7 +34,7 @@
       <p class="govuk-body">Check your spam folder if you have not received an email after a few minutes.</p>
 
       <p class="govuk-body">
-        <a class="govuk-link" href="/runner-sign-in-v2/emails/save-and-exit?variant=without-sign-in&amp;formKey={{ formKey | urlencode }}&amp;applicationId={{ applicationId | urlencode }}">View the email (prototype only)</a>
+        <a class="govuk-link" href="/runner-sign-in-v2/emails/save-and-exit?variant={{ emailVariant or 'without-sign-in' }}&amp;formKey={{ formKey | urlencode }}&amp;applicationId={{ applicationId | urlencode }}">View the email (prototype only)</a>
       </p>
 
       {{ govukButton({
