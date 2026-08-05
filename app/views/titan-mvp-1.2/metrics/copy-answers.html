@@ -69,9 +69,6 @@ Defra Form Designer metrics                </h1>
     text: "Sign-in",
     href: "/titan-mvp-1.2/metrics/sign-in"
   },   {
-    text: "Save and exit",
-    href: "/titan-mvp-1.2/metrics/save-and-exit"
-  },   {
     text: "Copy answers",
     href: "/titan-mvp-1.2/metrics/copy-answers",
     active: true
@@ -92,7 +89,7 @@ Defra Form Designer metrics                </h1>
 
 <div class="govuk-!-margin-bottom-0">
     <div class="govuk-grid-row">
-    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-desktop">
+    <div class="govuk-grid-column-one-half">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
           {{ metricLabel('Forms with copy answers enabled', 'Total number of forms that have copy answers enabled.', 'metric-tip-copy-answers-enabled-7d') }}
@@ -108,7 +105,7 @@ Defra Form Designer metrics                </h1>
         <p class="govuk-body-xs app-metric-caption">3 more forms enabled this week</p>
       </div>
     </div>
-    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-desktop">
+    <div class="govuk-grid-column-one-half">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
           {{ metricLabel('Submissions using copy answers', 'Total number of submissions based on copy answers.', 'metric-tip-copy-answers-submissions-7d') }}
@@ -124,22 +121,6 @@ Defra Form Designer metrics                </h1>
         <p class="govuk-body-xs app-metric-caption">Strong uptake of copy answers</p>
       </div>
     </div>
-    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-desktop">
-      <div class="app-metric-tile">
-        <div class="gem-c-big-number">
-          {{ metricLabel('Average time to copy submission', 'Average time from initial form submission to copy submission, in days.', 'metric-tip-copy-answers-avg-time-7d') }}
-          <span class="gem-c-big-number__value">12<span class="app-big-number-unit"> days</span></span>
-        </div>
-        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-          {{ govukTag({
-            text: "–7.7%",
-            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-down",
-            attributes: { "aria-label": "Average time to copy submission decreased by 7.7% compared to the previous 7 days." }
-          }) }}
-        </div>
-        <p class="govuk-body-xs app-metric-caption">From initial submission to copy submission</p>
-      </div>
-    </div>
   </div>
 </div>
 {% endset %}
@@ -153,7 +134,7 @@ Defra Form Designer metrics                </h1>
 
 <div class="govuk-!-margin-bottom-0">
     <div class="govuk-grid-row">
-    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-desktop">
+    <div class="govuk-grid-column-one-half">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
           {{ metricLabel('Forms with copy answers enabled', 'Total number of forms that have copy answers enabled.', 'metric-tip-copy-answers-enabled-30d') }}
@@ -165,7 +146,7 @@ Defra Form Designer metrics                </h1>
         <p class="govuk-body-xs app-metric-caption">8 more forms enabled this month</p>
       </div>
     </div>
-    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-desktop">
+    <div class="govuk-grid-column-one-half">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
           {{ metricLabel('Submissions using copy answers', 'Total number of submissions based on copy answers.', 'metric-tip-copy-answers-submissions-30d') }}
@@ -175,18 +156,6 @@ Defra Form Designer metrics                </h1>
           {{ govukTag({ text: "+15.3%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Submissions using copy answers increased by 15.3%." } }) }}
         </div>
         <p class="govuk-body-xs app-metric-caption">Strong uptake of copy answers</p>
-      </div>
-    </div>
-    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-desktop">
-      <div class="app-metric-tile">
-        <div class="gem-c-big-number">
-          {{ metricLabel('Average time to copy submission', 'Average time from initial form submission to copy submission, in days.', 'metric-tip-copy-answers-avg-time-30d') }}
-          <span class="gem-c-big-number__value">12<span class="app-big-number-unit"> days</span></span>
-        </div>
-        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-          {{ govukTag({ text: "–7.7%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-down", attributes: { "aria-label": "Average time to copy submission decreased by 7.7%." } }) }}
-        </div>
-        <p class="govuk-body-xs app-metric-caption">From initial submission to copy submission</p>
       </div>
     </div>
   </div>
@@ -202,7 +171,7 @@ Defra Form Designer metrics                </h1>
 
 <div class="govuk-!-margin-bottom-0">
     <div class="govuk-grid-row">
-    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-desktop">
+    <div class="govuk-grid-column-one-half">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
           {{ metricLabel('Forms with copy answers enabled', 'Total number of forms that have copy answers enabled.', 'metric-tip-copy-answers-enabled-all') }}
@@ -214,7 +183,7 @@ Defra Form Designer metrics                </h1>
         <p class="govuk-body-xs app-metric-caption">Nearly double last year’s enabled forms</p>
       </div>
     </div>
-    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-desktop">
+    <div class="govuk-grid-column-one-half">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
           {{ metricLabel('Submissions using copy answers', 'Total number of submissions based on copy answers.', 'metric-tip-copy-answers-submissions-all') }}
@@ -224,18 +193,6 @@ Defra Form Designer metrics                </h1>
           {{ govukTag({ text: "+47.3%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Submissions using copy answers increased by 47.3%." } }) }}
         </div>
         <p class="govuk-body-xs app-metric-caption">Strong uptake of copy answers</p>
-      </div>
-    </div>
-    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-desktop">
-      <div class="app-metric-tile">
-        <div class="gem-c-big-number">
-          {{ metricLabel('Average time to copy submission', 'Average time from initial form submission to copy submission, in days.', 'metric-tip-copy-answers-avg-time-all') }}
-          <span class="gem-c-big-number__value">12<span class="app-big-number-unit"> days</span></span>
-        </div>
-        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-          {{ govukTag({ text: "–14.3%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-down", attributes: { "aria-label": "Average time to copy submission decreased by 14.3%." } }) }}
-        </div>
-        <p class="govuk-body-xs app-metric-caption">From initial submission to copy submission</p>
       </div>
     </div>
   </div>
