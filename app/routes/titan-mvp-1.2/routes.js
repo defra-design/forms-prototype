@@ -9406,6 +9406,26 @@ router.get("/titan-mvp-1.2/metrics/v7", function (req, res) {
   res.render("titan-mvp-1.2/metrics/v7");
 });
 
+router.get("/titan-mvp-1.2/metrics/component-usage", function (req, res) {
+  res.render("titan-mvp-1.2/metrics/component-usage");
+});
+
+router.get("/titan-mvp-1.2/metrics/sign-in", function (req, res) {
+  res.render("titan-mvp-1.2/metrics/sign-in");
+});
+
+router.get("/titan-mvp-1.2/metrics/save-and-exit", function (req, res) {
+  res.render("titan-mvp-1.2/metrics/save-and-exit");
+});
+
+router.get("/titan-mvp-1.2/metrics/copy-answers", function (req, res) {
+  res.render("titan-mvp-1.2/metrics/copy-answers");
+});
+
+router.get("/titan-mvp-1.2/metrics/3rd-party-review", function (req, res) {
+  res.render("titan-mvp-1.2/metrics/3rd-party-review");
+});
+
 router.get("/titan-mvp-1.2/metrics/v8", function (req, res) {
   res.render("titan-mvp-1.2/metrics/v8");
 });

@@ -71,9 +71,6 @@ Defra Form Designer metrics                </h1>
     href: "/titan-mvp-1.2/metrics/sign-in",
     active: true
   },   {
-    text: "Save and exit",
-    href: "/titan-mvp-1.2/metrics/save-and-exit"
-  },   {
     text: "Copy answers",
     href: "/titan-mvp-1.2/metrics/copy-answers"
   },   {
@@ -87,137 +84,103 @@ Defra Form Designer metrics                </h1>
 {% set sevenDaysContent %}
 <div class="govuk-!-margin-bottom-6">
   <span class="govuk-caption-m">18 November 2024 to 24 November 2024</span>
-  <h2 class="govuk-heading-l govuk-!-margin-bottom-1">Service metrics</h2>
-  <p class="govuk-body">Monitor registrations, sign-ins and account activity across Defra Forms.</p>
+  <h2 class="govuk-heading-l govuk-!-margin-bottom-1">Last 7 days</h2>
+  <p class="govuk-body">Monitor registrations, sign-ins, account updates and recovery across Defra Forms.</p>
 </div>
 
-<!-- Summary KPI row -->
-<div class="govuk-grid-row app-kpi-row govuk-!-margin-bottom-6">
-  <div class="govuk-grid-column-one-half govuk-grid-column-one-fifth-from-desktop">
-    <div class="app-metric-tile app-metric-tile--summary">
-      <div class="gem-c-big-number">
-        {{ metricLabel('Registrations', 'Total number of new Defra sign-in account registrations.', 'metric-tip-registrations-7d') }}
-        <span class="gem-c-big-number__value">384</span>
-      </div>
-      <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-        {{ govukTag({
-          text: "+12.3%",
-          classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
-          attributes: { "aria-label": "Registrations increased by 12.3% compared to the previous 7 days." }
-        }) }}
-      </div>
-      <p class="govuk-body-xs app-metric-caption">42 more than last week</p>
-    </div>
-  </div>
-  <div class="govuk-grid-column-one-half govuk-grid-column-one-fifth-from-desktop">
-    <div class="app-metric-tile app-metric-tile--summary">
-      <div class="gem-c-big-number">
-        {{ metricLabel('Sign-ins', 'Total number of successful authentications (sign-ins) to Defra Forms.', 'metric-tip-sign-ins-7d') }}
-        <span class="gem-c-big-number__value">8,942</span>
-      </div>
-      <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-        {{ govukTag({
-          text: "+7.3%",
-          classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
-          attributes: { "aria-label": "Sign-ins increased by 7.3% compared to the previous 7 days." }
-        }) }}
-      </div>
-      <p class="govuk-body-xs app-metric-caption">612 more than last week</p>
-    </div>
-  </div>
-  <div class="govuk-grid-column-one-half govuk-grid-column-one-fifth-from-desktop">
-    <div class="app-metric-tile app-metric-tile--summary">
-      <div class="gem-c-big-number">
-        {{ metricLabel('Account updates', 'Combined total of email address and phone number updates.', 'metric-tip-account-updates-7d') }}
-        <span class="gem-c-big-number__value">116</span>
-      </div>
-      <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-        {{ govukTag({
-          text: "+14.9%",
-          classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
-          attributes: { "aria-label": "Account updates increased by 14.9% compared to the previous 7 days." }
-        }) }}
-      </div>
-      <p class="govuk-body-xs app-metric-caption">15 more than last week</p>
-    </div>
-  </div>
-  <div class="govuk-grid-column-one-half govuk-grid-column-one-fifth-from-desktop">
-    <div class="app-metric-tile app-metric-tile--summary">
-      <div class="gem-c-big-number">
-        {{ metricLabel('Account recovery', 'Total number of completed forgotten details journeys from start to finish.', 'metric-tip-account-recovery-7d') }}
-        <span class="gem-c-big-number__value">126</span>
-      </div>
-      <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-        {{ govukTag({
-          text: "+6.8%",
-          classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
-          attributes: { "aria-label": "Account recovery increased by 6.8% compared to the previous 7 days." }
-        }) }}
-      </div>
-      <p class="govuk-body-xs app-metric-caption">8 more than last week</p>
-    </div>
-  </div>
-  <div class="govuk-grid-column-one-half govuk-grid-column-one-fifth-from-desktop">
-    <div class="app-metric-tile app-metric-tile--summary">
-      <div class="gem-c-big-number">
-        {{ metricLabel('Account deletions', 'Total number of Defra sign-in accounts deleted by users.', 'metric-tip-account-deletions-7d') }}
-        <span class="gem-c-big-number__value">18</span>
-      </div>
-      <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-        {{ govukTag({
-          text: "–10.0%",
-          classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-down",
-          attributes: { "aria-label": "Account deletions decreased by 10.0% compared to the previous 7 days." }
-        }) }}
-      </div>
-      <p class="govuk-body-xs app-metric-caption">2 fewer than last week</p>
-    </div>
-  </div>
-</div>
-
-<!-- Key insights and service issues -->
-<div class="app-insights-row govuk-!-margin-bottom-8">
-  <div class="app-insights-row__column">
-    <h2 class="govuk-heading-m">Key insights</h2>
-    <div class="app-side-panel app-side-panel--insights">
-      <ul class="govuk-list govuk-!-margin-bottom-0">
-        <li class="app-insights-panel__item"><strong>Registrations</strong> up 12.3% week-on-week</li>
-        <li class="app-insights-panel__item"><strong>Sign-ins</strong> increased by 612</li>
-        <li class="app-insights-panel__item"><strong>Account deletions</strong> reduced by 10.0%</li>
-        <li class="app-insights-panel__item app-insights-panel__item--warning"><strong>Mobile number not associated</strong> up 17.2% — may warrant investigation</li>
-      </ul>
-    </div>
-  </div>
-  <div class="app-insights-row__column">
-    <h2 class="govuk-heading-m">Service issues</h2>
-    <div class="app-side-panel app-side-panel--issues">
-      <p class="govuk-body govuk-!-margin-bottom-4">Metrics that may indicate friction in the sign-in journey.</p>
-      <div class="app-side-panel__stat">
-        <p class="app-side-panel__label">
-          {{ metricLabel('Mobile number not associated with account', 'Number of times a user could not continue because no mobile number was associated with their account, during recovery or email update journeys.', 'metric-tip-mobile-number-not-associated-with-account-7d') }}
-        </p>
-        <p class="app-side-panel__value-row">
-          <span class="app-side-panel__value">55</span>
+<!-- Registration -->
+<div class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Registration</h2>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Total registrations', 'Total number of registrations.', 'metric-tip-registrations-7d') }}
+          <span class="gem-c-big-number__value">384</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
           {{ govukTag({
-            text: "+16.9%",
-            classes: "govuk-tag--red app-tag-with-icon app-tag-arrow-up",
-            attributes: { "aria-label": "Mobile number not associated increased by 16.9% compared to the previous 7 days." }
+            text: "+12.3%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Registrations increased by 12.3% compared to the previous 7 days." }
           }) }}
-        </p>
-        <p class="govuk-body-xs app-metric-caption govuk-!-margin-bottom-0">34 during recovery · 21 during email updates</p>
+        </div>
+        <p class="govuk-body-xs app-metric-caption">42 more than last week</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Sign in -->
+<div class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Sign in</h2>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Successful authentications', 'Total number of successful authentications (sign-ins).', 'metric-tip-successful-auths-7d') }}
+          <span class="gem-c-big-number__value">8,942</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+7.3%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Successful authentications increased by 7.3% compared to the previous 7 days." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">612 more than last week</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+<div class="gem-c-big-number">
+          {{ metricLabel('Unsuccessful authentications', 'Total number of unsuccessful authentications (sign-ins).', 'metric-tip-unsuccessful-auths-7d') }}
+          <span class="gem-c-big-number__value">412</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+9.1%",
+            classes: "govuk-tag--red app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Unsuccessful authentications increased by 9.1% compared to the previous 7 days." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">34 more than last week</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Account deletion -->
+<div class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Account deletion</h2>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Account deletions', 'Total number of account deletions.', 'metric-tip-account-deletions-7d') }}
+          <span class="gem-c-big-number__value">18</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "–10.0%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-down",
+            attributes: { "aria-label": "Account deletions decreased by 10.0% compared to the previous 7 days." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">2 fewer than last week</p>
       </div>
     </div>
   </div>
 </div>
 
 <!-- Updating details -->
-<div class="govuk-!-margin-bottom-0">
+<div class="govuk-!-margin-bottom-8">
   <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Updating details</h2>
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-one-half">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
-          {{ metricLabel('Email address updates', 'Total number of times users updated the email address on their account.', 'metric-tip-email-address-updates-7d') }}
+          {{ metricLabel('Email address updates', 'Total number of email address updates.', 'metric-tip-email-updates-7d') }}
           <span class="gem-c-big-number__value">67</span>
         </div>
         <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
@@ -233,7 +196,7 @@ Defra Form Designer metrics                </h1>
     <div class="govuk-grid-column-one-half">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
-          {{ metricLabel('Phone number updates', 'Total number of times users updated the phone number on their account.', 'metric-tip-phone-number-updates-7d') }}
+          {{ metricLabel('Phone number updates', 'Total number of phone number updates.', 'metric-tip-phone-updates-7d') }}
           <span class="gem-c-big-number__value">49</span>
         </div>
         <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
@@ -249,119 +212,154 @@ Defra Form Designer metrics                </h1>
   </div>
 </div>
 
+<!-- Recovery -->
+<div class="govuk-!-margin-bottom-0">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Recovery</h2>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Forgotten details journeys', 'Total number of forgotten details journeys (end to end).', 'metric-tip-forgotten-details-7d') }}
+          <span class="gem-c-big-number__value">126</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+6.8%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Forgotten details journeys increased by 6.8% compared to the previous 7 days." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">8 more completed journeys than last week</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+<div class="gem-c-big-number">
+          {{ metricLabel('Mobile number not associated with account', 'Total number of instances where mobile number is not associated with the account.', 'metric-tip-mobile-not-associated-7d') }}
+          <span class="gem-c-big-number__value">55</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+16.9%",
+            classes: "govuk-tag--red app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Mobile number not associated increased by 16.9% compared to the previous 7 days." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">34 during recovery · 21 during email updates</p>
+      </div>
+    </div>
+  </div>
+</div>
 {% endset %}
 
 {% set thirtyDaysContent %}
 <div class="govuk-!-margin-bottom-6">
   <span class="govuk-caption-m">25 October 2024 to 24 November 2024</span>
-  <h2 class="govuk-heading-l govuk-!-margin-bottom-1">Service metrics</h2>
-  <p class="govuk-body">Monitor registrations, sign-ins and account activity across Defra Forms.</p>
+  <h2 class="govuk-heading-l govuk-!-margin-bottom-1">Last 30 days</h2>
+  <p class="govuk-body">Monitor registrations, sign-ins, account updates and recovery across Defra Forms.</p>
 </div>
 
-<div class="govuk-grid-row app-kpi-row govuk-!-margin-bottom-6">
-  <div class="govuk-grid-column-one-half govuk-grid-column-one-fifth-from-desktop">
-    <div class="app-metric-tile app-metric-tile--summary">
-      <div class="gem-c-big-number">
-        {{ metricLabel('Registrations', 'Total number of new Defra sign-in account registrations.', 'metric-tip-registrations-30d') }}
-        <span class="gem-c-big-number__value">1,562</span>
-      </div>
-      <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-        {{ govukTag({ text: "+12.9%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Registrations increased by 12.9%." } }) }}
-      </div>
-      <p class="govuk-body-xs app-metric-caption">178 more than last month</p>
-    </div>
-  </div>
-  <div class="govuk-grid-column-one-half govuk-grid-column-one-fifth-from-desktop">
-    <div class="app-metric-tile app-metric-tile--summary">
-      <div class="gem-c-big-number">
-        {{ metricLabel('Sign-ins', 'Total number of successful authentications (sign-ins) to Defra Forms.', 'metric-tip-sign-ins-30d') }}
-        <span class="gem-c-big-number__value">36,840</span>
-      </div>
-      <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-        {{ govukTag({ text: "+7.0%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Sign-ins increased by 7.0%." } }) }}
-      </div>
-      <p class="govuk-body-xs app-metric-caption">2,410 more than last month</p>
-    </div>
-  </div>
-  <div class="govuk-grid-column-one-half govuk-grid-column-one-fifth-from-desktop">
-    <div class="app-metric-tile app-metric-tile--summary">
-      <div class="gem-c-big-number">
-        {{ metricLabel('Account updates', 'Combined total of email address and phone number updates.', 'metric-tip-account-updates-30d') }}
-        <span class="gem-c-big-number__value">479</span>
-      </div>
-      <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-        {{ govukTag({ text: "+14.3%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Account updates increased by 14.3%." } }) }}
-      </div>
-      <p class="govuk-body-xs app-metric-caption">60 more than last month</p>
-    </div>
-  </div>
-  <div class="govuk-grid-column-one-half govuk-grid-column-one-fifth-from-desktop">
-    <div class="app-metric-tile app-metric-tile--summary">
-      <div class="gem-c-big-number">
-        {{ metricLabel('Account recovery', 'Total number of completed forgotten details journeys from start to finish.', 'metric-tip-account-recovery-30d') }}
-        <span class="gem-c-big-number__value">512</span>
-      </div>
-      <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-        {{ govukTag({ text: "+7.1%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Account recovery increased by 7.1%." } }) }}
-      </div>
-      <p class="govuk-body-xs app-metric-caption">34 more than last month</p>
-    </div>
-  </div>
-  <div class="govuk-grid-column-one-half govuk-grid-column-one-fifth-from-desktop">
-    <div class="app-metric-tile app-metric-tile--summary">
-      <div class="gem-c-big-number">
-        {{ metricLabel('Account deletions', 'Total number of Defra sign-in accounts deleted by users.', 'metric-tip-account-deletions-30d') }}
-        <span class="gem-c-big-number__value">74</span>
-      </div>
-      <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-        {{ govukTag({ text: "–9.8%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-down", attributes: { "aria-label": "Account deletions decreased by 9.8%." } }) }}
-      </div>
-      <p class="govuk-body-xs app-metric-caption">8 fewer than last month</p>
-    </div>
-  </div>
-</div>
-
-<div class="app-insights-row govuk-!-margin-bottom-8">
-  <div class="app-insights-row__column">
-    <h2 class="govuk-heading-m">Key insights</h2>
-    <div class="app-side-panel app-side-panel--insights">
-      <ul class="govuk-list govuk-!-margin-bottom-0">
-        <li class="app-insights-panel__item"><strong>Registrations</strong> up 12.9% month-on-month</li>
-        <li class="app-insights-panel__item"><strong>Sign-ins</strong> increased by 2,410</li>
-        <li class="app-insights-panel__item"><strong>Account deletions</strong> reduced by 9.8%</li>
-        <li class="app-insights-panel__item app-insights-panel__item--warning"><strong>Mobile number not associated</strong> up 14.3% — may warrant investigation</li>
-      </ul>
-    </div>
-  </div>
-  <div class="app-insights-row__column">
-    <h2 class="govuk-heading-m">Service issues</h2>
-    <div class="app-side-panel app-side-panel--issues">
-      <p class="govuk-body govuk-!-margin-bottom-4">Metrics that may indicate friction in the sign-in journey.</p>
-      <div class="app-side-panel__stat">
-        <p class="app-side-panel__label">
-          {{ metricLabel('Mobile number not associated with account', 'Number of times a user could not continue because no mobile number was associated with their account, during recovery or email update journeys.', 'metric-tip-mobile-number-not-associated-with-account-30d') }}
-        </p>
-        <p class="app-side-panel__value-row">
-          <span class="app-side-panel__value">231</span>
-          {{ govukTag({ text: "+14.3%", classes: "govuk-tag--red app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Mobile number not associated increased by 14.3%." } }) }}
-        </p>
-        <p class="govuk-body-xs app-metric-caption govuk-!-margin-bottom-0">142 during recovery · 89 during email updates</p>
+<!-- Registration -->
+<div class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Registration</h2>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Total registrations', 'Total number of registrations.', 'metric-tip-registrations-30d') }}
+          <span class="gem-c-big-number__value">1,562</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+12.9%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Registrations increased by 12.9% compared to the previous 30 days." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">178 more than last month</p>
       </div>
     </div>
   </div>
 </div>
 
-<div class="govuk-!-margin-bottom-0">
+<!-- Sign in -->
+<div class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Sign in</h2>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Successful authentications', 'Total number of successful authentications (sign-ins).', 'metric-tip-successful-auths-30d') }}
+          <span class="gem-c-big-number__value">36,840</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+7.0%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Successful authentications increased by 7.0% compared to the previous 30 days." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">2,410 more than last month</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+<div class="gem-c-big-number">
+          {{ metricLabel('Unsuccessful authentications', 'Total number of unsuccessful authentications (sign-ins).', 'metric-tip-unsuccessful-auths-30d') }}
+          <span class="gem-c-big-number__value">1,684</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+8.4%",
+            classes: "govuk-tag--red app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Unsuccessful authentications increased by 8.4% compared to the previous 30 days." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">130 more than last month</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Account deletion -->
+<div class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Account deletion</h2>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Account deletions', 'Total number of account deletions.', 'metric-tip-account-deletions-30d') }}
+          <span class="gem-c-big-number__value">74</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "–9.8%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-down",
+            attributes: { "aria-label": "Account deletions decreased by 9.8% compared to the previous 30 days." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">8 fewer than last month</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Updating details -->
+<div class="govuk-!-margin-bottom-8">
   <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Updating details</h2>
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-one-half">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
-          {{ metricLabel('Email address updates', 'Total number of times users updated the email address on their account.', 'metric-tip-email-address-updates-30d') }}
+          {{ metricLabel('Email address updates', 'Total number of email address updates.', 'metric-tip-email-updates-30d') }}
           <span class="gem-c-big-number__value">278</span>
         </div>
         <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-          {{ govukTag({ text: "+14.9%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Email updates increased by 14.9%." } }) }}
+          {{ govukTag({
+            text: "+14.9%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Email address updates increased by 14.9% compared to the previous 30 days." }
+          }) }}
         </div>
         <p class="govuk-body-xs app-metric-caption">36 more than last month</p>
       </div>
@@ -369,11 +367,15 @@ Defra Form Designer metrics                </h1>
     <div class="govuk-grid-column-one-half">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
-          {{ metricLabel('Phone number updates', 'Total number of times users updated the phone number on their account.', 'metric-tip-phone-number-updates-30d') }}
+          {{ metricLabel('Phone number updates', 'Total number of phone number updates.', 'metric-tip-phone-updates-30d') }}
           <span class="gem-c-big-number__value">201</span>
         </div>
         <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-          {{ govukTag({ text: "+13.6%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Phone updates increased by 13.6%." } }) }}
+          {{ govukTag({
+            text: "+13.6%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Phone number updates increased by 13.6% compared to the previous 30 days." }
+          }) }}
         </div>
         <p class="govuk-body-xs app-metric-caption">24 more than last month</p>
       </div>
@@ -381,119 +383,154 @@ Defra Form Designer metrics                </h1>
   </div>
 </div>
 
+<!-- Recovery -->
+<div class="govuk-!-margin-bottom-0">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Recovery</h2>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Forgotten details journeys', 'Total number of forgotten details journeys (end to end).', 'metric-tip-forgotten-details-30d') }}
+          <span class="gem-c-big-number__value">512</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+7.1%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Forgotten details journeys increased by 7.1% compared to the previous 30 days." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">34 more completed journeys than last month</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+<div class="gem-c-big-number">
+          {{ metricLabel('Mobile number not associated with account', 'Total number of instances where mobile number is not associated with the account.', 'metric-tip-mobile-not-associated-30d') }}
+          <span class="gem-c-big-number__value">231</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+14.3%",
+            classes: "govuk-tag--red app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Mobile number not associated increased by 14.3% compared to the previous 30 days." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">142 during recovery · 89 during email updates</p>
+      </div>
+    </div>
+  </div>
+</div>
 {% endset %}
 
 {% set allTimeContent %}
 <div class="govuk-!-margin-bottom-6">
   <span class="govuk-caption-m">Since launch</span>
-  <h2 class="govuk-heading-l govuk-!-margin-bottom-1">Service metrics</h2>
-  <p class="govuk-body">Monitor registrations, sign-ins and account activity across Defra Forms.</p>
+  <h2 class="govuk-heading-l govuk-!-margin-bottom-1">All time</h2>
+  <p class="govuk-body">Monitor registrations, sign-ins, account updates and recovery across Defra Forms.</p>
 </div>
 
-<div class="govuk-grid-row app-kpi-row govuk-!-margin-bottom-6">
-  <div class="govuk-grid-column-one-half govuk-grid-column-one-fifth-from-desktop">
-    <div class="app-metric-tile app-metric-tile--summary">
-      <div class="gem-c-big-number">
-        {{ metricLabel('Registrations', 'Total number of new Defra sign-in account registrations.', 'metric-tip-registrations-all') }}
-        <span class="gem-c-big-number__value">24,680</span>
-      </div>
-      <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-        {{ govukTag({ text: "+20.6%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Registrations increased by 20.6%." } }) }}
-      </div>
-      <p class="govuk-body-xs app-metric-caption">4,210 more year-on-year</p>
-    </div>
-  </div>
-  <div class="govuk-grid-column-one-half govuk-grid-column-one-fifth-from-desktop">
-    <div class="app-metric-tile app-metric-tile--summary">
-      <div class="gem-c-big-number">
-        {{ metricLabel('Sign-ins', 'Total number of successful authentications (sign-ins) to Defra Forms.', 'metric-tip-sign-ins-all') }}
-        <span class="gem-c-big-number__value">486K</span>
-      </div>
-      <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-        {{ govukTag({ text: "+17.4%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Sign-ins increased by 17.4%." } }) }}
-      </div>
-      <p class="govuk-body-xs app-metric-caption">72,000 more year-on-year</p>
-    </div>
-  </div>
-  <div class="govuk-grid-column-one-half govuk-grid-column-one-fifth-from-desktop">
-    <div class="app-metric-tile app-metric-tile--summary">
-      <div class="gem-c-big-number">
-        {{ metricLabel('Account updates', 'Combined total of email address and phone number updates.', 'metric-tip-account-updates-all') }}
-        <span class="gem-c-big-number__value">6,800</span>
-      </div>
-      <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-        {{ govukTag({ text: "+15.2%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Account updates increased by 15.2%." } }) }}
-      </div>
-      <p class="govuk-body-xs app-metric-caption">900 more year-on-year</p>
-    </div>
-  </div>
-  <div class="govuk-grid-column-one-half govuk-grid-column-one-fifth-from-desktop">
-    <div class="app-metric-tile app-metric-tile--summary">
-      <div class="gem-c-big-number">
-        {{ metricLabel('Account recovery', 'Total number of completed forgotten details journeys from start to finish.', 'metric-tip-account-recovery-all') }}
-        <span class="gem-c-big-number__value">6,840</span>
-      </div>
-      <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-        {{ govukTag({ text: "+14.9%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Account recovery increased by 14.9%." } }) }}
-      </div>
-      <p class="govuk-body-xs app-metric-caption">890 more year-on-year</p>
-    </div>
-  </div>
-  <div class="govuk-grid-column-one-half govuk-grid-column-one-fifth-from-desktop">
-    <div class="app-metric-tile app-metric-tile--summary">
-      <div class="gem-c-big-number">
-        {{ metricLabel('Account deletions', 'Total number of Defra sign-in accounts deleted by users.', 'metric-tip-account-deletions-all') }}
-        <span class="gem-c-big-number__value">1,045</span>
-      </div>
-      <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-        {{ govukTag({ text: "–10.3%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-down", attributes: { "aria-label": "Account deletions decreased by 10.3%." } }) }}
-      </div>
-      <p class="govuk-body-xs app-metric-caption">120 fewer year-on-year</p>
-    </div>
-  </div>
-</div>
-
-<div class="app-insights-row govuk-!-margin-bottom-8">
-  <div class="app-insights-row__column">
-    <h2 class="govuk-heading-m">Key insights</h2>
-    <div class="app-side-panel app-side-panel--insights">
-      <ul class="govuk-list govuk-!-margin-bottom-0">
-        <li class="app-insights-panel__item"><strong>Registrations</strong> up 20.6% year-on-year</li>
-        <li class="app-insights-panel__item"><strong>Sign-ins</strong> increased by 72,000</li>
-        <li class="app-insights-panel__item"><strong>Account deletions</strong> reduced by 10.3%</li>
-        <li class="app-insights-panel__item app-insights-panel__item--warning"><strong>Mobile number not associated</strong> up 12.5% — may warrant investigation</li>
-      </ul>
-    </div>
-  </div>
-  <div class="app-insights-row__column">
-    <h2 class="govuk-heading-m">Service issues</h2>
-    <div class="app-side-panel app-side-panel--issues">
-      <p class="govuk-body govuk-!-margin-bottom-4">Metrics that may indicate friction in the sign-in journey.</p>
-      <div class="app-side-panel__stat">
-        <p class="app-side-panel__label">
-          {{ metricLabel('Mobile number not associated with account', 'Number of times a user could not continue because no mobile number was associated with their account, during recovery or email update journeys.', 'metric-tip-mobile-number-not-associated-with-account-all') }}
-        </p>
-        <p class="app-side-panel__value-row">
-          <span class="app-side-panel__value">3,200</span>
-          {{ govukTag({ text: "+12.5%", classes: "govuk-tag--red app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Mobile number not associated increased by 12.5%." } }) }}
-        </p>
-        <p class="govuk-body-xs app-metric-caption govuk-!-margin-bottom-0">1,920 during recovery · 1,280 during email updates</p>
+<!-- Registration -->
+<div class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Registration</h2>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Total registrations', 'Total number of registrations.', 'metric-tip-registrations-all') }}
+          <span class="gem-c-big-number__value">24,680</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+20.6%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Registrations increased by 20.6% compared to the same period last year." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">4,210 more than same period last year</p>
       </div>
     </div>
   </div>
 </div>
 
-<div class="govuk-!-margin-bottom-0">
+<!-- Sign in -->
+<div class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Sign in</h2>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Successful authentications', 'Total number of successful authentications (sign-ins).', 'metric-tip-successful-auths-all') }}
+          <span class="gem-c-big-number__value">486K</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+17.4%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Successful authentications increased by 17.4% compared to the same period last year." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">72,000 more than same period last year</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+<div class="gem-c-big-number">
+          {{ metricLabel('Unsuccessful authentications', 'Total number of unsuccessful authentications (sign-ins).', 'metric-tip-unsuccessful-auths-all') }}
+          <span class="gem-c-big-number__value">18,420</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+11.2%",
+            classes: "govuk-tag--red app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Unsuccessful authentications increased by 11.2% compared to the same period last year." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">1,860 more than same period last year</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Account deletion -->
+<div class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Account deletion</h2>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Account deletions', 'Total number of account deletions.', 'metric-tip-account-deletions-all') }}
+          <span class="gem-c-big-number__value">1,045</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "–10.3%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-down",
+            attributes: { "aria-label": "Account deletions decreased by 10.3% compared to the same period last year." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">120 fewer than same period last year</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Updating details -->
+<div class="govuk-!-margin-bottom-8">
   <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Updating details</h2>
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-one-half">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
-          {{ metricLabel('Email address updates', 'Total number of times users updated the email address on their account.', 'metric-tip-email-address-updates-all') }}
+          {{ metricLabel('Email address updates', 'Total number of email address updates.', 'metric-tip-email-updates-all') }}
           <span class="gem-c-big-number__value">3,860</span>
         </div>
         <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-          {{ govukTag({ text: "+15.6%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Email updates increased by 15.6%." } }) }}
+          {{ govukTag({
+            text: "+15.6%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Email address updates increased by 15.6% compared to the same period last year." }
+          }) }}
         </div>
         <p class="govuk-body-xs app-metric-caption">520 more than same period last year</p>
       </div>
@@ -501,11 +538,15 @@ Defra Form Designer metrics                </h1>
     <div class="govuk-grid-column-one-half">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
-          {{ metricLabel('Phone number updates', 'Total number of times users updated the phone number on their account.', 'metric-tip-phone-number-updates-all') }}
+          {{ metricLabel('Phone number updates', 'Total number of phone number updates.', 'metric-tip-phone-updates-all') }}
           <span class="gem-c-big-number__value">2,940</span>
         </div>
         <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-          {{ govukTag({ text: "+14.8%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Phone updates increased by 14.8%." } }) }}
+          {{ govukTag({
+            text: "+14.8%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Phone number updates increased by 14.8% compared to the same period last year." }
+          }) }}
         </div>
         <p class="govuk-body-xs app-metric-caption">380 more than same period last year</p>
       </div>
@@ -513,6 +554,44 @@ Defra Form Designer metrics                </h1>
   </div>
 </div>
 
+<!-- Recovery -->
+<div class="govuk-!-margin-bottom-0">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Recovery</h2>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Forgotten details journeys', 'Total number of forgotten details journeys (end to end).', 'metric-tip-forgotten-details-all') }}
+          <span class="gem-c-big-number__value">6,840</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+14.9%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Forgotten details journeys increased by 14.9% compared to the same period last year." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">890 more than same period last year</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+<div class="gem-c-big-number">
+          {{ metricLabel('Mobile number not associated with account', 'Total number of instances where mobile number is not associated with the account.', 'metric-tip-mobile-not-associated-all') }}
+          <span class="gem-c-big-number__value">3,200</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+12.5%",
+            classes: "govuk-tag--red app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Mobile number not associated increased by 12.5% compared to the same period last year." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">1,920 during recovery · 1,280 during email updates</p>
+      </div>
+    </div>
+  </div>
+</div>
 {% endset %}
 
 {{ govukTabs({
