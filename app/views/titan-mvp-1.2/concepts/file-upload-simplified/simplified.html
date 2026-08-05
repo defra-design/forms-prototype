@@ -1,0 +1,137 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/file-upload/macro.njk" import govukFileUpload %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+
+{% block pageTitle %}
+Upload supporting evidence – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+{{ govukPhaseBanner({
+  tag: { text: "Concept" },
+  html: 'Simplified pattern — <a class="govuk-link" href="/titan-mvp-1.2/concepts/file-upload-simplified">about this concept</a>'
+}) }}
+
+{{ govukNotificationBanner({
+  titleText: "Important",
+  html: "This is a preview of a live form. Do not enter personal information."
+}) }}
+
+{{ govukBackLink({
+  text: "Back",
+  href: "/titan-mvp-1.2/concepts/file-upload-simplified"
+}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% if error %}
+      {{ govukErrorSummary({
+        titleText: "There is a problem",
+        errorList: [{ text: error, href: "#file-upload-simplified" }]
+      }) }}
+    {% endif %}
+
+    <form id="simplified-upload-form" method="post" action="/titan-mvp-1.2/concepts/file-upload-simplified/simplified" novalidate>
+      {{ govukFileUpload({
+        id: "file-upload-simplified",
+        name: "fileUpload",
+        label: {
+          text: "Upload supporting evidence",
+          classes: "govuk-label--l",
+          isPageHeading: true
+        },
+        hint: {
+          text: "You can upload Word, PDF or JPEG files. The maximum file size for each file is 100MB."
+        },
+        javascript: true,
+        multiple: true,
+        errorMessage: { text: error } if error else null,
+        attributes: {
+          accept: ".doc,.docx,.pdf,.jpg,.jpeg"
+        }
+      }) }}
+
+      <div id="uploaded-files-section" class="govuk-!-margin-top-6{% if not uploadedFiles or uploadedFiles.length == 0 %} govuk-!-display-none{% endif %}">
+        <h2 class="govuk-heading-m">Uploaded files</h2>
+        <p class="govuk-body" aria-live="polite" id="uploaded-files-count">
+          {% if uploadedFiles and uploadedFiles.length %}
+            {{ uploadedFiles.length }} file{% if uploadedFiles.length != 1 %}s{% endif %} uploaded
+          {% else %}
+            0 files uploaded
+          {% endif %}
+        </p>
+
+        <dl class="govuk-summary-list" id="uploaded-files-list">
+          {% for file in uploadedFiles or [] %}
+          <div class="govuk-summary-list__row" data-file-id="{{ file.id }}">
+            <dt class="govuk-summary-list__key">
+              {{ file.name }}
+            </dt>
+            <dd class="govuk-summary-list__value">
+              <strong class="govuk-tag govuk-tag--green">Uploaded</strong>
+            </dd>
+            <dd class="govuk-summary-list__actions">
+              <button type="submit" class="govuk-link govuk-body" name="removeFileId" value="{{ file.id }}" style="border: none; background: none; padding: 0; cursor: pointer; text-decoration: underline; color: #1d70b8;">
+                Remove<span class="govuk-visually-hidden"> {{ file.name }}</span>
+              </button>
+            </dd>
+          </div>
+          {% endfor %}
+        </dl>
+      </div>
+
+      <div class="govuk-button-group govuk-!-margin-top-6">
+        {{ govukButton({
+          text: "Continue",
+          name: "action",
+          value: "continue"
+        }) }}
+
+        {{ govukButton({
+          text: "Save and exit",
+          name: "action",
+          value: "save-exit",
+          classes: "govuk-button--secondary"
+        }) }}
+      </div>
+    </form>
+
+    <p class="govuk-body govuk-!-margin-top-6">
+      <a class="govuk-link" href="/titan-mvp-1.2/concepts/file-upload-simplified/current">Compare with current pattern</a>
+    </p>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var input = document.getElementById('file-upload-simplified');
+    var form = document.getElementById('simplified-upload-form');
+    if (!input || !form) return;
+
+    input.addEventListener('change', function () {
+      if (!input.files || !input.files.length) return;
+
+      // Selecting a file uploads immediately — no separate Upload file button.
+      // Send filenames as hidden fields so the prototype kit can persist them without multipart parsing.
+      Array.prototype.forEach.call(input.files, function (file) {
+        var nameField = document.createElement('input');
+        nameField.type = 'hidden';
+        nameField.name = 'uploadedFileNames';
+        nameField.value = file.name;
+        form.appendChild(nameField);
+      });
+
+      var field = document.createElement('input');
+      field.type = 'hidden';
+      field.name = 'action';
+      field.value = 'upload';
+      form.appendChild(field);
+      form.submit();
+    });
+  })();
+</script>
+{% endblock %}

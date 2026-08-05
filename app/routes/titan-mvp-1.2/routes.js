@@ -4662,7 +4662,9 @@ function getNextPendingSfiIndex(journey) {
 
 function renderSfiAddedAnswers(req, res, { error } = {}) {
   const journey = getSfiConditionalLabelsJourney(req);
-  const completedEntries = getCompletedSfiEntries(journey);
+  const entries = buildSfiOperationEntries(journey);
+  const completedEntries = entries.filter((entry) => entry.complete);
+  const pendingEntries = entries.filter((entry) => !entry.complete);
   const nextPendingIndex = getNextPendingSfiIndex(journey);
 
   if (!completedEntries.length) {
@@ -4676,7 +4678,10 @@ function renderSfiAddedAnswers(req, res, { error } = {}) {
       formName: "Give notice and get consent for a planned activity on a SSSI",
     },
     completedEntries,
-    hasPending: nextPendingIndex >= 0,
+    pendingEntries,
+    selectedCount: entries.length,
+    completedCount: completedEntries.length,
+    hasPending: pendingEntries.length > 0,
     nextPendingIndex,
     pageContext: SFI_PAGE_CONTEXT,
     genericOperationLabel: SFI_GENERIC_OPERATION_LABEL,
@@ -4853,20 +4858,11 @@ router.post("/titan-mvp-1.2/concepts/conditional-labels-sfi/added-answers", func
 
   const nextPendingIndex = getNextPendingSfiIndex(journey);
 
-  if (action === "add-another") {
-    if (nextPendingIndex >= 0) {
-      return res.redirect(`/titan-mvp-1.2/concepts/conditional-labels-sfi/operation/${nextPendingIndex}`);
-    }
-    return res.redirect("/titan-mvp-1.2/concepts/conditional-labels-sfi/select-codes?mode=add-more");
-  }
-
   if (action === "continue") {
     if (nextPendingIndex >= 0) {
-      return renderSfiAddedAnswers(req, res, {
-        error: {
-          continue: "Add details for all selected action codes before continuing",
-        },
-      });
+      return res.redirect(
+        `/titan-mvp-1.2/concepts/conditional-labels-sfi/operation/${nextPendingIndex}`
+      );
     }
     return res.redirect("/titan-mvp-1.2/concepts/conditional-labels-sfi/check-answers");
   }
@@ -4909,6 +4905,97 @@ router.get("/titan-mvp-1.2/concepts/conditional-labels-sfi/confirmation", functi
     formDef: {
       formName: "Give notice and get consent for a planned activity on a SSSI",
     },
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Concept: simplified file upload (remove competing Upload file button)
+// ---------------------------------------------------------------------------
+function getSimplifiedFileUploadJourney(req) {
+  if (!req.session.data.fileUploadSimplified) {
+    req.session.data.fileUploadSimplified = { uploadedFiles: [] };
+  }
+  if (!Array.isArray(req.session.data.fileUploadSimplified.uploadedFiles)) {
+    req.session.data.fileUploadSimplified.uploadedFiles = [];
+  }
+  return req.session.data.fileUploadSimplified;
+}
+
+function nextSimplifiedUploadFileId(files) {
+  const maxId = files.reduce((max, file) => Math.max(max, Number(file.id) || 0), 0);
+  return String(maxId + 1);
+}
+
+router.get("/titan-mvp-1.2/concepts/file-upload-simplified", function (req, res) {
+  res.render("titan-mvp-1.2/concepts/file-upload-simplified/index.html");
+});
+
+router.get("/titan-mvp-1.2/concepts/file-upload-simplified/current", function (req, res) {
+  res.render("titan-mvp-1.2/concepts/file-upload-simplified/current.html");
+});
+
+router.get("/titan-mvp-1.2/concepts/file-upload-simplified/simplified", function (req, res) {
+  const journey = getSimplifiedFileUploadJourney(req);
+  res.render("titan-mvp-1.2/concepts/file-upload-simplified/simplified.html", {
+    formDef: { formName: "Register as a unicorn breeder" },
+    uploadedFiles: journey.uploadedFiles,
+    error: null,
+  });
+});
+
+router.post("/titan-mvp-1.2/concepts/file-upload-simplified/simplified", function (req, res) {
+  const journey = getSimplifiedFileUploadJourney(req);
+  const action = req.body.action;
+  const removeFileId = req.body.removeFileId;
+
+  if (removeFileId) {
+    journey.uploadedFiles = journey.uploadedFiles.filter(
+      (file) => String(file.id) !== String(removeFileId)
+    );
+    return res.redirect("/titan-mvp-1.2/concepts/file-upload-simplified/simplified");
+  }
+
+  if (action === "upload") {
+    let names = req.body.uploadedFileNames;
+    if (!names) names = [];
+    if (!Array.isArray(names)) names = [names];
+
+    names
+      .map((name) => String(name || "").trim())
+      .filter(Boolean)
+      .forEach((name) => {
+        journey.uploadedFiles.push({
+          id: nextSimplifiedUploadFileId(journey.uploadedFiles),
+          name: name.split(/[/\\]/).pop(),
+        });
+      });
+
+    return res.redirect("/titan-mvp-1.2/concepts/file-upload-simplified/simplified");
+  }
+
+  if (action === "save-exit") {
+    return res.redirect("/titan-mvp-1.2/concepts/file-upload-simplified");
+  }
+
+  if (action === "continue") {
+    if (!journey.uploadedFiles.length) {
+      return res.render("titan-mvp-1.2/concepts/file-upload-simplified/simplified.html", {
+        formDef: { formName: "Register as a unicorn breeder" },
+        uploadedFiles: journey.uploadedFiles,
+        error: "Upload at least one file",
+      });
+    }
+    return res.redirect("/titan-mvp-1.2/concepts/file-upload-simplified/check-answers");
+  }
+
+  res.redirect("/titan-mvp-1.2/concepts/file-upload-simplified/simplified");
+});
+
+router.get("/titan-mvp-1.2/concepts/file-upload-simplified/check-answers", function (req, res) {
+  const journey = getSimplifiedFileUploadJourney(req);
+  res.render("titan-mvp-1.2/concepts/file-upload-simplified/check-answers.html", {
+    formDef: { formName: "Register as a unicorn breeder" },
+    uploadedFiles: journey.uploadedFiles,
   });
 });
 

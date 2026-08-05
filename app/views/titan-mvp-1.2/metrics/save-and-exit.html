@@ -1,0 +1,574 @@
+{% extends "layouts/main.html" %}
+{% from "components/service-header/macro.njk" import serviceHeader %}
+{%- from "govuk/components/tag/macro.njk" import govukTag -%}
+{%- from "govuk/components/tabs/macro.njk" import govukTabs -%}
+{%- from "moj/components/sub-navigation/macro.njk" import mojSubNavigation -%}
+
+{% block pageTitle %}
+Save and exit metrics – {{ serviceName }} – GOV.UK Prototype Kit
+{% endblock %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+containerClasses: containerClasses,
+accountName: "Chris Smith ",
+homepageLink: "/",
+signOutLink: "/onboarding/sign-out-confirmation",
+navigationItems: [
+{ href: "/titan-mvp-1.2/roles/my-account.html", text: "My account", id: "my-account" },
+{ href: "/titan-mvp-1.2/roles/manage-users.html", text: "Manage users", id: "manage-users" },
+{ href: "/titan-mvp-1.2/roles/manage-users.html", text: "Admin tools", id: "admin-tools" }
+
+],
+activeLinkId: "admin-tools"
+}) }}
+
+<div class="x-govuk-masthead x-govuk-masthead--large">
+    <div class="govuk-width-container">
+        {{ govukBackLink({ classes: "govuk-back-link--inverse govuk-!-margin-bottom-0", text: "Back to admin tools",
+        href: "/titan-mvp-1.2/library.html" }) }}
+
+        <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"
+            style="border-bottom: 1px solid white; margin-bottom: 0" />
+
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full-from-desktop">
+                <h1 class="x-govuk-masthead__title">
+Defra Form Designer metrics                </h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block content %}
+
+{% macro metricLabel(text, description, id) %}
+<span class="gem-c-big-number__label">
+  <span class="app-metric-tooltip tooltip" tabindex="0" aria-describedby="{{ id }}">
+    {{ text }}
+    <span class="tooltiptext" id="{{ id }}" role="tooltip">{{ description }}</span>
+  </span>
+</span>
+{% endmacro %}
+
+
+{{ mojSubNavigation({
+  label: "Sub navigation",
+  items: [  {
+    text: "Form activity",
+    href: "/titan-mvp-1.2/metrics/v7"
+  },   {
+    text: "Component usage",
+    href: "/titan-mvp-1.2/metrics/component-usage"
+  },   {
+    text: "Sign-in",
+    href: "/titan-mvp-1.2/metrics/sign-in"
+  },   {
+    text: "Save and exit",
+    href: "/titan-mvp-1.2/metrics/save-and-exit",
+    active: true
+  },   {
+    text: "Copy answers",
+    href: "/titan-mvp-1.2/metrics/copy-answers"
+  },   {
+    text: "3rd party review",
+    href: "/titan-mvp-1.2/metrics/3rd-party-review"
+  }
+  ]
+}) }}
+
+
+{% set sevenDaysContent %}
+<div class="govuk-!-margin-bottom-6">
+  <span class="govuk-caption-m">18 November 2024 to 24 November 2024</span>
+  <h2 class="govuk-heading-l govuk-!-margin-bottom-1">Last 7 days</h2>
+  <p class="govuk-body">Monitor save and exit requests, completions and deletions across Defra Forms.</p>
+</div>
+
+<div class="govuk-!-margin-bottom-0">
+    <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Save and exit requests', 'Total number of save and exit requests.', 'metric-tip-save-exit-requests-7d') }}
+          <span class="gem-c-big-number__value">1,248</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+8.1%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Save and exit requests increased by 8.1% compared to the previous 7 days." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">94 more than last week</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Expired incomplete save and exits', 'Total number of expired save and exit instances which were not completed.', 'metric-tip-save-exit-expired-7d') }}
+          <span class="gem-c-big-number__value">186</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+4.5%",
+            classes: "govuk-tag--red app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Expired incomplete save and exits increased by 4.5% compared to the previous 7 days." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">Expired before the user returned</p>
+      </div>
+    </div>
+  </div>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Completed after reminder email', 'Total number of save and exit requests completed after a reminder email was sent.', 'metric-tip-save-exit-reminder-7d') }}
+          <span class="gem-c-big-number__value">412</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+11.1%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Completed after reminder email increased by 11.1% compared to the previous 7 days." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">Reminder emails driving returns</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Deleted by user', 'Total number of save and exit forms deleted by the user directly.', 'metric-tip-save-exit-deleted-7d') }}
+          <span class="gem-c-big-number__value">94</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "–3.1%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-down",
+            attributes: { "aria-label": "Deleted by user decreased by 3.1% compared to the previous 7 days." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">3 fewer deletions than last week</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endset %}
+
+{% set thirtyDaysContent %}
+<div class="govuk-!-margin-bottom-6">
+  <span class="govuk-caption-m">25 October 2024 to 24 November 2024</span>
+  <h2 class="govuk-heading-l govuk-!-margin-bottom-1">Last 30 days</h2>
+  <p class="govuk-body">Monitor save and exit requests, completions and deletions across Defra Forms.</p>
+</div>
+
+<div class="govuk-!-margin-bottom-0">
+    <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Save and exit requests', 'Total number of save and exit requests.', 'metric-tip-save-exit-requests-30d') }}
+          <span class="gem-c-big-number__value">5,186</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({ text: "+8.6%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Save and exit requests increased by 8.6%." } }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">412 more than last month</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Expired incomplete save and exits', 'Total number of expired save and exit instances which were not completed.', 'metric-tip-save-exit-expired-30d') }}
+          <span class="gem-c-big-number__value">748</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({ text: "+4.5%", classes: "govuk-tag--red app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Expired incomplete save and exits increased by 4.5%." } }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">Expired before the user returned</p>
+      </div>
+    </div>
+  </div>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Completed after reminder email', 'Total number of save and exit requests completed after a reminder email was sent.', 'metric-tip-save-exit-reminder-30d') }}
+          <span class="gem-c-big-number__value">1,684</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({ text: "+11.1%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Completed after reminder email increased by 11.1%." } }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">Reminder emails driving returns</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Deleted by user', 'Total number of save and exit forms deleted by the user directly.', 'metric-tip-save-exit-deleted-30d') }}
+          <span class="gem-c-big-number__value">386</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({ text: "–3.0%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-down", attributes: { "aria-label": "Deleted by user decreased by 3.0%." } }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">12 fewer deletions than last month</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endset %}
+
+{% set allTimeContent %}
+<div class="govuk-!-margin-bottom-6">
+  <span class="govuk-caption-m">Since launch</span>
+  <h2 class="govuk-heading-l govuk-!-margin-bottom-1">All time</h2>
+  <p class="govuk-body">Monitor save and exit requests, completions and deletions across Defra Forms.</p>
+</div>
+
+<div class="govuk-!-margin-bottom-0">
+    <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Save and exit requests', 'Total number of save and exit requests.', 'metric-tip-save-exit-requests-all') }}
+          <span class="gem-c-big-number__value">48,620</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({ text: "+20.9%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Save and exit requests increased by 20.9%." } }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">Growing use of save and exit</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Expired incomplete save and exits', 'Total number of expired save and exit instances which were not completed.', 'metric-tip-save-exit-expired-all') }}
+          <span class="gem-c-big-number__value">6,840</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({ text: "+6.5%", classes: "govuk-tag--red app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Expired incomplete save and exits increased by 6.5%." } }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">Expired before the user returned</p>
+      </div>
+    </div>
+  </div>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Completed after reminder email', 'Total number of save and exit requests completed after a reminder email was sent.', 'metric-tip-save-exit-reminder-all') }}
+          <span class="gem-c-big-number__value">15,280</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({ text: "+20.9%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Completed after reminder email increased by 20.9%." } }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">Reminder emails driving returns</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Deleted by user', 'Total number of save and exit forms deleted by the user directly.', 'metric-tip-save-exit-deleted-all') }}
+          <span class="gem-c-big-number__value">3,420</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({ text: "–5.0%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-down", attributes: { "aria-label": "Deleted by user decreased by 5.0%." } }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">Fewer deletions than same period last year</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endset %}
+
+{{ govukTabs({
+  items: [
+    {
+      label: "Last 7 days",
+      id: "last-7-days",
+      panel: {
+        html: sevenDaysContent
+      }
+    },
+    {
+      label: "Last 30 days",
+      id: "last-30-days",
+      panel: {
+        html: thirtyDaysContent
+      }
+    },
+    {
+      label: "All time",
+      id: "all-time",
+      panel: {
+        html: allTimeContent
+      }
+    }
+  ]
+}) }}
+
+{% endblock %}
+
+{% block pageScripts %}
+<style>
+  /* Five-column KPI row on desktop */
+  @media (min-width: 48.0625em) {
+    .govuk-grid-column-one-fifth-from-desktop {
+      width: 20%;
+      float: left;
+      box-sizing: border-box;
+      padding: 0 15px;
+    }
+  }
+
+  /* Key insights panel */
+  .app-insights-panel {
+    background-color: #f3f2f1;
+    border-left: 5px solid #1d70b8;
+    padding: 20px 24px;
+  }
+
+  .app-insights-panel__item {
+    margin-bottom: 8px;
+    padding-left: 0;
+  }
+
+  .app-insights-panel__item:last-child {
+    margin-bottom: 0;
+  }
+
+  .app-insights-panel__item--warning {
+    color: #942514;
+  }
+
+  .app-insights-panel__item--warning::before {
+    content: "⚠ ";
+  }
+
+  /* Smaller unit text for big numbers, e.g. "days" */
+  .app-big-number-unit {
+    font-size: 0.6em;
+    font-weight: 400;
+  }
+
+  /* Metric tiles */
+  .app-metric-tile {
+    background-color: #f3f2f1;
+    padding: 24px;
+    margin-bottom: 1rem;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+  }
+
+  .app-metric-tile--summary {
+    min-height: 160px;
+  }
+
+  .app-metric-tile--summary .gem-c-big-number__value {
+    font-size: 2.25rem;
+  }
+
+  @media (min-width: 40.0625em) {
+    .app-metric-tile--summary .gem-c-big-number__value {
+      font-size: 2.5rem;
+    }
+  }
+
+  .app-metric-tile--warning {
+    background-color: #fef7f7;
+    border: 2px solid #d4351c;
+    border-left-width: 5px;
+  }
+
+  .app-metric-tile__warning-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #942514;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  .app-warning-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #d4351c;
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  @media (min-width: 40.0625em) {
+    .app-metric-tile {
+      min-height: 200px;
+    }
+  }
+
+  .gem-c-big-number {
+    margin-bottom: 0;
+  }
+
+  .gem-c-big-number__value {
+    display: block;
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 0;
+    color: #0b0c0c;
+  }
+
+  @media (min-width: 40.0625em) {
+    .gem-c-big-number__value {
+      font-size: 3.5rem;
+    }
+  }
+
+  .gem-c-big-number__label {
+    display: block;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.25;
+    margin-bottom: 12px;
+    color: #0b0c0c;
+  }
+
+  .app-tag-with-icon {
+    position: relative;
+    padding-left: 26px;
+    white-space: nowrap;
+  }
+
+  .app-tag-arrow-up::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    background-color: currentColor;
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 0l6 6H7v6H5V6H0z'/%3E%3C/svg%3E");
+    mask-repeat: no-repeat;
+    mask-position: center;
+    mask-size: contain;
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 0l6 6H7v6H5V6H0z'/%3E%3C/svg%3E");
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    -webkit-mask-size: contain;
+  }
+
+  .app-tag-arrow-down::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    background-color: currentColor;
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 12L0 6h5V0h2v6h5z'/%3E%3C/svg%3E");
+    mask-repeat: no-repeat;
+    mask-position: center;
+    mask-size: contain;
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 12L0 6h5V0h2v6h5z'/%3E%3C/svg%3E");
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    -webkit-mask-size: contain;
+  }
+
+  .app-metric-tile .gem-c-big-number {
+    flex: 1 0 auto;
+  }
+
+  .app-metric-caption {
+    color: #505a5f;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+
+  /* Accessible metric tooltips (ICDS-inspired) */
+  .app-metric-tooltip {
+    max-width: 100%;
+  }
+
+  .app-metric-tooltip .tooltiptext {
+    font-weight: 400;
+    user-select: text;
+    pointer-events: auto;
+  }
+
+  .app-metric-tile--summary .app-metric-tooltip .tooltiptext {
+    width: 220px;
+    margin-left: -110px;
+    font-size: 16px;
+    line-height: 1.4;
+    padding: 10px 12px;
+  }
+
+  .app-metric-tooltip:focus-visible {
+    outline: 3px solid transparent;
+    background-color: #ffdd00;
+    box-shadow: 0 -2px #ffdd00, 0 4px #0b0c0c;
+    border-bottom-color: transparent;
+  }
+
+  .app-metric-tooltip .tooltiptext.app-metric-tooltip__tip--visible {
+    visibility: visible;
+    opacity: 1;
+  }
+
+</style>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.app-metric-tooltip').forEach(function (trigger) {
+      const tip = trigger.querySelector('[role="tooltip"]');
+      if (!tip) return;
+
+      // Keep tooltip text available to assistive tech via aria-describedby.
+      // Only toggle visual visibility; do not set aria-hidden on the tip.
+
+      function show() {
+        tip.classList.add('app-metric-tooltip__tip--visible');
+      }
+
+      function hide() {
+        tip.classList.remove('app-metric-tooltip__tip--visible');
+      }
+
+      trigger.addEventListener('mouseenter', show);
+      trigger.addEventListener('mouseleave', hide);
+      tip.addEventListener('mouseenter', show);
+      tip.addEventListener('mouseleave', hide);
+      trigger.addEventListener('focus', show);
+      trigger.addEventListener('blur', hide);
+
+      trigger.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          hide();
+          trigger.blur();
+        }
+      });
+    });
+  });
+</script>
+{% endblock %}

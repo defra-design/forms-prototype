@@ -1,0 +1,87 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% from "govuk/components/table/macro.njk" import govukTable %}
+
+{% block pageTitle %}
+Simplified file upload (concept) – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+{{ govukPhaseBanner({
+  tag: { text: "Concept" },
+  html: 'Prototype exploration — reducing competing actions on file upload pages.'
+}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <span class="govuk-caption-xl">File upload</span>
+    <h1 class="govuk-heading-xl">Simplify competing actions</h1>
+
+    <p class="govuk-body">
+      The current runner pattern can show three actions on one page:
+      <strong>Choose file</strong>, <strong>Upload file</strong>, and <strong>Continue</strong>.
+      That creates competing next steps.
+    </p>
+
+    {{ govukInsetText({
+      html: "<strong>Hypothesis</strong><p class='govuk-body govuk-!-margin-bottom-0'>Selecting a file should upload automatically (or be committed on Continue). Remove the separate Upload file button so the uploaded files list becomes the focus, and Continue is the only obvious next step.</p>"
+    }) }}
+
+    <h2 class="govuk-heading-m">Compare the patterns</h2>
+
+    {{ govukTable({
+      caption: "Current vs simplified",
+      captionClasses: "govuk-table__caption--m govuk-visually-hidden",
+      firstCellIsHeader: true,
+      head: [
+        { text: "" },
+        { text: "Current" },
+        { text: "Simplified" }
+      ],
+      rows: [
+        [
+          { text: "File control" },
+          { text: "Choose file" },
+          { text: "Choose files (or drag and drop)" }
+        ],
+        [
+          { text: "Upload action" },
+          { text: "Separate Upload file button" },
+          { text: "None — selecting a file adds it to the list" }
+        ],
+        [
+          { text: "Primary next step" },
+          { text: "Continue (competes with Upload file)" },
+          { text: "Continue only" }
+        ],
+        [
+          { text: "Secondary action" },
+          { text: "—" },
+          { text: "Save and exit" }
+        ]
+      ]
+    }) }}
+
+    <div class="govuk-button-group">
+      {{ govukButton({
+        text: "Try simplified pattern",
+        href: "/titan-mvp-1.2/concepts/file-upload-simplified/simplified",
+        isStartButton: true
+      }) }}
+
+      {{ govukButton({
+        text: "See current pattern",
+        href: "/titan-mvp-1.2/concepts/file-upload-simplified/current",
+        classes: "govuk-button--secondary"
+      }) }}
+    </div>
+
+    <p class="govuk-body govuk-!-margin-top-6">
+      <a class="govuk-link" href="/design-history/file-upload">Back to file upload design history</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

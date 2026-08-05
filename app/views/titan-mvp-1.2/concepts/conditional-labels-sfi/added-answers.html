@@ -1,13 +1,9 @@
 {% extends "layouts/runner.html" %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
-{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
 {% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
 
-{% set answerLabel = "SFI action" %}
-{% set answerLabelPlural = "SFI actions" %}
-
 {% block pageTitle %}
-You have added {{ completedEntries.length }} {% if completedEntries.length == 1 %}{{ answerLabel }}{% else %}{{ answerLabelPlural }}{% endif %} – GOV.UK
+You've added details for {{ completedCount }} of {{ selectedCount }} selected actions – GOV.UK
 {% endblock %}
 
 {% block beforeContent %}
@@ -30,15 +26,12 @@ You have added {{ completedEntries.length }} {% if completedEntries.length == 1 
 {% block content %}
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
-    {% if error and error.continue %}
-      {{ govukErrorSummary({
-        titleText: "There is a problem",
-        errorList: [{ text: error.continue, href: "#continue-button" }]
-      }) }}
-    {% endif %}
-
     <h1 class="govuk-heading-l">
-      You have added {{ completedEntries.length }} {% if completedEntries.length == 1 %}{{ answerLabel }}{% else %}{{ answerLabelPlural }}{% endif %}
+      {% if hasPending %}
+        You've added details for {{ completedCount }} of {{ selectedCount }} selected actions
+      {% else %}
+        You've added details for {{ selectedCount }} selected {% if selectedCount == 1 %}action{% else %}actions{% endif %}
+      {% endif %}
     </h1>
 
     <dl class="govuk-summary-list govuk-!-margin-bottom-6">
@@ -69,20 +62,21 @@ You have added {{ completedEntries.length }} {% if completedEntries.length == 1 
       {% endfor %}
     </dl>
 
+    {% if hasPending %}
+    <h2 class="govuk-heading-m">You still need to provide details for:</h2>
+    <ul class="govuk-list govuk-list--bullet">
+      {% for entry in pendingEntries %}
+      <li>{{ entry.label }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+
     <form id="added-answers-form" class="form" action="/titan-mvp-1.2/concepts/conditional-labels-sfi/added-answers" method="post">
       <div class="govuk-button-group">
         {{ govukButton({
           text: "Continue",
           name: "action",
-          value: "continue",
-          attributes: { id: "continue-button" }
-        }) }}
-
-        {{ govukButton({
-          text: "Add another " ~ answerLabel,
-          name: "action",
-          value: "add-another",
-          classes: "govuk-button--secondary"
+          value: "continue"
         }) }}
 
         {{ govukButton({

@@ -1,0 +1,64 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/file-upload/macro.njk" import govukFileUpload %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+
+{% block pageTitle %}
+Upload your methodology statement (current) – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+{{ govukPhaseBanner({
+  tag: { text: "Concept" },
+  html: 'Current pattern for comparison — <a class="govuk-link" href="/titan-mvp-1.2/concepts/file-upload-simplified">about this concept</a>'
+}) }}
+
+{{ govukNotificationBanner({
+  titleText: "Important",
+  html: "This shows the existing pattern with <strong>Choose file</strong>, <strong>Upload file</strong>, and <strong>Continue</strong> competing for attention."
+}) }}
+
+{{ govukBackLink({
+  text: "Back",
+  href: "/titan-mvp-1.2/concepts/file-upload-simplified"
+}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <form>
+      {{ govukFileUpload({
+        id: "file-upload-current",
+        name: "fileUpload",
+        label: {
+          text: "Upload your methodology statement",
+          classes: "govuk-label--l",
+          isPageHeading: true
+        },
+        hint: {
+          text: "Upload 2 copies in Word, PDF or JPEG. The maximum file size for each file is 100MB."
+        }
+      }) }}
+
+      {{ govukButton({
+        text: "Upload file",
+        classes: "govuk-button--secondary",
+        type: "button"
+      }) }}
+    </form>
+
+    <h2 class="govuk-heading-m">Uploaded files</h2>
+    <p class="govuk-body" aria-live="polite">0 files uploaded</p>
+
+    {{ govukButton({
+      text: "Continue",
+      href: "/titan-mvp-1.2/concepts/file-upload-simplified/simplified"
+    }) }}
+
+    <p class="govuk-body govuk-!-margin-top-6">
+      <a class="govuk-link" href="/titan-mvp-1.2/concepts/file-upload-simplified/simplified">Compare with simplified pattern</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

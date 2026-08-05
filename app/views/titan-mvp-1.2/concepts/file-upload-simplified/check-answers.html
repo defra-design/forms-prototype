@@ -1,0 +1,64 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+
+{% block pageTitle %}
+Check your answers – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+{{ govukPhaseBanner({
+  tag: { text: "Concept" },
+  html: 'Simplified file upload concept — <a class="govuk-link" href="/titan-mvp-1.2/concepts/file-upload-simplified">about this concept</a>'
+}) }}
+
+{{ govukNotificationBanner({
+  titleText: "Important",
+  html: "This is a preview of a live form. Do not enter personal information."
+}) }}
+
+{{ govukBackLink({
+  text: "Back",
+  href: "/titan-mvp-1.2/concepts/file-upload-simplified/simplified"
+}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">Check your answers</h1>
+
+    {% set filesHtml %}
+      {% if uploadedFiles and uploadedFiles.length %}
+        {% for file in uploadedFiles %}
+          {{ file.name }}{% if not loop.last %}<br>{% endif %}
+        {% endfor %}
+      {% else %}
+        No files uploaded
+      {% endif %}
+    {% endset %}
+
+    {{ govukSummaryList({
+      rows: [
+        {
+          key: { text: "Supporting evidence" },
+          value: { html: filesHtml },
+          actions: {
+            items: [{
+              href: "/titan-mvp-1.2/concepts/file-upload-simplified/simplified",
+              text: "Change",
+              visuallyHiddenText: "supporting evidence"
+            }]
+          }
+        }
+      ]
+    }) }}
+
+    {{ govukButton({
+      text: "Back to concept overview",
+      href: "/titan-mvp-1.2/concepts/file-upload-simplified"
+    }) }}
+  </div>
+</div>
+{% endblock %}
