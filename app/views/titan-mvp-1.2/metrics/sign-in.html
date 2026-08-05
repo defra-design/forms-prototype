@@ -2,7 +2,6 @@
 {% from "components/service-header/macro.njk" import serviceHeader %}
 {%- from "govuk/components/tag/macro.njk" import govukTag -%}
 {%- from "govuk/components/tabs/macro.njk" import govukTabs -%}
-{%- from "govuk/components/table/macro.njk" import govukTable -%}
 {%- from "govuk/components/warning-text/macro.njk" import govukWarningText -%}
 {%- from "moj/components/sub-navigation/macro.njk" import mojSubNavigation -%}
 
@@ -61,18 +60,29 @@ Defra Form Designer metrics                </h1>
 
 {{ mojSubNavigation({
   label: "Sub navigation",
-  items: [{
+  items: [  {
     text: "Form activity",
     href: "/titan-mvp-1.2/metrics/v7"
-  }, {
+  },   {
     text: "Component usage",
     href: "/titan-mvp-1.2/metrics/component-usage"
-  }, {
+  },   {
     text: "Sign-in",
     href: "/titan-mvp-1.2/metrics/sign-in",
     active: true
-  }]
+  },   {
+    text: "Save and exit",
+    href: "/titan-mvp-1.2/metrics/save-and-exit"
+  },   {
+    text: "Copy answers",
+    href: "/titan-mvp-1.2/metrics/copy-answers"
+  },   {
+    text: "3rd party review",
+    href: "/titan-mvp-1.2/metrics/3rd-party-review"
+  }
+  ]
 }) }}
+
 
 {% set sevenDaysContent %}
 <div class="govuk-!-margin-bottom-6">
@@ -165,88 +175,44 @@ Defra Form Designer metrics                </h1>
   </div>
 </div>
 
-<!-- Key insights -->
-<div class="app-insights-panel govuk-!-margin-bottom-8">
-  <h2 class="govuk-heading-m govuk-!-margin-bottom-3">Key insights</h2>
-  <ul class="govuk-list govuk-!-margin-bottom-0">
-    <li class="app-insights-panel__item"><strong>Registrations</strong> up 12.3% week-on-week</li>
-    <li class="app-insights-panel__item"><strong>Sign-ins</strong> increased by 612</li>
-    <li class="app-insights-panel__item"><strong>Account deletions</strong> reduced by 10.0%</li>
-    <li class="app-insights-panel__item app-insights-panel__item--warning"><strong>Mobile number not associated</strong> up 17.2% — may warrant investigation</li>
-  </ul>
+<!-- Key insights and service issues -->
+<div class="app-insights-row govuk-!-margin-bottom-8">
+  <div class="app-insights-row__column">
+    <h2 class="govuk-heading-m">Key insights</h2>
+    <div class="app-side-panel app-side-panel--insights">
+      <ul class="govuk-list govuk-!-margin-bottom-0">
+        <li class="app-insights-panel__item"><strong>Registrations</strong> up 12.3% week-on-week</li>
+        <li class="app-insights-panel__item"><strong>Sign-ins</strong> increased by 612</li>
+        <li class="app-insights-panel__item"><strong>Account deletions</strong> reduced by 10.0%</li>
+        <li class="app-insights-panel__item app-insights-panel__item--warning"><strong>Mobile number not associated</strong> up 17.2% — may warrant investigation</li>
+      </ul>
+    </div>
+  </div>
+  <div class="app-insights-row__column">
+    <h2 class="govuk-heading-m">Service issues</h2>
+    <div class="app-side-panel app-side-panel--issues">
+      <p class="govuk-body govuk-!-margin-bottom-4">Metrics that may indicate friction in the sign-in journey.</p>
+      <div class="app-side-panel__stat">
+        <p class="app-side-panel__label">
+          {{ metricLabel('Mobile number not associated with account', 'Number of times a user could not continue because no mobile number was associated with their account, during recovery or email update journeys.', 'metric-tip-mobile-number-not-associated-with-account-7d') }}
+        </p>
+        <p class="app-side-panel__value-row">
+          <span class="app-side-panel__value">55</span>
+          {{ govukTag({
+            text: "+16.9%",
+            classes: "govuk-tag--red app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Mobile number not associated increased by 16.9% compared to the previous 7 days." }
+          }) }}
+        </p>
+        <p class="govuk-body-xs app-metric-caption govuk-!-margin-bottom-0">34 during recovery · 21 during email updates</p>
+      </div>
+    </div>
+  </div>
 </div>
 
-<!-- Account activity -->
-<div class="govuk-!-margin-bottom-8">
-  <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Account activity</h2>
-  <div class="govuk-grid-row">
-    <div class="govuk-grid-column-one-half">
-      <div class="app-metric-tile">
-        <div class="gem-c-big-number">
-          {{ metricLabel('Sign-ins', 'Total number of successful authentications (sign-ins) to Defra Forms.', 'metric-tip-sign-ins-7d-2') }}
-          <span class="gem-c-big-number__value">8,942</span>
-        </div>
-        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-          {{ govukTag({
-            text: "+7.3%",
-            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
-            attributes: { "aria-label": "Sign-ins increased by 7.3% compared to the previous 7 days." }
-          }) }}
-        </div>
-        <p class="govuk-body-xs app-metric-caption">612 more than last week</p>
-      </div>
-    </div>
-    <div class="govuk-grid-column-one-half">
-      <div class="app-metric-tile">
-        <div class="gem-c-big-number">
-          {{ metricLabel('Registrations', 'Total number of new Defra sign-in account registrations.', 'metric-tip-registrations-7d-2') }}
-          <span class="gem-c-big-number__value">384</span>
-        </div>
-        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-          {{ govukTag({
-            text: "+12.3%",
-            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
-            attributes: { "aria-label": "Registrations increased by 12.3% compared to the previous 7 days." }
-          }) }}
-        </div>
-        <p class="govuk-body-xs app-metric-caption">42 more than last week</p>
-      </div>
-    </div>
-  </div>
-  <div class="govuk-grid-row">
-    <div class="govuk-grid-column-one-half">
-      <div class="app-metric-tile">
-        <div class="gem-c-big-number">
-          {{ metricLabel('Account recovery journeys', 'Total number of completed forgotten details journeys from start to finish.', 'metric-tip-account-recovery-journeys-7d') }}
-          <span class="gem-c-big-number__value">126</span>
-        </div>
-        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-          {{ govukTag({
-            text: "+6.8%",
-            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
-            attributes: { "aria-label": "Account recovery journeys increased by 6.8% compared to the previous 7 days." }
-          }) }}
-        </div>
-        <p class="govuk-body-xs app-metric-caption">8 more completed journeys than last week</p>
-      </div>
-    </div>
-    <div class="govuk-grid-column-one-half">
-      <div class="app-metric-tile">
-        <div class="gem-c-big-number">
-          {{ metricLabel('Account deletions', 'Total number of Defra sign-in accounts deleted by users.', 'metric-tip-account-deletions-7d-2') }}
-          <span class="gem-c-big-number__value">18</span>
-        </div>
-        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-          {{ govukTag({
-            text: "–10.0%",
-            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-down",
-            attributes: { "aria-label": "Account deletions decreased by 10.0% compared to the previous 7 days." }
-          }) }}
-        </div>
-        <p class="govuk-body-xs app-metric-caption">2 fewer than last week</p>
-      </div>
-    </div>
-  </div>
+<!-- Updating details -->
+<div class="govuk-!-margin-bottom-0">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Updating details</h2>
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-one-half">
       <div class="app-metric-tile">
@@ -283,133 +249,6 @@ Defra Form Designer metrics                </h1>
   </div>
 </div>
 
-<!-- Service issues -->
-<div class="govuk-!-margin-bottom-8">
-  <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Service issues</h2>
-  <p class="govuk-body govuk-!-margin-bottom-4">Metrics that may indicate friction in the sign-in journey.</p>
-  <div class="govuk-grid-row">
-    <div class="govuk-grid-column-one-half">
-      <div class="app-metric-tile app-metric-tile--warning">
-        <div class="app-metric-tile__warning-label">
-          <span class="app-warning-icon" aria-hidden="true">!</span>
-          Potential friction
-        </div>
-        <div class="gem-c-big-number">
-          {{ metricLabel('Mobile number not associated with account', 'Number of times a user could not continue because no mobile number was associated with their account, during recovery or email update journeys.', 'metric-tip-mobile-number-not-associated-with-account-7d') }}
-          <span class="gem-c-big-number__value">55</span>
-        </div>
-        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-          {{ govukTag({
-            text: "+16.9%",
-            classes: "govuk-tag--red app-tag-with-icon app-tag-arrow-up",
-            attributes: { "aria-label": "Mobile number not associated increased by 16.9% compared to the previous 7 days." }
-          }) }}
-        </div>
-        <p class="govuk-body-xs app-metric-caption">34 during recovery · 21 during email updates</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="govuk-!-margin-bottom-0">
-  <h2 class="govuk-heading-m govuk-!-margin-bottom-2">By form</h2>
-  <p class="govuk-body govuk-!-margin-bottom-4">Compare sign-in performance across forms. Select a column heading to sort.</p>
-
-  {{ govukTable({
-    attributes: {
-      "data-module": "moj-sortable-table"
-    },
-    firstCellIsHeader: true,
-    head: [
-      {
-        text: "Form name",
-        attributes: { "aria-sort": "none" }
-      },
-      {
-        text: "Organisation",
-        attributes: { "aria-sort": "none" }
-      },
-      {
-        text: "Registrations",
-        format: "numeric",
-        attributes: { "aria-sort": "descending" }
-      },
-      {
-        text: "Sign-ins",
-        format: "numeric",
-        attributes: { "aria-sort": "none" }
-      },
-      {
-        text: "Recovery",
-        format: "numeric",
-        attributes: { "aria-sort": "none" }
-      },
-      {
-        text: "Updates",
-        format: "numeric",
-        attributes: { "aria-sort": "none" }
-      }
-    ],
-    rows: [
-      [
-        { html: '<a href="#" class="govuk-link">Waste carrier registration</a>', attributes: { "data-sort-value": "Waste carrier registration" } },
-        { text: "Environment Agency", attributes: { "data-sort-value": "Environment Agency" } },
-        { text: "86", format: "numeric", attributes: { "data-sort-value": "86" } },
-        { text: "2,145", format: "numeric", attributes: { "data-sort-value": "2145" } },
-        { text: "28", format: "numeric", attributes: { "data-sort-value": "28" } },
-        { text: "25", format: "numeric", attributes: { "data-sort-value": "25" } }
-      ],
-      [
-        { html: '<a href="#" class="govuk-link">Export health certificate</a>', attributes: { "data-sort-value": "Export health certificate" } },
-        { text: "APHA", attributes: { "data-sort-value": "APHA" } },
-        { text: "72", format: "numeric", attributes: { "data-sort-value": "72" } },
-        { text: "1,876", format: "numeric", attributes: { "data-sort-value": "1876" } },
-        { text: "22", format: "numeric", attributes: { "data-sort-value": "22" } },
-        { text: "21", format: "numeric", attributes: { "data-sort-value": "21" } }
-      ],
-      [
-        { html: '<a href="#" class="govuk-link">Basic Payment Scheme claim</a>', attributes: { "data-sort-value": "Basic Payment Scheme claim" } },
-        { text: "Rural Payments Agency", attributes: { "data-sort-value": "Rural Payments Agency" } },
-        { text: "64", format: "numeric", attributes: { "data-sort-value": "64" } },
-        { text: "1,542", format: "numeric", attributes: { "data-sort-value": "1542" } },
-        { text: "19", format: "numeric", attributes: { "data-sort-value": "19" } },
-        { text: "18", format: "numeric", attributes: { "data-sort-value": "18" } }
-      ],
-      [
-        { html: '<a href="#" class="govuk-link">Countryside Stewardship application</a>', attributes: { "data-sort-value": "Countryside Stewardship application" } },
-        { text: "Rural Payments Agency", attributes: { "data-sort-value": "Rural Payments Agency" } },
-        { text: "51", format: "numeric", attributes: { "data-sort-value": "51" } },
-        { text: "1,203", format: "numeric", attributes: { "data-sort-value": "1203" } },
-        { text: "16", format: "numeric", attributes: { "data-sort-value": "16" } },
-        { text: "14", format: "numeric", attributes: { "data-sort-value": "14" } }
-      ],
-      [
-        { html: '<a href="#" class="govuk-link">Hazardous waste consignment</a>', attributes: { "data-sort-value": "Hazardous waste consignment" } },
-        { text: "Environment Agency", attributes: { "data-sort-value": "Environment Agency" } },
-        { text: "43", format: "numeric", attributes: { "data-sort-value": "43" } },
-        { text: "892", format: "numeric", attributes: { "data-sort-value": "892" } },
-        { text: "14", format: "numeric", attributes: { "data-sort-value": "14" } },
-        { text: "12", format: "numeric", attributes: { "data-sort-value": "12" } }
-      ],
-      [
-        { html: '<a href="#" class="govuk-link">Farm waste management</a>', attributes: { "data-sort-value": "Farm waste management" } },
-        { text: "Environment Agency", attributes: { "data-sort-value": "Environment Agency" } },
-        { text: "38", format: "numeric", attributes: { "data-sort-value": "38" } },
-        { text: "764", format: "numeric", attributes: { "data-sort-value": "764" } },
-        { text: "12", format: "numeric", attributes: { "data-sort-value": "12" } },
-        { text: "10", format: "numeric", attributes: { "data-sort-value": "10" } }
-      ],
-      [
-        { html: '<a href="#" class="govuk-link">Agricultural subsidy claim</a>', attributes: { "data-sort-value": "Agricultural subsidy claim" } },
-        { text: "Rural Payments Agency", attributes: { "data-sort-value": "Rural Payments Agency" } },
-        { text: "30", format: "numeric", attributes: { "data-sort-value": "30" } },
-        { text: "520", format: "numeric", attributes: { "data-sort-value": "520" } },
-        { text: "15", format: "numeric", attributes: { "data-sort-value": "15" } },
-        { text: "16", format: "numeric", attributes: { "data-sort-value": "16" } }
-      ]
-    ]
-  }) }}
-</div>
 {% endset %}
 
 {% set thirtyDaysContent %}
@@ -482,70 +321,38 @@ Defra Form Designer metrics                </h1>
   </div>
 </div>
 
-<div class="app-insights-panel govuk-!-margin-bottom-8">
-  <h2 class="govuk-heading-m govuk-!-margin-bottom-3">Key insights</h2>
-  <ul class="govuk-list govuk-!-margin-bottom-0">
-    <li class="app-insights-panel__item"><strong>Registrations</strong> up 12.9% month-on-month</li>
-    <li class="app-insights-panel__item"><strong>Sign-ins</strong> increased by 2,410</li>
-    <li class="app-insights-panel__item"><strong>Account deletions</strong> reduced by 9.8%</li>
-    <li class="app-insights-panel__item app-insights-panel__item--warning"><strong>Mobile number not associated</strong> up 14.3% — may warrant investigation</li>
-  </ul>
+<div class="app-insights-row govuk-!-margin-bottom-8">
+  <div class="app-insights-row__column">
+    <h2 class="govuk-heading-m">Key insights</h2>
+    <div class="app-side-panel app-side-panel--insights">
+      <ul class="govuk-list govuk-!-margin-bottom-0">
+        <li class="app-insights-panel__item"><strong>Registrations</strong> up 12.9% month-on-month</li>
+        <li class="app-insights-panel__item"><strong>Sign-ins</strong> increased by 2,410</li>
+        <li class="app-insights-panel__item"><strong>Account deletions</strong> reduced by 9.8%</li>
+        <li class="app-insights-panel__item app-insights-panel__item--warning"><strong>Mobile number not associated</strong> up 14.3% — may warrant investigation</li>
+      </ul>
+    </div>
+  </div>
+  <div class="app-insights-row__column">
+    <h2 class="govuk-heading-m">Service issues</h2>
+    <div class="app-side-panel app-side-panel--issues">
+      <p class="govuk-body govuk-!-margin-bottom-4">Metrics that may indicate friction in the sign-in journey.</p>
+      <div class="app-side-panel__stat">
+        <p class="app-side-panel__label">
+          {{ metricLabel('Mobile number not associated with account', 'Number of times a user could not continue because no mobile number was associated with their account, during recovery or email update journeys.', 'metric-tip-mobile-number-not-associated-with-account-30d') }}
+        </p>
+        <p class="app-side-panel__value-row">
+          <span class="app-side-panel__value">231</span>
+          {{ govukTag({ text: "+14.3%", classes: "govuk-tag--red app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Mobile number not associated increased by 14.3%." } }) }}
+        </p>
+        <p class="govuk-body-xs app-metric-caption govuk-!-margin-bottom-0">142 during recovery · 89 during email updates</p>
+      </div>
+    </div>
+  </div>
 </div>
 
-<div class="govuk-!-margin-bottom-8">
-  <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Account activity</h2>
-  <div class="govuk-grid-row">
-    <div class="govuk-grid-column-one-half">
-      <div class="app-metric-tile">
-        <div class="gem-c-big-number">
-          {{ metricLabel('Sign-ins', 'Total number of successful authentications (sign-ins) to Defra Forms.', 'metric-tip-sign-ins-30d-2') }}
-          <span class="gem-c-big-number__value">36,840</span>
-        </div>
-        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-          {{ govukTag({ text: "+7.0%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Sign-ins increased by 7.0%." } }) }}
-        </div>
-        <p class="govuk-body-xs app-metric-caption">2,410 more than last month</p>
-      </div>
-    </div>
-    <div class="govuk-grid-column-one-half">
-      <div class="app-metric-tile">
-        <div class="gem-c-big-number">
-          {{ metricLabel('Registrations', 'Total number of new Defra sign-in account registrations.', 'metric-tip-registrations-30d-2') }}
-          <span class="gem-c-big-number__value">1,562</span>
-        </div>
-        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-          {{ govukTag({ text: "+12.9%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Registrations increased by 12.9%." } }) }}
-        </div>
-        <p class="govuk-body-xs app-metric-caption">178 more than last month</p>
-      </div>
-    </div>
-  </div>
-  <div class="govuk-grid-row">
-    <div class="govuk-grid-column-one-half">
-      <div class="app-metric-tile">
-        <div class="gem-c-big-number">
-          {{ metricLabel('Account recovery journeys', 'Total number of completed forgotten details journeys from start to finish.', 'metric-tip-account-recovery-journeys-30d') }}
-          <span class="gem-c-big-number__value">512</span>
-        </div>
-        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-          {{ govukTag({ text: "+7.1%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Account recovery increased by 7.1%." } }) }}
-        </div>
-        <p class="govuk-body-xs app-metric-caption">34 more completed journeys than last month</p>
-      </div>
-    </div>
-    <div class="govuk-grid-column-one-half">
-      <div class="app-metric-tile">
-        <div class="gem-c-big-number">
-          {{ metricLabel('Account deletions', 'Total number of Defra sign-in accounts deleted by users.', 'metric-tip-account-deletions-30d-2') }}
-          <span class="gem-c-big-number__value">74</span>
-        </div>
-        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-          {{ govukTag({ text: "–9.8%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-down", attributes: { "aria-label": "Account deletions decreased by 9.8%." } }) }}
-        </div>
-        <p class="govuk-body-xs app-metric-caption">8 fewer than last month</p>
-      </div>
-    </div>
-  </div>
+<div class="govuk-!-margin-bottom-0">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Updating details</h2>
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-one-half">
       <div class="app-metric-tile">
@@ -574,128 +381,6 @@ Defra Form Designer metrics                </h1>
   </div>
 </div>
 
-<div class="govuk-!-margin-bottom-8">
-  <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Service issues</h2>
-  <p class="govuk-body govuk-!-margin-bottom-4">Metrics that may indicate friction in the sign-in journey.</p>
-  <div class="govuk-grid-row">
-    <div class="govuk-grid-column-one-half">
-      <div class="app-metric-tile app-metric-tile--warning">
-        <div class="app-metric-tile__warning-label">
-          <span class="app-warning-icon" aria-hidden="true">!</span>
-          Potential friction
-        </div>
-        <div class="gem-c-big-number">
-          {{ metricLabel('Mobile number not associated with account', 'Number of times a user could not continue because no mobile number was associated with their account, during recovery or email update journeys.', 'metric-tip-mobile-number-not-associated-with-account-30d') }}
-          <span class="gem-c-big-number__value">231</span>
-        </div>
-        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-          {{ govukTag({ text: "+14.3%", classes: "govuk-tag--red app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Mobile number not associated increased by 14.3%." } }) }}
-        </div>
-        <p class="govuk-body-xs app-metric-caption">142 during recovery · 89 during email updates</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="govuk-!-margin-bottom-0">
-  <h2 class="govuk-heading-m govuk-!-margin-bottom-2">By form</h2>
-  <p class="govuk-body govuk-!-margin-bottom-4">Compare sign-in performance across forms. Select a column heading to sort.</p>
-
-  {{ govukTable({
-    attributes: {
-      "data-module": "moj-sortable-table"
-    },
-    firstCellIsHeader: true,
-    head: [
-      {
-        text: "Form name",
-        attributes: { "aria-sort": "none" }
-      },
-      {
-        text: "Organisation",
-        attributes: { "aria-sort": "none" }
-      },
-      {
-        text: "Registrations",
-        format: "numeric",
-        attributes: { "aria-sort": "descending" }
-      },
-      {
-        text: "Sign-ins",
-        format: "numeric",
-        attributes: { "aria-sort": "none" }
-      },
-      {
-        text: "Recovery",
-        format: "numeric",
-        attributes: { "aria-sort": "none" }
-      },
-      {
-        text: "Updates",
-        format: "numeric",
-        attributes: { "aria-sort": "none" }
-      }
-    ],
-    rows: [
-      [
-        { html: '<a href="#" class="govuk-link">Waste carrier registration</a>', attributes: { "data-sort-value": "Waste carrier registration" } },
-        { text: "Environment Agency", attributes: { "data-sort-value": "Environment Agency" } },
-        { text: "342", format: "numeric", attributes: { "data-sort-value": "342" } },
-        { text: "8,640", format: "numeric", attributes: { "data-sort-value": "8640" } },
-        { text: "112", format: "numeric", attributes: { "data-sort-value": "112" } },
-        { text: "100", format: "numeric", attributes: { "data-sort-value": "100" } }
-      ],
-      [
-        { html: '<a href="#" class="govuk-link">Export health certificate</a>', attributes: { "data-sort-value": "Export health certificate" } },
-        { text: "APHA", attributes: { "data-sort-value": "APHA" } },
-        { text: "298", format: "numeric", attributes: { "data-sort-value": "298" } },
-        { text: "7,512", format: "numeric", attributes: { "data-sort-value": "7512" } },
-        { text: "94", format: "numeric", attributes: { "data-sort-value": "94" } },
-        { text: "89", format: "numeric", attributes: { "data-sort-value": "89" } }
-      ],
-      [
-        { html: '<a href="#" class="govuk-link">Basic Payment Scheme claim</a>', attributes: { "data-sort-value": "Basic Payment Scheme claim" } },
-        { text: "Rural Payments Agency", attributes: { "data-sort-value": "Rural Payments Agency" } },
-        { text: "256", format: "numeric", attributes: { "data-sort-value": "256" } },
-        { text: "6,204", format: "numeric", attributes: { "data-sort-value": "6204" } },
-        { text: "78", format: "numeric", attributes: { "data-sort-value": "78" } },
-        { text: "76", format: "numeric", attributes: { "data-sort-value": "76" } }
-      ],
-      [
-        { html: '<a href="#" class="govuk-link">Countryside Stewardship application</a>', attributes: { "data-sort-value": "Countryside Stewardship application" } },
-        { text: "Rural Payments Agency", attributes: { "data-sort-value": "Rural Payments Agency" } },
-        { text: "214", format: "numeric", attributes: { "data-sort-value": "214" } },
-        { text: "4,890", format: "numeric", attributes: { "data-sort-value": "4890" } },
-        { text: "68", format: "numeric", attributes: { "data-sort-value": "68" } },
-        { text: "64", format: "numeric", attributes: { "data-sort-value": "64" } }
-      ],
-      [
-        { html: '<a href="#" class="govuk-link">Hazardous waste consignment</a>', attributes: { "data-sort-value": "Hazardous waste consignment" } },
-        { text: "Environment Agency", attributes: { "data-sort-value": "Environment Agency" } },
-        { text: "178", format: "numeric", attributes: { "data-sort-value": "178" } },
-        { text: "3,642", format: "numeric", attributes: { "data-sort-value": "3642" } },
-        { text: "56", format: "numeric", attributes: { "data-sort-value": "56" } },
-        { text: "53", format: "numeric", attributes: { "data-sort-value": "53" } }
-      ],
-      [
-        { html: '<a href="#" class="govuk-link">Farm waste management</a>', attributes: { "data-sort-value": "Farm waste management" } },
-        { text: "Environment Agency", attributes: { "data-sort-value": "Environment Agency" } },
-        { text: "152", format: "numeric", attributes: { "data-sort-value": "152" } },
-        { text: "3,102", format: "numeric", attributes: { "data-sort-value": "3102" } },
-        { text: "48", format: "numeric", attributes: { "data-sort-value": "48" } },
-        { text: "47", format: "numeric", attributes: { "data-sort-value": "47" } }
-      ],
-      [
-        { html: '<a href="#" class="govuk-link">Agricultural subsidy claim</a>', attributes: { "data-sort-value": "Agricultural subsidy claim" } },
-        { text: "Rural Payments Agency", attributes: { "data-sort-value": "Rural Payments Agency" } },
-        { text: "122", format: "numeric", attributes: { "data-sort-value": "122" } },
-        { text: "2,850", format: "numeric", attributes: { "data-sort-value": "2850" } },
-        { text: "56", format: "numeric", attributes: { "data-sort-value": "56" } },
-        { text: "50", format: "numeric", attributes: { "data-sort-value": "50" } }
-      ]
-    ]
-  }) }}
-</div>
 {% endset %}
 
 {% set allTimeContent %}
@@ -768,70 +453,38 @@ Defra Form Designer metrics                </h1>
   </div>
 </div>
 
-<div class="app-insights-panel govuk-!-margin-bottom-8">
-  <h2 class="govuk-heading-m govuk-!-margin-bottom-3">Key insights</h2>
-  <ul class="govuk-list govuk-!-margin-bottom-0">
-    <li class="app-insights-panel__item"><strong>Registrations</strong> up 20.6% year-on-year</li>
-    <li class="app-insights-panel__item"><strong>Sign-ins</strong> increased by 72,000</li>
-    <li class="app-insights-panel__item"><strong>Account deletions</strong> reduced by 10.3%</li>
-    <li class="app-insights-panel__item app-insights-panel__item--warning"><strong>Mobile number not associated</strong> up 12.5% — may warrant investigation</li>
-  </ul>
+<div class="app-insights-row govuk-!-margin-bottom-8">
+  <div class="app-insights-row__column">
+    <h2 class="govuk-heading-m">Key insights</h2>
+    <div class="app-side-panel app-side-panel--insights">
+      <ul class="govuk-list govuk-!-margin-bottom-0">
+        <li class="app-insights-panel__item"><strong>Registrations</strong> up 20.6% year-on-year</li>
+        <li class="app-insights-panel__item"><strong>Sign-ins</strong> increased by 72,000</li>
+        <li class="app-insights-panel__item"><strong>Account deletions</strong> reduced by 10.3%</li>
+        <li class="app-insights-panel__item app-insights-panel__item--warning"><strong>Mobile number not associated</strong> up 12.5% — may warrant investigation</li>
+      </ul>
+    </div>
+  </div>
+  <div class="app-insights-row__column">
+    <h2 class="govuk-heading-m">Service issues</h2>
+    <div class="app-side-panel app-side-panel--issues">
+      <p class="govuk-body govuk-!-margin-bottom-4">Metrics that may indicate friction in the sign-in journey.</p>
+      <div class="app-side-panel__stat">
+        <p class="app-side-panel__label">
+          {{ metricLabel('Mobile number not associated with account', 'Number of times a user could not continue because no mobile number was associated with their account, during recovery or email update journeys.', 'metric-tip-mobile-number-not-associated-with-account-all') }}
+        </p>
+        <p class="app-side-panel__value-row">
+          <span class="app-side-panel__value">3,200</span>
+          {{ govukTag({ text: "+12.5%", classes: "govuk-tag--red app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Mobile number not associated increased by 12.5%." } }) }}
+        </p>
+        <p class="govuk-body-xs app-metric-caption govuk-!-margin-bottom-0">1,920 during recovery · 1,280 during email updates</p>
+      </div>
+    </div>
+  </div>
 </div>
 
-<div class="govuk-!-margin-bottom-8">
-  <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Account activity</h2>
-  <div class="govuk-grid-row">
-    <div class="govuk-grid-column-one-half">
-      <div class="app-metric-tile">
-        <div class="gem-c-big-number">
-          {{ metricLabel('Sign-ins', 'Total number of successful authentications (sign-ins) to Defra Forms.', 'metric-tip-sign-ins-all-2') }}
-          <span class="gem-c-big-number__value">486K</span>
-        </div>
-        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-          {{ govukTag({ text: "+17.4%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Sign-ins increased by 17.4%." } }) }}
-        </div>
-        <p class="govuk-body-xs app-metric-caption">72,000 more than same period last year</p>
-      </div>
-    </div>
-    <div class="govuk-grid-column-one-half">
-      <div class="app-metric-tile">
-        <div class="gem-c-big-number">
-          {{ metricLabel('Registrations', 'Total number of new Defra sign-in account registrations.', 'metric-tip-registrations-all-2') }}
-          <span class="gem-c-big-number__value">24,680</span>
-        </div>
-        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-          {{ govukTag({ text: "+20.6%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Registrations increased by 20.6%." } }) }}
-        </div>
-        <p class="govuk-body-xs app-metric-caption">4,210 more than same period last year</p>
-      </div>
-    </div>
-  </div>
-  <div class="govuk-grid-row">
-    <div class="govuk-grid-column-one-half">
-      <div class="app-metric-tile">
-        <div class="gem-c-big-number">
-          {{ metricLabel('Account recovery journeys', 'Total number of completed forgotten details journeys from start to finish.', 'metric-tip-account-recovery-journeys-all') }}
-          <span class="gem-c-big-number__value">6,840</span>
-        </div>
-        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-          {{ govukTag({ text: "+14.9%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Account recovery increased by 14.9%." } }) }}
-        </div>
-        <p class="govuk-body-xs app-metric-caption">890 more than same period last year</p>
-      </div>
-    </div>
-    <div class="govuk-grid-column-one-half">
-      <div class="app-metric-tile">
-        <div class="gem-c-big-number">
-          {{ metricLabel('Account deletions', 'Total number of Defra sign-in accounts deleted by users.', 'metric-tip-account-deletions-all-2') }}
-          <span class="gem-c-big-number__value">1,045</span>
-        </div>
-        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-          {{ govukTag({ text: "–10.3%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-down", attributes: { "aria-label": "Account deletions decreased by 10.3%." } }) }}
-        </div>
-        <p class="govuk-body-xs app-metric-caption">120 fewer than same period last year</p>
-      </div>
-    </div>
-  </div>
+<div class="govuk-!-margin-bottom-0">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Updating details</h2>
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-one-half">
       <div class="app-metric-tile">
@@ -860,128 +513,6 @@ Defra Form Designer metrics                </h1>
   </div>
 </div>
 
-<div class="govuk-!-margin-bottom-8">
-  <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Service issues</h2>
-  <p class="govuk-body govuk-!-margin-bottom-4">Metrics that may indicate friction in the sign-in journey.</p>
-  <div class="govuk-grid-row">
-    <div class="govuk-grid-column-one-half">
-      <div class="app-metric-tile app-metric-tile--warning">
-        <div class="app-metric-tile__warning-label">
-          <span class="app-warning-icon" aria-hidden="true">!</span>
-          Potential friction
-        </div>
-        <div class="gem-c-big-number">
-          {{ metricLabel('Mobile number not associated with account', 'Number of times a user could not continue because no mobile number was associated with their account, during recovery or email update journeys.', 'metric-tip-mobile-number-not-associated-with-account-all') }}
-          <span class="gem-c-big-number__value">3,200</span>
-        </div>
-        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-          {{ govukTag({ text: "+12.5%", classes: "govuk-tag--red app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Mobile number not associated increased by 12.5%." } }) }}
-        </div>
-        <p class="govuk-body-xs app-metric-caption">1,920 during recovery · 1,280 during email updates</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="govuk-!-margin-bottom-0">
-  <h2 class="govuk-heading-m govuk-!-margin-bottom-2">By form</h2>
-  <p class="govuk-body govuk-!-margin-bottom-4">Compare sign-in performance across forms. Select a column heading to sort.</p>
-
-  {{ govukTable({
-    attributes: {
-      "data-module": "moj-sortable-table"
-    },
-    firstCellIsHeader: true,
-    head: [
-      {
-        text: "Form name",
-        attributes: { "aria-sort": "none" }
-      },
-      {
-        text: "Organisation",
-        attributes: { "aria-sort": "none" }
-      },
-      {
-        text: "Registrations",
-        format: "numeric",
-        attributes: { "aria-sort": "descending" }
-      },
-      {
-        text: "Sign-ins",
-        format: "numeric",
-        attributes: { "aria-sort": "none" }
-      },
-      {
-        text: "Recovery",
-        format: "numeric",
-        attributes: { "aria-sort": "none" }
-      },
-      {
-        text: "Updates",
-        format: "numeric",
-        attributes: { "aria-sort": "none" }
-      }
-    ],
-    rows: [
-      [
-        { html: '<a href="#" class="govuk-link">Waste carrier registration</a>', attributes: { "data-sort-value": "Waste carrier registration" } },
-        { text: "Environment Agency", attributes: { "data-sort-value": "Environment Agency" } },
-        { text: "5,240", format: "numeric", attributes: { "data-sort-value": "5240" } },
-        { text: "98,400", format: "numeric", attributes: { "data-sort-value": "98400" } },
-        { text: "1,420", format: "numeric", attributes: { "data-sort-value": "1420" } },
-        { text: "1,430", format: "numeric", attributes: { "data-sort-value": "1430" } }
-      ],
-      [
-        { html: '<a href="#" class="govuk-link">Export health certificate</a>', attributes: { "data-sort-value": "Export health certificate" } },
-        { text: "APHA", attributes: { "data-sort-value": "APHA" } },
-        { text: "4,680", format: "numeric", attributes: { "data-sort-value": "4680" } },
-        { text: "86,200", format: "numeric", attributes: { "data-sort-value": "86200" } },
-        { text: "1,180", format: "numeric", attributes: { "data-sort-value": "1180" } },
-        { text: "1,280", format: "numeric", attributes: { "data-sort-value": "1280" } }
-      ],
-      [
-        { html: '<a href="#" class="govuk-link">Basic Payment Scheme claim</a>', attributes: { "data-sort-value": "Basic Payment Scheme claim" } },
-        { text: "Rural Payments Agency", attributes: { "data-sort-value": "Rural Payments Agency" } },
-        { text: "4,120", format: "numeric", attributes: { "data-sort-value": "4120" } },
-        { text: "74,800", format: "numeric", attributes: { "data-sort-value": "74800" } },
-        { text: "980", format: "numeric", attributes: { "data-sort-value": "980" } },
-        { text: "1,100", format: "numeric", attributes: { "data-sort-value": "1100" } }
-      ],
-      [
-        { html: '<a href="#" class="govuk-link">Countryside Stewardship application</a>', attributes: { "data-sort-value": "Countryside Stewardship application" } },
-        { text: "Rural Payments Agency", attributes: { "data-sort-value": "Rural Payments Agency" } },
-        { text: "3,450", format: "numeric", attributes: { "data-sort-value": "3450" } },
-        { text: "62,100", format: "numeric", attributes: { "data-sort-value": "62100" } },
-        { text: "840", format: "numeric", attributes: { "data-sort-value": "840" } },
-        { text: "900", format: "numeric", attributes: { "data-sort-value": "900" } }
-      ],
-      [
-        { html: '<a href="#" class="govuk-link">Hazardous waste consignment</a>', attributes: { "data-sort-value": "Hazardous waste consignment" } },
-        { text: "Environment Agency", attributes: { "data-sort-value": "Environment Agency" } },
-        { text: "2,890", format: "numeric", attributes: { "data-sort-value": "2890" } },
-        { text: "51,400", format: "numeric", attributes: { "data-sort-value": "51400" } },
-        { text: "720", format: "numeric", attributes: { "data-sort-value": "720" } },
-        { text: "750", format: "numeric", attributes: { "data-sort-value": "750" } }
-      ],
-      [
-        { html: '<a href="#" class="govuk-link">Farm waste management</a>', attributes: { "data-sort-value": "Farm waste management" } },
-        { text: "Environment Agency", attributes: { "data-sort-value": "Environment Agency" } },
-        { text: "2,310", format: "numeric", attributes: { "data-sort-value": "2310" } },
-        { text: "42,600", format: "numeric", attributes: { "data-sort-value": "42600" } },
-        { text: "610", format: "numeric", attributes: { "data-sort-value": "610" } },
-        { text: "660", format: "numeric", attributes: { "data-sort-value": "660" } }
-      ],
-      [
-        { html: '<a href="#" class="govuk-link">Agricultural subsidy claim</a>', attributes: { "data-sort-value": "Agricultural subsidy claim" } },
-        { text: "Rural Payments Agency", attributes: { "data-sort-value": "Rural Payments Agency" } },
-        { text: "1,990", format: "numeric", attributes: { "data-sort-value": "1990" } },
-        { text: "70,500", format: "numeric", attributes: { "data-sort-value": "70500" } },
-        { text: "1,090", format: "numeric", attributes: { "data-sort-value": "1090" } },
-        { text: "680", format: "numeric", attributes: { "data-sort-value": "680" } }
-      ]
-    ]
-  }) }}
-</div>
 {% endset %}
 
 {{ govukTabs({
@@ -1025,11 +556,62 @@ Defra Form Designer metrics                </h1>
     }
   }
 
-  /* Key insights panel */
-  .app-insights-panel {
+  /* Key insights and service issues row */
+  .app-insights-row {
+    display: none;
+  }
+
+  .app-insights-row__column {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .app-insights-row__column > .govuk-heading-m {
+    margin-bottom: 15px;
+  }
+
+  .app-side-panel {
+    flex: 1 1 auto;
+    padding: 24px;
     background-color: #f3f2f1;
     border-left: 5px solid #1d70b8;
-    padding: 20px 24px;
+    box-sizing: border-box;
+  }
+
+  .app-side-panel--issues {
+    background-color: #fef7f7;
+    border: 1px solid #f6d7d2;
+    border-left: 5px solid #d4351c;
+  }
+
+  .app-side-panel__label {
+    margin-bottom: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: #0b0c0c;
+  }
+
+  .app-side-panel__value-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 0 0 8px;
+  }
+
+  .app-side-panel__value {
+    font-size: 2.25rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: #0b0c0c;
+  }
+
+  @media (min-width: 40.0625em) {
+    .app-side-panel__value {
+      font-size: 2.5rem;
+    }
   }
 
   .app-insights-panel__item {
@@ -1047,6 +629,12 @@ Defra Form Designer metrics                </h1>
 
   .app-insights-panel__item--warning::before {
     content: "⚠ ";
+  }
+
+  /* Smaller unit text for big numbers, e.g. "days" */
+  .app-big-number-unit {
+    font-size: 0.6em;
+    font-weight: 400;
   }
 
   /* Metric tiles */
