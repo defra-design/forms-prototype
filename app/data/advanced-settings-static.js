@@ -8,7 +8,7 @@ const CHECK_BEFORE_SUBMISSION_SETTING = {
   summaryLabel: "Check before submission",
   summaryValueYes: "Someone else reviews answers before submission",
   summaryValueNo: "Submitted without anyone else reviewing answers",
-  label: "Does someone need to check the form before it is submitted?",
+  label: "Do people have to get their answers checked before submitting?",
   hint:
     "Use when someone other than the person filling in the form should review their answers first.",
   yesDescription:
@@ -16,10 +16,10 @@ const CHECK_BEFORE_SUBMISSION_SETTING = {
   noDescription:
     "The person filling in the form can submit when they are ready. No one else needs to review their answers.",
   changeHiddenText: "whether someone must check the form before it is submitted",
-  whoCanCheckLabel: "Who can check the form",
+  whoCanCheckLabel: "Who should check the form",
   whoCanCheckHint:
     "Tell people who they should ask to review their answers. For example, their manager or a colleague in the same team.",
-  optionalLabel: "Is this optional?",
+  optionalLabel: "Is the check optional?",
   optionalHint:
     "If optional, people can choose whether to ask someone to check their answers before submitting.",
   optionalSummaryLabel: "Check before submission is optional",
@@ -62,7 +62,7 @@ const OVERVIEW_VARIANTS = [
   {
     slug: "check-before-submission-enabled",
     title: "Check before submission enabled",
-    description: "Checker review required. Who can check the form is set.",
+    description: "Checker review required. Who should check the form is set.",
   },
   {
     slug: "reuse-previous-answers-off",
@@ -102,19 +102,19 @@ const CHECK_BEFORE_SUBMISSION_VARIANTS = [
     slug: "yes-with-description",
     title: "Yes selected with description",
     description:
-      "Checker review required. Who can check the form is filled in. Optional set to no.",
+      "Checker review required. Who should check the form is filled in. Optional set to no.",
   },
   {
     slug: "yes-optional",
     title: "Yes selected and optional",
     description:
-      "Checker review available. Who can check the form is filled in. Optional set to yes.",
+      "Checker review available. Who should check the form is filled in. Optional set to yes.",
   },
   {
     slug: "validation-error",
     title: "Validation error",
     description:
-      "Yes selected but who can check the form and whether it is optional are missing.",
+      "Yes selected but who should check the form and whether it is optional are missing.",
   },
 ];
 
@@ -369,7 +369,7 @@ function buildStaticAdvancedSettingsChangeContext(settingSlug, variant) {
       data.whoCanCheckDescription = "";
       data.checkBeforeSubmissionOptional = "";
       errors = {
-        whoCanCheckDescription: "Enter who can check the form",
+        whoCanCheckDescription: "Enter who should check the form",
         checkBeforeSubmissionOptional:
           "Select yes if this is optional, or no if it is not",
       };
