@@ -2621,6 +2621,12 @@ const ADVANCED_SETTINGS_PAGES = {
     whoCanCheckLabel: "Who can check the form",
     whoCanCheckHint:
       "Tell people who they should ask to review their answers. For example, their manager or a colleague in the same team.",
+    optionalLabel: "Is this optional?",
+    optionalHint:
+      "If optional, people can choose whether to ask someone to check their answers before submitting.",
+    optionalSummaryLabel: "Check before submission is optional",
+    optionalSummaryValueYes: "Yes",
+    optionalSummaryValueNo: "No",
     autoEnableWarning:
       "If someone must check the form before it is submitted, the confirmation email and reference number will be switched on automatically.",
   },
@@ -2670,12 +2676,19 @@ function setReusePreviousAnswers(formData, value) {
 
 function getAdvancedSettings(formData) {
   const settings = formData.advancedSettings || {};
+  const checkBeforeSubmissionOptional =
+    settings.checkBeforeSubmissionOptional === "yes" ||
+    settings.checkBeforeSubmissionOptional === "no"
+      ? settings.checkBeforeSubmissionOptional
+      : "";
+
   return {
     checkBeforeSubmission: resolveAdvancedSettingsYesNo(
       settings.checkBeforeSubmission,
       settings.requiresApproval
     ),
     whoCanCheckDescription: settings.whoCanCheckDescription || "",
+    checkBeforeSubmissionOptional,
     reusePreviousAnswers: resolveAdvancedSettingsYesNo(
       settings.reusePreviousAnswers,
       settings.allowCopies,
@@ -2707,21 +2720,43 @@ function getAdvancedSettingsSummaryRows(formData) {
 
   if (data.checkBeforeSubmission === "yes") {
     const checkSetting = ADVANCED_SETTINGS_PAGES["check-before-submission"];
-    rows.splice(1, 0, {
-      key: { text: checkSetting.whoCanCheckLabel },
-      value: {
-        text: data.whoCanCheckDescription || "Not added yet",
+    rows.splice(
+      1,
+      0,
+      {
+        key: { text: checkSetting.whoCanCheckLabel },
+        value: {
+          text: data.whoCanCheckDescription || "Not added yet",
+        },
+        actions: {
+          items: [
+            {
+              href: `/titan-mvp-1.2/form-editor/advanced-settings/${checkSetting.slug}`,
+              text: "Change",
+              visuallyHiddenText: checkSetting.whoCanCheckLabel.toLowerCase(),
+            },
+          ],
+        },
       },
-      actions: {
-        items: [
-          {
-            href: `/titan-mvp-1.2/form-editor/advanced-settings/${checkSetting.slug}`,
-            text: "Change",
-            visuallyHiddenText: checkSetting.whoCanCheckLabel.toLowerCase(),
-          },
-        ],
-      },
-    });
+      {
+        key: { text: checkSetting.optionalSummaryLabel },
+        value: {
+          text:
+            data.checkBeforeSubmissionOptional === "yes"
+              ? checkSetting.optionalSummaryValueYes
+              : checkSetting.optionalSummaryValueNo,
+        },
+        actions: {
+          items: [
+            {
+              href: `/titan-mvp-1.2/form-editor/advanced-settings/${checkSetting.slug}`,
+              text: "Change",
+              visuallyHiddenText: checkSetting.optionalLabel.toLowerCase(),
+            },
+          ],
+        },
+      }
+    );
   }
 
   const mailboxSettings = getConditionalMailboxSettings(formData);
@@ -3342,25 +3377,42 @@ router.post(
       const whoCanCheckDescription = String(
         req.body.whoCanCheckDescription || ""
       ).trim();
+      const checkBeforeSubmissionOptional =
+        req.body.checkBeforeSubmissionOptional === "yes" ||
+        req.body.checkBeforeSubmissionOptional === "no"
+          ? req.body.checkBeforeSubmissionOptional
+          : "";
+
+      const errors = {};
 
       if (selectedValue === "yes" && !whoCanCheckDescription) {
+        errors.whoCanCheckDescription = "Enter who can check the form";
+      }
+
+      if (selectedValue === "yes" && !checkBeforeSubmissionOptional) {
+        errors.checkBeforeSubmissionOptional =
+          "Select yes if this is optional, or no if it is not";
+      }
+
+      if (Object.keys(errors).length) {
         return res.render("titan-mvp-1.2/form-editor/advanced-settings/change", {
           data: {
             ...getAdvancedSettings(formData),
             whoCanCheckDescription,
+            checkBeforeSubmissionOptional,
           },
           setting,
           form: {
             name: formData.formName || "Form name",
           },
-          errors: {
-            whoCanCheckDescription: "Enter who can check the form",
-          },
+          errors,
         });
       }
 
       formData.advancedSettings.whoCanCheckDescription =
         selectedValue === "yes" ? whoCanCheckDescription : "";
+      formData.advancedSettings.checkBeforeSubmissionOptional =
+        selectedValue === "yes" ? checkBeforeSubmissionOptional : "no";
 
       if (selectedValue === "yes") {
         enableConfirmationEmailAndReferenceNumber(formData);

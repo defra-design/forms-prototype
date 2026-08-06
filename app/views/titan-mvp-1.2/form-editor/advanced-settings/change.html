@@ -51,19 +51,28 @@ href: backUrl
 
             <span class="govuk-caption-l">{{ form.name }}</span>
 
-            {% if errors and errors.whoCanCheckDescription %}
-            {{ govukErrorSummary({
-            titleText: "There is a problem",
-            errorList: [
-            {
+            {% if errors and (errors.whoCanCheckDescription or errors.checkBeforeSubmissionOptional) %}
+            {% set errorList = [] %}
+            {% if errors.whoCanCheckDescription %}
+            {% set errorList = (errorList.push({
             text: errors.whoCanCheckDescription,
             href: "#who-can-check-description"
-            }
-            ]
+            }), errorList) %}
+            {% endif %}
+            {% if errors.checkBeforeSubmissionOptional %}
+            {% set errorList = (errorList.push({
+            text: errors.checkBeforeSubmissionOptional,
+            href: "#check-before-submission-optional"
+            }), errorList) %}
+            {% endif %}
+            {{ govukErrorSummary({
+            titleText: "There is a problem",
+            errorList: errorList
             }) }}
             {% endif %}
 
             {% if setting.slug == "check-before-submission" %}
+            {% set markdownHelpHtml %}{% include "titan-mvp-1.2/form-editor/welsh-translation/_markdown-help-panel.html" %}{% endset %}
             {% set whoCanCheckHtml %}
             {{ govukTextarea({
             id: "who-can-check-description",
@@ -73,11 +82,45 @@ href: backUrl
             text: setting.whoCanCheckLabel
             },
             hint: {
-            text: setting.whoCanCheckHint
+            html: setting.whoCanCheckHint + "<br>You can use Markdown if you want to format the content or add links"
             },
             errorMessage: {
             text: errors.whoCanCheckDescription
             } if errors and errors.whoCanCheckDescription else false
+            }) }}
+
+            {{ govukDetails({
+            summaryText: "Help with markdown",
+            html: markdownHelpHtml
+            }) }}
+
+            {{ govukRadios({
+            classes: "govuk-radios--inline",
+            idPrefix: "check-before-submission-optional",
+            name: "checkBeforeSubmissionOptional",
+            fieldset: {
+            legend: {
+            text: "Is the check optional?"
+            }
+            },
+            hint: {
+            text: "If optional, people can choose whether to ask someone to check their answers before submitting."
+            },
+            errorMessage: {
+            text: errors.checkBeforeSubmissionOptional
+            } if errors and errors.checkBeforeSubmissionOptional else false,
+            items: [
+            {
+            value: "yes",
+            text: "Yes",
+            checked: data.checkBeforeSubmissionOptional == "yes"
+            },
+            {
+            value: "no",
+            text: "No, this is required",
+            checked: data.checkBeforeSubmissionOptional == "no"
+            }
+            ]
             }) }}
             {% endset -%}
 
@@ -85,7 +128,7 @@ href: backUrl
             name: setting.key,
             fieldset: {
             legend: {
-            text: setting.label,
+            text: "Do people have to get their answers checked before submitting?",
             isPageHeading: true,
             classes: "govuk-fieldset__legend--l"
             }
