@@ -226,6 +226,10 @@ function buildRunnerSignInV2BaselineAllPagesSections(urls, { formKey, applicatio
       heading: "Checker",
       links: [
         { text: "Check your answers", href: urls.applicantCheckAnswers },
+        {
+          text: "Check your answers (optional check)",
+          href: "/runner-sign-in-v2-baseline/journeys/preview/applicant-check-answers-optional",
+        },
         { text: "Invite a checker", href: urls.checkerInvite },
         {
           text: "Checker invite sent",
@@ -456,6 +460,7 @@ function buildRunnerSignInV2BaselineAllPagesStaticSections(urls, { unexpectedPag
       heading: "Checker",
       links: [
         { text: "Check your answers", href: p.applicantCheckAnswers },
+        { text: "Check your answers (optional check)", href: preview("applicant-check-answers-optional") },
         { text: "Invite a checker", href: p.checkerInvite },
         { text: "Checker invite sent", href: preview("checker-invite-sent") },
         { text: "Checker invite email", href: p.emailCheckerInvite },

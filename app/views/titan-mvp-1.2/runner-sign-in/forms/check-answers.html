@@ -195,29 +195,34 @@ Check your answers – {{ formDef.formName }} – GOV.UK
 
     {% if application.formKey == "apply-small-grant" %}
       {% set checkingStatus = (application.checking.status if application.checking and application.checking.status else "not_started") %}
+      {% set isOptionalCheck = checkingOptional or (application.checking and application.checking.optional) %}
+      {% set whoCanCheck = whoCanCheckDescription or (application.checking.whoCanCheckDescription if application.checking else "") %}
 
       {% if checkingStatus != "checked" %}
-        <h2 class="govuk-heading-m">Your form must be checked before you can submit it
-        </h2>
-        <p class="govuk-body">
-          You’ll need their email address so we can send them a link to check your answers.</p>
-
-          <p class="govuk-body">You can submit the form once they have finished checking it.
-
+        {% if isOptionalCheck %}
+          <h2 class="govuk-heading-m">You can ask someone to check your form before you submit it (optional)</h2>
+          {% if whoCanCheck %}
+            <div class="govuk-body markdown-content" data-markdown="{{ whoCanCheck | replace('"', '&quot;') }}"></div>
+          {% endif %}
+          <p class="govuk-body">
+            You’ll need their email address so we can send them a link to check your answers.
           </p>
+          <p class="govuk-body">
+            You can also submit the form without someone checking it.
+          </p>
+        {% else %}
+          <h2 class="govuk-heading-m">Your form must be checked before you can submit it
+          </h2>
+          {% if whoCanCheck %}
+            <div class="govuk-body markdown-content" data-markdown="{{ whoCanCheck | replace('"', '&quot;') }}"></div>
+          {% endif %}
+          <p class="govuk-body">
+            You’ll need their email address so we can send them a link to check your answers.</p>
 
-        {# <ol class="govuk-list govuk-list--number">
-          <li>
-            <p class="govuk-body">
-              On the next screen you’ll enter the details of the person checking your form.
+            <p class="govuk-body">You can submit the form once they have finished checking it.
+
             </p>
-          </li>
-          <li>
-            <p class="govuk-body govuk-!-margin-bottom-0">
-              We’ll email you the details you need to access the form again while it is being checked.
-            </p>
-          </li>
-        </ol> #}
+        {% endif %}
 
         {% if checkingStatus == "awaiting_check" %}
           <p class="govuk-body">
@@ -225,11 +230,45 @@ Check your answers – {{ formDef.formName }} – GOV.UK
           </p>
         {% endif %}
 
-        {% if inviteCheckerUrl %}
+        {% if isOptionalCheck %}
+          {% if inviteCheckerUrl %}
+            <form method="post" action="{{ submitUrl or (baseHref + '/submit') }}">
+              <div class="govuk-button-group">
+                {{ govukButton({
+                  text: "Invite someone to check your form",
+                  href: inviteCheckerUrl
+                }) }}
+                {% if canSubmitWithoutCheck %}
+                  {{ govukButton({
+                    text: "Submit without checking",
+                    classes: "govuk-button--secondary"
+                  }) }}
+                {% endif %}
+              </div>
+            </form>
+          {% else %}
+            <form method="post" action="{{ baseHref }}/send-for-checking">
+              <div class="govuk-button-group">
+                {{ govukButton({
+                  text: "Invite someone to check your form"
+                }) }}
+                {{ govukButton({
+                  text: "Submit without checking",
+                  classes: "govuk-button--secondary",
+                  attributes: {
+                    formaction: submitUrl or (baseHref + '/submit')
+                  }
+                }) }}
+              </div>
+            </form>
+          {% endif %}
+          <p class="govuk-body">
+            <a class="govuk-link" href="{{ saveAndExitUrl or '/runner-sign-in/applications' }}">Save and exit</a>
+          </p>
+        {% elif inviteCheckerUrl %}
           <div class="govuk-button-group">
             {{ govukButton({
               text: "Invite someone to check your form",
-              classes: "govuk-button--primary govuk-!-margin-top-4 govuk-!-margin-bottom-0",
               href: inviteCheckerUrl
             }) }}
             {{ govukButton({
@@ -242,13 +281,12 @@ Check your answers – {{ formDef.formName }} – GOV.UK
           <form method="post" action="{{ baseHref }}/send-for-checking">
             <div class="govuk-button-group">
               {{ govukButton({
-                text: "Invite someone to check your form",
-                classes: "govuk-button--primary govuk-!-margin-top-4 govuk-!-margin-bottom-0"
+                text: "Invite someone to check your form"
               }) }}
               {{ govukButton({
                 text: "Save and exit",
                 classes: "govuk-button--secondary",
-                href: "/runner-sign-in/applications"
+                href: saveAndExitUrl or "/runner-sign-in/applications"
               }) }}
             </div>
           </form>
@@ -260,7 +298,7 @@ Check your answers – {{ formDef.formName }} – GOV.UK
           </p>
         {% endif %}
       {% else %}
-        <form method="post" action="{{ baseHref }}/submit">
+        <form method="post" action="{{ submitUrl or (baseHref + '/submit') }}">
           <div class="govuk-button-group">
             {{ govukButton({
               text: "Submit form",
@@ -285,5 +323,24 @@ Check your answers – {{ formDef.formName }} – GOV.UK
     {% endif %}
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    (function () {
+      if (typeof marked === "undefined") return;
+      document.querySelectorAll(".markdown-content[data-markdown]").forEach(function (element) {
+        var markdownText = element.getAttribute("data-markdown");
+        if (!markdownText) return;
+        try {
+          element.innerHTML = marked.parse(markdownText);
+        } catch (error) {
+          element.textContent = markdownText;
+        }
+      });
+    })();
+  </script>
 {% endblock %}
 

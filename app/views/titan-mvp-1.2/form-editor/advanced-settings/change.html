@@ -82,7 +82,7 @@ href: backUrl
             text: setting.whoCanCheckLabel
             },
             hint: {
-            html: setting.whoCanCheckHint + "<br>You can use Markdown if you want to format the content or add links"
+            html: setting.whoCanCheckHint + "<br>You can use Markdown if you want to format the content or add links."
             },
             errorMessage: {
             text: errors.whoCanCheckDescription
@@ -90,7 +90,7 @@ href: backUrl
             }) }}
 
             {{ govukDetails({
-            summaryText: "Help with markdown",
+            summaryText: "Help with Markdown",
             html: markdownHelpHtml
             }) }}
 
@@ -100,11 +100,11 @@ href: backUrl
             name: "checkBeforeSubmissionOptional",
             fieldset: {
             legend: {
-            text: "Is the check optional?"
+            text: setting.optionalLabel
             }
             },
             hint: {
-            text: "If optional, people can choose whether to ask someone to check their answers before submitting."
+            text: setting.optionalHint
             },
             errorMessage: {
             text: errors.checkBeforeSubmissionOptional
@@ -128,7 +128,7 @@ href: backUrl
             name: setting.key,
             fieldset: {
             legend: {
-            text: "Do people have to get their answers checked before submitting?",
+            text: setting.label,
             isPageHeading: true,
             classes: "govuk-fieldset__legend--l"
             }

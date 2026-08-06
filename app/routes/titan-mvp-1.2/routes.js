@@ -2610,7 +2610,7 @@ const ADVANCED_SETTINGS_PAGES = {
     summaryLabel: "Check before submission",
     summaryValueYes: "Someone else reviews answers before submission",
     summaryValueNo: "Submitted without anyone else reviewing answers",
-    label: "Does someone need to check the form before it is submitted?",
+    label: "Do people have to get their answers checked before submitting?",
     hint:
       "Use when someone other than the person filling in the form should review their answers first.",
     yesDescription:
@@ -2618,10 +2618,10 @@ const ADVANCED_SETTINGS_PAGES = {
     noDescription:
       "The person filling in the form can submit when they are ready. No one else needs to review their answers.",
     changeHiddenText: "whether someone must check the form before it is submitted",
-    whoCanCheckLabel: "Who can check the form",
+    whoCanCheckLabel: "Who should check the form",
     whoCanCheckHint:
       "Tell people who they should ask to review their answers. For example, their manager or a colleague in the same team.",
-    optionalLabel: "Is this optional?",
+    optionalLabel: "Is the check optional?",
     optionalHint:
       "If optional, people can choose whether to ask someone to check their answers before submitting.",
     optionalSummaryLabel: "Check before submission is optional",
@@ -3386,7 +3386,7 @@ router.post(
       const errors = {};
 
       if (selectedValue === "yes" && !whoCanCheckDescription) {
-        errors.whoCanCheckDescription = "Enter who can check the form";
+        errors.whoCanCheckDescription = "Enter who should check the form";
       }
 
       if (selectedValue === "yes" && !checkBeforeSubmissionOptional) {
@@ -17906,23 +17906,83 @@ function denormalizeRunnerSignInReferenceNumber(normalized) {
   return normalized;
 }
 
-function isRunnerSignInCheckingRequired(formKey) {
+function isRunnerSignInCheckingEnabled(formKey) {
   return String(formKey || "").trim() === "apply-small-grant";
 }
 
-function ensureRunnerSignInChecking(application) {
+function getRunnerSignInCheckingConfig(req, formKey) {
+  if (!isRunnerSignInCheckingEnabled(formKey)) {
+    return {
+      enabled: false,
+      optional: false,
+      whoCanCheckDescription: "",
+      fromDesigner: false,
+    };
+  }
+
+  const settings = getAdvancedSettings((req && req.session && req.session.data) || {});
+  if (settings.checkBeforeSubmission === "yes") {
+    return {
+      enabled: true,
+      optional: settings.checkBeforeSubmissionOptional === "yes",
+      whoCanCheckDescription: settings.whoCanCheckDescription || "",
+      fromDesigner: true,
+    };
+  }
+
+  return {
+    enabled: true,
+    optional: false,
+    whoCanCheckDescription:
+      "Their line manager or a colleague in the same team who is authorised to approve submissions.",
+    fromDesigner: false,
+  };
+}
+
+function ensureRunnerSignInChecking(application, req) {
   if (!application || typeof application !== "object") return application;
-  const required = isRunnerSignInCheckingRequired(application.formKey);
+  const config = getRunnerSignInCheckingConfig(req, application.formKey);
   if (!application.checking || typeof application.checking !== "object") {
     application.checking = {};
   }
-  application.checking.required = required;
-  if (!required) return application;
+  application.checking.required = config.enabled;
+
+  if (config.fromDesigner) {
+    application.checking.optional = Boolean(config.optional);
+    application.checking.whoCanCheckDescription = config.whoCanCheckDescription || "";
+  } else {
+    if (typeof application.checking.optional !== "boolean") {
+      application.checking.optional = Boolean(config.optional);
+    }
+    if (!application.checking.whoCanCheckDescription && config.whoCanCheckDescription) {
+      application.checking.whoCanCheckDescription = config.whoCanCheckDescription;
+    }
+  }
+
+  if (!config.enabled) return application;
 
   if (!application.checking.status) {
     application.checking.status = application.status === "Submitted" ? "checked" : "not_started";
   }
   return application;
+}
+
+function runnerSignInCheckingIsMandatory(application) {
+  return Boolean(
+    application &&
+      application.checking &&
+      application.checking.required &&
+      !application.checking.optional
+  );
+}
+
+function runnerSignInCheckingAllowsInvite(application) {
+  return Boolean(
+    application &&
+      application.checking &&
+      application.checking.required &&
+      String(application.checking.status || "not_started") !== "checked"
+  );
 }
 
 function runnerSignInQueryIsCopied(query) {
@@ -18558,7 +18618,7 @@ router.get("/runner-sign-in/forms/:formKey/:id/check-answers", function (req, re
   const formDef = getRunnerSignInFormDef(req.params.formKey);
   if (!formDef || formDef.formKey !== application.formKey) return res.redirect("/runner-sign-in/applications");
 
-  ensureRunnerSignInChecking(application);
+  ensureRunnerSignInChecking(application, req);
   // If we're operating in the v2 manage context, keep the focus aligned to the
   // application being checked/submitted (including newly-copied forms).
   if (data.runnerSignInV2RedirectApplicationsToManage) {
@@ -18575,12 +18635,13 @@ router.get("/runner-sign-in/forms/:formKey/:id/check-answers", function (req, re
   }
 
   const copied = runnerSignInIsCopiedJourney(req.query, application);
-  const inviteCheckerUrl =
-    application.checking &&
-    application.checking.required &&
-    String(application.checking.status || "not_started") !== "checked"
+  const inviteCheckerUrl = runnerSignInCheckingAllowsInvite(application)
       ? `/runner-sign-in-v2/forms/${encodeURIComponent(application.formKey)}/${encodeURIComponent(application.id)}/checker/invite`
       : null;
+  const checkingOptional = Boolean(application.checking && application.checking.optional);
+  const canSubmitWithoutCheck =
+    checkingOptional &&
+    String((application.checking && application.checking.status) || "not_started") !== "checked";
   return res.render("titan-mvp-1.2/runner-sign-in/forms/check-answers", {
     data,
     application,
@@ -18588,6 +18649,11 @@ router.get("/runner-sign-in/forms/:formKey/:id/check-answers", function (req, re
     copied,
     copiedQuerySuffix: runnerSignInCopiedQuerySuffix(req.query, application),
     inviteCheckerUrl,
+    checkingOptional,
+    whoCanCheckDescription:
+      (application.checking && application.checking.whoCanCheckDescription) || "",
+    canSubmitWithoutCheck,
+    submitUrl: `/runner-sign-in/forms/${encodeURIComponent(application.formKey)}/${encodeURIComponent(application.id)}/submit`,
     saveAndExitUrl: data.runnerSignInV2RedirectApplicationsToManage
       ? `/runner-sign-in-v2/save-and-exit/with-sign-in/confirm-email?formKey=${encodeURIComponent(application.formKey)}&applicationId=${encodeURIComponent(application.id)}`
       : "/runner-sign-in/applications",
@@ -18608,8 +18674,8 @@ router.post("/runner-sign-in/forms/:formKey/:id/submit", function (req, res) {
   const formDef = getRunnerSignInFormDef(req.params.formKey);
   if (!formDef || formDef.formKey !== application.formKey) return res.redirect("/runner-sign-in/applications");
 
-  ensureRunnerSignInChecking(application);
-  if (application.checking && application.checking.required) {
+  ensureRunnerSignInChecking(application, req);
+  if (runnerSignInCheckingIsMandatory(application)) {
     const status = String(application.checking.status || "not_started");
     if (status !== "checked") {
       return res.redirect(`/runner-sign-in/forms/${encodeURIComponent(application.formKey)}/${encodeURIComponent(application.id)}/send-for-checking`);
@@ -22719,6 +22785,7 @@ const RUNNER_SIGN_IN_V2_JOURNEY_PREVIEW_SIGNED_IN = new Set([
   "checker-invite",
   "checker-invite-sent",
   "applicant-check-answers",
+  "applicant-check-answers-optional",
   "ready-to-submit",
   "create-sign-in-created",
   "copy-clone",
@@ -23250,7 +23317,7 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
     });
   }
 
-  if (slug === "applicant-check-answers") {
+  if (slug === "applicant-check-answers" || slug === "applicant-check-answers-optional") {
     applyRunnerSignInV2EmailAuth(req, email, phone);
     data.runnerSignInV2RedirectApplicationsToManage = true;
     const grantFormKey = SEED.readyToInvite.formKey;
@@ -23259,8 +23326,17 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
     const applications = ensureRunnerSignInApplications(req);
     const grantApplication = applications.find((a) => a && a.id === grantApplicationId);
     if (!grantApplication) return res.redirect(journeysUrl);
-    ensureRunnerSignInChecking(grantApplication);
+    const checkingOptional = slug === "applicant-check-answers-optional";
+    const whoCanCheckDescription =
+      "Their line manager or a colleague in the same team who is authorised to approve submissions.";
+    if (!data.advancedSettings) data.advancedSettings = {};
+    data.advancedSettings.checkBeforeSubmission = "yes";
+    data.advancedSettings.checkBeforeSubmissionOptional = checkingOptional ? "yes" : "no";
+    data.advancedSettings.whoCanCheckDescription = whoCanCheckDescription;
+    ensureRunnerSignInChecking(grantApplication, req);
     grantApplication.checking.status = "not_started";
+    grantApplication.checking.optional = checkingOptional;
+    grantApplication.checking.whoCanCheckDescription = whoCanCheckDescription;
     const formDef = getRunnerSignInFormDef(grantFormKey);
     return res.render("titan-mvp-1.2/runner-sign-in/forms/check-answers", {
       data,
@@ -23269,6 +23345,10 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
       copied: false,
       copiedQuerySuffix: "",
       inviteCheckerUrl: runnerSignInV2JourneyPreviewPath("checker-invite"),
+      checkingOptional,
+      whoCanCheckDescription,
+      canSubmitWithoutCheck: checkingOptional,
+      submitUrl: `/runner-sign-in/forms/${encodeURIComponent(grantFormKey)}/${encodeURIComponent(grantApplicationId)}/submit`,
       saveAndExitUrl: manageUrl,
     });
   }
@@ -23281,7 +23361,7 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
     const applications = ensureRunnerSignInApplications(req);
     const grantApplication = applications.find((a) => a && a.id === grantApplicationId);
     if (!grantApplication) return res.redirect(journeysUrl);
-    ensureRunnerSignInChecking(grantApplication);
+    ensureRunnerSignInChecking(grantApplication, req);
     grantApplication.checking.status = "not_started";
     delete grantApplication.checking.inviteEmail;
     delete grantApplication.checking.invitedAtIso;
@@ -27653,6 +27733,7 @@ const RUNNER_SIGN_IN_V2_BASELINE_JOURNEY_PREVIEW_SIGNED_IN = new Set([
   "checker-invite",
   "checker-invite-sent",
   "applicant-check-answers",
+  "applicant-check-answers-optional",
   "ready-to-submit",
   "create-sign-in-created",
   "copy-clone",
@@ -28173,7 +28254,7 @@ router.get("/runner-sign-in-v2-baseline/journeys/preview/:slug", function (req, 
     });
   }
 
-  if (slug === "applicant-check-answers") {
+  if (slug === "applicant-check-answers" || slug === "applicant-check-answers-optional") {
     applyRunnerSignInV2EmailAuthBaseline(req, email, phone);
     data.runnerSignInV2BaselineRedirectApplicationsToManage = true;
     const grantFormKey = RUNNER_SIGN_IN_V2_BASELINE_SEED.readyToInvite.formKey;
@@ -28182,8 +28263,17 @@ router.get("/runner-sign-in-v2-baseline/journeys/preview/:slug", function (req, 
     const applications = ensureRunnerSignInApplications(req);
     const grantApplication = applications.find((a) => a && a.id === grantApplicationId);
     if (!grantApplication) return res.redirect(journeysUrl);
-    ensureRunnerSignInChecking(grantApplication);
+    const checkingOptional = slug === "applicant-check-answers-optional";
+    const whoCanCheckDescription =
+      "Their line manager or a colleague in the same team who is authorised to approve submissions.";
+    if (!data.advancedSettings) data.advancedSettings = {};
+    data.advancedSettings.checkBeforeSubmission = "yes";
+    data.advancedSettings.checkBeforeSubmissionOptional = checkingOptional ? "yes" : "no";
+    data.advancedSettings.whoCanCheckDescription = whoCanCheckDescription;
+    ensureRunnerSignInChecking(grantApplication, req);
     grantApplication.checking.status = "not_started";
+    grantApplication.checking.optional = checkingOptional;
+    grantApplication.checking.whoCanCheckDescription = whoCanCheckDescription;
     const formDef = getRunnerSignInFormDef(grantFormKey);
     return res.render("titan-mvp-1.2/runner-sign-in/forms/check-answers", {
       data,
@@ -28192,6 +28282,10 @@ router.get("/runner-sign-in-v2-baseline/journeys/preview/:slug", function (req, 
       copied: false,
       copiedQuerySuffix: "",
       inviteCheckerUrl: runnerSignInV2BaselineJourneyPreviewPath("checker-invite"),
+      checkingOptional,
+      whoCanCheckDescription,
+      canSubmitWithoutCheck: checkingOptional,
+      submitUrl: `/runner-sign-in/forms/${encodeURIComponent(grantFormKey)}/${encodeURIComponent(grantApplicationId)}/submit`,
       saveAndExitUrl: manageUrl,
     });
   }

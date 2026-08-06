@@ -141,6 +141,7 @@ function runnerSignInV2BaselineBuildJourneyUrls({
           saveExitCreate: journeyPreviewPath("save-exit-create"),
           saveExitConfirmEmail: journeyPreviewPath("save-exit-confirm-email"),
           applicantCheckAnswers: journeyPreviewPath("applicant-check-answers"),
+          applicantCheckAnswersOptional: journeyPreviewPath("applicant-check-answers-optional"),
           checkerInvite: journeyPreviewPath("checker-invite"),
           checkerWhySignIn: journeyPreviewPath("checker-why-sign-in"),
           checkerViewOrganisation: journeyPreviewPath("checker-view-organisation"),
