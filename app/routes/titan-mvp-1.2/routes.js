@@ -2610,7 +2610,7 @@ const ADVANCED_SETTINGS_PAGES = {
     summaryLabel: "Check before submission",
     summaryValueYes: "Someone else reviews answers before submission",
     summaryValueNo: "Submitted without anyone else reviewing answers",
-    label: "Do people have to get their answers checked before submitting?",
+    label: "Does the person completing the form have to get their answers checked before submitting it?",
     hint:
       "Use when someone other than the person filling in the form should review their answers first.",
     yesDescription:
@@ -2623,7 +2623,7 @@ const ADVANCED_SETTINGS_PAGES = {
       "Tell people who they should ask to review their answers. For example, their manager or a colleague in the same team.",
     optionalLabel: "Is the check optional?",
     optionalHint:
-      "If optional, people can choose whether to ask someone to check their answers before submitting.",
+      "If it's optional, people can choose whether to ask someone to check their answers before submitting.",
     optionalSummaryLabel: "Check before submission is optional",
     optionalSummaryValueYes: "Yes",
     optionalSummaryValueNo: "No",
