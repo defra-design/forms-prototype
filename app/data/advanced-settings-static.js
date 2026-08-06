@@ -19,6 +19,12 @@ const CHECK_BEFORE_SUBMISSION_SETTING = {
   whoCanCheckLabel: "Who can check the form",
   whoCanCheckHint:
     "Tell people who they should ask to review their answers. For example, their manager or a colleague in the same team.",
+  optionalLabel: "Is this optional?",
+  optionalHint:
+    "If optional, people can choose whether to ask someone to check their answers before submitting.",
+  optionalSummaryLabel: "Check before submission is optional",
+  optionalSummaryValueYes: "Yes",
+  optionalSummaryValueNo: "No",
   autoEnableWarning:
     "If someone must check the form before it is submitted, the confirmation email and reference number will be switched on automatically.",
 };
@@ -95,12 +101,20 @@ const CHECK_BEFORE_SUBMISSION_VARIANTS = [
   {
     slug: "yes-with-description",
     title: "Yes selected with description",
-    description: "Checker review required. Who can check the form is filled in.",
+    description:
+      "Checker review required. Who can check the form is filled in. Optional set to no.",
+  },
+  {
+    slug: "yes-optional",
+    title: "Yes selected and optional",
+    description:
+      "Checker review available. Who can check the form is filled in. Optional set to yes.",
   },
   {
     slug: "validation-error",
     title: "Validation error",
-    description: "Yes selected but who can check the form is missing.",
+    description:
+      "Yes selected but who can check the form and whether it is optional are missing.",
   },
 ];
 
@@ -121,6 +135,7 @@ function buildSummaryRows(settings) {
   const {
     checkBeforeSubmission = "no",
     whoCanCheckDescription = "",
+    checkBeforeSubmissionOptional = "no",
     reusePreviousAnswers = "no",
     additionalEmailCount = 0,
     staticPageBase = STATIC_BASE,
@@ -128,7 +143,9 @@ function buildSummaryRows(settings) {
 
   const checkBeforeChangeHref =
     checkBeforeSubmission === "yes"
-      ? `${staticPageBase}/check-before-submission/yes-with-description`
+      ? checkBeforeSubmissionOptional === "yes"
+        ? `${staticPageBase}/check-before-submission/yes-optional`
+        : `${staticPageBase}/check-before-submission/yes-with-description`
       : `${staticPageBase}/check-before-submission/no-selected`;
   const reusePreviousAnswersChangeHref =
     reusePreviousAnswers === "yes"
@@ -175,22 +192,50 @@ function buildSummaryRows(settings) {
   ];
 
   if (checkBeforeSubmission === "yes") {
-    rows.splice(1, 0, {
-      key: { text: CHECK_BEFORE_SUBMISSION_SETTING.whoCanCheckLabel },
-      value: {
-        text: whoCanCheckDescription || "Not added yet",
+    const checkBeforeChangeHrefOptional =
+      checkBeforeSubmissionOptional === "yes"
+        ? `${staticPageBase}/check-before-submission/yes-optional`
+        : `${staticPageBase}/check-before-submission/yes-with-description`;
+
+    rows.splice(
+      1,
+      0,
+      {
+        key: { text: CHECK_BEFORE_SUBMISSION_SETTING.whoCanCheckLabel },
+        value: {
+          text: whoCanCheckDescription || "Not added yet",
+        },
+        actions: {
+          items: [
+            {
+              href: checkBeforeChangeHrefOptional,
+              text: "Change",
+              visuallyHiddenText:
+                CHECK_BEFORE_SUBMISSION_SETTING.whoCanCheckLabel.toLowerCase(),
+            },
+          ],
+        },
       },
-      actions: {
-        items: [
-          {
-            href: `${staticPageBase}/check-before-submission/yes-with-description`,
-            text: "Change",
-            visuallyHiddenText:
-              CHECK_BEFORE_SUBMISSION_SETTING.whoCanCheckLabel.toLowerCase(),
-          },
-        ],
-      },
-    });
+      {
+        key: { text: CHECK_BEFORE_SUBMISSION_SETTING.optionalSummaryLabel },
+        value: {
+          text:
+            checkBeforeSubmissionOptional === "yes"
+              ? CHECK_BEFORE_SUBMISSION_SETTING.optionalSummaryValueYes
+              : CHECK_BEFORE_SUBMISSION_SETTING.optionalSummaryValueNo,
+        },
+        actions: {
+          items: [
+            {
+              href: checkBeforeChangeHrefOptional,
+              text: "Change",
+              visuallyHiddenText:
+                CHECK_BEFORE_SUBMISSION_SETTING.optionalLabel.toLowerCase(),
+            },
+          ],
+        },
+      }
+    );
   }
 
   rows.push({
@@ -223,6 +268,7 @@ function buildStaticAdvancedSettingsOverviewContext(variant) {
 
   let checkBeforeSubmission = "no";
   let whoCanCheckDescription = "";
+  let checkBeforeSubmissionOptional = "no";
   let reusePreviousAnswers = "no";
   let additionalEmailCount = 0;
   let saved = false;
@@ -238,6 +284,7 @@ function buildStaticAdvancedSettingsOverviewContext(variant) {
     checkBeforeSubmission = "yes";
     whoCanCheckDescription =
       "Their line manager or a colleague in the same team who is authorised to approve submissions.";
+    checkBeforeSubmissionOptional = "no";
   }
 
   if (
@@ -260,6 +307,7 @@ function buildStaticAdvancedSettingsOverviewContext(variant) {
     summaryRows: buildSummaryRows({
       checkBeforeSubmission,
       whoCanCheckDescription,
+      checkBeforeSubmissionOptional,
       reusePreviousAnswers,
       additionalEmailCount,
     }),
@@ -296,6 +344,7 @@ function buildStaticAdvancedSettingsChangeContext(settingSlug, variant) {
   let data = {
     checkBeforeSubmission: "no",
     whoCanCheckDescription: "",
+    checkBeforeSubmissionOptional: "",
     reusePreviousAnswers: "no",
   };
   let errors = {};
@@ -305,13 +354,24 @@ function buildStaticAdvancedSettingsChangeContext(settingSlug, variant) {
       data.checkBeforeSubmission = "yes";
       data.whoCanCheckDescription =
         "Their line manager or a colleague in the same team who is authorised to approve submissions.";
+      data.checkBeforeSubmissionOptional = "no";
+    }
+
+    if (variant === "yes-optional") {
+      data.checkBeforeSubmission = "yes";
+      data.whoCanCheckDescription =
+        "Their line manager or a colleague in the same team who is authorised to approve submissions.";
+      data.checkBeforeSubmissionOptional = "yes";
     }
 
     if (variant === "validation-error") {
       data.checkBeforeSubmission = "yes";
       data.whoCanCheckDescription = "";
+      data.checkBeforeSubmissionOptional = "";
       errors = {
         whoCanCheckDescription: "Enter who can check the form",
+        checkBeforeSubmissionOptional:
+          "Select yes if this is optional, or no if it is not",
       };
     }
   }
