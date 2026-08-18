@@ -9,6 +9,8 @@
 {%- from "govuk/components/button/macro.njk" import govukButton -%}
 {%- from "govuk/components/tabs/macro.njk" import govukTabs -%}
 {%- from "govuk/components/pagination/macro.njk" import govukPagination -%}
+{%- from "govuk/components/radios/macro.njk" import govukRadios -%}
+{%- from "govuk/components/inset-text/macro.njk" import govukInsetText -%}
 
 {% block pageTitle %}
 Dashboard – {{ serviceName }} – GOV.UK Prototype Kit
@@ -75,6 +77,36 @@ Defra Form Designer metrics                </h1>
   ]
 }) }}
 
+<div class="govuk-!-margin-bottom-6" id="metrics-cohort-filter">
+  {{ govukRadios({
+    idPrefix: "metrics-cohort",
+    name: "metrics-cohort",
+    classes: "govuk-radios--inline",
+    fieldset: {
+      legend: {
+        text: "Show metrics for",
+        classes: "govuk-fieldset__legend--m"
+      }
+    },
+    items: [
+      {
+        value: "all",
+        text: "All forms",
+        checked: true
+      },
+      {
+        value: "welsh",
+        text: "Forms with a Welsh translation"
+      }
+    ]
+  }) }}
+</div>
+
+<div id="welsh-metrics-notice" class="govuk-!-margin-bottom-6" hidden>
+  {{ govukInsetText({
+    text: "Showing metrics for forms that have a Welsh translation."
+  }) }}
+</div>
 
 {% set sevenDaysContent %}
 <!-- Form Activity Section -->
@@ -86,7 +118,7 @@ Defra Form Designer metrics                </h1>
   <div class="govuk-grid-row">
 
     <!-- Forms Created -->
-    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-third-from-desktop" data-testid="headline-column-forms-created">
+    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-third-from-desktop" data-testid="headline-column-forms-created" data-metric="forms-created" data-period="7d">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
           <span class="gem-c-big-number__label">New forms created</span>
@@ -106,7 +138,7 @@ Defra Form Designer metrics                </h1>
     </div>
 
     <!-- Forms Published -->
-    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-third-from-desktop" data-testid="headline-column-forms-published">
+    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-third-from-desktop" data-testid="headline-column-forms-published" data-metric="forms-published" data-period="7d">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
           <span class="gem-c-big-number__label">Forms published</span>
@@ -126,7 +158,7 @@ Defra Form Designer metrics                </h1>
     </div>
 
     <!-- Form Submissions -->
-    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-third-from-desktop" data-testid="headline-column-submissions">
+    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-third-from-desktop" data-testid="headline-column-submissions" data-metric="submissions" data-period="7d">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
           <span class="gem-c-big-number__label">Form submissions</span>
@@ -154,7 +186,7 @@ Defra Form Designer metrics                </h1>
   <div class="govuk-grid-row">
 
     <!-- Forms in Draft -->
-    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-half-from-desktop" data-testid="headline-column-draft">
+    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-half-from-desktop" data-testid="headline-column-draft" data-metric="draft" data-period="7d">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
           <span class="gem-c-big-number__label">Forms in draft</span>
@@ -174,7 +206,7 @@ Defra Form Designer metrics                </h1>
     </div>
 
     <!-- Average Time to Publish -->
-    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-half-from-desktop" data-testid="headline-column-days-to-publish">
+    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-half-from-desktop" data-testid="headline-column-days-to-publish" data-metric="days-to-publish" data-period="7d">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
           <span class="gem-c-big-number__label">Average time to publish</span>
@@ -207,7 +239,7 @@ Defra Form Designer metrics                </h1>
   <div class="govuk-grid-row">
 
     <!-- Forms Created -->
-    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-third-from-desktop" data-testid="headline-column-forms-created-30d">
+    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-third-from-desktop" data-testid="headline-column-forms-created-30d" data-metric="forms-created" data-period="30d">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
           <span class="gem-c-big-number__label">New forms created</span>
@@ -227,7 +259,7 @@ Defra Form Designer metrics                </h1>
     </div>
 
     <!-- Forms Published -->
-    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-third-from-desktop" data-testid="headline-column-forms-published-30d">
+    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-third-from-desktop" data-testid="headline-column-forms-published-30d" data-metric="forms-published" data-period="30d">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
           <span class="gem-c-big-number__label">Forms published</span>
@@ -247,7 +279,7 @@ Defra Form Designer metrics                </h1>
     </div>
 
     <!-- Form Submissions -->
-    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-third-from-desktop" data-testid="headline-column-submissions-30d">
+    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-third-from-desktop" data-testid="headline-column-submissions-30d" data-metric="submissions" data-period="30d">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
           <span class="gem-c-big-number__label">Form submissions</span>
@@ -275,7 +307,7 @@ Defra Form Designer metrics                </h1>
   <div class="govuk-grid-row">
 
     <!-- Forms in Draft -->
-    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-half-from-desktop" data-testid="headline-column-draft-30d">
+    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-half-from-desktop" data-testid="headline-column-draft-30d" data-metric="draft" data-period="30d">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
           <span class="gem-c-big-number__label">Forms in draft</span>
@@ -295,7 +327,7 @@ Defra Form Designer metrics                </h1>
     </div>
 
     <!-- Average Time to Publish -->
-    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-half-from-desktop" data-testid="headline-column-days-to-publish-30d">
+    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-half-from-desktop" data-testid="headline-column-days-to-publish-30d" data-metric="days-to-publish" data-period="30d">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
           <span class="gem-c-big-number__label">Average time to publish</span>
@@ -328,7 +360,7 @@ Defra Form Designer metrics                </h1>
   <div class="govuk-grid-row">
 
     <!-- Forms Created -->
-    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-third-from-desktop" data-testid="headline-column-forms-created-all-time">
+    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-third-from-desktop" data-testid="headline-column-forms-created-all-time" data-metric="forms-created" data-period="all-time">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
           <span class="gem-c-big-number__label">New forms created</span>
@@ -348,7 +380,7 @@ Defra Form Designer metrics                </h1>
     </div>
 
     <!-- Forms Published -->
-    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-third-from-desktop" data-testid="headline-column-forms-published-all-time">
+    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-third-from-desktop" data-testid="headline-column-forms-published-all-time" data-metric="forms-published" data-period="all-time">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
           <span class="gem-c-big-number__label">Forms published</span>
@@ -368,7 +400,7 @@ Defra Form Designer metrics                </h1>
     </div>
 
     <!-- Form Submissions -->
-    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-third-from-desktop" data-testid="headline-column-submissions-all-time">
+    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-third-from-desktop" data-testid="headline-column-submissions-all-time" data-metric="submissions" data-period="all-time">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
           <span class="gem-c-big-number__label">Form submissions</span>
@@ -396,7 +428,7 @@ Defra Form Designer metrics                </h1>
   <div class="govuk-grid-row">
 
     <!-- Forms in Draft -->
-    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-half-from-desktop" data-testid="headline-column-draft-all-time">
+    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-half-from-desktop" data-testid="headline-column-draft-all-time" data-metric="draft" data-period="all-time">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
           <span class="gem-c-big-number__label">Forms in draft</span>
@@ -416,7 +448,7 @@ Defra Form Designer metrics                </h1>
     </div>
 
     <!-- Average Time to Publish -->
-    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-half-from-desktop" data-testid="headline-column-days-to-publish-all-time">
+    <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-half-from-desktop" data-testid="headline-column-days-to-publish-all-time" data-metric="days-to-publish" data-period="all-time">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
           <span class="gem-c-big-number__label">Average time to publish</span>
@@ -1000,6 +1032,296 @@ Defra Form Designer metrics                </h1>
     color: inherit;
   }
 </style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var cohortFilter = document.getElementById('metrics-cohort-filter');
+    var welshNotice = document.getElementById('welsh-metrics-notice');
+    if (!cohortFilter) {
+      return;
+    }
+
+    var TAG_BASE = 'govuk-tag app-tag-with-icon';
+    var metricsCohortData = {
+      all: {
+        '7d': {
+          'forms-created': {
+            value: '142',
+            tagText: '12 (+9.2%)',
+            tagClasses: 'govuk-tag--green app-tag-arrow-up',
+            ariaLabel: 'There has been an increase of +12 (+9.2%) compared to the previous 7 days.',
+            caption: '12 more forms created than last week'
+          },
+          'forms-published': {
+            value: '86',
+            tagText: '8 (+10.3%)',
+            tagClasses: 'govuk-tag--green app-tag-arrow-up',
+            ariaLabel: 'There has been an increase of +8 (+10.3%) compared to the previous 7 days.',
+            caption: '8 more forms published than last week'
+          },
+          submissions: {
+            value: '12,500',
+            tagText: '1,200 (+10.6%)',
+            tagClasses: 'govuk-tag--green app-tag-arrow-up',
+            ariaLabel: 'There has been an increase of +1,200 (+10.6%) compared to the previous 7 days.',
+            caption: 'Strong week for user engagement'
+          },
+          draft: {
+            value: '56',
+            tagText: '4 (–6.7%)',
+            tagClasses: 'govuk-tag--red app-tag-arrow-down',
+            ariaLabel: 'There has been a decrease of -4 (–6.7%) compared to the previous 7 days.',
+            caption: 'Draft backlog shrinking'
+          },
+          'days-to-publish': {
+            valueHtml: '18<span class="app-big-number-unit"> days</span>',
+            tagText: '2 days (–10.0%)',
+            tagClasses: 'govuk-tag--green app-tag-arrow-down',
+            ariaLabel: 'There has been a decrease of -2 days (–10.0%) compared to the previous 7 days.',
+            caption: '2 days faster than last week'
+          }
+        },
+        '30d': {
+          'forms-created': {
+            value: '598',
+            tagText: '52 (+9.5%)',
+            tagClasses: 'govuk-tag--green app-tag-arrow-up',
+            ariaLabel: 'There has been an increase of +52 (+9.5%) compared to the previous 30 days.',
+            caption: '52 more forms created than last month'
+          },
+          'forms-published': {
+            value: '364',
+            tagText: '34 (+10.3%)',
+            tagClasses: 'govuk-tag--green app-tag-arrow-up',
+            ariaLabel: 'There has been an increase of +34 (+10.3%) compared to the previous 30 days.',
+            caption: '34 more forms published than last month'
+          },
+          submissions: {
+            value: '54,200',
+            tagText: '5,100 (+10.4%)',
+            tagClasses: 'govuk-tag--green app-tag-arrow-up',
+            ariaLabel: 'There has been an increase of +5,100 (+10.4%) compared to the previous 30 days.',
+            caption: '5,100 more submissions than last month'
+          },
+          draft: {
+            value: '56',
+            tagText: '18 (–24.3%)',
+            tagClasses: 'govuk-tag--red app-tag-arrow-down',
+            ariaLabel: 'There has been a decrease of -18 (–24.3%) compared to the previous 30 days.',
+            caption: 'Draft backlog shrinking'
+          },
+          'days-to-publish': {
+            valueHtml: '18<span class="app-big-number-unit"> days</span>',
+            tagText: '2 days (–10.0%)',
+            tagClasses: 'govuk-tag--green app-tag-arrow-down',
+            ariaLabel: 'There has been a decrease of -2 days (–10.0%) compared to the previous 30 days.',
+            caption: '2 days faster than last month'
+          }
+        },
+        'all-time': {
+          'forms-created': {
+            value: '8,542',
+            tagText: '1,234 (+16.9%)',
+            tagClasses: 'govuk-tag--green app-tag-arrow-up',
+            ariaLabel: 'There has been an increase of +1,234 (+16.9%) compared to the same period last year.',
+            caption: '1,234 more forms created than same period last year'
+          },
+          'forms-published': {
+            value: '5,234',
+            tagText: '678 (+14.9%)',
+            tagClasses: 'govuk-tag--green app-tag-arrow-up',
+            ariaLabel: 'There has been an increase of +678 (+14.9%) compared to the same period last year.',
+            caption: 'More forms going live'
+          },
+          submissions: {
+            value: '2.4M',
+            tagText: '450K (+23.1%)',
+            tagClasses: 'govuk-tag--green app-tag-arrow-up',
+            ariaLabel: 'There has been an increase of +450,000 (+23.1%) compared to the same period last year.',
+            caption: '450,000 more submissions than same period last year'
+          },
+          draft: {
+            value: '56',
+            tagText: '12 (–17.6%)',
+            tagClasses: 'govuk-tag--red app-tag-arrow-down',
+            ariaLabel: 'There has been a decrease of -12 (–17.6%) compared to the same period last year.',
+            caption: 'Draft backlog well managed'
+          },
+          'days-to-publish': {
+            valueHtml: '18<span class="app-big-number-unit"> days</span>',
+            tagText: '3 days (–14.3%)',
+            tagClasses: 'govuk-tag--green app-tag-arrow-down',
+            ariaLabel: 'There has been a decrease of -3 days (–14.3%) compared to the same period last year.',
+            caption: '3 days faster than same period last year'
+          }
+        }
+      },
+      welsh: {
+        '7d': {
+          'forms-created': {
+            value: '18',
+            tagText: '5 (+38.5%)',
+            tagClasses: 'govuk-tag--green app-tag-arrow-up',
+            ariaLabel: 'There has been an increase of +5 (+38.5%) compared to the previous 7 days.',
+            caption: '5 more Welsh forms created than last week'
+          },
+          'forms-published': {
+            value: '11',
+            tagText: '3 (+37.5%)',
+            tagClasses: 'govuk-tag--green app-tag-arrow-up',
+            ariaLabel: 'There has been an increase of +3 (+37.5%) compared to the previous 7 days.',
+            caption: '3 more Welsh forms published than last week'
+          },
+          submissions: {
+            value: '980',
+            tagText: '140 (+16.7%)',
+            tagClasses: 'govuk-tag--green app-tag-arrow-up',
+            ariaLabel: 'There has been an increase of +140 (+16.7%) compared to the previous 7 days.',
+            caption: '140 more Welsh submissions than last week'
+          },
+          draft: {
+            value: '9',
+            tagText: '2 (+28.6%)',
+            tagClasses: 'govuk-tag--red app-tag-arrow-up',
+            ariaLabel: 'There has been an increase of +2 (+28.6%) compared to the previous 7 days.',
+            caption: '2 more Welsh drafts than last week'
+          },
+          'days-to-publish': {
+            valueHtml: '24<span class="app-big-number-unit"> days</span>',
+            tagText: '1 day (+4.3%)',
+            tagClasses: 'govuk-tag--red app-tag-arrow-up',
+            ariaLabel: 'There has been an increase of +1 day (+4.3%) compared to the previous 7 days.',
+            caption: '1 day slower than last week'
+          }
+        },
+        '30d': {
+          'forms-created': {
+            value: '72',
+            tagText: '14 (+24.1%)',
+            tagClasses: 'govuk-tag--green app-tag-arrow-up',
+            ariaLabel: 'There has been an increase of +14 (+24.1%) compared to the previous 30 days.',
+            caption: '14 more Welsh forms created than last month'
+          },
+          'forms-published': {
+            value: '48',
+            tagText: '9 (+23.1%)',
+            tagClasses: 'govuk-tag--green app-tag-arrow-up',
+            ariaLabel: 'There has been an increase of +9 (+23.1%) compared to the previous 30 days.',
+            caption: '9 more Welsh forms published than last month'
+          },
+          submissions: {
+            value: '4,100',
+            tagText: '620 (+17.8%)',
+            tagClasses: 'govuk-tag--green app-tag-arrow-up',
+            ariaLabel: 'There has been an increase of +620 (+17.8%) compared to the previous 30 days.',
+            caption: '620 more Welsh submissions than last month'
+          },
+          draft: {
+            value: '9',
+            tagText: '3 (+50.0%)',
+            tagClasses: 'govuk-tag--red app-tag-arrow-up',
+            ariaLabel: 'There has been an increase of +3 (+50.0%) compared to the previous 30 days.',
+            caption: '3 more Welsh drafts than last month'
+          },
+          'days-to-publish': {
+            valueHtml: '24<span class="app-big-number-unit"> days</span>',
+            tagText: '2 days (+9.1%)',
+            tagClasses: 'govuk-tag--red app-tag-arrow-up',
+            ariaLabel: 'There has been an increase of +2 days (+9.1%) compared to the previous 30 days.',
+            caption: '2 days slower than last month'
+          }
+        },
+        'all-time': {
+          'forms-created': {
+            value: '890',
+            tagText: '210 (+30.9%)',
+            tagClasses: 'govuk-tag--green app-tag-arrow-up',
+            ariaLabel: 'There has been an increase of +210 (+30.9%) compared to the same period last year.',
+            caption: '210 more Welsh forms created than same period last year'
+          },
+          'forms-published': {
+            value: '612',
+            tagText: '148 (+31.9%)',
+            tagClasses: 'govuk-tag--green app-tag-arrow-up',
+            ariaLabel: 'There has been an increase of +148 (+31.9%) compared to the same period last year.',
+            caption: '148 more Welsh forms published than same period last year'
+          },
+          submissions: {
+            value: '180K',
+            tagText: '42K (+30.4%)',
+            tagClasses: 'govuk-tag--green app-tag-arrow-up',
+            ariaLabel: 'There has been an increase of +42,000 (+30.4%) compared to the same period last year.',
+            caption: '42,000 more Welsh submissions than same period last year'
+          },
+          draft: {
+            value: '9',
+            tagText: '4 (+80.0%)',
+            tagClasses: 'govuk-tag--red app-tag-arrow-up',
+            ariaLabel: 'There has been an increase of +4 (+80.0%) compared to the same period last year.',
+            caption: 'More Welsh drafts in progress'
+          },
+          'days-to-publish': {
+            valueHtml: '24<span class="app-big-number-unit"> days</span>',
+            tagText: '1 day (+4.3%)',
+            tagClasses: 'govuk-tag--red app-tag-arrow-up',
+            ariaLabel: 'There has been an increase of +1 day (+4.3%) compared to the same period last year.',
+            caption: '1 day slower than same period last year'
+          }
+        }
+      }
+    };
+
+    function applyCohort(cohort) {
+      var cohortData = metricsCohortData[cohort];
+      if (!cohortData) {
+        return;
+      }
+
+      if (welshNotice) {
+        welshNotice.hidden = cohort !== 'welsh';
+      }
+
+      Object.keys(cohortData).forEach(function(period) {
+        var periodData = cohortData[period];
+        Object.keys(periodData).forEach(function(metricKey) {
+          var tile = document.querySelector('[data-metric="' + metricKey + '"][data-period="' + period + '"]');
+          if (!tile) {
+            return;
+          }
+
+          var metric = periodData[metricKey];
+          var valueEl = tile.querySelector('.gem-c-big-number__value');
+          var tagEl = tile.querySelector('.govuk-tag');
+          var captionEl = tile.querySelector('.app-metric-caption');
+
+          if (valueEl) {
+            if (metric.valueHtml) {
+              valueEl.innerHTML = metric.valueHtml;
+            } else {
+              valueEl.textContent = metric.value;
+            }
+          }
+
+          if (tagEl) {
+            tagEl.textContent = metric.tagText;
+            tagEl.className = TAG_BASE + ' ' + metric.tagClasses;
+            tagEl.setAttribute('aria-label', metric.ariaLabel);
+          }
+
+          if (captionEl) {
+            captionEl.textContent = metric.caption;
+          }
+        });
+      });
+    }
+
+    cohortFilter.addEventListener('change', function(event) {
+      if (event.target && event.target.name === 'metrics-cohort') {
+        applyCohort(event.target.value);
+      }
+    });
+  });
+</script>
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {

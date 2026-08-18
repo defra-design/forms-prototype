@@ -8,6 +8,7 @@ const { cwd } = require("process");
 
 const govukPrototypeKit = require("govuk-prototype-kit");
 const { addFilter, addFunction } = govukPrototypeKit.views;
+const { buildLibraryQuery } = require("./lib/build-library-query");
 
 // Add your filters here
 
@@ -68,7 +69,8 @@ addFilter(
    * @param {Partial<Record<string, string | string[]>>} [data]
    */
   function (items, data = {}) {
-    const { author, name, organisation, status } = data;
+    const { author, name, organisation, status, favouritesOnly, favouriteForms } =
+      data;
 
     // Form name keyword search
     if (name && typeof name === "string") {
@@ -101,9 +103,27 @@ addFilter(
           : items.filter((item) => item.status === status.join("-"));
     }
 
+    // Favourites only filter
+    const favouritesOnlyOn =
+      favouritesOnly === "yes" ||
+      (Array.isArray(favouritesOnly) && favouritesOnly.includes("yes"));
+    if (favouritesOnlyOn) {
+      const favourites = Array.isArray(favouriteForms) ? favouriteForms : [];
+      items = items.filter((item) => favourites.includes(item.name));
+    }
+
     return items;
   }
 );
+
+addFilter("libraryQuery", function (data, overrides = {}) {
+  return buildLibraryQuery(data || {}, overrides || {});
+});
+
+// Positional page arg – Nunjucks object literals in filters are unreliable
+addFilter("libraryPageHref", function (data, page) {
+  return buildLibraryQuery(data || {}, { page: page });
+});
 
 /**
  * @typedef {typeof import('./data/form-library.json')} FormLibrary

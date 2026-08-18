@@ -3,6 +3,8 @@
 {% from "moj/components/timeline/macro.njk" import mojTimeline %}
 {% from "govuk/components/table/macro.njk" import govukTable %}
 {% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
 
 {% block header %}
 {{ serviceHeader({
@@ -70,6 +72,9 @@ activeLinkId: "nav-submissions"
 {% endblock %}
 
 {% block content %}
+
+
+
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
 
@@ -122,10 +127,39 @@ activeLinkId: "nav-submissions"
   </div>
 </div>
         {% endif %}
+
+        {% if showScheduleSuccess %}
+        {% set scheduleHtml %}
+          <h3 class="govuk-notification-banner__heading">
+            You've set up a schedule
+          </h3>
+          <p class="govuk-body">We'll send a spreadsheet to the email addresses you added.</p>
+        {% endset %}
+        {{ govukNotificationBanner({
+          html: scheduleHtml,
+          type: "success"
+        }) }}
+        {% endif %}
+
+        {% if showScheduleStopped %}
+        {% set stoppedHtml %}
+          <h3 class="govuk-notification-banner__heading">
+            You've stopped the schedule
+          </h3>
+          <p class="govuk-body">You can still send the last 9 months of responses from this page.</p>
+        {% endset %}
+        {{ govukNotificationBanner({
+          html: stoppedHtml,
+          type: "success"
+        }) }}
+        {% endif %}
         </div>
         </div>
 
-        <div class="govuk-!-margin-bottom-6">
+        <h2 class="govuk-heading-m">Send responses now</h2>
+        <p class="govuk-body">Send a spreadsheet of the last 9 months of responses to your shared mailbox.</p>
+
+        <div class="govuk-!-margin-bottom-8">
             {{ govukTable({
             firstCellIsHeader: true,
             head: [
@@ -147,6 +181,42 @@ activeLinkId: "nav-submissions"
             ]
             }) }}
         </div>
+
+        <h2 class="govuk-heading-m">Schedule spreadsheet reports</h2>
+        {% if scheduleSetup %}
+        <p class="govuk-body">The spreadsheet will include responses from the last month. You can still download the last 9 months of responses whenever you need to above.</p>
+        {{ govukSummaryList({
+          rows: [
+            {
+              key: { text: "How often" },
+              value: { text: scheduleFrequencyText }
+            },
+            {
+              key: { text: "Email addresses" },
+              value: { html: scheduleRecipientsHtml }
+            },
+            {
+              key: { text: "What we'll send" },
+              value: { text: "Responses from the last month" }
+            }
+          ]
+        }) }}
+        <div class="govuk-button-group">
+          {{ govukButton({
+            text: "Change schedule",
+            href: "/titan-mvp-1.2/form-overview/submissions/schedule/check-answers",
+            classes: "govuk-button--secondary"
+          }) }}
+          <a class="govuk-link" href="/titan-mvp-1.2/form-overview/submissions/schedule/stop">Stop sending automatically</a>
+        </div>
+        {% else %}
+        <p class="govuk-body">The spreadsheet will include responses from the last month.</p>
+        <p class="govuk-body">You can still download the last 9 months of responses whenever you need to above.</p>
+        {{ govukButton({
+          text: "Set up a schedule",
+          href: "/titan-mvp-1.2/form-overview/submissions/schedule/frequency"
+        }) }}
+        {% endif %}
 
     </div>
 

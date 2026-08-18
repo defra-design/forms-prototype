@@ -1,10 +1,14 @@
 {% extends "layouts/main.html" %}
 
 {% from "components/service-header/macro.njk" import serviceHeader %}
+{% from "components/favourite-pin/macro.njk" import favouritePin %}
 {% from "govuk/components/tabs/macro.njk" import govukTabs %}
 {% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
 
 {% set pageName = "Form overview - Livestock registration" %}
+{% set favouriteForms = data["favouriteForms"] if data["favouriteForms"] else [] %}
+{% set isFavourite = "Livestock registration" in favouriteForms %}
+{% set favouriteHref = "/titan-mvp-1.2/library/toggle-favourite?favouriteForm=" + ("Livestock registration" | urlencode) + "&returnTo=overview" %}
 
 {% block header %}
 {{ serviceHeader({
@@ -35,10 +39,18 @@ activeLinkId: "nav-overview"
 
         <div class="govuk-grid-row">
             <div class="govuk-grid-column-full-from-desktop">
-                <h1 class="x-govuk-masthead__title">
-                    <span class="govuk-caption-xl" style="color: #fff;">Form overview</span>
-                    Livestock registration
-                </h1>
+                <div class="app-favourite-name app-favourite-name--masthead">
+                    {{ favouritePin({
+                    name: "Livestock registration",
+                    href: favouriteHref,
+                    isFavourite: isFavourite,
+                    classes: "app-favourite-pin--inverse"
+                    }) }}
+                    <h1 class="x-govuk-masthead__title govuk-!-margin-bottom-0">
+                        <span class="govuk-caption-xl" style="color: #fff;">Form overview</span>
+                        Livestock registration
+                    </h1>
+                </div>
             </div>
         </div>
     </div>
@@ -46,6 +58,15 @@ activeLinkId: "nav-overview"
 {% endblock %}
 
 {% block content %}
+<div class="govuk-visually-hidden" aria-live="polite" id="favourite-status">
+  {% if favouriteFlash %}
+  {% if favouriteFlash.action == "added" %}
+  {{ favouriteFlash.name }} added to favourites
+  {% else %}
+  {{ favouriteFlash.name }} removed from favourites
+  {% endif %}
+  {% endif %}
+</div>
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
 

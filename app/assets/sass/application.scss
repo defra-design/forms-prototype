@@ -301,6 +301,244 @@ $defra-link-colour-hover: govuk-shade($defra-link-colour, 50%);
   }
 }
 
+// Favourite pin (forms library PoC)
+.app-favourite-pin {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  // Visual size matches the icon; padding grows the hit target without shifting alignment
+  box-sizing: content-box;
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0.5rem;
+  margin: 0 0 0 -0.5rem;
+  color: $govuk-link-colour;
+  text-decoration: none;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+
+  &:link,
+  &:visited,
+  &:hover,
+  &:active {
+    color: $govuk-link-colour;
+  }
+
+  &:hover {
+    color: $govuk-link-hover-colour;
+  }
+
+  &:focus {
+    @include govuk-focused-text;
+    color: $govuk-focus-text-colour;
+  }
+
+  &--active {
+    &:link,
+    &:visited,
+    &:hover,
+    &:active {
+      color: $govuk-link-colour;
+    }
+
+    &:hover {
+      color: $govuk-link-hover-colour;
+    }
+  }
+
+  &--inverse {
+    &:link,
+    &:visited,
+    &:hover,
+    &:active {
+      color: govuk-colour("white");
+    }
+
+    &:hover {
+      opacity: 0.85;
+    }
+
+    &:focus {
+      color: $govuk-focus-text-colour;
+      opacity: 1;
+    }
+  }
+
+  &__icon {
+    display: block;
+    width: 1.25rem;
+    height: 1.25rem;
+    pointer-events: none;
+  }
+
+  // Dark tip (ICDS sizing) so it stands out on the white library page
+  &__tooltip {
+    @include govuk-font($size: 19);
+    position: absolute;
+    bottom: calc(100% + 12px);
+    // Grow right from the pin so the tip stays in view when the control
+    // sits flush to the left edge (common on narrow library layouts)
+    left: 0;
+    z-index: 1000;
+    max-width: 280px;
+    padding: 12px 16px;
+    color: govuk-colour("white");
+    text-align: left;
+    white-space: nowrap;
+    pointer-events: none;
+    background-color: $govuk-text-colour;
+    border: 0;
+    border-radius: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    opacity: 0;
+    visibility: hidden;
+    font-weight: 400;
+    line-height: 1.5;
+    word-wrap: break-word;
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      // Align caret under the star (padding + half icon width)
+      left: 1.125rem;
+      margin-left: -8px;
+      border-width: 8px;
+      border-style: solid;
+      border-color: $govuk-text-colour transparent transparent transparent;
+    }
+  }
+
+  &:hover &__tooltip,
+  &:focus &__tooltip {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+.app-favourite-name {
+  display: flex;
+  align-items: center;
+  gap: govuk-spacing(1);
+}
+
+.app-favourite-name--masthead {
+  align-items: flex-end;
+}
+
+.app-favourite-name__link {
+  flex: 1;
+  min-width: 0;
+  // Cancel the pin's negative margin from shifting the text baseline
+  margin-top: 0;
+  line-height: 1.31579;
+}
+
+.app-results-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: govuk-spacing(3) govuk-spacing(4);
+  margin-bottom: govuk-spacing(4);
+}
+
+.app-results-toolbar__sort {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: govuk-spacing(2) govuk-spacing(3);
+}
+
+.app-results-toolbar__sort .govuk-label {
+  margin-bottom: 0;
+  white-space: nowrap;
+}
+
+.app-results-toolbar__sort .govuk-select {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.app-results-toolbar__sort .govuk-button {
+  margin-bottom: 0;
+}
+
+.app-favourites-view-toggle {
+  @include govuk-font($size: 19, $weight: regular);
+  display: inline-flex;
+  align-items: center;
+  gap: govuk-spacing(2);
+  margin: 0;
+  margin-left: auto;
+  white-space: nowrap;
+
+  &__icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 1.125rem;
+    height: 1.125rem;
+    color: $govuk-link-colour;
+
+    svg {
+      display: block;
+      width: 1.125rem;
+      height: 1.125rem;
+    }
+  }
+}
+
+// Narrow screens: favourites first (choose view), then sort
+@include govuk-media-query($until: tablet) {
+  .app-results-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .app-favourites-view-toggle {
+    order: -1;
+    margin-left: 0;
+    margin-bottom: govuk-spacing(1);
+  }
+
+  .app-results-toolbar__sort {
+    width: 100%;
+  }
+
+  .app-results-toolbar__sort .govuk-select {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+}
+
+.app-favourites-panel {
+  margin-bottom: govuk-spacing(6);
+  padding-bottom: govuk-spacing(2);
+  border-bottom: 1px solid $govuk-border-colour;
+}
+
+.app-favourites-panel__list {
+  margin-bottom: govuk-spacing(3);
+}
+
+.app-favourites-panel__item {
+  display: flex;
+  align-items: flex-start;
+  gap: govuk-spacing(1);
+  margin-bottom: govuk-spacing(2);
+}
+
+.app-favourites-panel__meta {
+  @include govuk-font($size: 16);
+  color: $govuk-secondary-text-colour;
+  margin: govuk-spacing(1) 0 0;
+}
+
 .app-width-container--full-width {
   max-width: 1400px;
 
@@ -2715,6 +2953,18 @@ code.lang-md {
   color: #1d70b8 !important; // GOV.UK default visited link color
 }
 
+// Keep current pagination number readable (white on blue), including visited
+.govuk-pagination__item--current .govuk-pagination__link:link,
+.govuk-pagination__item--current .govuk-pagination__link:visited,
+.govuk-pagination__item--current .govuk-pagination__link:hover,
+.govuk-pagination__item--current .govuk-pagination__link:active {
+  color: govuk-colour("white") !important;
+}
+
+.govuk-pagination__item--current .govuk-pagination__link:focus {
+  color: $govuk-focus-text-colour !important;
+}
+
 // Base styling for inverse links to ensure they appear white
 .govuk-link--inverse {
   color: white !important;
@@ -3834,4 +4084,64 @@ to
 
 .govuk-notification-banner--journey-options .govuk-notification-banner__title {
   color: govuk-colour("white");
+}
+
+// MOJ Add another — later layout (inline/stacked). Overrides v4.0.1 styles.
+.moj-add-another {
+  margin-bottom: govuk-spacing(8);
+
+  &__item {
+    position: relative;
+    margin: govuk-spacing(6) 0 govuk-spacing(4);
+    padding: 0;
+
+    &:first-of-type {
+      margin-top: 0;
+    }
+  }
+
+  &__item-container {
+    border-bottom: 2px solid govuk-colour("mid-grey");
+  }
+
+  &__remove-button {
+    position: static;
+    width: auto;
+  }
+
+  &__item--inline {
+    @include govuk-media-query($from: tablet) {
+      margin-top: 0;
+      margin-bottom: govuk-spacing(6);
+      border-bottom: none;
+
+      .moj-add-another__item-title {
+        @include govuk-visually-hidden;
+      }
+
+      .moj-add-another__item-container {
+        display: flex;
+        gap: govuk-spacing(6);
+        justify-content: space-between;
+        border-bottom: none;
+      }
+
+      .moj-add-another__item-row {
+        flex: 1 1 auto;
+      }
+
+      .govuk-form-group {
+        margin-bottom: 0;
+      }
+
+      .moj-add-another__remove-button-container {
+        flex: 1 0 100px;
+        align-self: flex-end;
+      }
+
+      .moj-add-another__remove-button {
+        margin-bottom: 2px;
+      }
+    }
+  }
 }

@@ -1,0 +1,171 @@
+{% extends "layouts/main.html" %}
+{% from "components/service-header/macro.njk" import serviceHeader %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% set emails = recipients if recipients and recipients.length else [""] %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+accountName: "Chris Smith",
+homepageLink: "/",
+signOutLink: "/titan-mvp-1.2/onboarding/sign-out-confirmation",
+navigationItems: [
+{ href: "/titan-mvp-1.2/library", text: "Forms library", id: "nav-library" },
+{ href: "/titan-mvp-1.2/form-overview/poc.html", text: "Overview", id: "nav-overview" },
+{ href: "/titan-mvp-1.2/form-overview/submissions/improved-2-table", text: "Responses", id: "nav-submissions" },
+{ href: "/titan-mvp-1.2/form-editor/listing", text: "Editor", id: "nav-editor" }
+],
+activeLinkId: "nav-submissions"
+}) }}
+{% endblock %}
+
+{% block pageTitle %}
+{{ pageName }}
+{% endblock %}
+
+{% block beforeContent %}
+{{ govukBackLink({
+  text: "Back",
+  href: backHref
+}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <form method="post" novalidate>
+      {% if fromCya %}
+      <input type="hidden" name="from" value="cya">
+      {% endif %}
+
+      <h1 class="govuk-heading-l moj-add-another__heading" tabindex="-1">
+        Who do you want us to send the spreadsheet to?
+      </h1>
+      <p class="govuk-hint">You can add up to 5 email addresses.</p>
+
+      <div class="moj-add-another" data-module="moj-add-another" data-item-label="Email address">
+        <div class="moj-add-another__items">
+          {% for email in emails %}
+            {% set index = loop.index0 %}
+            <div class="moj-add-another__item">
+              <fieldset class="govuk-fieldset moj-add-another__fieldset">
+                <legend class="govuk-fieldset__legend moj-add-another__item-title govuk-fieldset__legend--m">
+                  Email address {{ loop.index }}
+                </legend>
+                <div class="moj-add-another__item-container">
+                  {{ govukInput({
+                    label: {
+                      html: 'Email address <span class="govuk-visually-hidden moj-add-another__label-suffix">for email address ' + loop.index + '</span>'
+                    },
+                    classes: "govuk-!-width-three-quarters",
+                    id: "scheduleRecipient[" + index + "]",
+                    name: "scheduleRecipient[" + index + "]",
+                    type: "email",
+                    autocomplete: "email",
+                    spellcheck: false,
+                    value: email,
+                    attributes: {
+                      "data-name": "scheduleRecipient[%index%]",
+                      "data-id": "scheduleRecipient[%index%]",
+                      "data-label": "Email address"
+                    }
+                  }) }}
+                  <div class="moj-add-another__remove-button-container">
+                    {% if emails.length > 1 %}
+                    <button type="submit" class="govuk-button govuk-button--secondary moj-add-another__remove-button" data-module="govuk-button">
+                      Remove<span class="govuk-visually-hidden"> email address {{ loop.index }}</span>
+                    </button>
+                    {% endif %}
+                  </div>
+                </div>
+              </fieldset>
+            </div>
+          {% endfor %}
+        </div>
+
+        <div class="moj-add-another__add-button-container">
+          <button type="submit" class="govuk-button govuk-button--secondary moj-add-another__add-button" data-module="govuk-button">
+            Add another email address
+          </button>
+        </div>
+      </div>
+
+      {{ govukButton({
+        text: "Save and continue"
+      }) }}
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+  (function () {
+    var root = document.querySelector("[data-module='moj-add-another']");
+    if (!root) return;
+
+    var addButton = root.querySelector(".moj-add-another__add-button");
+    var maxItems = 5;
+
+    function items() {
+      return root.querySelectorAll(".moj-add-another__item");
+    }
+
+    function placeRemoveButtons() {
+      items().forEach(function (item) {
+        var button = item.querySelector(".moj-add-another__remove-button");
+        var container = item.querySelector(".moj-add-another__remove-button-container");
+        if (button && container && button.parentElement !== container) {
+          container.appendChild(button);
+        }
+      });
+    }
+
+    function renumber() {
+      items().forEach(function (item, index) {
+        var number = index + 1;
+        var title = item.querySelector(".moj-add-another__item-title");
+        if (title) {
+          title.textContent = "Email address " + number;
+        }
+        item.querySelectorAll(".moj-add-another__label-suffix").forEach(function (suffix) {
+          suffix.textContent = " for email address " + number;
+        });
+      });
+    }
+
+    function updateAddButton() {
+      addButton.classList.toggle("govuk-!-display-none", items().length >= maxItems);
+    }
+
+    function refresh() {
+      placeRemoveButtons();
+      renumber();
+      updateAddButton();
+    }
+
+    addButton.addEventListener("click", function (event) {
+      if (items().length >= maxItems) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
+    }, true);
+
+    root.addEventListener("click", function (event) {
+      if (
+        event.target.closest(".moj-add-another__add-button") ||
+        event.target.closest(".moj-add-another__remove-button")
+      ) {
+        window.setTimeout(refresh, 0);
+      }
+    });
+
+    refresh();
+  })();
+</script>
+{% endblock %}

@@ -17,9 +17,12 @@
 
 {% block bodyEnd %}
   <script type="module" src="/javascripts/govuk-frontend.min.js"></script>
+  <script type="module" src="/javascripts/moj-frontend.min.js"></script>
   <script type="module">
     import { initAll } from '/javascripts/govuk-frontend.min.js'
+    import * as MOJFrontend from '/javascripts/moj-frontend.min.js'
     initAll()
+    MOJFrontend.initAll()
   </script>
   <script type="module" src="/javascripts/lottie-loader.js"></script>
 {% endblock %}
