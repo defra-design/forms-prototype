@@ -8,6 +8,7 @@
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
 {% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% from "govuk/components/checkboxes/macro.njk" import govukCheckboxes %}
 
 {% set pageName = "Email actions - " + form.name %}
 {% set pageBaseUrl = staticPageBase if staticPage else "/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing" %}
@@ -44,7 +45,7 @@
       },
       checked: submissionType == "machine-readable" or not submissionType,
       conditional: {
-        html: '<div class="govuk-form-group" id="' + fieldIdPrefix + '-version-selection">
+        html: '<div id="' + fieldIdPrefix + '-version-selection">
           <fieldset class="govuk-fieldset">
             <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">Which version do you need?</legend>
             <div class="govuk-radios">
@@ -67,6 +68,37 @@
     }
   ]
 }) }}
+{% endmacro %}
+
+{% macro recipientCheckboxes(excludeDefaultInbox, thisEmail, defaultEmail, conditionId) %}
+{% set thisLabel = thisEmail if thisEmail else "The new email address you add" %}
+<div id="js-recipient-question"{% if not conditionId %} hidden{% endif %}>
+<input type="hidden" name="recipients" value="this">
+{{ govukCheckboxes({
+  name: "recipients",
+  fieldset: {
+    legend: {
+      text: "Where should we send submissions?"
+    }
+  },
+  items: [
+    {
+      value: "default",
+      text: defaultEmail + " (default email address)",
+      checked: excludeDefaultInbox != true
+    },
+    {
+      value: "this",
+      text: thisLabel,
+      checked: true,
+      disabled: true,
+      attributes: {
+        "data-recipient-this": "true"
+      }
+    }
+  ]
+}) }}
+</div>
 {% endmacro %}
 
 {% block header %}
@@ -188,25 +220,32 @@ activeLinkId: "nav-editor"
             </div>
         </div>
 
-
-
-
-        <h2 class="govuk-heading-l">Additional email addresses</h2>
-
-        <p class="govuk-body">To send submissions based on answers, create and manage conditions in the <a class="govuk-link" href="/titan-mvp-1.2/form-editor/conditions/manager">conditions manager</a>.</p>
-
-
         {% if outputs and outputs | length %}
         <div id="outputs-list" class="govuk-!-margin-bottom-6">
-            {% for output in outputs %}
-            <div class="govuk-summary-card{% if not loop.last %} govuk-!-margin-bottom-4{% endif %}" data-output-id="{{ output.id }}">
-                <div class="govuk-summary-card__title-wrapper">
-                    <h3 class="govuk-summary-card__title">{{ output.emailAddress }}</h3>
-                    <ul class="govuk-summary-card__actions">
-                        <li class="govuk-summary-card__action">
+            <table class="govuk-table">
+                <caption class="govuk-table__caption govuk-visually-hidden">Additional email addresses</caption>
+                <thead class="govuk-table__head">
+                    <tr class="govuk-table__row">
+                        <th scope="col" class="govuk-table__header">Email address</th>
+                        <th scope="col" class="govuk-table__header">When submissions are sent</th>
+                        <th scope="col" class="govuk-table__header">Format</th>
+                        <th scope="col" class="govuk-table__header"><span class="govuk-visually-hidden">Actions</span></th>
+                    </tr>
+                </thead>
+                <tbody class="govuk-table__body">
+                    {% for output in outputs %}
+                    <tr class="govuk-table__row" data-output-id="{{ output.id }}">
+                        <td class="govuk-table__cell">
+                            {{ output.emailAddress }}
+                            {% if output.excludeDefaultInbox %}
+                            <div class="govuk-hint govuk-!-margin-bottom-0">Not sent to {{ routingDefaultEmail }}</div>
+                            {% endif %}
+                        </td>
+                        <td class="govuk-table__cell">{{ output.conditionName }}</td>
+                        <td class="govuk-table__cell">{{ output.formatLabel }}</td>
+                        <td class="govuk-table__cell govuk-!-text-align-right">
                             <a class="govuk-link" href="{% if staticPage %}{{ pageBaseUrl }}/edit-output{% else %}{{ pageBaseUrl }}?edit={{ output.id }}#mailbox-add-section{% endif %}">Change<span class="govuk-visually-hidden"> {{ output.emailAddress }}</span></a>
-                        </li>
-                        <li class="govuk-summary-card__action">
+                            <span aria-hidden="true"> | </span>
                             {% if staticPage %}
                             <span class="govuk-body govuk-!-margin-bottom-0" style="color: #505a5f;">Remove</span>
                             {% else %}
@@ -216,28 +255,11 @@ activeLinkId: "nav-editor"
                                 <button type="submit" class="govuk-link govuk-body govuk-!-margin-bottom-0" style="border: none; background: none; padding: 0; cursor: pointer; text-decoration: underline; color: #1d70b8;">Remove<span class="govuk-visually-hidden"> {{ output.emailAddress }}</span></button>
                             </form>
                             {% endif %}
-                        </li>
-                    </ul>
-                </div>
-                <div class="govuk-summary-card__content">
-                    <dl class="govuk-summary-list govuk-summary-list--no-border govuk-!-margin-bottom-0">
-                        <div class="govuk-summary-list__row">
-                            <dt class="govuk-summary-list__key">When</dt>
-                            <dd class="govuk-summary-list__value">
-                                {{ output.conditionName }}
-                                {% if output.conditionId and (output.ruleSummary or output.conditionText) %}
-                                <div class="govuk-hint govuk-!-margin-top-1">{{ output.ruleSummary or output.conditionText }}</div>
-                                {% endif %}
-                            </dd>
-                        </div>
-                        <div class="govuk-summary-list__row">
-                            <dt class="govuk-summary-list__key">Submission format</dt>
-                            <dd class="govuk-summary-list__value">{{ output.formatLabel }}</dd>
-                        </div>
-                    </dl>
-                </div>
-            </div>
-            {% endfor %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
         {% else %}
 
@@ -258,7 +280,7 @@ activeLinkId: "nav-editor"
             classes: "govuk-label--m"
             },
             hint: {
-            text: "Choose a condition, or leave as every submission to send all submissions to this address."
+            text: "Choose a condition, or every submission to send all submissions to this address."
             },
             items: mailboxConditionSelectItems
             }) }}
@@ -283,14 +305,18 @@ activeLinkId: "nav-editor"
 
             {{ submissionFormatRadios("submission", addOutputForm.submissionType, addOutputForm.submissionVersion, "edit-submission") }}
 
+            {{ recipientCheckboxes(addOutputForm.excludeDefaultInbox, addOutputForm.emailAddress, routingDefaultEmail, addOutputForm.conditionId) }}
+
             <div class="govuk-button-group">
                 {{ govukButton({ text: "Save changes", disabled: staticPage }) }}
                 <a class="govuk-link govuk-link--no-visited-state" href="{% if staticPage %}{{ pageBaseUrl }}/with-outputs{% else %}{{ pageBaseUrl }}{% endif %}">Cancel</a>
             </div>
         </form>
         {% elif outputs | length < maxOutputs %}
-        <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
-        <h3 class="govuk-heading-m">Add a new email address</h3>
+        {# <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible"> #}
+        <h2 class="govuk-heading-m">Add a new email address (optional)</h2>
+        <p class="govuk-body">To send submissions based on answers, create and manage conditions in the <a class="govuk-link" href="/titan-mvp-1.2/form-editor/conditions/manager">conditions manager</a>.</p>
+
         <form method="post" action="{% if staticPage %}#{% else %}{{ pageBaseUrl }}{% endif %}">
             <input type="hidden" name="action" value="add-output">
 
@@ -298,10 +324,10 @@ activeLinkId: "nav-editor"
             id: "mailbox-condition",
             name: "conditionId",
             label: {
-            text: "When should submissions be sent to this email address? (optional)"
+            text: "When should submissions be sent to this email address?"
             },
             hint: {
-            text: "Choose a condition, or leave as every submission to send all submissions to this address."
+            text: "Choose a condition, or every submission to send all submissions to this address."
             },
             items: mailboxConditionSelectItems
             }) }}
@@ -327,6 +353,8 @@ activeLinkId: "nav-editor"
 
             {{ submissionFormatRadios("submission", addOutputForm.submissionType, addOutputForm.submissionVersion, "add-submission") }}
 
+            {{ recipientCheckboxes(addOutputForm.excludeDefaultInbox, addOutputForm.emailAddress, routingDefaultEmail, addOutputForm.conditionId) }}
+
             {{ govukButton({
             text: "Save new email address",
             disabled: staticPage
@@ -338,4 +366,36 @@ activeLinkId: "nav-editor"
 
     </div>
 </div>
+<script>
+  (function () {
+    var emailInput = document.getElementById("mailbox-email-address");
+    var thisInput = document.querySelector("[data-recipient-this]");
+    var conditionSelect = document.getElementById("mailbox-condition");
+    var recipientQuestion = document.getElementById("js-recipient-question");
+    var fallback = "The new email address you add";
+
+    function updateThisLabel() {
+      if (!emailInput || !thisInput) return;
+      var label = document.querySelector('label[for="' + thisInput.id + '"]');
+      if (!label) return;
+      label.textContent = emailInput.value.trim() || fallback;
+    }
+
+    function toggleRecipientQuestion() {
+      if (!conditionSelect || !recipientQuestion) return;
+      recipientQuestion.hidden =
+        !conditionSelect.value || conditionSelect.value === "every";
+    }
+
+    if (emailInput) {
+      emailInput.addEventListener("input", updateThisLabel);
+      updateThisLabel();
+    }
+
+    if (conditionSelect) {
+      conditionSelect.addEventListener("change", toggleRecipientQuestion);
+      toggleRecipientQuestion();
+    }
+  })();
+</script>
 {% endblock %}

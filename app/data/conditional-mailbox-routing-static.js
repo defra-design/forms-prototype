@@ -118,20 +118,30 @@ function enrichOutput(output) {
       output.submissionType,
       output.submissionVersion
     ),
+    excludeDefaultInbox: Boolean(output.excludeDefaultInbox),
+    defaultInboxLabel: output.excludeDefaultInbox
+      ? "Only this email address"
+      : "This email address and notify@defra.gov.uk",
   };
 }
 
 function buildMailboxConditionSelectItems(selectedConditionId) {
-  const hasSelectedCondition =
-    selectedConditionId !== null &&
-    selectedConditionId !== undefined &&
-    String(selectedConditionId) !== "";
+  const selected = selectedConditionId;
+  const hasPrompt =
+    selected === "" || selected === undefined;
+  const isEvery =
+    selected === "every" || selected === null;
 
   return [
     {
       value: "",
+      text: "Choose a condition",
+      selected: hasPrompt,
+    },
+    {
+      value: "every",
       text: "Every submission (no condition)",
-      selected: !hasSelectedCondition,
+      selected: isEvery,
     },
     ...DEMO_CONDITIONS.map((condition) => ({
       value: String(condition.id),
@@ -151,6 +161,7 @@ const SAMPLE_OUTPUTS = [
     emailAddress: "farmers@defra.gov.uk",
     submissionType: "human-only",
     submissionVersion: "3",
+    excludeDefaultInbox: true,
   },
   {
     id: 2002,
@@ -158,6 +169,7 @@ const SAMPLE_OUTPUTS = [
     emailAddress: "records@defra.gov.uk",
     submissionType: "machine-readable",
     submissionVersion: "3",
+    excludeDefaultInbox: false,
   },
 ];
 
@@ -172,6 +184,7 @@ const MAX_OUTPUT_SAMPLES = Array.from(
     emailAddress: `team${index + 1}@defra.gov.uk`,
     submissionType: index % 4 === 0 ? "machine-readable" : "human-only",
     submissionVersion: "3",
+    excludeDefaultInbox: index % 3 === 0,
   })
 );
 
@@ -195,6 +208,7 @@ function buildStaticConditionalMailboxContext(variant) {
     emailAddress: "",
     submissionType: "human-only",
     submissionVersion: "3",
+    excludeDefaultInbox: false,
   };
 
   if (variant === "with-outputs" || variant === "saved" || variant === "edit-output") {
@@ -220,6 +234,7 @@ function buildStaticConditionalMailboxContext(variant) {
       emailAddress: "not-a-valid-email",
       submissionType: "human-only",
       submissionVersion: "3",
+      excludeDefaultInbox: false,
     };
   }
 
@@ -234,6 +249,7 @@ function buildStaticConditionalMailboxContext(variant) {
       emailAddress: editing.emailAddress,
       submissionType: editing.submissionType,
       submissionVersion: editing.submissionVersion,
+      excludeDefaultInbox: Boolean(editing.excludeDefaultInbox),
     };
   }
 

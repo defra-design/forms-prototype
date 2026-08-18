@@ -2915,16 +2915,22 @@ function formatConditionRulesSummary(rules) {
 }
 
 function buildMailboxConditionSelectItems(conditions, selectedConditionId) {
-  const hasSelectedCondition =
-    selectedConditionId !== null &&
-    selectedConditionId !== undefined &&
-    String(selectedConditionId) !== "";
+  const selected = selectedConditionId;
+  const hasPrompt =
+    selected === "" || selected === undefined;
+  const isEvery =
+    selected === "every" || selected === null;
 
   return [
     {
       value: "",
+      text: "Choose a condition",
+      selected: hasPrompt,
+    },
+    {
+      value: "every",
       text: "Every submission (no condition)",
-      selected: !hasSelectedCondition,
+      selected: isEvery,
     },
     ...conditions.map((condition) => ({
       value: String(condition.id),
@@ -2939,7 +2945,9 @@ function buildMailboxConditionSelectItems(conditions, selectedConditionId) {
 
 function validateSingleOutputFields(body) {
   const errors = {};
-  const conditionId = String(body.conditionId || "").trim();
+  const conditionValue = String(body.conditionId || "").trim();
+  const conditionId =
+    !conditionValue || conditionValue === "every" ? "" : conditionValue;
   const emailAddress = String(body.emailAddress || "").trim();
 
   if (!emailAddress) {
@@ -2948,6 +2956,9 @@ function validateSingleOutputFields(body) {
     errors.emailAddress = "Enter an email address in the correct format, like name@example.com";
   }
 
+  const recipients = [].concat(body.recipients || []);
+  const excludeDefaultInbox = Boolean(conditionId) && !recipients.includes("default");
+
   return {
     errors,
     output: {
@@ -2955,6 +2966,7 @@ function validateSingleOutputFields(body) {
       emailAddress,
       submissionType: body.submissionType || "human-only",
       submissionVersion: body.submissionVersion || "3",
+      excludeDefaultInbox,
     },
   };
 }
@@ -2998,6 +3010,10 @@ function renderConditionalMailboxRouting(req, res, options = {}) {
         output.submissionType,
         output.submissionVersion
       ),
+      excludeDefaultInbox: Boolean(output.excludeDefaultInbox),
+      defaultInboxLabel: output.excludeDefaultInbox
+        ? "Only this email address"
+        : `This email address and ${defaultMailbox.emailAddress}`,
     };
   });
 
@@ -3021,12 +3037,14 @@ function renderConditionalMailboxRouting(req, res, options = {}) {
           emailAddress: editOutput.emailAddress,
           submissionType: editOutput.submissionType,
           submissionVersion: editOutput.submissionVersion,
+          excludeDefaultInbox: Boolean(editOutput.excludeDefaultInbox),
         }
       : {
           conditionId: "",
           emailAddress: "",
           submissionType: "human-only",
           submissionVersion: "3",
+          excludeDefaultInbox: false,
         });
 
   const mailboxConditionSelectItems = buildMailboxConditionSelectItems(
@@ -5673,13 +5691,251 @@ router.get("/titan-mvp-1.2/form-overview/submissions/improved-2-table", (req, re
   const showFeedbackSuccessMessage = req.query.feedbackSuccess === 'true';
   const showErrorMessage = req.query.success === 'fail';
 
+  const scheduleRecipients = getScheduleRecipients(formData);
+  const scheduleSetup = formData.scheduleSetup === true || formData.scheduleSetup === "true";
+
   res.render("titan-mvp-1.2/form-overview/submissions/index-improved-2-table", {
     form: form,
     pageName: `Submissions - ${form.name}`,
     showSuccessMessage: showSuccessMessage,
     showFeedbackSuccessMessage: showFeedbackSuccessMessage,
-    showErrorMessage: showErrorMessage
+    showErrorMessage: showErrorMessage,
+    showScheduleSuccess: req.query.scheduleSuccess === "true",
+    showScheduleStopped: req.query.scheduleStopped === "true",
+    scheduleSetup,
+    scheduleFrequencyText: formatScheduleFrequency(formData),
+    scheduleRecipientsHtml: scheduleRecipients.length
+      ? scheduleRecipients.join("<br>")
+      : "Not provided"
   });
+});
+
+const SCHEDULE_BASE = "/titan-mvp-1.2/form-overview/submissions/schedule";
+const RESPONSES_TABLE = "/titan-mvp-1.2/form-overview/submissions/improved-2-table";
+
+function getScheduleRecipients(data) {
+  const collected = [];
+  const nested = data.scheduleRecipient;
+
+  if (Array.isArray(nested)) {
+    nested.forEach((value) => {
+      const email = String(value || "").trim();
+      if (email) collected.push(email);
+    });
+  } else if (nested && typeof nested === "object") {
+    Object.keys(nested)
+      .sort((a, b) => Number(a) - Number(b))
+      .forEach((key) => {
+        const email = String(nested[key] || "").trim();
+        if (email) collected.push(email);
+      });
+  }
+
+  if (!collected.length) {
+    for (let i = 1; i <= 5; i += 1) {
+      const value = (data[`scheduleRecipient${i}`] || "").trim();
+      if (value) collected.push(value);
+    }
+  }
+
+  return collected.slice(0, 5);
+}
+
+function formatScheduleTime(value) {
+  if (!value) return "9am";
+  const raw = String(value).trim().toLowerCase().replace(/\s+/g, "").replace(".", ":");
+
+  const twentyFourHour = raw.match(/^([01]?\d|2[0-3])(?::(\d{2}))?$/);
+  if (twentyFourHour && !raw.includes("am") && !raw.includes("pm")) {
+    let hour = parseInt(twentyFourHour[1], 10);
+    const period = hour >= 12 ? "pm" : "am";
+    hour = hour % 12;
+    if (hour === 0) hour = 12;
+    return `${hour}${period}`;
+  }
+
+  const twelveHour = raw.match(/^(\d{1,2})(?::\d{2})?(am|pm)$/);
+  if (twelveHour) {
+    let hour = parseInt(twelveHour[1], 10);
+    const period = twelveHour[2];
+    if (hour === 0) hour = 12;
+    if (hour > 12) hour = hour % 12 || 12;
+    return `${hour}${period}`;
+  }
+
+  return "9am";
+}
+
+const SCHEDULE_TIMES = [
+  "6am", "7am", "8am", "9am", "10am", "11am",
+  "12pm", "1pm", "2pm", "3pm", "4pm", "5pm", "6pm"
+];
+
+function getScheduleTimeOptions(selectedTime) {
+  const selected = formatScheduleTime(selectedTime);
+  return SCHEDULE_TIMES.map((time) => ({
+    value: time,
+    text: time,
+    selected: time === selected
+  }));
+}
+
+function formatScheduleFrequency(data) {
+  const time = formatScheduleTime(data.scheduleTime);
+  if (data.scheduleFrequency === "Weekly") {
+    return `Every ${data.scheduleDay || "Monday"} at ${time}`;
+  }
+  if (data.scheduleFrequency === "Daily") {
+    return `Every day at ${time}`;
+  }
+  return "";
+}
+
+function fromCheckAnswers(req) {
+  return req.query.from === "cya" || req.body.from === "cya";
+}
+
+function nextAfterQuestion(req, nextPath) {
+  if (fromCheckAnswers(req)) {
+    return `${SCHEDULE_BASE}/check-answers`;
+  }
+  return nextPath;
+}
+
+router.get(`${SCHEDULE_BASE}/frequency`, (req, res) => {
+  res.render("titan-mvp-1.2/form-overview/submissions/schedule/frequency", {
+    pageName: "How often do you want us to send the spreadsheet?",
+    fromCya: fromCheckAnswers(req),
+    backHref: fromCheckAnswers(req)
+      ? `${SCHEDULE_BASE}/check-answers`
+      : RESPONSES_TABLE
+  });
+});
+
+router.post(`${SCHEDULE_BASE}/frequency`, (req, res) => {
+  if (req.body.scheduleFrequency === "Daily") {
+    req.session.data.scheduleDay = "";
+  }
+  if (fromCheckAnswers(req) && req.body.scheduleFrequency === "Weekly" && !req.session.data.scheduleDay) {
+    return res.redirect(`${SCHEDULE_BASE}/day?from=cya`);
+  }
+  const next = req.body.scheduleFrequency === "Weekly"
+    ? `${SCHEDULE_BASE}/day`
+    : `${SCHEDULE_BASE}/time`;
+  res.redirect(nextAfterQuestion(req, next));
+});
+
+router.get(`${SCHEDULE_BASE}/day`, (req, res) => {
+  res.render("titan-mvp-1.2/form-overview/submissions/schedule/day", {
+    pageName: "What day do you want us to send the spreadsheet?",
+    fromCya: fromCheckAnswers(req),
+    backHref: fromCheckAnswers(req)
+      ? `${SCHEDULE_BASE}/check-answers`
+      : `${SCHEDULE_BASE}/frequency`
+  });
+});
+
+router.post(`${SCHEDULE_BASE}/day`, (req, res) => {
+  res.redirect(nextAfterQuestion(req, `${SCHEDULE_BASE}/time`));
+});
+
+router.get(`${SCHEDULE_BASE}/time`, (req, res) => {
+  const data = req.session.data || {};
+  const backHref = fromCheckAnswers(req)
+    ? `${SCHEDULE_BASE}/check-answers`
+    : (data.scheduleFrequency === "Weekly" ? `${SCHEDULE_BASE}/day` : `${SCHEDULE_BASE}/frequency`);
+  res.render("titan-mvp-1.2/form-overview/submissions/schedule/time", {
+    pageName: "What time do you want us to send the spreadsheet?",
+    fromCya: fromCheckAnswers(req),
+    backHref,
+    timeOptions: getScheduleTimeOptions(data.scheduleTime)
+  });
+});
+
+router.post(`${SCHEDULE_BASE}/time`, (req, res) => {
+  req.session.data.scheduleTime = formatScheduleTime(req.body.scheduleTime);
+  res.redirect(nextAfterQuestion(req, `${SCHEDULE_BASE}/recipients`));
+});
+
+router.get(`${SCHEDULE_BASE}/recipients`, (req, res) => {
+  const data = req.session.data || {};
+  res.render("titan-mvp-1.2/form-overview/submissions/schedule/recipients", {
+    pageName: "Who do you want us to send the spreadsheet to?",
+    fromCya: fromCheckAnswers(req),
+    backHref: fromCheckAnswers(req)
+      ? `${SCHEDULE_BASE}/check-answers`
+      : `${SCHEDULE_BASE}/time`,
+    recipients: getScheduleRecipients(data)
+  });
+});
+
+router.post(`${SCHEDULE_BASE}/recipients`, (req, res) => {
+  res.redirect(`${SCHEDULE_BASE}/check-answers`);
+});
+
+router.get(`${SCHEDULE_BASE}/check-answers`, (req, res) => {
+  const data = req.session.data || {};
+  const recipients = getScheduleRecipients(data);
+  const recipientHtml = recipients.length ? recipients.join("<br>") : "Not entered";
+  const change = (path) => `${SCHEDULE_BASE}/${path}?from=cya`;
+  const howOften = data.scheduleFrequency === "Weekly"
+    ? "Every week"
+    : (data.scheduleFrequency === "Daily" ? "Every day" : "Not entered");
+
+  const summaryRows = [
+    {
+      key: { text: "How often" },
+      value: { text: howOften },
+      actions: { items: [{ href: change("frequency"), text: "Change", visuallyHiddenText: "how often we send the spreadsheet" }] }
+    }
+  ];
+
+  if (data.scheduleFrequency === "Weekly") {
+    summaryRows.push({
+      key: { text: "Day" },
+      value: { text: data.scheduleDay || "Not entered" },
+      actions: { items: [{ href: change("day"), text: "Change", visuallyHiddenText: "day" }] }
+    });
+  }
+
+  summaryRows.push(
+    {
+      key: { text: "Time" },
+      value: { text: data.scheduleTime ? formatScheduleTime(data.scheduleTime) : "Not entered" },
+      actions: { items: [{ href: change("time"), text: "Change", visuallyHiddenText: "time" }] }
+    },
+    {
+      key: { text: "Email addresses" },
+      value: { html: recipientHtml },
+      actions: { items: [{ href: change("recipients"), text: "Change", visuallyHiddenText: "email addresses" }] }
+    },
+    {
+      key: { text: "What we'll send" },
+      value: { text: "Responses from the last month" }
+    }
+  );
+
+  res.render("titan-mvp-1.2/form-overview/submissions/schedule/check-answers", {
+    pageName: "Check your answers",
+    backHref: `${SCHEDULE_BASE}/recipients`,
+    summaryRows
+  });
+});
+
+router.post(`${SCHEDULE_BASE}/check-answers`, (req, res) => {
+  req.session.data.scheduleSetup = true;
+  res.redirect(`${RESPONSES_TABLE}?scheduleSuccess=true`);
+});
+
+router.get(`${SCHEDULE_BASE}/stop`, (req, res) => {
+  res.render("titan-mvp-1.2/form-overview/submissions/schedule/stop", {
+    pageName: "Are you sure you want to stop sending spreadsheets automatically?"
+  });
+});
+
+router.post(`${SCHEDULE_BASE}/stop`, (req, res) => {
+  req.session.data.scheduleSetup = false;
+  res.redirect(`${RESPONSES_TABLE}?scheduleStopped=true`);
 });
 
 // Error version of improved-2 TABLE submissions page route
@@ -6020,9 +6276,13 @@ router.post("/titan-mvp-1.2/form-overview/submissions/improved-2-table/download-
 router.get("/titan-mvp-1.2/form-overview/simplified/index-tabs", (req, res) => {
   // Check if this is specifically for Livestock registration
   if (req.query.form === "livestock-registration") {
+    const preservedFavouriteForms = Array.isArray(req.session.data.favouriteForms)
+      ? req.session.data.favouriteForms
+      : [];
     // Set up session data for Livestock registration form
     req.session.data = {
       formName: "Livestock registration",
+      favouriteForms: preservedFavouriteForms,
       formDetails: {
         organisation: "Defra",
         teamName: "Livestock team",
@@ -6198,10 +6458,16 @@ router.get("/titan-mvp-1.2/form-overview/simplified/index-tabs", (req, res) => {
   // Add draft settings if they exist
   const draftSettings = formData.draftSettings || {};
 
+  const favouriteFlash = req.session.data.favouriteFlash || null;
+  if (favouriteFlash) {
+    delete req.session.data.favouriteFlash;
+  }
+
   res.render("titan-mvp-1.2/form-overview/simplified/index-tabs", {
     form: form,
     draftSettings: draftSettings,
     pageName: `Overview - ${form.name}`,
+    favouriteFlash,
   });
 });
 
@@ -6211,9 +6477,13 @@ router.get(
   (req, res) => {
     // Check if this is specifically for Livestock registration
     if (req.query.form === "livestock-registration") {
+      const preservedFavouriteForms = Array.isArray(req.session.data.favouriteForms)
+        ? req.session.data.favouriteForms
+        : [];
       // Set up session data for Livestock registration form
       req.session.data = {
         formName: "Livestock registration",
+        favouriteForms: preservedFavouriteForms,
         formDetails: {
           organisation: "Defra",
           teamName: "Livestock team",
@@ -6389,10 +6659,16 @@ router.get(
     // Add draft settings if they exist
     const draftSettings = formData.draftSettings || {};
 
+    const favouriteFlash = req.session.data.favouriteFlash || null;
+    if (favouriteFlash) {
+      delete req.session.data.favouriteFlash;
+    }
+
     res.render("titan-mvp-1.2/form-overview/simplified/index-tabs", {
       form: form,
       draftSettings: draftSettings,
       pageName: `Overview - ${form.name}`,
+      favouriteFlash,
     });
   }
 );
@@ -7378,11 +7654,107 @@ router.get(
   }
 );
 
-// Library route
+const { buildLibraryQuery } = require("../../lib/build-library-query");
 router.get("/titan-mvp-1.2/library", function (req, res) {
+  // Normalise favourites view toggle (may arrive as string or array from query)
+  const rawFavouritesOnly = req.session.data.favouritesOnly;
+  const favouritesOnlyOn =
+    rawFavouritesOnly === "yes" ||
+    (Array.isArray(rawFavouritesOnly) && rawFavouritesOnly.includes("yes"));
+  req.session.data.favouritesOnly = favouritesOnlyOn ? "yes" : "";
+
+  const flash = req.session.data.favouriteFlash || null;
+  if (flash) {
+    delete req.session.data.favouriteFlash;
+  }
+
+  const libraryPageHrefs = [null];
+  for (let page = 1; page <= 50; page += 1) {
+    libraryPageHrefs[page] = buildLibraryQuery(req.session.data, { page });
+  }
+
   res.render("titan-mvp-1.2/library.html", {
     commonTerms: terms,
+    favouriteFlash: flash,
+    libraryPageHrefs,
+    favouritesOnlyToggleHref: buildLibraryQuery(req.session.data, {
+      favouritesOnly: favouritesOnlyOn ? "" : "yes",
+      page: 1,
+    }),
+    clearSearchFiltersHref: buildLibraryQuery(req.session.data, {
+      page: 1,
+      name: "",
+      author: "",
+      organisation: "",
+      status: "",
+    }),
+    clearAllHref: buildLibraryQuery(
+      {},
+      {
+        page: 1,
+        name: "",
+        author: "",
+        organisation: "",
+        status: "",
+        favouritesOnly: "",
+        sort: "updated-newest",
+      }
+    ),
   });
+});
+
+// Favourites URL kept as a shortcut into the library favourites view
+router.get("/titan-mvp-1.2/favourites", function (req, res) {
+  req.session.data.favouritesOnly = "yes";
+  return res.redirect("/titan-mvp-1.2/library?favouritesOnly=yes&page=1");
+});
+
+// Toggle a form as favourite (keyed by form name for the PoC)
+router.get("/titan-mvp-1.2/library/toggle-favourite", function (req, res) {
+  // Use favouriteForm (not name/formName) so Prototype Kit auto-store does not
+  // overwrite the library search filter or the editor's formName.
+  const favouriteForm = String(req.query.favouriteForm || "").trim();
+
+  // Strip toggle-only query keys out of session data
+  delete req.session.data.favouriteForm;
+  delete req.session.data.returnTo;
+  // Old toggle used ?name=, which Prototype Kit stored as the library search
+  // filter and forced a filtered results view. Clear that pollution.
+  if (
+    (favouriteForm && req.session.data.name === favouriteForm) ||
+    req.query.name
+  ) {
+    delete req.session.data.name;
+  }
+
+  const returnTo =
+    req.query.returnTo === "overview"
+      ? "/titan-mvp-1.2/form-overview/simplified/index-tabs?form=livestock-registration"
+      : `/titan-mvp-1.2/library${buildLibraryQuery(req.session.data)}`;
+
+  if (!favouriteForm) {
+    return res.redirect(returnTo);
+  }
+
+  if (!Array.isArray(req.session.data.favouriteForms)) {
+    req.session.data.favouriteForms = [];
+  }
+
+  const favourites = req.session.data.favouriteForms;
+  const index = favourites.indexOf(favouriteForm);
+
+  if (index === -1) {
+    favourites.push(favouriteForm);
+    req.session.data.favouriteFlash = { action: "added", name: favouriteForm };
+  } else {
+    favourites.splice(index, 1);
+    req.session.data.favouriteFlash = {
+      action: "removed",
+      name: favouriteForm,
+    };
+  }
+
+  return res.redirect(returnTo);
 });
 
 // Add non-.html route for information-type-nf
