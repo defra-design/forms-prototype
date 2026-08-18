@@ -118,10 +118,6 @@ function enrichOutput(output) {
       output.submissionType,
       output.submissionVersion
     ),
-    excludeDefaultInbox: Boolean(output.excludeDefaultInbox),
-    defaultInboxLabel: output.excludeDefaultInbox
-      ? "Only this email address"
-      : "This email address and notify@defra.gov.uk",
   };
 }
 
@@ -156,12 +152,18 @@ function buildMailboxConditionSelectItems(selectedConditionId) {
 
 const SAMPLE_OUTPUTS = [
   {
+    id: 2000,
+    conditionId: null,
+    emailAddress: "notify@defra.gov.uk",
+    submissionType: "human-only",
+    submissionVersion: "3",
+  },
+  {
     id: 2001,
     conditionId: 1001,
     emailAddress: "farmers@defra.gov.uk",
     submissionType: "human-only",
     submissionVersion: "3",
-    excludeDefaultInbox: true,
   },
   {
     id: 2002,
@@ -169,7 +171,6 @@ const SAMPLE_OUTPUTS = [
     emailAddress: "records@defra.gov.uk",
     submissionType: "machine-readable",
     submissionVersion: "3",
-    excludeDefaultInbox: false,
   },
 ];
 
@@ -184,7 +185,6 @@ const MAX_OUTPUT_SAMPLES = Array.from(
     emailAddress: `team${index + 1}@defra.gov.uk`,
     submissionType: index % 4 === 0 ? "machine-readable" : "human-only",
     submissionVersion: "3",
-    excludeDefaultInbox: index % 3 === 0,
   })
 );
 
@@ -208,7 +208,6 @@ function buildStaticConditionalMailboxContext(variant) {
     emailAddress: "",
     submissionType: "human-only",
     submissionVersion: "3",
-    excludeDefaultInbox: false,
   };
 
   if (variant === "with-outputs" || variant === "saved" || variant === "edit-output") {
@@ -234,7 +233,6 @@ function buildStaticConditionalMailboxContext(variant) {
       emailAddress: "not-a-valid-email",
       submissionType: "human-only",
       submissionVersion: "3",
-      excludeDefaultInbox: false,
     };
   }
 
@@ -249,7 +247,6 @@ function buildStaticConditionalMailboxContext(variant) {
       emailAddress: editing.emailAddress,
       submissionType: editing.submissionType,
       submissionVersion: editing.submissionVersion,
-      excludeDefaultInbox: Boolean(editing.excludeDefaultInbox),
     };
   }
 

@@ -2956,9 +2956,6 @@ function validateSingleOutputFields(body) {
     errors.emailAddress = "Enter an email address in the correct format, like name@example.com";
   }
 
-  const recipients = [].concat(body.recipients || []);
-  const excludeDefaultInbox = Boolean(conditionId) && !recipients.includes("default");
-
   return {
     errors,
     output: {
@@ -2966,7 +2963,6 @@ function validateSingleOutputFields(body) {
       emailAddress,
       submissionType: body.submissionType || "human-only",
       submissionVersion: body.submissionVersion || "3",
-      excludeDefaultInbox,
     },
   };
 }
@@ -3010,10 +3006,6 @@ function renderConditionalMailboxRouting(req, res, options = {}) {
         output.submissionType,
         output.submissionVersion
       ),
-      excludeDefaultInbox: Boolean(output.excludeDefaultInbox),
-      defaultInboxLabel: output.excludeDefaultInbox
-        ? "Only this email address"
-        : `This email address and ${defaultMailbox.emailAddress}`,
     };
   });
 
@@ -3037,14 +3029,12 @@ function renderConditionalMailboxRouting(req, res, options = {}) {
           emailAddress: editOutput.emailAddress,
           submissionType: editOutput.submissionType,
           submissionVersion: editOutput.submissionVersion,
-          excludeDefaultInbox: Boolean(editOutput.excludeDefaultInbox),
         }
       : {
           conditionId: "",
           emailAddress: "",
           submissionType: "human-only",
           submissionVersion: "3",
-          excludeDefaultInbox: false,
         });
 
   const mailboxConditionSelectItems = buildMailboxConditionSelectItems(
@@ -3201,6 +3191,7 @@ router.post(
 
     if (action === "save-default") {
       store.defaultMailbox = {
+        ...(store.defaultMailbox || {}),
         emailAddress: String(req.body.emailAddress || "").trim(),
         submissionType: req.body.submissionType || "human-only",
         submissionVersion: req.body.submissionVersion || "3",
