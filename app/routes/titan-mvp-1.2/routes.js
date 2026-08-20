@@ -5666,7 +5666,10 @@ router.get("/titan-mvp-1.2/form-overview/submissions/improved-2", (req, res) => 
   });
 });
 
-// Improved-2 TABLE submissions page route
+router.get("/titan-mvp-1.2/form-overview/submissions/index-improved-2-table", (req, res) => {
+  res.redirect("/titan-mvp-1.2/form-overview/submissions/improved-2-table");
+});
+
 router.get("/titan-mvp-1.2/form-overview/submissions/improved-2-table", (req, res) => {
   // Get the form data from the session
   const formData = req.session.data || {};
@@ -5682,7 +5685,6 @@ router.get("/titan-mvp-1.2/form-overview/submissions/improved-2-table", (req, re
   const showFeedbackSuccessMessage = req.query.feedbackSuccess === 'true';
   const showErrorMessage = req.query.success === 'fail';
 
-  const scheduleRecipients = getScheduleRecipients(formData);
   const scheduleSetup = formData.scheduleSetup === true || formData.scheduleSetup === "true";
 
   res.render("titan-mvp-1.2/form-overview/submissions/index-improved-2-table", {
@@ -5695,9 +5697,7 @@ router.get("/titan-mvp-1.2/form-overview/submissions/improved-2-table", (req, re
     showScheduleStopped: req.query.scheduleStopped === "true",
     scheduleSetup,
     scheduleFrequencyText: formatScheduleFrequency(formData),
-    scheduleRecipientsHtml: scheduleRecipients.length
-      ? scheduleRecipients.join("<br>")
-      : "Not provided"
+    scheduleDataWindow: formatScheduleDataWindow(formData)
   });
 });
 
@@ -5782,6 +5782,16 @@ function formatScheduleFrequency(data) {
   return "";
 }
 
+function formatScheduleDataWindow(data) {
+  if (data.scheduleFrequency === "Weekly") {
+    return "Responses from the last 7 days";
+  }
+  if (data.scheduleFrequency === "Daily") {
+    return "Responses from the last day";
+  }
+  return "Not entered";
+}
+
 function fromCheckAnswers(req) {
   return req.query.from === "cya" || req.body.from === "cya";
 }
@@ -5845,7 +5855,7 @@ router.get(`${SCHEDULE_BASE}/time`, (req, res) => {
 
 router.post(`${SCHEDULE_BASE}/time`, (req, res) => {
   req.session.data.scheduleTime = formatScheduleTime(req.body.scheduleTime);
-  res.redirect(nextAfterQuestion(req, `${SCHEDULE_BASE}/recipients`));
+  res.redirect(nextAfterQuestion(req, `${SCHEDULE_BASE}/check-answers`));
 });
 
 router.get(`${SCHEDULE_BASE}/recipients`, (req, res) => {
@@ -5866,8 +5876,6 @@ router.post(`${SCHEDULE_BASE}/recipients`, (req, res) => {
 
 router.get(`${SCHEDULE_BASE}/check-answers`, (req, res) => {
   const data = req.session.data || {};
-  const recipients = getScheduleRecipients(data);
-  const recipientHtml = recipients.length ? recipients.join("<br>") : "Not entered";
   const change = (path) => `${SCHEDULE_BASE}/${path}?from=cya`;
   const howOften = data.scheduleFrequency === "Weekly"
     ? "Every week"
@@ -5896,20 +5904,16 @@ router.get(`${SCHEDULE_BASE}/check-answers`, (req, res) => {
       actions: { items: [{ href: change("time"), text: "Change", visuallyHiddenText: "time" }] }
     },
     {
-      key: { text: "Email addresses" },
-      value: { html: recipientHtml },
-      actions: { items: [{ href: change("recipients"), text: "Change", visuallyHiddenText: "email addresses" }] }
-    },
-    {
       key: { text: "What we'll send" },
-      value: { text: "Responses from the last month" }
+      value: { text: formatScheduleDataWindow(data) }
     }
   );
 
   res.render("titan-mvp-1.2/form-overview/submissions/schedule/check-answers", {
     pageName: "Check your answers",
-    backHref: `${SCHEDULE_BASE}/recipients`,
-    summaryRows
+    backHref: `${SCHEDULE_BASE}/time`,
+    summaryRows,
+    sharedMailbox: data.notificationEmail || "example@example.com"
   });
 });
 

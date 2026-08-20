@@ -49,17 +49,23 @@ activeLinkId: "nav-submissions"
           }
         },
         hint: {
-          text: "The spreadsheet will include responses from the last month."
+          text: "Each spreadsheet only includes responses since the last one was sent."
         },
         items: [
           {
             value: "Daily",
             text: "Every day",
+            hint: {
+              text: "We'll send responses from the last day."
+            },
             checked: data.scheduleFrequency == "Daily"
           },
           {
             value: "Weekly",
             text: "Every week",
+            hint: {
+              text: "We'll send responses from the last 7 days."
+            },
             checked: data.scheduleFrequency == "Weekly"
           }
         ]

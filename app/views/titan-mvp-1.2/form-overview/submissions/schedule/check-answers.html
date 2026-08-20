@@ -2,6 +2,7 @@
 {% from "components/service-header/macro.njk" import serviceHeader %}
 {% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
 
 {% block header %}
 {{ serviceHeader({
@@ -37,11 +38,20 @@ activeLinkId: "nav-submissions"
   <div class="govuk-grid-column-two-thirds">
     <h1 class="govuk-heading-l">Check your answers</h1>
 
+    {% set insetHtml %}
+      <p class="govuk-body">We'll send each spreadsheet to your shared mailbox:</p>
+      <p class="govuk-body govuk-!-font-weight-bold govuk-!-margin-bottom-0">{{ sharedMailbox }}</p>
+    {% endset %}
+
+    {{ govukInsetText({
+      html: insetHtml
+    }) }}
+
     {{ govukSummaryList({ rows: summaryRows }) }}
 
     <form method="post">
       {{ govukButton({
-        text: "Confirm"
+        text: "Confirm schedule"
       }) }}
     </form>
   </div>

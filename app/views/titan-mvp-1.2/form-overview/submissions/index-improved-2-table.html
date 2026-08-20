@@ -27,7 +27,7 @@ id: "nav-overview",
 active: true
 },
 {
-    href: "/titan-mvp-1.2/form-overview/submissions/index-improved-2-table",
+    href: "/titan-mvp-1.2/form-overview/submissions/improved-2-table",
     text: "Responses",
     id: "nav-submissions"
 },
@@ -133,7 +133,7 @@ activeLinkId: "nav-submissions"
           <h3 class="govuk-notification-banner__heading">
             You've set up a schedule
           </h3>
-          <p class="govuk-body">We'll send a spreadsheet to the email addresses you added.</p>
+          <p class="govuk-body">We'll send the spreadsheet at the time you chose.</p>
         {% endset %}
         {{ govukNotificationBanner({
           html: scheduleHtml,
@@ -183,21 +183,25 @@ activeLinkId: "nav-submissions"
         </div>
 
         <h2 class="govuk-heading-m">Schedule spreadsheet reports</h2>
-        {% if scheduleSetup %}
-        <p class="govuk-body">The spreadsheet will include responses from the last month. You can still download the last 9 months of responses whenever you need to above.</p>
+        {% set dataWindow %}
+          {% if data.scheduleFrequency == "Weekly" %}
+            Responses from the last 7 days
+          {% elif data.scheduleFrequency == "Daily" %}
+            Responses from the last day
+          {% else %}
+            {{ scheduleDataWindow }}
+          {% endif %}
+        {% endset %}
+        {% if scheduleSetup or data.scheduleSetup %}
         {{ govukSummaryList({
           rows: [
             {
               key: { text: "How often" },
-              value: { text: scheduleFrequencyText }
-            },
-            {
-              key: { text: "Email addresses" },
-              value: { html: scheduleRecipientsHtml }
+              value: { text: scheduleFrequencyText or ("Every " + ("week" if data.scheduleFrequency == "Weekly" else "day") + " at " + (data.scheduleTime or "9am")) }
             },
             {
               key: { text: "What we'll send" },
-              value: { text: "Responses from the last month" }
+              value: { text: dataWindow | trim }
             }
           ]
         }) }}
@@ -210,8 +214,8 @@ activeLinkId: "nav-submissions"
           <a class="govuk-link" href="/titan-mvp-1.2/form-overview/submissions/schedule/stop">Stop sending automatically</a>
         </div>
         {% else %}
-        <p class="govuk-body">The spreadsheet will include responses from the last month.</p>
-        <p class="govuk-body">You can still download the last 9 months of responses whenever you need to above.</p>
+        <p class="govuk-body">You can get a spreadsheet sent automatically, instead of requesting one each time.</p>
+        <p class="govuk-body">You'll choose how often and what time we send it.</p>
         {{ govukButton({
           text: "Set up a schedule",
           href: "/titan-mvp-1.2/form-overview/submissions/schedule/frequency"
