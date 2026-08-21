@@ -4,6 +4,7 @@
 {% from "components/favourite-pin/macro.njk" import favouritePin %}
 {% from "govuk/components/tabs/macro.njk" import govukTabs %}
 {% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
+{% from "moj/components/timeline/macro.njk" import mojTimeline %}
 
 {% set pageName = "Form overview - Livestock registration" %}
 {% set favouriteForms = data["favouriteForms"] if data["favouriteForms"] else [] %}
@@ -487,6 +488,42 @@ activeLinkId: "nav-overview"
         <h2 class="govuk-heading-m">History</h2>
         <div id="timeline-container">
             {% set timelineItems = [] %}
+            {% set _ = timelineItems.push({
+            label: { text: "Spreadsheet schedule cancelled" },
+            text: "Stopped sending spreadsheets automatically.",
+            datetime: { timestamp: "2026-08-21T11:15:00.000Z", type: "datetime" },
+            byline: { text: "Chris Smith" }
+            }) %}
+            {% set _ = timelineItems.push({
+            label: { text: "Form submissions downloaded" },
+            text: "Downloaded form submissions.",
+            datetime: { timestamp: "2026-08-21T10:59:00.000Z", type: "datetime" },
+            byline: { text: "Chris Smith" }
+            }) %}
+            {% set _ = timelineItems.push({
+            label: { text: "Spreadsheet schedule changed" },
+            text: "Changed the schedule from every day to every week.",
+            datetime: { timestamp: "2026-08-21T10:45:00.000Z", type: "datetime" },
+            byline: { text: "Chris Smith" }
+            }) %}
+            {% set _ = timelineItems.push({
+            label: { text: "Form submissions sent" },
+            text: "Sent responses from the previous day to example@example.com.",
+            datetime: { timestamp: "2026-08-20T23:01:00.000Z", type: "datetime" },
+            byline: { text: "Automatically" }
+            }) %}
+            {% set _ = timelineItems.push({
+            label: { text: "User feedback downloaded" },
+            text: "Downloaded user feedback.",
+            datetime: { timestamp: "2026-08-20T14:20:00.000Z", type: "datetime" },
+            byline: { text: "Chris Smith" }
+            }) %}
+            {% set _ = timelineItems.push({
+            label: { text: "Spreadsheet schedule set up" },
+            text: "Set up a schedule to send responses every day.",
+            datetime: { timestamp: "2026-08-20T09:30:00.000Z", type: "datetime" },
+            byline: { text: "Chris Smith" }
+            }) %}
             {% if form.status.text === "Live-Draft" %}
             {% set _ = timelineItems.push({
             label: { text: "Draft created from live form" },

@@ -183,25 +183,16 @@ activeLinkId: "nav-submissions"
         </div>
 
         <h2 class="govuk-heading-m">Schedule spreadsheet reports</h2>
-        {% set dataWindow %}
-          {% if data.scheduleFrequency == "Weekly" %}
-            Responses from the last 7 days
-          {% elif data.scheduleFrequency == "Daily" %}
-            Responses from the last day
-          {% else %}
-            {{ scheduleDataWindow }}
-          {% endif %}
-        {% endset %}
         {% if scheduleSetup or data.scheduleSetup %}
         {{ govukSummaryList({
           rows: [
             {
               key: { text: "How often" },
-              value: { text: scheduleFrequencyText or ("Every " + ("week" if data.scheduleFrequency == "Weekly" else "day") + " at " + (data.scheduleTime or "9am")) }
+              value: { text: scheduleFrequencyText or ("Every " + ("week" if data.scheduleFrequency == "Weekly" else "day")) }
             },
             {
               key: { text: "What we'll send" },
-              value: { text: dataWindow | trim }
+              value: { text: scheduleDataWindow }
             }
           ]
         }) }}
@@ -215,7 +206,7 @@ activeLinkId: "nav-submissions"
         </div>
         {% else %}
         <p class="govuk-body">You can get a spreadsheet sent automatically, instead of requesting one each time.</p>
-        <p class="govuk-body">You'll choose how often and what time we send it.</p>
+        <p class="govuk-body">You'll choose how often we send it.</p>
         {{ govukButton({
           text: "Set up a schedule",
           href: "/titan-mvp-1.2/form-overview/submissions/schedule/frequency"

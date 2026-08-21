@@ -56,7 +56,7 @@ activeLinkId: "nav-submissions"
             value: "Daily",
             text: "Every day",
             hint: {
-              text: "We'll send responses from the last day."
+              text: "We'll send it just after midnight, covering the previous day."
             },
             checked: data.scheduleFrequency == "Daily"
           },
@@ -64,7 +64,7 @@ activeLinkId: "nav-submissions"
             value: "Weekly",
             text: "Every week",
             hint: {
-              text: "We'll send responses from the last 7 days."
+              text: "We'll send it just after midnight on Monday, covering the previous Monday to Sunday."
             },
             checked: data.scheduleFrequency == "Weekly"
           }

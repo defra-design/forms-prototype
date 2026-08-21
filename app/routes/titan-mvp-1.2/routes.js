@@ -5772,22 +5772,21 @@ function getScheduleTimeOptions(selectedTime) {
 }
 
 function formatScheduleFrequency(data) {
-  const time = formatScheduleTime(data.scheduleTime);
   if (data.scheduleFrequency === "Weekly") {
-    return `Every ${data.scheduleDay || "Monday"} at ${time}`;
+    return "Every week";
   }
   if (data.scheduleFrequency === "Daily") {
-    return `Every day at ${time}`;
+    return "Every day";
   }
   return "";
 }
 
 function formatScheduleDataWindow(data) {
   if (data.scheduleFrequency === "Weekly") {
-    return "Responses from the last 7 days";
+    return "Responses from the previous Monday to Sunday";
   }
   if (data.scheduleFrequency === "Daily") {
-    return "Responses from the last day";
+    return "Responses from the previous day";
   }
   return "Not entered";
 }
@@ -5814,16 +5813,7 @@ router.get(`${SCHEDULE_BASE}/frequency`, (req, res) => {
 });
 
 router.post(`${SCHEDULE_BASE}/frequency`, (req, res) => {
-  if (req.body.scheduleFrequency === "Daily") {
-    req.session.data.scheduleDay = "";
-  }
-  if (fromCheckAnswers(req) && req.body.scheduleFrequency === "Weekly" && !req.session.data.scheduleDay) {
-    return res.redirect(`${SCHEDULE_BASE}/day?from=cya`);
-  }
-  const next = req.body.scheduleFrequency === "Weekly"
-    ? `${SCHEDULE_BASE}/day`
-    : `${SCHEDULE_BASE}/time`;
-  res.redirect(nextAfterQuestion(req, next));
+  res.redirect(`${SCHEDULE_BASE}/check-answers`);
 });
 
 router.get(`${SCHEDULE_BASE}/day`, (req, res) => {
@@ -5865,7 +5855,7 @@ router.get(`${SCHEDULE_BASE}/recipients`, (req, res) => {
     fromCya: fromCheckAnswers(req),
     backHref: fromCheckAnswers(req)
       ? `${SCHEDULE_BASE}/check-answers`
-      : `${SCHEDULE_BASE}/time`,
+      : `${SCHEDULE_BASE}/frequency`,
     recipients: getScheduleRecipients(data)
   });
 });
@@ -5886,32 +5876,16 @@ router.get(`${SCHEDULE_BASE}/check-answers`, (req, res) => {
       key: { text: "How often" },
       value: { text: howOften },
       actions: { items: [{ href: change("frequency"), text: "Change", visuallyHiddenText: "how often we send the spreadsheet" }] }
-    }
-  ];
-
-  if (data.scheduleFrequency === "Weekly") {
-    summaryRows.push({
-      key: { text: "Day" },
-      value: { text: data.scheduleDay || "Not entered" },
-      actions: { items: [{ href: change("day"), text: "Change", visuallyHiddenText: "day" }] }
-    });
-  }
-
-  summaryRows.push(
-    {
-      key: { text: "Time" },
-      value: { text: data.scheduleTime ? formatScheduleTime(data.scheduleTime) : "Not entered" },
-      actions: { items: [{ href: change("time"), text: "Change", visuallyHiddenText: "time" }] }
     },
     {
       key: { text: "What we'll send" },
       value: { text: formatScheduleDataWindow(data) }
     }
-  );
+  ];
 
   res.render("titan-mvp-1.2/form-overview/submissions/schedule/check-answers", {
     pageName: "Check your answers",
-    backHref: `${SCHEDULE_BASE}/time`,
+    backHref: `${SCHEDULE_BASE}/frequency`,
     summaryRows,
     sharedMailbox: data.notificationEmail || "example@example.com"
   });
