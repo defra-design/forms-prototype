@@ -1,0 +1,758 @@
+{% extends "layouts/main.html" %}
+{% from "components/service-header/macro.njk" import serviceHeader %}
+{%- from "govuk/components/tag/macro.njk" import govukTag -%}
+{%- from "govuk/components/tabs/macro.njk" import govukTabs -%}
+{%- from "govuk/components/table/macro.njk" import govukTable -%}
+{%- from "moj/components/sub-navigation/macro.njk" import mojSubNavigation -%}
+
+{% block pageTitle %}
+Payments metrics – {{ serviceName }} – GOV.UK Prototype Kit
+{% endblock %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+containerClasses: containerClasses,
+accountName: "Chris Smith ",
+homepageLink: "/",
+signOutLink: "/onboarding/sign-out-confirmation",
+navigationItems: [
+{ href: "/titan-mvp-1.2/roles/my-account.html", text: "My account", id: "my-account" },
+{ href: "/titan-mvp-1.2/roles/manage-users.html", text: "Manage users", id: "manage-users" },
+{ href: "/titan-mvp-1.2/roles/manage-users.html", text: "Admin tools", id: "admin-tools" }
+
+],
+activeLinkId: "admin-tools"
+}) }}
+
+<div class="x-govuk-masthead x-govuk-masthead--large">
+    <div class="govuk-width-container">
+        {{ govukBackLink({ classes: "govuk-back-link--inverse govuk-!-margin-bottom-0", text: "Back to admin tools",
+        href: "/titan-mvp-1.2/library.html" }) }}
+
+        <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"
+            style="border-bottom: 1px solid white; margin-bottom: 0" />
+
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full-from-desktop">
+                <h1 class="x-govuk-masthead__title">
+Defra Form Designer metrics                </h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block content %}
+
+{% macro metricLabel(text, description, id) %}
+<span class="gem-c-big-number__label">
+  <span class="app-metric-tooltip tooltip" tabindex="0" aria-describedby="{{ id }}">
+    {{ text }}
+    <span class="tooltiptext" id="{{ id }}" role="tooltip">{{ description }}</span>
+  </span>
+</span>
+{% endmacro %}
+
+
+{{ mojSubNavigation({
+  label: "Sub navigation",
+  items: [  {
+    text: "Form activity",
+    href: "/titan-mvp-1.2/metrics/v7"
+  },   {
+    text: "Component usage",
+    href: "/titan-mvp-1.2/metrics/component-usage"
+  },   {
+    text: "Sign-in",
+    href: "/titan-mvp-1.2/metrics/sign-in"
+  },   {
+    text: "Copy answers",
+    href: "/titan-mvp-1.2/metrics/copy-answers"
+  },   {
+    text: "Payments",
+    href: "/titan-mvp-1.2/metrics/payments",
+    active: true
+  },   {
+    text: "3rd party review",
+    href: "/titan-mvp-1.2/metrics/3rd-party-review"
+  }
+  ]
+}) }}
+
+
+{% set sevenDaysContent %}
+<div class="govuk-!-margin-bottom-6">
+  <span class="govuk-caption-m">18 November 2024 to 24 November 2024</span>
+  <h2 class="govuk-heading-l govuk-!-margin-bottom-1">Last 7 days</h2>
+  <p class="govuk-body">See how many people started and completed payments, which forms take the most money, and whether those forms use a fixed or conditional payment amount.</p>
+</div>
+
+<!-- Payments started and completed -->
+<div class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Payments started and completed</h2>
+  <p class="govuk-body govuk-!-margin-bottom-4">How many people began paying, and how many payments were successfully taken.</p>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Payments started', 'How many times someone began a payment for a form submission.', 'metric-tip-payments-started-7d') }}
+          <span class="gem-c-big-number__value">1,248</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+8.4%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Payments started increased by 8.4% compared to the previous 7 days." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">97 more than last week</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Payments completed', 'How many payments were successfully taken (captured).', 'metric-tip-payments-completed-7d') }}
+          <span class="gem-c-big-number__value">1,086</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+6.9%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Payments completed increased by 6.9% compared to the previous 7 days." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">70 more than last week</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Fixed or conditional payments -->
+<div class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Fixed or conditional payments</h2>
+  <p class="govuk-body govuk-!-margin-bottom-4">How many live forms always charge the same amount, and how many charge different amounts depending on answers.</p>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Forms with a fixed payment', 'Forms that always charge the same amount.', 'metric-tip-fixed-payment-7d') }}
+          <span class="gem-c-big-number__value">41</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+2.5%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Forms with a fixed payment increased by 2.5% compared to the previous 7 days." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">1 more than last week</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Forms with a conditional payment', 'Forms that charge different amounts depending on how someone answers earlier questions.', 'metric-tip-conditional-payment-7d') }}
+          <span class="gem-c-big-number__value">17</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+6.3%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Forms with a conditional payment increased by 6.3% compared to the previous 7 days." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">1 more than last week</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Money taken -->
+<div class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Money taken</h2>
+  <p class="govuk-body govuk-!-margin-bottom-4">The total amount successfully taken across all forms in this period.</p>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Total amount taken', 'The total money successfully taken from completed payments.', 'metric-tip-total-taken-7d') }}
+          <span class="gem-c-big-number__value">£186,420</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+11.2%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Total amount taken increased by 11.2% compared to the previous 7 days." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">£18,760 more than last week</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Form that took the most money', 'The form that collected the highest total amount from completed payments.', 'metric-tip-top-revenue-7d') }}
+          <span class="gem-c-big-number__value govuk-!-font-size-36">Export licence application</span>
+        </div>
+        <p class="govuk-body govuk-!-margin-top-2 govuk-!-margin-bottom-1"><strong>£54,280</strong> taken from 312 completed payments</p>
+        <p class="govuk-body-xs app-metric-caption">Highest total amount this week</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Forms with the most payments -->
+<div class="govuk-!-margin-bottom-0">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Payments and money taken by form</h2>
+  <p class="govuk-body govuk-!-margin-bottom-4">Which forms had the most completed payments, and how much money each form took. Use this to see which forms bring in the most revenue.</p>
+  {{ govukTable({
+    caption: "Forms ranked by money taken in the last 7 days",
+    captionClasses: "govuk-table__caption--m",
+    firstCellIsHeader: true,
+    head: [
+      { text: "Form" },
+      { text: "Payment type" },
+      { text: "Payments completed", format: "numeric" },
+      { text: "Total amount taken", format: "numeric" }
+    ],
+    rows: [
+      [
+        { html: '<a href="#" class="govuk-link">Export licence application</a><span class="govuk-caption-m govuk-!-display-block">Animal and Plant Health Agency</span>' },
+        { text: "Conditional" },
+        { text: "312", format: "numeric" },
+        { text: "£54,280", format: "numeric" }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Waste carrier registration</a><span class="govuk-caption-m govuk-!-display-block">Environment Agency</span>' },
+        { text: "Fixed" },
+        { text: "268", format: "numeric" },
+        { text: "£41,540", format: "numeric" }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Fishing vessel licence</a><span class="govuk-caption-m govuk-!-display-block">Marine Management Organisation</span>' },
+        { text: "Conditional" },
+        { text: "194", format: "numeric" },
+        { text: "£36,110", format: "numeric" }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Tree felling licence</a><span class="govuk-caption-m govuk-!-display-block">Forestry Commission</span>' },
+        { text: "Fixed" },
+        { text: "156", format: "numeric" },
+        { text: "£28,080", format: "numeric" }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Veterinary medicine application</a><span class="govuk-caption-m govuk-!-display-block">Veterinary Medicines Directorate</span>' },
+        { text: "Fixed" },
+        { text: "98", format: "numeric" },
+        { text: "£17,640", format: "numeric" }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Import permit for animal products</a><span class="govuk-caption-m govuk-!-display-block">Animal and Plant Health Agency</span>' },
+        { text: "Conditional" },
+        { text: "58", format: "numeric" },
+        { text: "£8,770", format: "numeric" }
+      ]
+    ]
+  }) }}
+</div>
+{% endset %}
+
+{% set thirtyDaysContent %}
+<div class="govuk-!-margin-bottom-6">
+  <span class="govuk-caption-m">25 October 2024 to 24 November 2024</span>
+  <h2 class="govuk-heading-l govuk-!-margin-bottom-1">Last 30 days</h2>
+  <p class="govuk-body">See how many people started and completed payments, which forms take the most money, and whether those forms use a fixed or conditional payment amount.</p>
+</div>
+
+<div class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Payments started and completed</h2>
+  <p class="govuk-body govuk-!-margin-bottom-4">How many people began paying, and how many payments were successfully taken.</p>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Payments started', 'How many times someone began a payment for a form submission.', 'metric-tip-payments-started-30d') }}
+          <span class="gem-c-big-number__value">5,210</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({ text: "+9.1%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Payments started increased by 9.1% compared to the previous 30 days." } }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">434 more than last month</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Payments completed', 'How many payments were successfully taken (captured).', 'metric-tip-payments-completed-30d') }}
+          <span class="gem-c-big-number__value">4,540</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({ text: "+7.6%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Payments completed increased by 7.6% compared to the previous 30 days." } }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">321 more than last month</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Fixed or conditional payments</h2>
+  <p class="govuk-body govuk-!-margin-bottom-4">How many live forms always charge the same amount, and how many charge different amounts depending on answers.</p>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Forms with a fixed payment', 'Forms that always charge the same amount.', 'metric-tip-fixed-payment-30d') }}
+          <span class="gem-c-big-number__value">41</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({ text: "+7.9%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Forms with a fixed payment increased by 7.9%." } }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">3 more than last month</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Forms with a conditional payment', 'Forms that charge different amounts depending on how someone answers earlier questions.', 'metric-tip-conditional-payment-30d') }}
+          <span class="gem-c-big-number__value">17</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({ text: "+13.3%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Forms with a conditional payment increased by 13.3%." } }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">2 more than last month</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Money taken</h2>
+  <p class="govuk-body govuk-!-margin-bottom-4">The total amount successfully taken across all forms in this period.</p>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Total amount taken', 'The total money successfully taken from completed payments.', 'metric-tip-total-taken-30d') }}
+          <span class="gem-c-big-number__value">£782,150</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({ text: "+10.4%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Total amount taken increased by 10.4%." } }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">£73,640 more than last month</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Form that took the most money', 'The form that collected the highest total amount from completed payments.', 'metric-tip-top-revenue-30d') }}
+          <span class="gem-c-big-number__value govuk-!-font-size-36">Export licence application</span>
+        </div>
+        <p class="govuk-body govuk-!-margin-top-2 govuk-!-margin-bottom-1"><strong>£228,940</strong> taken from 1,286 completed payments</p>
+        <p class="govuk-body-xs app-metric-caption">Highest total amount this month</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="govuk-!-margin-bottom-0">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Payments and money taken by form</h2>
+  <p class="govuk-body govuk-!-margin-bottom-4">Which forms had the most completed payments, and how much money each form took. Use this to see which forms bring in the most revenue.</p>
+  {{ govukTable({
+    caption: "Forms ranked by money taken in the last 30 days",
+    captionClasses: "govuk-table__caption--m",
+    firstCellIsHeader: true,
+    head: [
+      { text: "Form" },
+      { text: "Payment type" },
+      { text: "Payments completed", format: "numeric" },
+      { text: "Total amount taken", format: "numeric" }
+    ],
+    rows: [
+      [
+        { html: '<a href="#" class="govuk-link">Export licence application</a><span class="govuk-caption-m govuk-!-display-block">Animal and Plant Health Agency</span>' },
+        { text: "Conditional" },
+        { text: "1,286", format: "numeric" },
+        { text: "£228,940", format: "numeric" }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Waste carrier registration</a><span class="govuk-caption-m govuk-!-display-block">Environment Agency</span>' },
+        { text: "Fixed" },
+        { text: "1,102", format: "numeric" },
+        { text: "£170,810", format: "numeric" }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Fishing vessel licence</a><span class="govuk-caption-m govuk-!-display-block">Marine Management Organisation</span>' },
+        { text: "Conditional" },
+        { text: "812", format: "numeric" },
+        { text: "£149,260", format: "numeric" }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Tree felling licence</a><span class="govuk-caption-m govuk-!-display-block">Forestry Commission</span>' },
+        { text: "Fixed" },
+        { text: "648", format: "numeric" },
+        { text: "£116,640", format: "numeric" }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Veterinary medicine application</a><span class="govuk-caption-m govuk-!-display-block">Veterinary Medicines Directorate</span>' },
+        { text: "Fixed" },
+        { text: "412", format: "numeric" },
+        { text: "£74,160", format: "numeric" }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Import permit for animal products</a><span class="govuk-caption-m govuk-!-display-block">Animal and Plant Health Agency</span>' },
+        { text: "Conditional" },
+        { text: "280", format: "numeric" },
+        { text: "£42,340", format: "numeric" }
+      ]
+    ]
+  }) }}
+</div>
+{% endset %}
+
+{% set allTimeContent %}
+<div class="govuk-!-margin-bottom-6">
+  <span class="govuk-caption-m">Since launch</span>
+  <h2 class="govuk-heading-l govuk-!-margin-bottom-1">All time</h2>
+  <p class="govuk-body">See how many people started and completed payments, which forms take the most money, and whether those forms use a fixed or conditional payment amount.</p>
+</div>
+
+<div class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Payments started and completed</h2>
+  <p class="govuk-body govuk-!-margin-bottom-4">How many people began paying, and how many payments were successfully taken.</p>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Payments started', 'How many times someone began a payment for a form submission.', 'metric-tip-payments-started-all') }}
+          <span class="gem-c-big-number__value">64,820</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({ text: "+28.4%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Payments started increased by 28.4% compared to the same period last year." } }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">14,320 more than same period last year</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Payments completed', 'How many payments were successfully taken (captured).', 'metric-tip-payments-completed-all') }}
+          <span class="gem-c-big-number__value">56,410</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({ text: "+26.1%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Payments completed increased by 26.1% compared to the same period last year." } }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">11,680 more than same period last year</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Fixed or conditional payments</h2>
+  <p class="govuk-body govuk-!-margin-bottom-4">How many live forms always charge the same amount, and how many charge different amounts depending on answers.</p>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Forms with a fixed payment', 'Forms that always charge the same amount.', 'metric-tip-fixed-payment-all') }}
+          <span class="gem-c-big-number__value">41</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({ text: "+64.0%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Forms with a fixed payment increased by 64.0%." } }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">16 more than same period last year</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Forms with a conditional payment', 'Forms that charge different amounts depending on how someone answers earlier questions.', 'metric-tip-conditional-payment-all') }}
+          <span class="gem-c-big-number__value">17</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({ text: "+112.5%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Forms with a conditional payment increased by 112.5%." } }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">9 more than same period last year</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Money taken</h2>
+  <p class="govuk-body govuk-!-margin-bottom-4">The total amount successfully taken across all forms in this period.</p>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Total amount taken', 'The total money successfully taken from completed payments.', 'metric-tip-total-taken-all') }}
+          <span class="gem-c-big-number__value">£9.4M</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({ text: "+31.8%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Total amount taken increased by 31.8%." } }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">£2.3M more than same period last year</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Form that took the most money', 'The form that collected the highest total amount from completed payments.', 'metric-tip-top-revenue-all') }}
+          <span class="gem-c-big-number__value govuk-!-font-size-36">Export licence application</span>
+        </div>
+        <p class="govuk-body govuk-!-margin-top-2 govuk-!-margin-bottom-1"><strong>£2.7M</strong> taken from 15,420 completed payments</p>
+        <p class="govuk-body-xs app-metric-caption">Highest total amount since launch</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="govuk-!-margin-bottom-0">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Payments and money taken by form</h2>
+  <p class="govuk-body govuk-!-margin-bottom-4">Which forms had the most completed payments, and how much money each form took. Use this to see which forms bring in the most revenue.</p>
+  {{ govukTable({
+    caption: "Forms ranked by money taken since launch",
+    captionClasses: "govuk-table__caption--m",
+    firstCellIsHeader: true,
+    head: [
+      { text: "Form" },
+      { text: "Payment type" },
+      { text: "Payments completed", format: "numeric" },
+      { text: "Total amount taken", format: "numeric" }
+    ],
+    rows: [
+      [
+        { html: '<a href="#" class="govuk-link">Export licence application</a><span class="govuk-caption-m govuk-!-display-block">Animal and Plant Health Agency</span>' },
+        { text: "Conditional" },
+        { text: "15,420", format: "numeric" },
+        { text: "£2.7M", format: "numeric" }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Waste carrier registration</a><span class="govuk-caption-m govuk-!-display-block">Environment Agency</span>' },
+        { text: "Fixed" },
+        { text: "13,180", format: "numeric" },
+        { text: "£2.0M", format: "numeric" }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Fishing vessel licence</a><span class="govuk-caption-m govuk-!-display-block">Marine Management Organisation</span>' },
+        { text: "Conditional" },
+        { text: "9,860", format: "numeric" },
+        { text: "£1.8M", format: "numeric" }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Tree felling licence</a><span class="govuk-caption-m govuk-!-display-block">Forestry Commission</span>' },
+        { text: "Fixed" },
+        { text: "7,940", format: "numeric" },
+        { text: "£1.4M", format: "numeric" }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Veterinary medicine application</a><span class="govuk-caption-m govuk-!-display-block">Veterinary Medicines Directorate</span>' },
+        { text: "Fixed" },
+        { text: "5,120", format: "numeric" },
+        { text: "£920K", format: "numeric" }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Import permit for animal products</a><span class="govuk-caption-m govuk-!-display-block">Animal and Plant Health Agency</span>' },
+        { text: "Conditional" },
+        { text: "4,890", format: "numeric" },
+        { text: "£580K", format: "numeric" }
+      ]
+    ]
+  }) }}
+</div>
+{% endset %}
+
+{{ govukTabs({
+  items: [
+    {
+      label: "Last 7 days",
+      id: "last-7-days",
+      panel: {
+        html: sevenDaysContent
+      }
+    },
+    {
+      label: "Last 30 days",
+      id: "last-30-days",
+      panel: {
+        html: thirtyDaysContent
+      }
+    },
+    {
+      label: "All time",
+      id: "all-time",
+      panel: {
+        html: allTimeContent
+      }
+    }
+  ]
+}) }}
+
+{% endblock %}
+
+{% block pageScripts %}
+<style>
+  .app-big-number-unit {
+    font-size: 0.6em;
+    font-weight: 400;
+  }
+
+  .app-metric-tile {
+    background-color: #f3f2f1;
+    padding: 24px;
+    margin-bottom: 1rem;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+  }
+
+  @media (min-width: 40.0625em) {
+    .app-metric-tile {
+      min-height: 200px;
+    }
+  }
+
+  .gem-c-big-number {
+    margin-bottom: 0;
+  }
+
+  .gem-c-big-number__value {
+    display: block;
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 0;
+    color: #0b0c0c;
+  }
+
+  @media (min-width: 40.0625em) {
+    .gem-c-big-number__value {
+      font-size: 3.5rem;
+    }
+  }
+
+  .gem-c-big-number__label {
+    display: block;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.25;
+    margin-bottom: 12px;
+    color: #0b0c0c;
+  }
+
+  .app-tag-with-icon {
+    position: relative;
+    padding-left: 26px;
+    white-space: nowrap;
+  }
+
+  .app-tag-arrow-up::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    background-color: currentColor;
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 0l6 6H7v6H5V6H0z'/%3E%3C/svg%3E");
+    mask-repeat: no-repeat;
+    mask-position: center;
+    mask-size: contain;
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 0l6 6H7v6H5V6H0z'/%3E%3C/svg%3E");
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    -webkit-mask-size: contain;
+  }
+
+  .app-tag-arrow-down::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    background-color: currentColor;
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 12L0 6h5V0h2v6h5z'/%3E%3C/svg%3E");
+    mask-repeat: no-repeat;
+    mask-position: center;
+    mask-size: contain;
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 12L0 6h5V0h2v6h5z'/%3E%3C/svg%3E");
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    -webkit-mask-size: contain;
+  }
+
+  .app-metric-tile .gem-c-big-number {
+    flex: 1 0 auto;
+  }
+
+  .app-metric-caption {
+    color: #505a5f;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  .app-metric-tooltip {
+    max-width: 100%;
+  }
+
+  .app-metric-tooltip .tooltiptext {
+    font-weight: 400;
+    user-select: text;
+    pointer-events: auto;
+  }
+
+  .app-metric-tooltip:focus-visible {
+    outline: 3px solid transparent;
+    background-color: #ffdd00;
+    box-shadow: 0 -2px #ffdd00, 0 4px #0b0c0c;
+    border-bottom-color: transparent;
+  }
+
+  .app-metric-tooltip .tooltiptext.app-metric-tooltip__tip--visible {
+    visibility: visible;
+    opacity: 1;
+  }
+
+</style>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.app-metric-tooltip').forEach(function (trigger) {
+      const tip = trigger.querySelector('[role="tooltip"]');
+      if (!tip) return;
+
+      function show() {
+        tip.classList.add('app-metric-tooltip__tip--visible');
+      }
+
+      function hide() {
+        tip.classList.remove('app-metric-tooltip__tip--visible');
+      }
+
+      trigger.addEventListener('mouseenter', show);
+      trigger.addEventListener('mouseleave', hide);
+      tip.addEventListener('mouseenter', show);
+      tip.addEventListener('mouseleave', hide);
+      trigger.addEventListener('focus', show);
+      trigger.addEventListener('blur', hide);
+
+      trigger.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          hide();
+          trigger.blur();
+        }
+      });
+    });
+  });
+</script>
+{% endblock %}
