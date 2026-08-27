@@ -94,9 +94,9 @@ Defra Form Designer metrics                </h1>
 <!-- Payments started and completed -->
 <div class="govuk-!-margin-bottom-8">
   <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Payments started and completed</h2>
-  <p class="govuk-body govuk-!-margin-bottom-4">How many people began paying, and how many payments were successfully taken.</p>
+  <p class="govuk-body govuk-!-margin-bottom-4">How many people began paying, how many payments were successfully taken, and how many failed.</p>
   <div class="govuk-grid-row">
-    <div class="govuk-grid-column-one-half">
+    <div class="govuk-grid-column-one-half govuk-grid-column-one-quarter-from-desktop">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
           {{ metricLabel('Payments started', 'How many times someone began a payment for a form submission.', 'metric-tip-payments-started-7d') }}
@@ -112,7 +112,7 @@ Defra Form Designer metrics                </h1>
         <p class="govuk-body-xs app-metric-caption">97 more than last week</p>
       </div>
     </div>
-    <div class="govuk-grid-column-one-half">
+    <div class="govuk-grid-column-one-half govuk-grid-column-one-quarter-from-desktop">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
           {{ metricLabel('Payments completed', 'How many payments were successfully taken (captured).', 'metric-tip-payments-completed-7d') }}
@@ -126,6 +126,38 @@ Defra Form Designer metrics                </h1>
           }) }}
         </div>
         <p class="govuk-body-xs app-metric-caption">70 more than last week</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half govuk-grid-column-one-quarter-from-desktop">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Completed of started', 'The percentage of payments that were successfully taken after being started.', 'metric-tip-completion-rate-7d') }}
+          <span class="gem-c-big-number__value">87.0%</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+1.2%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Completion rate increased by 1.2 percentage points compared to the previous 7 days." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">1,086 of 1,248 payments started</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half govuk-grid-column-one-quarter-from-desktop">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Failed payments', 'How many payments were started but not successfully taken, and what percentage that is of payments started.', 'metric-tip-failed-payments-7d') }}
+          <span class="gem-c-big-number__value">162</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "13.0%",
+            classes: "govuk-tag--red",
+            attributes: { "aria-label": "13.0% of payments started failed." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">13.0% of payments started failed</p>
       </div>
     </div>
   </div>
@@ -208,53 +240,70 @@ Defra Form Designer metrics                </h1>
 <!-- Forms with the most payments -->
 <div class="govuk-!-margin-bottom-0">
   <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Payments and money taken by form</h2>
-  <p class="govuk-body govuk-!-margin-bottom-4">Which forms had the most completed payments, and how much money each form took. Use this to see which forms bring in the most revenue.</p>
+  <p class="govuk-body govuk-!-margin-bottom-4">Which forms had the most completed payments, and how much money each form took. Use this to see which forms bring in the most revenue. Select a column heading to sort the table.</p>
   {{ govukTable({
+    attributes: {
+      "data-module": "moj-sortable-table"
+    },
     caption: "Forms ranked by money taken in the last 7 days",
     captionClasses: "govuk-table__caption--m",
     firstCellIsHeader: true,
     head: [
-      { text: "Form" },
-      { text: "Payment type" },
-      { text: "Payments completed", format: "numeric" },
-      { text: "Total amount taken", format: "numeric" }
+      {
+        text: "Form",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Payment type",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Payments completed",
+        format: "numeric",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Total amount taken",
+        format: "numeric",
+        attributes: { "aria-sort": "descending" }
+      }
     ],
     rows: [
       [
-        { html: '<a href="#" class="govuk-link">Export licence application</a><span class="govuk-caption-m govuk-!-display-block">Animal and Plant Health Agency</span>' },
-        { text: "Conditional" },
-        { text: "312", format: "numeric" },
-        { text: "£54,280", format: "numeric" }
+        { html: '<a href="#" class="govuk-link">Export licence application</a><span class="govuk-caption-m govuk-!-display-block">Animal and Plant Health Agency</span>', attributes: { "data-sort-value": "Export licence application" } },
+        { text: "Conditional", attributes: { "data-sort-value": "Conditional" } },
+        { text: "312", format: "numeric", attributes: { "data-sort-value": "312" } },
+        { text: "£54,280", format: "numeric", attributes: { "data-sort-value": "54280" } }
       ],
       [
-        { html: '<a href="#" class="govuk-link">Waste carrier registration</a><span class="govuk-caption-m govuk-!-display-block">Environment Agency</span>' },
-        { text: "Fixed" },
-        { text: "268", format: "numeric" },
-        { text: "£41,540", format: "numeric" }
+        { html: '<a href="#" class="govuk-link">Waste carrier registration</a><span class="govuk-caption-m govuk-!-display-block">Environment Agency</span>', attributes: { "data-sort-value": "Waste carrier registration" } },
+        { text: "Fixed", attributes: { "data-sort-value": "Fixed" } },
+        { text: "268", format: "numeric", attributes: { "data-sort-value": "268" } },
+        { text: "£41,540", format: "numeric", attributes: { "data-sort-value": "41540" } }
       ],
       [
-        { html: '<a href="#" class="govuk-link">Fishing vessel licence</a><span class="govuk-caption-m govuk-!-display-block">Marine Management Organisation</span>' },
-        { text: "Conditional" },
-        { text: "194", format: "numeric" },
-        { text: "£36,110", format: "numeric" }
+        { html: '<a href="#" class="govuk-link">Fishing vessel licence</a><span class="govuk-caption-m govuk-!-display-block">Marine Management Organisation</span>', attributes: { "data-sort-value": "Fishing vessel licence" } },
+        { text: "Conditional", attributes: { "data-sort-value": "Conditional" } },
+        { text: "194", format: "numeric", attributes: { "data-sort-value": "194" } },
+        { text: "£36,110", format: "numeric", attributes: { "data-sort-value": "36110" } }
       ],
       [
-        { html: '<a href="#" class="govuk-link">Tree felling licence</a><span class="govuk-caption-m govuk-!-display-block">Forestry Commission</span>' },
-        { text: "Fixed" },
-        { text: "156", format: "numeric" },
-        { text: "£28,080", format: "numeric" }
+        { html: '<a href="#" class="govuk-link">Tree felling licence</a><span class="govuk-caption-m govuk-!-display-block">Forestry Commission</span>', attributes: { "data-sort-value": "Tree felling licence" } },
+        { text: "Fixed", attributes: { "data-sort-value": "Fixed" } },
+        { text: "156", format: "numeric", attributes: { "data-sort-value": "156" } },
+        { text: "£28,080", format: "numeric", attributes: { "data-sort-value": "28080" } }
       ],
       [
-        { html: '<a href="#" class="govuk-link">Veterinary medicine application</a><span class="govuk-caption-m govuk-!-display-block">Veterinary Medicines Directorate</span>' },
-        { text: "Fixed" },
-        { text: "98", format: "numeric" },
-        { text: "£17,640", format: "numeric" }
+        { html: '<a href="#" class="govuk-link">Veterinary medicine application</a><span class="govuk-caption-m govuk-!-display-block">Veterinary Medicines Directorate</span>', attributes: { "data-sort-value": "Veterinary medicine application" } },
+        { text: "Fixed", attributes: { "data-sort-value": "Fixed" } },
+        { text: "98", format: "numeric", attributes: { "data-sort-value": "98" } },
+        { text: "£17,640", format: "numeric", attributes: { "data-sort-value": "17640" } }
       ],
       [
-        { html: '<a href="#" class="govuk-link">Import permit for animal products</a><span class="govuk-caption-m govuk-!-display-block">Animal and Plant Health Agency</span>' },
-        { text: "Conditional" },
-        { text: "58", format: "numeric" },
-        { text: "£8,770", format: "numeric" }
+        { html: '<a href="#" class="govuk-link">Import permit for animal products</a><span class="govuk-caption-m govuk-!-display-block">Animal and Plant Health Agency</span>', attributes: { "data-sort-value": "Import permit for animal products" } },
+        { text: "Conditional", attributes: { "data-sort-value": "Conditional" } },
+        { text: "58", format: "numeric", attributes: { "data-sort-value": "58" } },
+        { text: "£8,770", format: "numeric", attributes: { "data-sort-value": "8770" } }
       ]
     ]
   }) }}
@@ -270,9 +319,9 @@ Defra Form Designer metrics                </h1>
 
 <div class="govuk-!-margin-bottom-8">
   <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Payments started and completed</h2>
-  <p class="govuk-body govuk-!-margin-bottom-4">How many people began paying, and how many payments were successfully taken.</p>
+  <p class="govuk-body govuk-!-margin-bottom-4">How many people began paying, how many payments were successfully taken, and how many failed.</p>
   <div class="govuk-grid-row">
-    <div class="govuk-grid-column-one-half">
+    <div class="govuk-grid-column-one-half govuk-grid-column-one-quarter-from-desktop">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
           {{ metricLabel('Payments started', 'How many times someone began a payment for a form submission.', 'metric-tip-payments-started-30d') }}
@@ -284,7 +333,7 @@ Defra Form Designer metrics                </h1>
         <p class="govuk-body-xs app-metric-caption">434 more than last month</p>
       </div>
     </div>
-    <div class="govuk-grid-column-one-half">
+    <div class="govuk-grid-column-one-half govuk-grid-column-one-quarter-from-desktop">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
           {{ metricLabel('Payments completed', 'How many payments were successfully taken (captured).', 'metric-tip-payments-completed-30d') }}
@@ -294,6 +343,30 @@ Defra Form Designer metrics                </h1>
           {{ govukTag({ text: "+7.6%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Payments completed increased by 7.6% compared to the previous 30 days." } }) }}
         </div>
         <p class="govuk-body-xs app-metric-caption">321 more than last month</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half govuk-grid-column-one-quarter-from-desktop">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Completed of started', 'The percentage of payments that were successfully taken after being started.', 'metric-tip-completion-rate-30d') }}
+          <span class="gem-c-big-number__value">87.1%</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({ text: "+0.8%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Completion rate increased by 0.8 percentage points compared to the previous 30 days." } }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">4,540 of 5,210 payments started</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half govuk-grid-column-one-quarter-from-desktop">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Failed payments', 'How many payments were started but not successfully taken, and what percentage that is of payments started.', 'metric-tip-failed-payments-30d') }}
+          <span class="gem-c-big-number__value">670</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({ text: "12.9%", classes: "govuk-tag--red", attributes: { "aria-label": "12.9% of payments started failed." } }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">12.9% of payments started failed</p>
       </div>
     </div>
   </div>
@@ -361,53 +434,70 @@ Defra Form Designer metrics                </h1>
 
 <div class="govuk-!-margin-bottom-0">
   <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Payments and money taken by form</h2>
-  <p class="govuk-body govuk-!-margin-bottom-4">Which forms had the most completed payments, and how much money each form took. Use this to see which forms bring in the most revenue.</p>
+  <p class="govuk-body govuk-!-margin-bottom-4">Which forms had the most completed payments, and how much money each form took. Use this to see which forms bring in the most revenue. Select a column heading to sort the table.</p>
   {{ govukTable({
+    attributes: {
+      "data-module": "moj-sortable-table"
+    },
     caption: "Forms ranked by money taken in the last 30 days",
     captionClasses: "govuk-table__caption--m",
     firstCellIsHeader: true,
     head: [
-      { text: "Form" },
-      { text: "Payment type" },
-      { text: "Payments completed", format: "numeric" },
-      { text: "Total amount taken", format: "numeric" }
+      {
+        text: "Form",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Payment type",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Payments completed",
+        format: "numeric",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Total amount taken",
+        format: "numeric",
+        attributes: { "aria-sort": "descending" }
+      }
     ],
     rows: [
       [
-        { html: '<a href="#" class="govuk-link">Export licence application</a><span class="govuk-caption-m govuk-!-display-block">Animal and Plant Health Agency</span>' },
-        { text: "Conditional" },
-        { text: "1,286", format: "numeric" },
-        { text: "£228,940", format: "numeric" }
+        { html: '<a href="#" class="govuk-link">Export licence application</a><span class="govuk-caption-m govuk-!-display-block">Animal and Plant Health Agency</span>', attributes: { "data-sort-value": "Export licence application" } },
+        { text: "Conditional", attributes: { "data-sort-value": "Conditional" } },
+        { text: "1,286", format: "numeric", attributes: { "data-sort-value": "1286" } },
+        { text: "£228,940", format: "numeric", attributes: { "data-sort-value": "228940" } }
       ],
       [
-        { html: '<a href="#" class="govuk-link">Waste carrier registration</a><span class="govuk-caption-m govuk-!-display-block">Environment Agency</span>' },
-        { text: "Fixed" },
-        { text: "1,102", format: "numeric" },
-        { text: "£170,810", format: "numeric" }
+        { html: '<a href="#" class="govuk-link">Waste carrier registration</a><span class="govuk-caption-m govuk-!-display-block">Environment Agency</span>', attributes: { "data-sort-value": "Waste carrier registration" } },
+        { text: "Fixed", attributes: { "data-sort-value": "Fixed" } },
+        { text: "1,102", format: "numeric", attributes: { "data-sort-value": "1102" } },
+        { text: "£170,810", format: "numeric", attributes: { "data-sort-value": "170810" } }
       ],
       [
-        { html: '<a href="#" class="govuk-link">Fishing vessel licence</a><span class="govuk-caption-m govuk-!-display-block">Marine Management Organisation</span>' },
-        { text: "Conditional" },
-        { text: "812", format: "numeric" },
-        { text: "£149,260", format: "numeric" }
+        { html: '<a href="#" class="govuk-link">Fishing vessel licence</a><span class="govuk-caption-m govuk-!-display-block">Marine Management Organisation</span>', attributes: { "data-sort-value": "Fishing vessel licence" } },
+        { text: "Conditional", attributes: { "data-sort-value": "Conditional" } },
+        { text: "812", format: "numeric", attributes: { "data-sort-value": "812" } },
+        { text: "£149,260", format: "numeric", attributes: { "data-sort-value": "149260" } }
       ],
       [
-        { html: '<a href="#" class="govuk-link">Tree felling licence</a><span class="govuk-caption-m govuk-!-display-block">Forestry Commission</span>' },
-        { text: "Fixed" },
-        { text: "648", format: "numeric" },
-        { text: "£116,640", format: "numeric" }
+        { html: '<a href="#" class="govuk-link">Tree felling licence</a><span class="govuk-caption-m govuk-!-display-block">Forestry Commission</span>', attributes: { "data-sort-value": "Tree felling licence" } },
+        { text: "Fixed", attributes: { "data-sort-value": "Fixed" } },
+        { text: "648", format: "numeric", attributes: { "data-sort-value": "648" } },
+        { text: "£116,640", format: "numeric", attributes: { "data-sort-value": "116640" } }
       ],
       [
-        { html: '<a href="#" class="govuk-link">Veterinary medicine application</a><span class="govuk-caption-m govuk-!-display-block">Veterinary Medicines Directorate</span>' },
-        { text: "Fixed" },
-        { text: "412", format: "numeric" },
-        { text: "£74,160", format: "numeric" }
+        { html: '<a href="#" class="govuk-link">Veterinary medicine application</a><span class="govuk-caption-m govuk-!-display-block">Veterinary Medicines Directorate</span>', attributes: { "data-sort-value": "Veterinary medicine application" } },
+        { text: "Fixed", attributes: { "data-sort-value": "Fixed" } },
+        { text: "412", format: "numeric", attributes: { "data-sort-value": "412" } },
+        { text: "£74,160", format: "numeric", attributes: { "data-sort-value": "74160" } }
       ],
       [
-        { html: '<a href="#" class="govuk-link">Import permit for animal products</a><span class="govuk-caption-m govuk-!-display-block">Animal and Plant Health Agency</span>' },
-        { text: "Conditional" },
-        { text: "280", format: "numeric" },
-        { text: "£42,340", format: "numeric" }
+        { html: '<a href="#" class="govuk-link">Import permit for animal products</a><span class="govuk-caption-m govuk-!-display-block">Animal and Plant Health Agency</span>', attributes: { "data-sort-value": "Import permit for animal products" } },
+        { text: "Conditional", attributes: { "data-sort-value": "Conditional" } },
+        { text: "280", format: "numeric", attributes: { "data-sort-value": "280" } },
+        { text: "£42,340", format: "numeric", attributes: { "data-sort-value": "42340" } }
       ]
     ]
   }) }}
@@ -423,9 +513,9 @@ Defra Form Designer metrics                </h1>
 
 <div class="govuk-!-margin-bottom-8">
   <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Payments started and completed</h2>
-  <p class="govuk-body govuk-!-margin-bottom-4">How many people began paying, and how many payments were successfully taken.</p>
+  <p class="govuk-body govuk-!-margin-bottom-4">How many people began paying, how many payments were successfully taken, and how many failed.</p>
   <div class="govuk-grid-row">
-    <div class="govuk-grid-column-one-half">
+    <div class="govuk-grid-column-one-half govuk-grid-column-one-quarter-from-desktop">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
           {{ metricLabel('Payments started', 'How many times someone began a payment for a form submission.', 'metric-tip-payments-started-all') }}
@@ -437,7 +527,7 @@ Defra Form Designer metrics                </h1>
         <p class="govuk-body-xs app-metric-caption">14,320 more than same period last year</p>
       </div>
     </div>
-    <div class="govuk-grid-column-one-half">
+    <div class="govuk-grid-column-one-half govuk-grid-column-one-quarter-from-desktop">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
           {{ metricLabel('Payments completed', 'How many payments were successfully taken (captured).', 'metric-tip-payments-completed-all') }}
@@ -447,6 +537,30 @@ Defra Form Designer metrics                </h1>
           {{ govukTag({ text: "+26.1%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Payments completed increased by 26.1% compared to the same period last year." } }) }}
         </div>
         <p class="govuk-body-xs app-metric-caption">11,680 more than same period last year</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half govuk-grid-column-one-quarter-from-desktop">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Completed of started', 'The percentage of payments that were successfully taken after being started.', 'metric-tip-completion-rate-all') }}
+          <span class="gem-c-big-number__value">87.0%</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({ text: "+1.5%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Completion rate increased by 1.5 percentage points compared to the same period last year." } }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">56,410 of 64,820 payments started</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half govuk-grid-column-one-quarter-from-desktop">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Failed payments', 'How many payments were started but not successfully taken, and what percentage that is of payments started.', 'metric-tip-failed-payments-all') }}
+          <span class="gem-c-big-number__value">8,410</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({ text: "13.0%", classes: "govuk-tag--red", attributes: { "aria-label": "13.0% of payments started failed." } }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">13.0% of payments started failed</p>
       </div>
     </div>
   </div>
@@ -514,53 +628,70 @@ Defra Form Designer metrics                </h1>
 
 <div class="govuk-!-margin-bottom-0">
   <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Payments and money taken by form</h2>
-  <p class="govuk-body govuk-!-margin-bottom-4">Which forms had the most completed payments, and how much money each form took. Use this to see which forms bring in the most revenue.</p>
+  <p class="govuk-body govuk-!-margin-bottom-4">Which forms had the most completed payments, and how much money each form took. Use this to see which forms bring in the most revenue. Select a column heading to sort the table.</p>
   {{ govukTable({
+    attributes: {
+      "data-module": "moj-sortable-table"
+    },
     caption: "Forms ranked by money taken since launch",
     captionClasses: "govuk-table__caption--m",
     firstCellIsHeader: true,
     head: [
-      { text: "Form" },
-      { text: "Payment type" },
-      { text: "Payments completed", format: "numeric" },
-      { text: "Total amount taken", format: "numeric" }
+      {
+        text: "Form",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Payment type",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Payments completed",
+        format: "numeric",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Total amount taken",
+        format: "numeric",
+        attributes: { "aria-sort": "descending" }
+      }
     ],
     rows: [
       [
-        { html: '<a href="#" class="govuk-link">Export licence application</a><span class="govuk-caption-m govuk-!-display-block">Animal and Plant Health Agency</span>' },
-        { text: "Conditional" },
-        { text: "15,420", format: "numeric" },
-        { text: "£2.7M", format: "numeric" }
+        { html: '<a href="#" class="govuk-link">Export licence application</a><span class="govuk-caption-m govuk-!-display-block">Animal and Plant Health Agency</span>', attributes: { "data-sort-value": "Export licence application" } },
+        { text: "Conditional", attributes: { "data-sort-value": "Conditional" } },
+        { text: "15,420", format: "numeric", attributes: { "data-sort-value": "15420" } },
+        { text: "£2.7M", format: "numeric", attributes: { "data-sort-value": "2700000" } }
       ],
       [
-        { html: '<a href="#" class="govuk-link">Waste carrier registration</a><span class="govuk-caption-m govuk-!-display-block">Environment Agency</span>' },
-        { text: "Fixed" },
-        { text: "13,180", format: "numeric" },
-        { text: "£2.0M", format: "numeric" }
+        { html: '<a href="#" class="govuk-link">Waste carrier registration</a><span class="govuk-caption-m govuk-!-display-block">Environment Agency</span>', attributes: { "data-sort-value": "Waste carrier registration" } },
+        { text: "Fixed", attributes: { "data-sort-value": "Fixed" } },
+        { text: "13,180", format: "numeric", attributes: { "data-sort-value": "13180" } },
+        { text: "£2.0M", format: "numeric", attributes: { "data-sort-value": "2000000" } }
       ],
       [
-        { html: '<a href="#" class="govuk-link">Fishing vessel licence</a><span class="govuk-caption-m govuk-!-display-block">Marine Management Organisation</span>' },
-        { text: "Conditional" },
-        { text: "9,860", format: "numeric" },
-        { text: "£1.8M", format: "numeric" }
+        { html: '<a href="#" class="govuk-link">Fishing vessel licence</a><span class="govuk-caption-m govuk-!-display-block">Marine Management Organisation</span>', attributes: { "data-sort-value": "Fishing vessel licence" } },
+        { text: "Conditional", attributes: { "data-sort-value": "Conditional" } },
+        { text: "9,860", format: "numeric", attributes: { "data-sort-value": "9860" } },
+        { text: "£1.8M", format: "numeric", attributes: { "data-sort-value": "1800000" } }
       ],
       [
-        { html: '<a href="#" class="govuk-link">Tree felling licence</a><span class="govuk-caption-m govuk-!-display-block">Forestry Commission</span>' },
-        { text: "Fixed" },
-        { text: "7,940", format: "numeric" },
-        { text: "£1.4M", format: "numeric" }
+        { html: '<a href="#" class="govuk-link">Tree felling licence</a><span class="govuk-caption-m govuk-!-display-block">Forestry Commission</span>', attributes: { "data-sort-value": "Tree felling licence" } },
+        { text: "Fixed", attributes: { "data-sort-value": "Fixed" } },
+        { text: "7,940", format: "numeric", attributes: { "data-sort-value": "7940" } },
+        { text: "£1.4M", format: "numeric", attributes: { "data-sort-value": "1400000" } }
       ],
       [
-        { html: '<a href="#" class="govuk-link">Veterinary medicine application</a><span class="govuk-caption-m govuk-!-display-block">Veterinary Medicines Directorate</span>' },
-        { text: "Fixed" },
-        { text: "5,120", format: "numeric" },
-        { text: "£920K", format: "numeric" }
+        { html: '<a href="#" class="govuk-link">Veterinary medicine application</a><span class="govuk-caption-m govuk-!-display-block">Veterinary Medicines Directorate</span>', attributes: { "data-sort-value": "Veterinary medicine application" } },
+        { text: "Fixed", attributes: { "data-sort-value": "Fixed" } },
+        { text: "5,120", format: "numeric", attributes: { "data-sort-value": "5120" } },
+        { text: "£920K", format: "numeric", attributes: { "data-sort-value": "920000" } }
       ],
       [
-        { html: '<a href="#" class="govuk-link">Import permit for animal products</a><span class="govuk-caption-m govuk-!-display-block">Animal and Plant Health Agency</span>' },
-        { text: "Conditional" },
-        { text: "4,890", format: "numeric" },
-        { text: "£580K", format: "numeric" }
+        { html: '<a href="#" class="govuk-link">Import permit for animal products</a><span class="govuk-caption-m govuk-!-display-block">Animal and Plant Health Agency</span>', attributes: { "data-sort-value": "Import permit for animal products" } },
+        { text: "Conditional", attributes: { "data-sort-value": "Conditional" } },
+        { text: "4,890", format: "numeric", attributes: { "data-sort-value": "4890" } },
+        { text: "£580K", format: "numeric", attributes: { "data-sort-value": "580000" } }
       ]
     ]
   }) }}
@@ -597,6 +728,15 @@ Defra Form Designer metrics                </h1>
 
 {% block pageScripts %}
 <style>
+  @media (min-width: 48.0625em) {
+    .govuk-grid-column-one-quarter-from-desktop {
+      width: 25%;
+      float: left;
+      box-sizing: border-box;
+      padding: 0 15px;
+    }
+  }
+
   .app-big-number-unit {
     font-size: 0.6em;
     font-weight: 400;
@@ -614,7 +754,7 @@ Defra Form Designer metrics                </h1>
 
   @media (min-width: 40.0625em) {
     .app-metric-tile {
-      min-height: 200px;
+      min-height: 220px;
     }
   }
 
