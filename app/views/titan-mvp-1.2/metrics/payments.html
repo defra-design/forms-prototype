@@ -225,10 +225,10 @@ Defra Form Designer metrics                </h1>
       </div>
     </div>
     <div class="govuk-grid-column-one-half">
-      <div class="app-metric-tile">
+      <div class="app-metric-tile app-metric-tile--form-name">
         <div class="gem-c-big-number">
           {{ metricLabel('Form that took the most money', 'The form that collected the highest total amount from completed payments.', 'metric-tip-top-revenue-7d') }}
-          <span class="gem-c-big-number__value govuk-!-font-size-36">Export licence application</span>
+          <span class="gem-c-big-number__value gem-c-big-number__value--form-name">Export licence application</span>
         </div>
         <p class="govuk-body govuk-!-margin-top-2 govuk-!-margin-bottom-1"><strong>£54,280</strong> taken from 312 completed payments</p>
         <p class="govuk-body-xs app-metric-caption">Highest total amount this week</p>
@@ -420,10 +420,10 @@ Defra Form Designer metrics                </h1>
       </div>
     </div>
     <div class="govuk-grid-column-one-half">
-      <div class="app-metric-tile">
+      <div class="app-metric-tile app-metric-tile--form-name">
         <div class="gem-c-big-number">
           {{ metricLabel('Form that took the most money', 'The form that collected the highest total amount from completed payments.', 'metric-tip-top-revenue-30d') }}
-          <span class="gem-c-big-number__value govuk-!-font-size-36">Export licence application</span>
+          <span class="gem-c-big-number__value gem-c-big-number__value--form-name">Export licence application</span>
         </div>
         <p class="govuk-body govuk-!-margin-top-2 govuk-!-margin-bottom-1"><strong>£228,940</strong> taken from 1,286 completed payments</p>
         <p class="govuk-body-xs app-metric-caption">Highest total amount this month</p>
@@ -614,10 +614,10 @@ Defra Form Designer metrics                </h1>
       </div>
     </div>
     <div class="govuk-grid-column-one-half">
-      <div class="app-metric-tile">
+      <div class="app-metric-tile app-metric-tile--form-name">
         <div class="gem-c-big-number">
           {{ metricLabel('Form that took the most money', 'The form that collected the highest total amount from completed payments.', 'metric-tip-top-revenue-all') }}
-          <span class="gem-c-big-number__value govuk-!-font-size-36">Export licence application</span>
+          <span class="gem-c-big-number__value gem-c-big-number__value--form-name">Export licence application</span>
         </div>
         <p class="govuk-body govuk-!-margin-top-2 govuk-!-margin-bottom-1"><strong>£2.7M</strong> taken from 15,420 completed payments</p>
         <p class="govuk-body-xs app-metric-caption">Highest total amount since launch</p>
@@ -832,6 +832,22 @@ Defra Form Designer metrics                </h1>
 
   .app-metric-tile .gem-c-big-number {
     flex: 1 0 auto;
+  }
+
+  .app-metric-tile--form-name .gem-c-big-number {
+    flex: 0 0 auto;
+  }
+
+  .gem-c-big-number__value--form-name {
+    font-size: 2.25rem;
+    line-height: 1.15;
+    margin-bottom: 0;
+  }
+
+  @media (min-width: 40.0625em) {
+    .gem-c-big-number__value--form-name {
+      font-size: 2.25rem;
+    }
   }
 
   .app-metric-caption {
