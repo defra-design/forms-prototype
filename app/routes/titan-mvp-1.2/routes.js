@@ -22583,10 +22583,10 @@ function runnerSignInV2PostAuthDestination(req, formKey, applicationId, next) {
     delete data.runnerSignInV2CheckerPendingNext;
     return resolved;
   }
-  if (formKey && applicationId) {
-    return manageUrl;
+  if (resolved) {
+    return resolved;
   }
-  return resolved || manageUrl;
+  return manageUrl;
 }
 
 function runnerSignInV2FindApplication(req, formKey, applicationId) {
@@ -24750,7 +24750,11 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/start-page", functi
   if (isSaveExitDemo && firstStepId) {
     startNowUrl = runnerSignInFormStepUrl(application, firstStepId);
   } else {
-    const nextUrl = runnerSignInV2ManagePath(application.formKey, application.id);
+    const resumeStepId = getRunnerSignInResumeStepId(application) || firstStepId;
+    const nextUrl =
+      (application.status === "Not yet started" || application.formKey === "change-contact-details") && resumeStepId
+        ? runnerSignInFormStepUrl(application, resumeStepId)
+        : runnerSignInV2ManagePath(application.formKey, application.id);
     startNowUrl = `/runner-sign-in-v2/why-sign-in?formKey=${encodeURIComponent(application.formKey)}&applicationId=${encodeURIComponent(application.id)}&next=${encodeURIComponent(nextUrl)}&back=${encodeURIComponent(backUrl)}`;
   }
   return res.render("titan-mvp-1.2/runner-sign-in-v2/form-start-page", {
