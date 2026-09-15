@@ -256,6 +256,24 @@
       </div>
     {% endset %}
 
+    {% set returnResubmitHtml %}
+      <div class="journey-docs__section">
+        <p class="govuk-body">Someone signs in and lands on Manage your form. From there they can continue a draft, view a submitted form, edit it, copy, or start a new form. Editing a submitted form lets them change previous answers. Submitting those changes replaces the previous submission.</p>
+        {{ journeyDocs.journeyPath([
+          { text: "Manage your form", href: urls.manage },
+          { text: "Your submitted form", href: urls.viewSubmission },
+          { text: "Edit form", href: urls.makeChanges },
+          { text: "Check your answers", href: "/runner-sign-in/forms/volunteer-application/app-1721152526408/check-answers" },
+          { text: "Changes submitted", href: urls.formSubmitted }
+        ]) }}
+        {{ journeyDocs.journeyPreviews([
+          { caption: "Return and edit", title: "Manage your form", href: urls.manage },
+          { caption: "Return and edit", title: "Your submitted form", href: urls.viewSubmission },
+          { caption: "Return and edit", title: "Changes submitted", href: urls.formSubmitted }
+        ]) }}
+      </div>
+    {% endset %}
+
     {% set copySubmissionHtml %}
       <div class="journey-docs__section">
         <p class="govuk-body">Someone copies answers from a previous submission, completes the form, and receives a confirmation email that notes answers were copied.</p>
@@ -334,8 +352,13 @@
         },
         {
           heading: { text: "Manage your form" },
-          summary: { text: "Continue, submit and copy" },
+          summary: { text: "Continue, submit, view and edit" },
           content: { html: manageHtml }
+        },
+        {
+          heading: { text: "Return to a submitted form and edit it" },
+          summary: { text: "View submitted answers, edit previous answers, check answers and submit changes" },
+          content: { html: returnResubmitHtml }
         },
         {
           heading: { text: "Copy a previous submission" },

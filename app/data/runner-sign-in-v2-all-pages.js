@@ -80,6 +80,8 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
         { text: "Manage your form", href: urls.manage },
         { text: "Ready to submit", href: urls.readyToSubmit },
         { text: "Form submitted", href: urls.formSubmitted },
+        { text: "Your submitted form", href: urls.viewSubmission },
+        { text: "Edit form (are you sure?)", href: urls.makeChanges },
         { text: "Form submitted confirmation email", href: urls.emailFormSubmitted },
         { text: "Start a new application", href: urls.startNewForm },
         { text: "Manage your form (checked example)", href: urls.staticManageFormChecked },
