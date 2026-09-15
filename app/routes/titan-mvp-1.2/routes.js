@@ -18154,6 +18154,21 @@ function seedRunnerSignInApplicationsPrototype() {
       expiryIso: "2026-05-18T23:59:00+01:00",
     },
     {
+      id: "app-volunteer-in-progress",
+      formKey: "volunteer-application",
+      formName: "Apply to volunteer",
+      reference: "B6K-4M2-P9R",
+      status: "Draft",
+      step: "role",
+      excludeFromManage: true,
+      answers: {
+        fullName: "Alex Taylor",
+        email: "alex.taylor@example.com",
+      },
+      updatedIso: "2026-05-10T11:20:00+01:00",
+      expiryIso: "2026-06-10T23:59:00+01:00",
+    },
+    {
       // All-pages deep-link fixture only — excluded from manage lists.
       id: "app-copy-volunteer-draft",
       formKey: "volunteer-application",
@@ -18209,6 +18224,7 @@ function seedRunnerSignInApplicationsPrototype() {
       reference: "D8M-4K2-R9N",
       status: "Not yet started",
       step: "details",
+      excludeFromManage: true,
       answers: {},
       updatedIso: "2026-05-08T10:05:00+01:00",
       expiryIso: "2026-06-08T23:59:00+01:00",
@@ -18366,7 +18382,9 @@ function ensureRunnerSignInApplications(req) {
       app &&
       (app.id === "app-copy-volunteer-draft" ||
         app.id === "app-copy-volunteer-declaration" ||
-        app.id === "app-checker-ready-to-invite")
+        app.id === "app-checker-ready-to-invite" ||
+        app.id === "app-volunteer-in-progress" ||
+        app.id === RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_APP_ID)
     ) {
       app.excludeFromManage = true;
     }
@@ -18976,6 +18994,18 @@ router.get("/runner-sign-in/forms/:formKey/:id/check-answers", function (req, re
   }
 
   const copied = runnerSignInIsCopiedJourney(req.query, application);
+  const amending = Boolean(application.amending);
+  const previousSnapshot = (application.submittedSnapshot && typeof application.submittedSnapshot === "object")
+    ? application.submittedSnapshot
+    : null;
+  const previousReference =
+    (previousSnapshot && previousSnapshot.reference) ||
+    application.amendingFromReference ||
+    application.previousReference ||
+    "";
+  const previousSubmittedOnText = previousSnapshot && previousSnapshot.submittedIso
+    ? formatRunnerSignInSubmittedDateTime(previousSnapshot.submittedIso)
+    : (application.submittedIso ? formatRunnerSignInSubmittedDateTime(application.submittedIso) : "Not provided");
   const inviteCheckerUrl = runnerSignInCheckingAllowsInvite(application)
       ? `/runner-sign-in-v2/forms/${encodeURIComponent(application.formKey)}/${encodeURIComponent(application.id)}/checker/invite`
       : null;
@@ -18988,6 +19018,10 @@ router.get("/runner-sign-in/forms/:formKey/:id/check-answers", function (req, re
     application,
     formDef,
     copied,
+    amending,
+    previousReference,
+    previousSubmittedOnText,
+    previousFormName: application.formName,
     copiedQuerySuffix: runnerSignInCopiedQuerySuffix(req.query, application),
     inviteCheckerUrl,
     checkingOptional,
@@ -19023,10 +19057,14 @@ router.post("/runner-sign-in/forms/:formKey/:id/submit", function (req, res) {
     }
   }
 
-  application.status = "Submitted";
-  application.submittedIso = new Date().toISOString();
-  application.updatedIso = new Date().toISOString();
-  application.step = undefined;
+  if (application.amending) {
+    runnerSignInV2CompleteResubmit(req, application);
+  } else {
+    application.status = "Submitted";
+    application.submittedIso = new Date().toISOString();
+    application.updatedIso = new Date().toISOString();
+    application.step = undefined;
+  }
 
   if (data.runnerSignInV2RedirectApplicationsToManage) {
     data.runnerSignInV2FocusApplicationId = application.id;
@@ -19063,7 +19101,133 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/submitted", functio
     application,
     manageUrl: runnerSignInV2ManagePath(application.formKey, application.id),
     confirmationEmailUrl,
+    resubmitted: Boolean(application.resubmitted),
+    previousReference: application.previousReference,
+    submittedOnText: application.submittedIso
+      ? formatRunnerSignInSubmittedDateTime(application.submittedIso)
+      : "",
   });
+});
+
+router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/what-do-you-want-to-do", function (req, res) {
+  return res.redirect(runnerSignInV2ManagePath(req.params.formKey, req.params.applicationId));
+});
+
+router.post("/runner-sign-in-v2/forms/:formKey/:applicationId/what-do-you-want-to-do", function (req, res) {
+  return res.redirect(runnerSignInV2ManagePath(req.params.formKey, req.params.applicationId));
+});
+
+router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/view", function (req, res) {
+  const data = ensureRunnerSignInSession(req);
+  if (!data.runnerSignInAuthed) {
+    if (runnerSignInV2PrototypeMode(req)) {
+      applyRunnerSignInV2EmailAuth(req, data.runnerSignInEmail || "you@example.com", data.runnerSignInPhone || "07700 900000");
+    } else {
+      return res.redirect(
+        `/runner-sign-in-v2/sign-in/email?formKey=${encodeURIComponent(req.params.formKey)}&applicationId=${encodeURIComponent(req.params.applicationId)}&next=${encodeURIComponent(runnerSignInV2ViewSubmissionPath(req.params.formKey, req.params.applicationId, req.query.version))}`
+      );
+    }
+  }
+  const application =
+    runnerSignInV2FindApplication(req, req.params.formKey, req.params.applicationId) ||
+    runnerSignInV2EnsureApplication(req, req.params.formKey, req.params.applicationId);
+  if (!application) return res.redirect("/runner-sign-in-v2/start-page");
+  setRunnerSignInV2ManageFocus(req, application.formKey, application.id);
+
+  const version = String(req.query.version || "").trim();
+  const history = Array.isArray(application.submissionHistory) ? application.submissionHistory : [];
+  const historyEntry = version ? history.find((h) => h && h.reference === version) : null;
+  const viewingPrevious = Boolean(historyEntry);
+  const official = application.submittedSnapshot || null;
+  const answers = viewingPrevious
+    ? historyEntry.answers || {}
+    : (official && official.answers) || application.answers || {};
+  const reference = viewingPrevious
+    ? historyEntry.reference
+    : (official && official.reference) || application.reference;
+  const submittedIso = viewingPrevious
+    ? historyEntry.submittedIso
+    : (official && official.submittedIso) || application.submittedIso;
+  const isLatest = !viewingPrevious && (application.status === "Submitted" || application.amending);
+  const canMakeChanges = isLatest;
+  const hasUnsubmittedChanges = Boolean(application.amending);
+
+  return res.render("titan-mvp-1.2/runner-sign-in-v2/view-submission", {
+    data,
+    application,
+    answers,
+    reference,
+    submittedIso,
+    submittedOnText: submittedIso ? formatRunnerSignInSubmittedDateTime(submittedIso) : "Not provided",
+    submittedOnDate: submittedIso ? formatRunnerSignInDate(submittedIso) : "",
+    viewingPrevious,
+    isLatest,
+    canMakeChanges,
+    hasUnsubmittedChanges,
+    makeChangesUrl: runnerSignInV2MakeChangesPath(application.formKey, application.id),
+    manageUrl: runnerSignInV2ManagePath(application.formKey, application.id),
+    formDef: getRunnerSignInFormDef(application.formKey),
+  });
+});
+
+function runnerSignInV2LoadMakeChangesApplication(req, res) {
+  const data = ensureRunnerSignInSession(req);
+  if (!data.runnerSignInAuthed) {
+    if (runnerSignInV2PrototypeMode(req)) {
+      applyRunnerSignInV2EmailAuth(req, data.runnerSignInEmail || "you@example.com", data.runnerSignInPhone || "07700 900000");
+    } else {
+      res.redirect(
+        `/runner-sign-in-v2/sign-in/email?formKey=${encodeURIComponent(req.params.formKey)}&applicationId=${encodeURIComponent(req.params.applicationId)}&next=${encodeURIComponent(runnerSignInV2MakeChangesPath(req.params.formKey, req.params.applicationId))}`
+      );
+      return null;
+    }
+  }
+  const application =
+    runnerSignInV2FindApplication(req, req.params.formKey, req.params.applicationId) ||
+    runnerSignInV2EnsureApplication(req, req.params.formKey, req.params.applicationId);
+  if (!application) {
+    res.redirect("/runner-sign-in-v2/start-page");
+    return null;
+  }
+  setRunnerSignInV2ManageFocus(req, application.formKey, application.id);
+  if (application.status !== "Submitted" && application.status !== "Changes in progress" && !application.amending) {
+    res.redirect(runnerSignInV2ManagePath(application.formKey, application.id));
+    return null;
+  }
+  return application;
+}
+
+function runnerSignInV2RedirectToFormStart(res, application) {
+  const formDef = getRunnerSignInFormDef(application.formKey);
+  const firstStepId = getRunnerSignInFirstStepId(formDef) || application.step || "details";
+  return res.redirect(
+    `/runner-sign-in/forms/${encodeURIComponent(application.formKey)}/${encodeURIComponent(application.id)}/${encodeURIComponent(firstStepId)}`
+  );
+}
+
+router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/make-changes", function (req, res) {
+  const application = runnerSignInV2LoadMakeChangesApplication(req, res);
+  if (!application) return;
+  if (application.amending) {
+    return runnerSignInV2RedirectToFormStart(res, application);
+  }
+  return res.render("titan-mvp-1.2/runner-sign-in-v2/confirm-resubmit", {
+    data: ensureRunnerSignInSession(req),
+    application,
+    manageUrl: runnerSignInV2ManagePath(application.formKey, application.id),
+    confirmUrl: runnerSignInV2MakeChangesPath(application.formKey, application.id),
+    submittedOnText: application.submittedIso
+      ? formatRunnerSignInSubmittedDateTime(application.submittedIso)
+      : "Not provided",
+  });
+});
+
+router.post("/runner-sign-in-v2/forms/:formKey/:applicationId/make-changes", function (req, res) {
+  const application = runnerSignInV2LoadMakeChangesApplication(req, res);
+  if (!application) return;
+  runnerSignInV2StartAmend(application);
+  setRunnerSignInV2ManageFocus(req, application.formKey, application.id);
+  return runnerSignInV2RedirectToFormStart(res, application);
 });
 
 router.post("/runner-sign-in/forms/:formKey/:id/send-for-checking", function (req, res) {
@@ -19515,7 +19679,7 @@ router.get("/runner-sign-in/forms/:formKey/:id/:step", function (req, res) {
   }
 
   if (!application) return res.redirect("/runner-sign-in/applications");
-  if (application.status === "Submitted") {
+  if ((application.status === "Submitted" || application.status === "Changes in progress") && !application.amending) {
     if (data.runnerSignInV2RedirectApplicationsToManage) {
       setRunnerSignInV2ManageFocus(req, application.formKey, application.id);
       return res.redirect(runnerSignInV2ManagePath(application.formKey, application.id));
@@ -19582,7 +19746,9 @@ router.post("/runner-sign-in/forms/:formKey/:id/:step", function (req, res) {
   }
 
   if (!application) return res.redirect("/runner-sign-in/applications");
-  if (application.status === "Submitted") return res.redirect(`/runner-sign-in/applications/${encodeURIComponent(application.id)}`);
+  if ((application.status === "Submitted" || application.status === "Changes in progress") && !application.amending) {
+    return res.redirect(`/runner-sign-in/applications/${encodeURIComponent(application.id)}`);
+  }
 
   const formDef = getRunnerSignInFormDef(req.params.formKey);
   if (!formDef || formDef.formKey !== application.formKey) return res.redirect("/runner-sign-in/applications");
@@ -19669,13 +19835,20 @@ router.get("/runner-sign-in/applications/:id/clone", function (req, res) {
   const application = applications.find((a) => a.id === req.params.id);
   if (!application) return res.redirect("/runner-sign-in/applications");
 
+  const copyFromReference = String(req.query.from || "").trim();
+  const snapshot = runnerSignInV2FindSubmissionSnapshot(application, copyFromReference);
+  const copyReference = (snapshot && snapshot.reference) || application.reference;
+  const copySubmittedIso = (snapshot && snapshot.submittedIso) || application.submittedIso;
+
   return res.render("titan-mvp-1.2/runner-sign-in/clone-application", {
     data,
     application,
+    copyFromReference: snapshot ? copyFromReference : "",
     formatDate: formatRunnerSignInDate,
-    submittedOnText: application.submittedIso
-      ? formatRunnerSignInSubmittedDateTime(application.submittedIso)
+    submittedOnText: copySubmittedIso
+      ? formatRunnerSignInSubmittedDateTime(copySubmittedIso)
       : "Not provided",
+    copyReference,
   });
 });
 
@@ -19734,11 +19907,17 @@ router.post("/runner-sign-in/applications/:id/clone", function (req, res) {
   const source = applications.find((a) => a.id === req.params.id);
   if (!source) return res.redirect("/runner-sign-in/applications");
 
+  const copyFromReference = String(req.body.from || req.query.from || "").trim();
+  const snapshot = runnerSignInV2FindSubmissionSnapshot(source, copyFromReference);
+  const copyAnswers = snapshot && snapshot.answers ? snapshot.answers : source.answers;
+  const copyReference = (snapshot && snapshot.reference) || source.reference;
+  const copySubmittedIso = (snapshot && snapshot.submittedIso) || source.submittedIso;
+
   const ts = Date.now();
   const formDef = getRunnerSignInFormDef(source.formKey);
   const firstStepId = getRunnerSignInFirstStepId(formDef);
   const answersCopy =
-    source.answers && typeof source.answers === "object" ? JSON.parse(JSON.stringify(source.answers)) : {};
+    copyAnswers && typeof copyAnswers === "object" ? JSON.parse(JSON.stringify(copyAnswers)) : {};
   const cloned = {
     ...source,
     id: `app-${ts}`,
@@ -19749,12 +19928,18 @@ router.post("/runner-sign-in/applications/:id/clone", function (req, res) {
     updatedIso: new Date().toISOString(),
     submittedIso: undefined,
     expiryIso: createRunnerSignInExpiryIsoFromNow(28),
+    amending: false,
+    resubmitted: false,
+    previousReference: undefined,
+    submittedSnapshot: undefined,
+    submissionHistory: undefined,
+    amendingFromReference: undefined,
     copiedFrom: {
       applicationId: source.id,
       formKey: source.formKey,
       formName: source.formName,
-      reference: source.reference,
-      submittedIso: source.submittedIso,
+      reference: copyReference,
+      submittedIso: copySubmittedIso,
     },
   };
 
@@ -22061,6 +22246,131 @@ router.get("/user-submitted", function (req, res) {
 
 // ═══ Runner sign-in v2 (parallel prototype) ═══════════════════════════════════
 
+function runnerSignInV2ViewSubmissionPath(formKey, applicationId, version) {
+  let url = `/runner-sign-in-v2/forms/${encodeURIComponent(formKey)}/${encodeURIComponent(applicationId)}/view`;
+  if (version) url += `?version=${encodeURIComponent(version)}`;
+  return url;
+}
+
+function runnerSignInV2MakeChangesPath(formKey, applicationId) {
+  return `/runner-sign-in-v2/forms/${encodeURIComponent(formKey)}/${encodeURIComponent(applicationId)}/make-changes`;
+}
+
+function runnerSignInV2SnapshotSubmission(application) {
+  return {
+    reference: application.reference,
+    submittedIso: application.submittedIso,
+    answers:
+      application.answers && typeof application.answers === "object"
+        ? JSON.parse(JSON.stringify(application.answers))
+        : {},
+  };
+}
+
+function runnerSignInV2FindSubmissionSnapshot(application, reference) {
+  if (!application || !reference) return null;
+  const history = Array.isArray(application.submissionHistory) ? application.submissionHistory : [];
+  return history.find((snapshot) => snapshot && snapshot.reference === reference) || null;
+}
+
+function runnerSignInV2StartAmend(application) {
+  if (!application) return application;
+  if (application.amending) {
+    application.status = "Changes in progress";
+    return application;
+  }
+  if (application.status !== "Submitted" && application.status !== "Changes in progress") return application;
+  if (!application.submittedSnapshot) {
+    application.submittedSnapshot = runnerSignInV2SnapshotSubmission(application);
+  }
+  application.amending = true;
+  application.amendingFromReference = application.reference;
+  application.status = "Changes in progress";
+  application.updatedIso = new Date().toISOString();
+  const formDef = getRunnerSignInFormDef(application.formKey);
+  application.step = getRunnerSignInFirstStepId(formDef) || application.step;
+  return application;
+}
+
+function runnerSignInV2CancelAmend(application) {
+  if (!application) return application;
+  const snapshot = application.submittedSnapshot;
+  if (snapshot) {
+    application.reference = snapshot.reference || application.reference;
+    application.answers =
+      snapshot.answers && typeof snapshot.answers === "object"
+        ? JSON.parse(JSON.stringify(snapshot.answers))
+        : {};
+    application.submittedIso = snapshot.submittedIso || application.submittedIso;
+  }
+  application.status = "Submitted";
+  application.amending = false;
+  delete application.amendingFromReference;
+  application.step = undefined;
+  application.updatedIso = new Date().toISOString();
+  return application;
+}
+
+function runnerSignInV2ReferenceHtml(reference, previousReference) {
+  const main = escapeHtml(reference || "Not provided");
+  if (!previousReference || previousReference === reference) return main;
+  return `${main}<br><span class="govuk-hint govuk-!-margin-bottom-0">Replaces ${escapeHtml(previousReference)}</span>`;
+}
+
+function runnerSignInV2CompleteResubmit(req, application) {
+  if (!application) return application;
+  const previousSnapshot = application.submittedSnapshot || runnerSignInV2SnapshotSubmission(application);
+  application.submissionHistory = Array.isArray(application.submissionHistory)
+    ? application.submissionHistory
+    : [];
+  application.submissionHistory.push(previousSnapshot);
+  application.previousReference = previousSnapshot.reference || application.amendingFromReference || application.reference;
+  application.reference = createRunnerV4StyleReferenceNumber();
+  application.status = "Submitted";
+  application.amending = false;
+  delete application.amendingFromReference;
+  delete application.resubmittingFrom;
+  application.resubmitted = true;
+  application.submittedIso = new Date().toISOString();
+  application.updatedIso = application.submittedIso;
+  application.step = undefined;
+  application.submittedSnapshot = runnerSignInV2SnapshotSubmission(application);
+  return application;
+}
+
+function runnerSignInV2IsManageFixture(application) {
+  if (!application) return false;
+  if (application.excludeFromManage) return true;
+  const id = String(application.id || "");
+  return (
+    id === "app-copy-volunteer-draft" ||
+    id === "app-copy-volunteer-declaration" ||
+    id === "app-checker-ready-to-invite" ||
+    id === "app-volunteer-in-progress" ||
+    id === RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_APP_ID
+  );
+}
+
+function runnerSignInV2ManageOriginId(app) {
+  if (!app) return "";
+  if (app.resubmittingFrom && app.resubmittingFrom.applicationId) return app.resubmittingFrom.applicationId;
+  if (app.copiedFrom && app.copiedFrom.applicationId) return app.copiedFrom.applicationId;
+  return app.id;
+}
+
+function runnerSignInV2ShouldListOnManage(a, focus) {
+  if (!a || !focus) return false;
+  if (a.formKey !== focus.formKey) return false;
+  if (a.id === focus.id) return true;
+  if (runnerSignInV2IsManageFixture(a)) return false;
+
+  const originId = runnerSignInV2ManageOriginId(focus);
+  if (originId && a.id === originId) return true;
+  if (a.copiedFrom && a.copiedFrom.applicationId === originId) return true;
+
+  return false;
+}
+
 function runnerSignInV2ManagePath(formKey, applicationId) {
   return `/runner-sign-in-v2/forms/${encodeURIComponent(formKey)}/${encodeURIComponent(applicationId)}/manage`;
 }
@@ -22206,6 +22516,15 @@ function runnerSignInV2EnsureSecuritySession(req, res) {
 
 function setRunnerSignInV2ManageFocus(req, formKey, applicationId) {
   const data = ensureRunnerSignInSession(req);
+  const applications = ensureRunnerSignInApplications(req);
+  const current = applications.find((a) => a && a.id === String(applicationId || "").trim());
+  if (current && current.resubmittingFrom && current.resubmittingFrom.applicationId) {
+    const origin = applications.find((a) => a && a.id === current.resubmittingFrom.applicationId);
+    if (origin) {
+      formKey = origin.formKey;
+      applicationId = origin.id;
+    }
+  }
   data.runnerSignInV2RedirectApplicationsToManage = true;
   data.runnerSignInV2FocusFormKey = String(formKey || "").trim();
   data.runnerSignInV2FocusApplicationId = String(applicationId || "").trim();
@@ -25438,12 +25757,21 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/manage", function (
     runnerSignInV2FindApplication(req, req.params.formKey, req.params.applicationId) ||
     runnerSignInV2EnsureApplication(req, req.params.formKey, req.params.applicationId);
   if (!application) return res.redirect("/runner-sign-in-v2/start-page");
+  if (application.resubmittingFrom && application.resubmittingFrom.applicationId) {
+    const origin = applications.find((a) => a && a.id === application.resubmittingFrom.applicationId);
+    if (origin && origin.id !== application.id) {
+      setRunnerSignInV2ManageFocus(req, origin.formKey, origin.id);
+      return res.redirect(runnerSignInV2ManagePath(origin.formKey, origin.id));
+    }
+  }
   setRunnerSignInV2ManageFocus(req, application.formKey, application.id);
 
   // Compute display status locally (the v1 applications list does this too).
   ensureRunnerSignInChecking(application);
   function runnerSignInV2DisplayStatusFor(a) {
     if (!a) return "";
+    if (a.status === "Replaced") return "Replaced";
+    if (a.amending || a.status === "Changes in progress") return "In progress";
     if (a.status === "Submitted") return "Submitted";
     ensureRunnerSignInChecking(a);
     if (a.checking && a.checking.required) {
@@ -25458,6 +25786,9 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/manage", function (
   function runnerSignInV2StatusTagClassesFor(statusText) {
     const s = String(statusText || "");
     if (s === "Submitted") return "govuk-tag--green";
+    if (s === "Changes in progress") return "govuk-tag--blue";
+    if (s === "Making changes") return "govuk-tag--blue";
+    if (s === "Replaced") return "govuk-tag--grey";
     if (s === "Awaiting check") return "govuk-tag--yellow";
     if (s === "Checked") return "govuk-tag--turquoise";
     if (s === "Not yet started") return "govuk-tag--grey";
@@ -25466,16 +25797,20 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/manage", function (
     return "govuk-tag--teal";
   }
 
+  function runnerSignInV2ActionJoin(parts) {
+    return parts.filter(Boolean).join(' <span class="govuk-body govuk-!-margin-left-2 govuk-!-margin-right-2">|</span> ');
+  }
+
   function runnerSignInV2TableRowFor(a) {
     const statusText = runnerSignInV2DisplayStatusFor(a);
     const isSubmitted = statusText === "Submitted";
     const sortIso = (isSubmitted && a.submittedIso) ? a.submittedIso : (a.updatedIso || a.submittedIso || "");
     const sortTs = Date.parse(sortIso) || 0;
     const lastUpdatedText =
-      isSubmitted && a.submittedIso
+      (isSubmitted || statusText === "Replaced") && a.submittedIso
         ? `Submitted ${formatRunnerSignInDate(a.submittedIso)}`
         : formatRunnerSignInLastUpdated(a.updatedIso);
-    const expiryText = isSubmitted ? "" : formatRunnerSignInDate(a.expiryIso);
+    const expiryText = isSubmitted || statusText === "Replaced" ? "" : formatRunnerSignInDate(a.expiryIso);
     const resumeStepId = getRunnerSignInResumeStepId(a) || "name";
     const continueHref = `/runner-sign-in/forms/${encodeURIComponent(a.formKey)}/${encodeURIComponent(a.id)}/${encodeURIComponent(resumeStepId)}`;
     const readyToSubmitHref = `/runner-sign-in-v2/forms/${encodeURIComponent(a.formKey)}/${encodeURIComponent(a.id)}/ready-to-submit`;
@@ -25483,15 +25818,35 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/manage", function (
     const primaryLabel = statusText === "Checked" ? "Review and submit" : "Continue";
     const copyHref = `/runner-sign-in/applications/${encodeURIComponent(a.id)}/clone`;
     const deleteHref = `/runner-sign-in-v2/forms/${encodeURIComponent(a.formKey)}/${encodeURIComponent(a.id)}/delete`;
-    const actionsHtml = isSubmitted
-      ? `<a class="govuk-link" href="${copyHref}">Copy</a>`
-      : `<a class="govuk-link" href="${primaryHref}">${primaryLabel}</a> <span class="govuk-body govuk-!-margin-left-2 govuk-!-margin-right-2">|</span> <a class="govuk-link" href="${deleteHref}">Delete</a>`;
-    const sortExpiryTs = isSubmitted ? Number.POSITIVE_INFINITY : Date.parse(a.expiryIso) || Number.POSITIVE_INFINITY;
+    const viewHref = runnerSignInV2ViewSubmissionPath(a.formKey, a.id);
+    const makeChangesHref = runnerSignInV2MakeChangesPath(a.formKey, a.id);
+    let actionsHtml;
+    if (statusText === "Replaced") {
+      actionsHtml = `<a class="govuk-link" href="${copyHref}">Copy</a>`;
+    } else if (isSubmitted) {
+      actionsHtml = runnerSignInV2ActionJoin([
+        `<a class="govuk-link" href="${makeChangesHref}">Edit</a>`,
+        `<a class="govuk-link" href="${copyHref}">Copy</a>`,
+      ]);
+    } else {
+      actionsHtml = runnerSignInV2ActionJoin([
+        `<a class="govuk-link" href="${primaryHref}">${primaryLabel}</a>`,
+        `<a class="govuk-link" href="${deleteHref}">Delete</a>`,
+      ]);
+    }
+    const sortExpiryTs =
+      isSubmitted || statusText === "Replaced"
+        ? Number.POSITIVE_INFINITY
+        : Date.parse(a.expiryIso) || Number.POSITIVE_INFINITY;
     return {
       id: a.id,
       formName: a.formName,
-      reference: a.reference,
+      reference: a.amending ? `Changes to ${a.reference}` : a.reference,
+      referenceHtml: a.amending
+        ? escapeHtml(`Changes to ${a.reference}`)
+        : runnerSignInV2ReferenceHtml(a.reference, a.previousReference),
       statusText,
+      isLatest: isSubmitted,
       statusTagClasses: runnerSignInV2StatusTagClassesFor(statusText),
       lastUpdatedText,
       expiryText,
@@ -25501,36 +25856,76 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/manage", function (
     };
   }
 
+  function runnerSignInV2HistoryRowFor(a, snapshot) {
+    const viewHref = runnerSignInV2ViewSubmissionPath(a.formKey, a.id, snapshot.reference);
+    const copyHref = `/runner-sign-in/applications/${encodeURIComponent(a.id)}/clone?from=${encodeURIComponent(snapshot.reference || "")}`;
+    return {
+      id: `${a.id}-${snapshot.reference}`,
+      formName: a.formName,
+      reference: snapshot.reference,
+      referenceHtml: escapeHtml(snapshot.reference || "Not provided"),
+      statusText: "Replaced",
+      isLatest: false,
+      statusTagClasses: runnerSignInV2StatusTagClassesFor("Replaced"),
+      lastUpdatedText: snapshot.submittedIso
+        ? `Submitted ${formatRunnerSignInDate(snapshot.submittedIso)}`
+        : "Not provided",
+      expiryText: "",
+      actionsHtml: `<a class="govuk-link" href="${copyHref}">Copy</a>`,
+      _sortTs: Date.parse(snapshot.submittedIso) || 0,
+      _sortExpiryTs: Number.POSITIVE_INFINITY,
+    };
+  }
+
+  function runnerSignInV2OfficialSubmissionRowFor(a, snapshot) {
+    const copyHref = `/runner-sign-in/applications/${encodeURIComponent(a.id)}/clone`;
+    return {
+      id: `${a.id}-official`,
+      formName: a.formName,
+      reference: snapshot.reference || a.reference,
+      referenceHtml: escapeHtml(snapshot.reference || a.reference || "Not provided"),
+      statusText: "Submitted",
+      isLatest: true,
+      statusTagClasses: runnerSignInV2StatusTagClassesFor("Submitted"),
+      lastUpdatedText: snapshot.submittedIso
+        ? `Submitted ${formatRunnerSignInDate(snapshot.submittedIso)}`
+        : "Not provided",
+      expiryText: "",
+      actionsHtml: `<a class="govuk-link" href="${copyHref}">Copy</a>`,
+      _sortTs: Date.parse(snapshot.submittedIso) || 0,
+      _sortExpiryTs: Number.POSITIVE_INFINITY,
+    };
+  }
+
   const tableRow = runnerSignInV2TableRowFor(application);
   const tableRows = [];
+  const history = Array.isArray(application.submissionHistory) ? application.submissionHistory : [];
+  const listed = new Set();
 
-  // If we’re looking at a copied form, anchor the table on the original submitted form.
-  const anchorOriginalId =
-    (application && application.copiedFrom && application.copiedFrom.applicationId) ||
-    (application && application.status === "Submitted" && application.id) ||
-    null;
-  const original =
-    anchorOriginalId ? applications.find((a) => a && a.id === anchorOriginalId) : null;
+  applications.forEach((a) => {
+    if (!runnerSignInV2ShouldListOnManage(a, application)) return;
+    if (listed.has(a.id)) return;
+    if (a.amending) {
+      const snapshot = a.submittedSnapshot || runnerSignInV2SnapshotSubmission(a);
+      tableRows.push(runnerSignInV2OfficialSubmissionRowFor(a, snapshot));
+    }
+    tableRows.push(runnerSignInV2TableRowFor(a));
+    listed.add(a.id);
+    if (a.id === application.id && history.length) {
+      history
+        .slice()
+        .reverse()
+        .forEach((snapshot) => tableRows.push(runnerSignInV2HistoryRowFor(a, snapshot)));
+    }
+  });
 
-  if (original && runnerSignInV2DisplayStatusFor(original) === "Submitted") {
-    tableRows.push(runnerSignInV2TableRowFor(original));
-    const copies = applications.filter(
-      (a) =>
-        a &&
-        a.copiedFrom &&
-        a.copiedFrom.applicationId === original.id &&
-        // Hide all-pages fixtures from the submitted manage demo,
-        // but still show them when that fixture itself is the focused application.
-        (!a.excludeFromManage || a.id === application.id)
-    );
-    copies.forEach((c) => tableRows.push(runnerSignInV2TableRowFor(c)));
-  } else {
-    // Fallback: just show the current application.
+  if (!tableRows.length) {
     tableRows.push(tableRow);
   }
 
   function runnerSignInV2ManageRowRank(row) {
-    if (row.statusText === "Deleted") return 3;
+    if (row.statusText === "Deleted") return 4;
+    if (row.statusText === "Replaced") return 3;
     if (row.statusText === "Submitted") return 2;
     return 1;
   }
@@ -25591,6 +25986,10 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/manage", function (
     ? `/runner-sign-in-v2/emails/checker-invite-v2?formKey=${encodeURIComponent(application.formKey)}&applicationId=${encodeURIComponent(application.id)}`
     : "";
   const startNewUrl = `/runner-sign-in-v2/forms/${encodeURIComponent(application.formKey)}/${encodeURIComponent(application.id)}/start-new`;
+  const makeChangesUrl = runnerSignInV2MakeChangesPath(application.formKey, application.id);
+  const viewSubmissionUrl = runnerSignInV2ViewSubmissionPath(application.formKey, application.id);
+  const canMakeChanges = application.status === "Submitted" || Boolean(application.amending);
+  const hasUnsubmittedChanges = Boolean(application.amending);
 
   return res.render("titan-mvp-1.2/runner-sign-in-v2/manage-form", {
     data,
@@ -25614,6 +26013,10 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/manage", function (
     checkerInviteEmailPreviewUrl,
     checkingRequired,
     startNewUrl,
+    makeChangesUrl,
+    viewSubmissionUrl,
+    canMakeChanges,
+    hasUnsubmittedChanges,
   });
 });
 
@@ -26246,7 +26649,7 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/delete", function (
   const applications = ensureRunnerSignInApplications(req);
   const application = applications.find((a) => a && a.id === req.params.applicationId);
   if (!application) return res.redirect(runnerSignInV2ManagePath(req.params.formKey, req.params.applicationId));
-  if (application.status === "Submitted") {
+  if (application.status === "Submitted" && !application.amending) {
     return res.redirect(runnerSignInV2ManagePath(req.params.formKey, req.params.applicationId));
   }
   const manageUrl = runnerSignInV2ManagePath(application.formKey, application.id);
@@ -26274,6 +26677,10 @@ router.post("/runner-sign-in-v2/forms/:formKey/:applicationId/delete", function 
   const applications = ensureRunnerSignInApplications(req);
   const idx = applications.findIndex((a) => a && a.id === targetId);
   if (idx < 0) return res.redirect(manageUrl);
+  if (applications[idx].amending || applications[idx].status === "Changes in progress") {
+    runnerSignInV2CancelAmend(applications[idx]);
+    return res.redirect(`${manageUrl}?deleted=1`);
+  }
   if (applications[idx].status === "Submitted") return res.redirect(manageUrl);
 
   applications.splice(idx, 1);

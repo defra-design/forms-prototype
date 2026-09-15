@@ -58,6 +58,8 @@ function runnerSignInV2BuildJourneyUrls({
     emailSaveExitWithSignIn: `${triple("/runner-sign-in-v2/emails/save-and-exit", manageUrl)}&variant=with-sign-in`,
     signOut: "/runner-sign-in-v2/sign-out",
     formSubmitted: `/runner-sign-in-v2/forms/${enc(formKey)}/${enc(applicationId)}/submitted`,
+    viewSubmission: `/runner-sign-in-v2/forms/${enc(formKey)}/${enc(applicationId)}/view`,
+    makeChanges: `/runner-sign-in-v2/forms/${enc(formKey)}/${enc(applicationId)}/make-changes`,
     startNewForm: `/runner-sign-in-v2/forms/${enc(formKey)}/${enc(applicationId)}/start-new`,
     deleteDraft: `/runner-sign-in-v2/forms/${enc(formKey)}/${enc(applicationId)}/delete`,
     errorMessages: "/runner-sign-in-v2/error-messages",

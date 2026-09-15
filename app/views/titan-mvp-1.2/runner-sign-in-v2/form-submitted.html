@@ -3,7 +3,7 @@
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
 
-{% block pageTitle %}Form submitted – GOV.UK{% endblock %}
+{% block pageTitle %}{{ "Changes submitted" if resubmitted else "Form submitted" }} – GOV.UK{% endblock %}
 
 {% block beforeContent %}{% endblock %}
 
@@ -13,10 +13,15 @@
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
     {{ govukPanel({
-      titleText: "Form submitted"
+      titleText: "Changes submitted" if resubmitted else "Form submitted",
+      html: ("Submission reference<br><strong>" + application.reference + "</strong>") if (application.reference and not resubmitted) else ""
     }) }}
 
-    <p class="govuk-body">We have sent you a confirmation email.</p>
+    {% if resubmitted %}
+      <p class="govuk-body">Your previous submission has been replaced with your updated answers.</p>
+    {% else %}
+      <p class="govuk-body">We have sent you a confirmation email.</p>
+    {% endif %}
 
   {% if confirmationEmailUrl %}
     <p class="govuk-body">
@@ -28,6 +33,9 @@
 
     <p class="govuk-body">We’ll review your {{ application.formName }} submission.</p>
     <p class="govuk-body">We’ll contact you if we need more information.</p>
+    {% if not resubmitted %}
+      <p class="govuk-body">If you need to change your answers later, sign in and return to your submitted form.</p>
+    {% endif %}
 
     {{ govukButton({
       text: "Back to manage your form",
@@ -36,4 +44,3 @@
   </div>
 </div>
 {% endblock %}
-

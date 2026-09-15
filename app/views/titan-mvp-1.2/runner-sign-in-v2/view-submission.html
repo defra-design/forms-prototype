@@ -1,0 +1,78 @@
+{% extends "layouts/runner-sign-in-v2.html" %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}Your submitted form – {{ application.formName }} – GOV.UK{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ text: "Back", href: manageUrl }) }}
+{% endblock %}
+
+{% block header %}{{ v2.v2ServiceHeader("forms") }}{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <span class="govuk-caption-l">{{ application.formName }}</span>
+    <h1 class="govuk-heading-xl">Your submitted form</h1>
+
+    {% if viewingPrevious %}
+      {{ govukInsetText({
+        text: "This is a previous version of your submission. It is not the latest version."
+      }) }}
+    {% endif %}
+
+    {% if submittedOnDate %}
+      <p class="govuk-body">You submitted this form on {{ submittedOnDate }}.</p>
+    {% endif %}
+    <p class="govuk-body">Submission reference: <strong>{{ reference }}</strong></p>
+
+    {% if hasUnsubmittedChanges %}
+      {{ govukInsetText({
+        text: "You have started making changes. Your previous submission will be replaced when you submit your changes."
+      }) }}
+    {% endif %}
+
+    <h2 class="govuk-heading-m">View your answers</h2>
+
+    {% if application.formKey == "volunteer-application" %}
+      {{ govukSummaryList({
+        rows: [
+          { key: { text: "Full name" }, value: { text: answers.fullName or "Not provided" } },
+          { key: { text: "Email address" }, value: { text: answers.email or "Not provided" } },
+          { key: { text: "Volunteer role" }, value: { text: answers.volunteerRole or "Not provided" } },
+          { key: { text: "Declaration" }, value: { text: "Accepted" if answers.declarationAccepted == "yes" else "Not provided" } }
+        ]
+      }) }}
+    {% elif application.formKey == "apply-small-grant" %}
+      {{ govukSummaryList({
+        rows: [
+          { key: { text: "Organisation name" }, value: { text: answers.organisationName or "Not provided" } },
+          { key: { text: "Organisation type" }, value: { text: answers.organisationType or "Not provided" } },
+          { key: { text: "Amount requested" }, value: { text: ("£" + answers.amountRequested) if answers.amountRequested else "Not provided" } },
+          { key: { text: "Project summary" }, value: { text: answers.projectSummary or "Not provided" } },
+          { key: { text: "Declaration" }, value: { text: "Accepted" if answers.declarationAccepted == "yes" else "Not provided" } }
+        ]
+      }) }}
+    {% else %}
+      <p class="govuk-body">You can make changes to return to the answers you submitted.</p>
+    {% endif %}
+
+    {% if canMakeChanges %}
+      {{ govukButton({
+        text: "Continue editing" if hasUnsubmittedChanges else "Edit form",
+        href: makeChangesUrl
+      }) }}
+    {% else %}
+      {{ govukButton({
+        text: "Back",
+        href: manageUrl,
+        classes: "govuk-button--secondary"
+      }) }}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

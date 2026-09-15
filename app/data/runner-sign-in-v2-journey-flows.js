@@ -12,6 +12,7 @@ module.exports = {
       { id: "checker", label: "Check answers / invite", tone: "main", pageKey: "applicantCheckAnswers" },
       { id: "save", label: "Save and exit", tone: "main", pageKey: "saveExitChoose" },
       { id: "submit", label: "Ready to submit", tone: "branch", pageKey: "readyToSubmit" },
+      { id: "view", label: "View submitted answers", tone: "branch", pageKey: "viewSubmission" },
     ],
     edges: [
       { from: "start", to: "why" },
@@ -24,6 +25,7 @@ module.exports = {
       { from: "manage", to: "save", label: "signed in" },
       { from: "manage", to: "submit" },
       { from: "manage", to: "form", label: "continue" },
+      { from: "manage", to: "view", label: "submitted" },
     ],
   },
   create: {
@@ -269,6 +271,8 @@ module.exports = {
       { id: "checked", label: "Checked", tone: "branch", pageKey: "static:manage-form-checked" },
       { id: "ready", label: "Ready to submit", tone: "main", pageKey: "readyToSubmit" },
       { id: "submitted", label: "Form submitted", tone: "main", pageKey: "formSubmitted" },
+      { id: "view", label: "View submitted answers", tone: "main", pageKey: "viewSubmission" },
+      { id: "make", label: "Edit form", tone: "branch", pageKey: "makeChanges" },
       { id: "email", label: "Confirmation email", tone: "main", pageKey: "emailFormSubmitted" },
       { id: "emailChecked", label: "Confirmation email (checked)", tone: "branch", pageKey: "emailFormSubmittedCheckedPublic" },
       { id: "emailTeam", label: "Processing team email (checked)", tone: "branch", pageKey: "emailFormSubmittedCheckedTeam" },
@@ -286,6 +290,27 @@ module.exports = {
       { from: "submitted", to: "emailTeam" },
       { from: "submitted", to: "manage" },
       { from: "manage", to: "signout" },
+      { from: "manage", to: "view" },
+      { from: "view", to: "make" },
+      { from: "make", to: "submitted" },
+    ],
+  },
+  returnResubmit: {
+    title: "Return and edit",
+    description: "After sign-in, manage your form: view a submitted form, continue a draft, or edit previous answers. Submitting changes replaces the previous submission.",
+    nodes: [
+      { id: "manage", label: "Manage your form", tone: "hub", pageKey: "manage" },
+      { id: "view", label: "Your submitted form", tone: "main", pageKey: "viewSubmission" },
+      { id: "make", label: "Edit form", tone: "main", pageKey: "makeChanges" },
+      { id: "cya", label: "Check your answers", tone: "main", pageKey: "applicantCheckAnswers" },
+      { id: "resubmitted", label: "Changes submitted", tone: "main", pageKey: "formSubmitted" },
+    ],
+    edges: [
+      { from: "manage", to: "view" },
+      { from: "view", to: "make" },
+      { from: "make", to: "cya" },
+      { from: "cya", to: "resubmitted" },
+      { from: "resubmitted", to: "manage" },
     ],
   },
   unexpected: {

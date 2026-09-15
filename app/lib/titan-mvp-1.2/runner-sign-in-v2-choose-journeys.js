@@ -98,6 +98,14 @@ function runnerSignInV2ChooseJourneyRadioItems(selected) {
       checked: selected === "manage",
     },
     {
+      value: "return-resubmit",
+      text: "Return to a submitted form and edit it",
+      hint: {
+        text: "After signing in, users land on Manage your form, where they can view a submitted form, continue a draft, edit previous answers, or start a new form. Submitting changes replaces the previous submission.",
+      },
+      checked: selected === "return-resubmit",
+    },
+    {
       value: "copy-submission",
       text: "Copy a form I’ve submitted previously",
       hint: {
@@ -168,6 +176,8 @@ function runnerSignInV2ChooseJourneyRedirect(
       return managePath(SEED.awaitingCheck.formKey, SEED.awaitingCheck.applicationId);
     case "manage":
       return managePath(SEED.inProgress.formKey, SEED.inProgress.applicationId);
+    case "return-resubmit":
+      return managePath(SEED.submittedCopy.formKey, SEED.submittedCopy.applicationId);
     case "copy-submission":
       return managePath(SEED.submittedCopy.formKey, SEED.submittedCopy.applicationId);
     case "prototype-hub":
@@ -231,6 +241,7 @@ function runnerSignInV2PrepareChooseJourneySession(req, journeyId, helpers) {
       signIn();
       setFocus(SEED.inProgress.formKey, SEED.inProgress.applicationId);
       return;
+    case "return-resubmit":
     case "copy-submission":
       signIn();
       setFocus(SEED.submittedCopy.formKey, SEED.submittedCopy.applicationId);

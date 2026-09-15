@@ -2,6 +2,7 @@
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
 {% import "titan-mvp-1.2/runner-sign-in/_macros.njk" as runnerSignIn with context %}
 
 {% set baseHref = "/runner-sign-in/forms/" + application.formKey + "/" + application.id %}
@@ -22,6 +23,12 @@ Your details – {{ formDef.formName }} – GOV.UK
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
     <form method="post" action="{{ baseHref }}/details" class="form">
+      {% if application.amending %}
+        {{ govukNotificationBanner({
+          titleText: "Important",
+          html: "<p class=\"govuk-notification-banner__heading\">These answers are from your previous submission.</p><p class=\"govuk-body\">Any changes you make will not be saved until you resubmit your form.</p>"
+        }) }}
+      {% endif %}
       {{ govukInput({
         id: "fullName",
         name: "fullName",

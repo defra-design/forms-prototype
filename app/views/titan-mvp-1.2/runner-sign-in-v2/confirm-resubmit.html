@@ -1,0 +1,49 @@
+{% extends "layouts/runner-sign-in-v2.html" %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}Are you sure you want to edit this form? – {{ application.formName }} – GOV.UK{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ text: "Back", href: manageUrl }) }}
+{% endblock %}
+
+{% block header %}{{ v2.v2ServiceHeader("forms") }}{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-xl">Are you sure you want to edit this form?</h1>
+
+    <h2 class="govuk-heading-m">Previous submission</h2>
+
+    {{ govukSummaryList({
+      rows: [
+        { key: { text: "Form name" }, value: { text: application.formName } },
+        { key: { text: "Submitted on" }, value: { text: submittedOnText } },
+        { key: { text: "Reference" }, value: { text: application.reference } }
+      ]
+    }) }}
+
+    {{ govukWarningText({
+      text: "Any changes you make will not be saved until you resubmit your form.",
+      iconFallbackText: "Warning"
+    }) }}
+
+
+    <form method="post" action="{{ confirmUrl }}">
+      <div class="govuk-button-group">
+        {{ govukButton({ text: "Continue" }) }}
+        {{ govukButton({
+          text: "Cancel",
+          href: manageUrl,
+          classes: "govuk-button--secondary"
+        }) }}
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

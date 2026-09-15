@@ -28,6 +28,12 @@
     <span class="govuk-caption-l">Manage your form</span>
     <h1 class="govuk-heading-xl">{{ application.formName }}</h1>
 
+    {# {% if hasUnsubmittedChanges %}
+      <p class="govuk-body">You’ve started making changes. Your previous submission stays in place until you submit your changes.</p>
+    {% elif canMakeChanges %}
+      <p class="govuk-body">You can view a form you’ve submitted or edit it. Your previous submission stays current until you submit your changes.</p>
+    {% endif %} #}
+
     {{ govukButton({
       text: "Start a new form",
       href: startNewUrl,
@@ -36,13 +42,9 @@
 
     {% set rows = [] %}
     {% for r in (tableRows or [tableRow]) %}
-      {% if r.statusText == "Submitted" %}
-        {% set statusHtml = r.statusText %}
-      {% else %}
-        {% set statusHtml = govukTag({ text: r.statusText, classes: r.statusTagClasses }) %}
-      {% endif %}
+      {% set statusHtml = govukTag({ text: r.statusText, classes: r.statusTagClasses }) %}
       {% set rows = (rows.push([
-        { text: r.reference },
+        { html: r.referenceHtml or r.reference },
         { html: statusHtml },
         { text: r.lastUpdatedText },
         { text: r.expiryText },

@@ -41,12 +41,15 @@ You are about to clone this application – {{ serviceName }} – GOV.UK
       rows: [
         { key: { text: "Form name" }, value: { text: application.formName } },
         { key: { text: "Submitted on" }, value: { text: submittedOnText } },
-        { key: { text: "Reference" }, value: { text: application.reference } }
+        { key: { text: "Reference" }, value: { text: copyReference or application.reference } }
       ]
     }) }}
 
     <form class="form" action="/runner-sign-in/applications/{{ application.id }}/clone" method="post">
       <input type="hidden" name="cloneApplication" value="yes">
+      {% if copyFromReference %}
+        <input type="hidden" name="from" value="{{ copyFromReference }}">
+      {% endif %}
 
       <div class="govuk-button-group">
         {{ govukButton({ text: "Copy answers" }) }}
