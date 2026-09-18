@@ -1,0 +1,93 @@
+{% extends "layouts/main.html" %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/tag/macro.njk" import govukTag %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% set serviceName = "Forms processing" %}
+
+{% block pageTitle %}
+Compare submissions – {{ formName }} – Forms processing
+{% endblock %}
+
+{% block head %}
+  {{ super() }}
+  <style>
+    .hods-highlight {
+      background-color: #fff2d3;
+      border-bottom: 3px solid #ffbf47;
+      padding: 0 0.15em;
+    }
+    .processing-compare__caption {
+      margin-bottom: 5px;
+    }
+    /* .govuk-summary-list__value {
+      white-space: pre-wrap;
+    } */
+  </style>
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ text: "Back to email", href: teamEmailUrl }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-full">
+    <span class="govuk-caption-xl">{{ formName }}</span>
+    <h1 class="govuk-heading-xl">Compare submissions</h1>
+
+    <p class="govuk-body">This form has been edited. The current answers replace the previous form.</p>
+    <p class="govuk-body">
+      {{ compare.changeCount }} {{ "answer has" if compare.changeCount == 1 else "answers have" }} changed.
+      Highlighted answers are different from the previous form.
+    </p>
+
+
+  </div>
+</div>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half">
+    <p class="govuk-caption-m processing-compare__caption">Previous form</p>
+    <h2 class="govuk-heading-m">
+      {{ compare.previousReference }}
+      {{ govukTag({ text: "Replaced", classes: "govuk-tag--grey govuk-!-margin-left-2" }) }}
+    </h2>
+    <p class="govuk-body">Submitted {{ previousSubmittedOn }}</p>
+    {% set previousRows = [] %}
+    {% for field in compare.fields %}
+      {% set previousRows = (previousRows.push({
+        key: { text: field.key },
+        value: { html: field.previousHtml }
+      }), previousRows) %}
+    {% endfor %}
+    {{ govukSummaryList({ rows: previousRows }) }}
+  </div>
+  <div class="govuk-grid-column-one-half">
+    <p class="govuk-caption-m processing-compare__caption">Current form</p>
+    <h2 class="govuk-heading-m">
+      {{ compare.currentReference }}
+      {{ govukTag({ text: "Submitted", classes: "govuk-tag--green govuk-!-margin-left-2" }) }}
+    </h2>
+    <p class="govuk-body">Submitted {{ currentSubmittedOn }}</p>
+    {% set currentRows = [] %}
+    {% for field in compare.fields %}
+      {% set currentRows = (currentRows.push({
+        key: { text: field.key },
+        value: { html: field.currentHtml }
+      }), currentRows) %}
+    {% endfor %}
+    {{ govukSummaryList({ rows: currentRows }) }}
+  </div>
+</div>
+
+<div class="govuk-button-group">
+  {{ govukButton({
+    text: "Download current form (CSV)",
+    href: "#",
+    classes: "govuk-button--secondary"
+  }) }}
+</div>
+{% endblock %}

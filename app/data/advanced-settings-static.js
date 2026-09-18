@@ -48,6 +48,24 @@ const REUSE_PREVIOUS_ANSWERS_SETTING = {
     "If people can reuse answers from a previous submission, the confirmation email and reference number will be switched on automatically.",
 };
 
+const ALLOW_EDIT_SUBMITTED_FORM_SETTING = {
+  key: "allowEditSubmissions",
+  slug: "edit-submitted-form",
+  summaryLabel: "Edit a submitted form",
+  summaryValueYes: "People can edit a form they've already submitted",
+  summaryValueNo: "People cannot edit a submitted form",
+  label: "Can people edit a form after they've submitted it?",
+  hint:
+    "Use when people may need to correct or update answers after sending. This replaces the previous submission. It does not start a new form.",
+  yesDescription:
+    "After submitting, they can sign in, change their answers and submit again. The new answers replace the previous submission. The reference number stays the same.",
+  noDescription:
+    "Once submitted, they cannot change that form. They can still copy answers into a new form if that setting is on.",
+  changeHiddenText: "whether people can edit a submitted form",
+  autoEnableWarning:
+    "If people can edit a submitted form, the confirmation email and reference number will be switched on automatically.",
+};
+
 const OVERVIEW_VARIANTS = [
   {
     slug: "default",
@@ -73,6 +91,16 @@ const OVERVIEW_VARIANTS = [
     slug: "reuse-previous-answers-on",
     title: "Reuse previous answers on",
     description: "Reuse answers from a previous submission.",
+  },
+  {
+    slug: "edit-submitted-form-off",
+    title: "Edit a submitted form off",
+    description: "People cannot edit a submitted form.",
+  },
+  {
+    slug: "edit-submitted-form-on",
+    title: "Edit a submitted form on",
+    description: "People can edit a form they've already submitted.",
   },
   {
     // Keep the older slug so existing handover links still work.
@@ -131,12 +159,26 @@ const REUSE_PREVIOUS_ANSWERS_VARIANTS = [
   },
 ];
 
+const ALLOW_EDIT_SUBMITTED_FORM_VARIANTS = [
+  {
+    slug: "no-selected",
+    title: "No selected",
+    description: "People cannot edit a submitted form.",
+  },
+  {
+    slug: "yes-selected",
+    title: "Yes selected",
+    description: "People can edit a form they've already submitted.",
+  },
+];
+
 function buildSummaryRows(settings) {
   const {
     checkBeforeSubmission = "no",
     whoCanCheckDescription = "",
     checkBeforeSubmissionOptional = "no",
     reusePreviousAnswers = "no",
+    allowEditSubmissions = "no",
     additionalEmailCount = 0,
     staticPageBase = STATIC_BASE,
   } = settings;
@@ -151,6 +193,10 @@ function buildSummaryRows(settings) {
     reusePreviousAnswers === "yes"
       ? `${staticPageBase}/reuse-previous-answers/yes-selected`
       : `${staticPageBase}/reuse-previous-answers/no-selected`;
+  const allowEditSubmissionsChangeHref =
+    allowEditSubmissions === "yes"
+      ? `${staticPageBase}/edit-submitted-form/yes-selected`
+      : `${staticPageBase}/edit-submitted-form/no-selected`;
 
   const rows = [
     {
@@ -185,6 +231,24 @@ function buildSummaryRows(settings) {
             href: reusePreviousAnswersChangeHref,
             text: "Change",
             visuallyHiddenText: REUSE_PREVIOUS_ANSWERS_SETTING.changeHiddenText,
+          },
+        ],
+      },
+    },
+    {
+      key: { text: ALLOW_EDIT_SUBMITTED_FORM_SETTING.summaryLabel },
+      value: {
+        text:
+          allowEditSubmissions === "yes"
+            ? ALLOW_EDIT_SUBMITTED_FORM_SETTING.summaryValueYes
+            : ALLOW_EDIT_SUBMITTED_FORM_SETTING.summaryValueNo,
+      },
+      actions: {
+        items: [
+          {
+            href: allowEditSubmissionsChangeHref,
+            text: "Change",
+            visuallyHiddenText: ALLOW_EDIT_SUBMITTED_FORM_SETTING.changeHiddenText,
           },
         ],
       },
@@ -270,6 +334,7 @@ function buildStaticAdvancedSettingsOverviewContext(variant) {
   let whoCanCheckDescription = "";
   let checkBeforeSubmissionOptional = "no";
   let reusePreviousAnswers = "no";
+  let allowEditSubmissions = "no";
   let additionalEmailCount = 0;
   let saved = false;
 
@@ -299,6 +364,14 @@ function buildStaticAdvancedSettingsOverviewContext(variant) {
     reusePreviousAnswers = "no";
   }
 
+  if (variant === "edit-submitted-form-on" || variant === "fully-configured") {
+    allowEditSubmissions = "yes";
+  }
+
+  if (variant === "edit-submitted-form-off" || variant === "default") {
+    allowEditSubmissions = "no";
+  }
+
   if (variant === "with-email-actions" || variant === "fully-configured") {
     additionalEmailCount = 2;
   }
@@ -309,6 +382,7 @@ function buildStaticAdvancedSettingsOverviewContext(variant) {
       whoCanCheckDescription,
       checkBeforeSubmissionOptional,
       reusePreviousAnswers,
+      allowEditSubmissions,
       additionalEmailCount,
     }),
     form: { name: FORM_NAME },
@@ -329,7 +403,9 @@ function buildStaticAdvancedSettingsChangeContext(settingSlug, variant) {
       ? CHECK_BEFORE_SUBMISSION_VARIANTS
       : settingSlug === "reuse-previous-answers"
         ? REUSE_PREVIOUS_ANSWERS_VARIANTS
-        : [];
+        : settingSlug === "edit-submitted-form"
+          ? ALLOW_EDIT_SUBMITTED_FORM_VARIANTS
+          : [];
 
   const page = variants.find((item) => item.slug === variant);
   if (!page) {
@@ -339,13 +415,16 @@ function buildStaticAdvancedSettingsChangeContext(settingSlug, variant) {
   const setting =
     settingSlug === "check-before-submission"
       ? CHECK_BEFORE_SUBMISSION_SETTING
-      : REUSE_PREVIOUS_ANSWERS_SETTING;
+      : settingSlug === "edit-submitted-form"
+        ? ALLOW_EDIT_SUBMITTED_FORM_SETTING
+        : REUSE_PREVIOUS_ANSWERS_SETTING;
 
   let data = {
     checkBeforeSubmission: "no",
     whoCanCheckDescription: "",
     checkBeforeSubmissionOptional: "",
     reusePreviousAnswers: "no",
+    allowEditSubmissions: "no",
   };
   let errors = {};
 
@@ -380,10 +459,16 @@ function buildStaticAdvancedSettingsChangeContext(settingSlug, variant) {
     data.reusePreviousAnswers = "yes";
   }
 
+  if (settingSlug === "edit-submitted-form" && variant === "yes-selected") {
+    data.allowEditSubmissions = "yes";
+  }
+
   const overviewStaticUrl =
     settingSlug === "reuse-previous-answers"
       ? `${STATIC_BASE}/${variant === "yes-selected" ? "reuse-previous-answers-on" : "reuse-previous-answers-off"}`
-      : `${STATIC_BASE}/default`;
+      : settingSlug === "edit-submitted-form"
+        ? `${STATIC_BASE}/${variant === "yes-selected" ? "edit-submitted-form-on" : "edit-submitted-form-off"}`
+        : `${STATIC_BASE}/default`;
 
   return {
     data,
@@ -420,6 +505,10 @@ function buildStaticAdvancedSettingsIndexContext() {
     reusePreviousAnswersPages: REUSE_PREVIOUS_ANSWERS_VARIANTS.map((page) => ({
       ...page,
       href: `${STATIC_BASE}/reuse-previous-answers/${page.slug}`,
+    })),
+    allowEditSubmittedFormPages: ALLOW_EDIT_SUBMITTED_FORM_VARIANTS.map((page) => ({
+      ...page,
+      href: `${STATIC_BASE}/edit-submitted-form/${page.slug}`,
     })),
     emailActionsStaticUrl:
       "/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing/static",

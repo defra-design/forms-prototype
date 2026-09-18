@@ -36,7 +36,11 @@
   text: "For security reasons, the links in this email expire at " ~ linkExpiresAt
 }) }}
 
-<p class="govuk-body">{{ formTitle }} form received at {{ submittedAt }}.</p>
+<p class="govuk-body">{{ formTitle }} {% if resubmitted %}updated form received{% else %}form received{% endif %} at {{ submittedAt }}.</p>
+
+{% if resubmitted %}
+  <p class="govuk-body">This submission replaces a previous form{% if previousReference %} (reference {{ previousReference }}){% endif %}. Process these answers instead of the previous submission.</p>
+{% endif %}
 
 <p class="govuk-body">Do not reply to this email. Your reply will go to the Defra Forms team, not the person who submitted the form.</p>
 

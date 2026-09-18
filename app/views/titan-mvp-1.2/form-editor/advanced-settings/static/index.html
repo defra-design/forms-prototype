@@ -89,6 +89,19 @@ activeLinkId: "nav-editor"
         rows: reuseRows
         }) }}
 
+        <h2 class="govuk-heading-m govuk-!-margin-top-8">Edit a submitted form</h2>
+        {% set editRows = [] %}
+        {% for page in allowEditSubmittedFormPages %}
+        {% set editRows = editRows.concat([[
+        { html: '<a class="govuk-link" href="' + page.href + '">' + page.title + '</a>' },
+        { text: page.description }
+        ]]) %}
+        {% endfor %}
+        {{ govukTable({
+        head: [{ text: "Page" }, { text: "Description" }],
+        rows: editRows
+        }) }}
+
         <h2 class="govuk-heading-m govuk-!-margin-top-8">Email actions</h2>
         <p class="govuk-body"><a class="govuk-link" href="{{ emailActionsStaticUrl }}">Email actions static pages</a></p>
 

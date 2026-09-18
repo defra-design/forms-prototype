@@ -25,7 +25,12 @@
 
   {% if confirmationEmailUrl %}
     <p class="govuk-body">
-      <a class="govuk-link" href="{{ confirmationEmailUrl }}">View confirmation email prototype</a>
+      <a class="govuk-link" href="{{ confirmationEmailUrl }}">View confirmation email{% if resubmitted %} (form filler){% endif %}</a>
+    </p>
+  {% endif %}
+  {% if teamEmailUrl %}
+    <p class="govuk-body">
+      <a class="govuk-link" href="{{ teamEmailUrl }}">View processing team email</a>
     </p>
   {% endif %}
 

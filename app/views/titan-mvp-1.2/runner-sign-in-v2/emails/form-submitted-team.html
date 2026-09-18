@@ -1,0 +1,21 @@
+{% extends "layouts/main.html" %}
+
+{% block pageTitle %}
+{{ "Updated form received" if resubmitted else "Form received" }} – {{ formName or "Apply to volunteer" }} (processing team)
+{% endblock %}
+
+{% block head %}
+  {{ super() }}
+  {% include "titan-mvp-1.2/runner-sign-in-v2/emails/_form-submitted-email-styles.njk" %}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <p class="govuk-body">
+      <a class="govuk-link" href="/runner-sign-in-v2/emails/form-submitted?formKey={{ formKey | urlencode }}&amp;applicationId={{ applicationId | urlencode }}">Form filler email</a>
+    </p>
+    {% include "titan-mvp-1.2/runner-sign-in-v2/emails/_form-submitted-team-email-content.njk" %}
+  </div>
+</div>
+{% endblock %}
