@@ -68,6 +68,7 @@ function runnerSignInV2BuildJourneyUrls({
     formEditorAdvancedSettings: "/titan-mvp-1.2/form-editor/advanced-settings",
     formEditorCheckBeforeSubmission: "/titan-mvp-1.2/form-editor/advanced-settings/check-before-submission",
     formEditorReusePreviousAnswers: "/titan-mvp-1.2/form-editor/advanced-settings/reuse-previous-answers",
+    formEditorEditSubmittedForm: "/titan-mvp-1.2/form-editor/advanced-settings/edit-submitted-form",
     formEditorConditionalMailboxRouting: "/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing",
     readyToSubmit: `/runner-sign-in-v2/forms/${enc(formKey)}/${enc(applicationId)}/ready-to-submit`,
     applicantCheckAnswers: `/runner-sign-in/forms/apply-small-grant/app-checker-ready-to-invite/check-answers`,
@@ -82,6 +83,9 @@ function runnerSignInV2BuildJourneyUrls({
     emailApplicantFormChecked: `/runner-sign-in-v2/emails/applicant-form-checked?formKey=${enc(formKey)}&applicationId=${enc(applicationId)}`,
     emailFormSubmitted: triple("/runner-sign-in-v2/emails/form-submitted", manageUrl),
     emailFormSubmittedPublic: triple("/runner-sign-in-v2/emails/form-submitted/public", manageUrl),
+    emailFormSubmittedEdited: `${triple("/runner-sign-in-v2/emails/form-submitted", manageUrl)}&edited=1`,
+    emailFormSubmittedTeam: `${triple("/runner-sign-in-v2/emails/form-submitted/team", manageUrl)}&edited=1`,
+    processingCompare: `/runner-sign-in-v2/processing/forms/${enc(formKey)}/${enc(applicationId)}`,
     emailFormSubmittedCheckedPublic: journeyPreviewPath
       ? journeyPreviewPath("email-form-submitted-checked-public")
       : "/runner-sign-in-v2/emails/form-submitted-checked/public",
@@ -91,6 +95,7 @@ function runnerSignInV2BuildJourneyUrls({
     textRecoverSecurityCode: "/runner-sign-in-v2/texts/recover-security-code",
     textChangeEmailSecurityCode: "/runner-sign-in-v2/texts/change-email-security-code",
     staticManageFormChecked: "/runner-sign-in-v2/static/manage-form-checked",
+    staticManageFormAfterDelete: "/runner-sign-in-v2/static/manage-form-after-delete",
     staticChangeEmailNewEmailSameAsCurrent:
       "/runner-sign-in-v2/static/change-email-new-email-same-as-current",
     staticChangeEmailUsedOnOtherAccount: "/runner-sign-in-v2/static/change-email-used-on-other-account",
@@ -157,9 +162,13 @@ function runnerSignInV2BuildJourneyUrls({
           emailCheckerInvite: journeyPreviewPath("email-checker-invite"),
           emailFormSubmitted: journeyPreviewPath("email-form-submitted"),
           emailFormSubmittedPublic: journeyPreviewPath("email-form-submitted-public"),
+          emailFormSubmittedEdited: journeyPreviewPath("email-form-submitted-edited"),
+          emailFormSubmittedTeam: journeyPreviewPath("email-form-submitted-team"),
+          processingCompare: journeyPreviewPath("processing-compare"),
           emailFormSubmittedCheckedPublic: journeyPreviewPath("email-form-submitted-checked-public"),
           emailFormSubmittedCheckedTeam: journeyPreviewPath("email-form-submitted-checked-team"),
           manageFormChecked: journeyPreviewPath("manage-form-checked"),
+          manageFormAfterDelete: journeyPreviewPath("manage-form-after-delete"),
           saveExitCheckEmail: journeyPreviewPath("save-exit-check-email"),
           saveExitResumeWithSignIn: journeyPreviewPath("save-exit-resume-with-sign-in"),
           saveExitResumeWithoutSignIn: journeyPreviewPath("save-exit-resume-without-sign-in"),
@@ -179,6 +188,7 @@ function runnerSignInV2ResolvePageKey(pageKey, urls) {
   if (pageKey.startsWith("static:")) {
     const slug = pageKey.slice("static:".length);
     if (slug === "manage-form-checked") return urls.staticManageFormChecked;
+    if (slug === "manage-form-after-delete") return urls.staticManageFormAfterDelete;
     if (slug === "change-email-new-email-same-as-current") {
       return urls.staticChangeEmailNewEmailSameAsCurrent;
     }

@@ -460,10 +460,12 @@ function buildRunnerSignInV2SaveExitStories(urls) {
             { label: "AND", text: "I select Continue" },
             { label: "THEN", text: "Manage your form is displayed" },
             { label: "AND", text: "the deleted submission no longer appears in the list" },
+            { label: "AND", text: "a success banner confirms the draft was deleted" },
+            { label: "AND", text: "the remaining form shows as Not yet started" },
           ],
           links: [
             { text: "Delete draft confirmation", href: preview(urls, "delete-draft") },
-            { text: "Manage your form", href: preview(urls, "manage") },
+            { text: "Manage your form (after deleting an in-progress form)", href: preview(urls, "manage-form-after-delete") },
           ],
         },
         {

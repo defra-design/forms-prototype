@@ -1,0 +1,67 @@
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% set formTitle = formName or "Apply to volunteer" %}
+{% set referenceNumber = referenceNumber or "YCU-C8R-7KY" %}
+{% set previousSubmittedOn = previousSubmittedOn or "18 April 2026" %}
+{% set submittedAt = submittedAt or "11:10am on Tuesday 7 July 2026" %}
+{% set downloadCsvHref = downloadCsvHref or "#" %}
+{% set answers = answers or {} %}
+{% set fullName = answers.fullName or answers.contactName or "Alex Taylor" %}
+{% set emailAddress = answers.email or answers.contactEmail or "alex.taylor@example.com" %}
+{% set volunteerRole = answers.volunteerRole or "Gardening" %}
+{% set declarationAccepted = "Accepted" if answers.declarationAccepted == "yes" else "Accepted" %}
+
+<h1 class="govuk-heading-l govuk-!-margin-top-6">{{ "Updated form received" if resubmitted else "Form received" }}</h1>
+
+
+{% if resubmitted %}
+  <p class="govuk-body">Changes have been made to ‘{{ formTitle }}’ at {{ submittedAt }}.</p>
+{% else %}
+  <p class="govuk-body">We received ‘{{ formTitle }}’ at {{ submittedAt }}.</p>
+{% endif %}
+
+{% if resubmitted %}
+  {{ govukInsetText({
+    html: "<p class=\"govuk-body\">This replaces the form submitted " ~ previousSubmittedOn ~ ".</p><p class=\"govuk-body govuk-!-margin-bottom-0\">Reference number: " ~ referenceNumber ~ "</p>"
+  }) }}
+{% else %}
+  {{ govukInsetText({
+    text: "Reference number: " ~ referenceNumber
+  }) }}
+{% endif %}
+
+
+<p class="govuk-body">Do not reply to this email. Your reply will go to the Defra Forms team, not the person who submitted the form.</p>
+
+<hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+
+<h2 class="govuk-heading-s">Full name</h2>
+<p class="govuk-body">{{ fullName }}</p>
+
+<hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+
+<h2 class="govuk-heading-s">Email address</h2>
+<p class="govuk-body">{{ emailAddress }}</p>
+
+<hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+
+<h2 class="govuk-heading-s">Volunteer role</h2>
+<p class="govuk-body">{{ volunteerRole }}</p>
+
+<hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+
+<h2 class="govuk-heading-s">Declaration</h2>
+<p class="govuk-body">{{ declarationAccepted }}</p>
+
+<hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+
+<p class="govuk-body">
+  {% if resubmitted and compareUrl %}
+    <a class="govuk-link" href="{{ compareUrl }}">Compare with previous form</a>
+  {% endif %}
+</p>
+<p class="govuk-body">
+  <a class="govuk-link" href="{{ downloadCsvHref }}">Download main form (CSV)</a>
+</p>
+
+<p class="govuk-body">Thanks,</p>
+<p class="govuk-body">Defra</p>

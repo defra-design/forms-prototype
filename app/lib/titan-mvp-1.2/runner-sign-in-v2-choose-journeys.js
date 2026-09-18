@@ -242,9 +242,18 @@ function runnerSignInV2PrepareChooseJourneySession(req, journeyId, helpers) {
       setFocus(SEED.inProgress.formKey, SEED.inProgress.applicationId);
       return;
     case "return-resubmit":
+      signIn();
+      setFocus(SEED.submittedCopy.formKey, SEED.submittedCopy.applicationId);
+      if (typeof helpers.enableEditSubmittedForms === "function") {
+        helpers.enableEditSubmittedForms();
+      }
+      return;
     case "copy-submission":
       signIn();
       setFocus(SEED.submittedCopy.formKey, SEED.submittedCopy.applicationId);
+      if (typeof helpers.enableReusePreviousAnswers === "function") {
+        helpers.enableReusePreviousAnswers();
+      }
       return;
     case "prototype-hub":
     default:

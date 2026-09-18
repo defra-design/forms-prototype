@@ -2648,6 +2648,23 @@ const ADVANCED_SETTINGS_PAGES = {
     autoEnableWarning:
       "If people can reuse answers from a previous submission, the confirmation email and reference number will be switched on automatically.",
   },
+  "edit-submitted-form": {
+    key: "allowEditSubmissions",
+    slug: "edit-submitted-form",
+    summaryLabel: "Edit a submitted form",
+    summaryValueYes: "People can edit a form they've already submitted",
+    summaryValueNo: "People cannot edit a submitted form",
+    label: "Can people edit a form after they've submitted it?",
+    hint:
+      "Use when people may need to correct or update answers after sending. This replaces the previous submission. It does not start a new form.",
+    yesDescription:
+      "After submitting, they can sign in, change their answers and submit again. The new answers replace the previous submission. The reference number stays the same.",
+    noDescription:
+      "Once submitted, they cannot change that form. They can still copy answers into a new form if that setting is on.",
+    changeHiddenText: "whether people can edit a submitted form",
+    autoEnableWarning:
+      "If people can edit a submitted form, the confirmation email and reference number will be switched on automatically.",
+  },
 };
 
 function enableConfirmationEmailAndReferenceNumber(formData) {
@@ -2674,6 +2691,18 @@ function setReusePreviousAnswers(formData, value) {
   return selectedValue;
 }
 
+function setAllowEditSubmissions(formData, value) {
+  const selectedValue = value === "yes" ? "yes" : "no";
+  if (!formData.advancedSettings) {
+    formData.advancedSettings = {};
+  }
+  formData.advancedSettings.allowEditSubmissions = selectedValue;
+  if (selectedValue === "yes") {
+    enableConfirmationEmailAndReferenceNumber(formData);
+  }
+  return selectedValue;
+}
+
 function getAdvancedSettings(formData) {
   const settings = formData.advancedSettings || {};
   const checkBeforeSubmissionOptional =
@@ -2694,7 +2723,13 @@ function getAdvancedSettings(formData) {
       settings.allowCopies,
       formData.savedAnswersEnabled
     ),
+    allowEditSubmissions: resolveAdvancedSettingsYesNo(settings.allowEditSubmissions),
   };
+}
+
+function runnerSignInV2AllowEditSubmissions(req) {
+  const formData = (req && req.session && req.session.data) || {};
+  return getAdvancedSettings(formData).allowEditSubmissions === "yes";
 }
 
 function getAdvancedSettingsSummaryRows(formData) {
@@ -3148,6 +3183,29 @@ router.get(
 );
 
 router.get(
+  "/titan-mvp-1.2/form-editor/advanced-settings/static/edit-submitted-form/:variant",
+  function (req, res) {
+    const context = buildStaticAdvancedSettingsChangeContext(
+      "edit-submitted-form",
+      req.params.variant
+    );
+    if (!context) {
+      return res.redirect("/titan-mvp-1.2/form-editor/advanced-settings/static");
+    }
+    res.render("titan-mvp-1.2/form-editor/advanced-settings/change", context);
+  }
+);
+
+router.get(
+  "/titan-mvp-1.2/form-editor/advanced-settings/static/edit-submitted-form/:variant.html",
+  function (req, res) {
+    res.redirect(
+      `/titan-mvp-1.2/form-editor/advanced-settings/static/edit-submitted-form/${req.params.variant}`
+    );
+  }
+);
+
+router.get(
   "/titan-mvp-1.2/form-editor/advanced-settings/static/:variant",
   function (req, res) {
     const context = buildStaticAdvancedSettingsOverviewContext(req.params.variant);
@@ -3434,6 +3492,10 @@ router.post(
       if (selectedValue === "yes") {
         enableConfirmationEmailAndReferenceNumber(formData);
       }
+    }
+
+    if (setting.slug === "edit-submitted-form") {
+      setAllowEditSubmissions(formData, selectedValue);
     }
 
     req.session.data = formData;
@@ -18369,13 +18431,22 @@ function ensureRunnerSignInApplications(req) {
     data.runnerSignInApplications = seedRunnerSignInApplicationsPrototype();
   }
   const seeded = seedRunnerSignInApplicationsPrototype();
+  const deletedIds = new Set(
+    Array.isArray(data.runnerSignInDeletedApplicationIds)
+      ? data.runnerSignInDeletedApplicationIds
+      : []
+  );
   for (const seedApp of seeded) {
     if (!seedApp || !seedApp.id) continue;
+    if (deletedIds.has(seedApp.id)) continue;
     if (!data.runnerSignInApplications.some((a) => a && a.id === seedApp.id)) {
       data.runnerSignInApplications.push(JSON.parse(JSON.stringify(seedApp)));
     }
   }
   for (const app of data.runnerSignInApplications) {
+    if (app && deletedIds.has(app.id) && app.status !== "Submitted" && app.status !== "Deleted") {
+      runnerSignInResetDraftAfterDelete(app);
+    }
     ensureRunnerSignInChecking(app);
     // Keep all-pages fixtures out of manage tables even for older sessions.
     if (
@@ -18390,6 +18461,24 @@ function ensureRunnerSignInApplications(req) {
     }
   }
   return data.runnerSignInApplications;
+}
+
+function runnerSignInRememberDeletedApplication(req, applicationId) {
+  const data = ensureRunnerSignInSession(req);
+  if (!Array.isArray(data.runnerSignInDeletedApplicationIds)) {
+    data.runnerSignInDeletedApplicationIds = [];
+  }
+  const id = String(applicationId || "").trim();
+  if (id && !data.runnerSignInDeletedApplicationIds.includes(id)) {
+    data.runnerSignInDeletedApplicationIds.push(id);
+  }
+}
+
+function runnerSignInResetDraftAfterDelete(application) {
+  if (!application) return;
+  application.status = "Deleted";
+  application.updatedIso = new Date().toISOString();
+  delete application.amending;
 }
 
 function createRunnerSignInExpiryIsoFromNow(days = 28) {
@@ -19096,11 +19185,15 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/submitted", functio
   const confirmationEmailUrl = checkingRequired
     ? `/runner-sign-in-v2/emails/form-submitted-checked/public?formKey=${encodeURIComponent(application.formKey)}&applicationId=${encodeURIComponent(application.id)}`
     : `/runner-sign-in-v2/emails/form-submitted?formKey=${encodeURIComponent(application.formKey)}&applicationId=${encodeURIComponent(application.id)}`;
+  const teamEmailUrl = checkingRequired
+    ? `/runner-sign-in-v2/emails/form-submitted-checked/team?formKey=${encodeURIComponent(application.formKey)}&applicationId=${encodeURIComponent(application.id)}`
+    : `/runner-sign-in-v2/emails/form-submitted/team?formKey=${encodeURIComponent(application.formKey)}&applicationId=${encodeURIComponent(application.id)}`;
   return res.render("titan-mvp-1.2/runner-sign-in-v2/form-submitted", {
     data,
     application,
     manageUrl: runnerSignInV2ManagePath(application.formKey, application.id),
     confirmationEmailUrl,
+    teamEmailUrl,
     resubmitted: Boolean(application.resubmitted),
     previousReference: application.previousReference,
     submittedOnText: application.submittedIso
@@ -19149,7 +19242,7 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/view", function (re
     ? historyEntry.submittedIso
     : (official && official.submittedIso) || application.submittedIso;
   const isLatest = !viewingPrevious && (application.status === "Submitted" || application.amending);
-  const canMakeChanges = isLatest;
+  const canMakeChanges = isLatest && runnerSignInV2AllowEditSubmissions(req);
   const hasUnsubmittedChanges = Boolean(application.amending);
 
   return res.render("titan-mvp-1.2/runner-sign-in-v2/view-submission", {
@@ -19208,6 +19301,9 @@ function runnerSignInV2RedirectToFormStart(res, application) {
 router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/make-changes", function (req, res) {
   const application = runnerSignInV2LoadMakeChangesApplication(req, res);
   if (!application) return;
+  if (!runnerSignInV2AllowEditSubmissions(req) && !application.amending) {
+    return res.redirect(runnerSignInV2ManagePath(application.formKey, application.id));
+  }
   if (application.amending) {
     return runnerSignInV2RedirectToFormStart(res, application);
   }
@@ -19225,6 +19321,9 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/make-changes", func
 router.post("/runner-sign-in-v2/forms/:formKey/:applicationId/make-changes", function (req, res) {
   const application = runnerSignInV2LoadMakeChangesApplication(req, res);
   if (!application) return;
+  if (!runnerSignInV2AllowEditSubmissions(req)) {
+    return res.redirect(runnerSignInV2ManagePath(application.formKey, application.id));
+  }
   runnerSignInV2StartAmend(application);
   setRunnerSignInV2ManageFocus(req, application.formKey, application.id);
   return runnerSignInV2RedirectToFormStart(res, application);
@@ -22311,10 +22410,18 @@ function runnerSignInV2CancelAmend(application) {
   return application;
 }
 
-function runnerSignInV2ReferenceHtml(reference, previousReference) {
+function runnerSignInV2ReferenceCellHtml(reference, hint) {
   const main = escapeHtml(reference || "Not provided");
-  if (!previousReference || previousReference === reference) return main;
-  return `${main}<br><span class="govuk-hint govuk-!-margin-bottom-0">Replaces ${escapeHtml(previousReference)}</span>`;
+  if (!hint) return main;
+  return `${main}<br><span class="govuk-hint govuk-!-margin-bottom-0">${escapeHtml(hint)}</span>`;
+}
+
+function runnerSignInV2ReferenceHtml(reference, previousSubmittedIso) {
+  if (!previousSubmittedIso) return runnerSignInV2ReferenceCellHtml(reference);
+  return runnerSignInV2ReferenceCellHtml(
+    reference,
+    `Replaces version submitted ${formatRunnerSignInDate(previousSubmittedIso)}`
+  );
 }
 
 function runnerSignInV2CompleteResubmit(req, application) {
@@ -22325,7 +22432,7 @@ function runnerSignInV2CompleteResubmit(req, application) {
     : [];
   application.submissionHistory.push(previousSnapshot);
   application.previousReference = previousSnapshot.reference || application.amendingFromReference || application.reference;
-  application.reference = createRunnerV4StyleReferenceNumber();
+  application.previousSubmittedIso = previousSnapshot.submittedIso || application.submittedIso;
   application.status = "Submitted";
   application.amending = false;
   delete application.amendingFromReference;
@@ -23077,6 +23184,7 @@ router.get("/runner-sign-in-v2", function (req, res) {
 router.get("/runner-sign-in-v2/reset", function (req, res) {
   const data = ensureRunnerSignInSession(req);
   data.runnerSignInApplications = seedRunnerSignInApplicationsPrototype();
+  delete data.runnerSignInDeletedApplicationIds;
   data.runnerSignInAuthed = false;
   delete data.runnerSignInEmail;
   delete data.runnerSignInMethod;
@@ -23233,6 +23341,8 @@ function runnerSignInV2ChooseJourneyHelpers(req) {
       delete data.runnerSignInV2RecoverPhoneAttempt;
       delete data.runnerSignInV2Error;
     },
+    enableEditSubmittedForms: () => setAllowEditSubmissions(data, "yes"),
+    enableReusePreviousAnswers: () => setReusePreviousAnswers(data, "yes"),
   };
 }
 
@@ -23910,7 +24020,9 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
       data,
       application,
       manageUrl,
-      confirmationEmailUrl: `/runner-sign-in-v2/journeys/preview/email-form-submitted`,
+      confirmationEmailUrl: `/runner-sign-in-v2/journeys/preview/email-form-submitted-edited`,
+      teamEmailUrl: `/runner-sign-in-v2/journeys/preview/email-form-submitted-team`,
+      resubmitted: true,
     });
   }
 
@@ -24132,6 +24244,7 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
   if (slug === "email-form-submitted") {
     const target = runnerSignInV2FormSubmittedEmailTargetIds(req, formKey, applicationId);
     const signInUrl = runnerSignInV2FormSubmittedEmailSignInUrl(target.formKey, target.applicationId);
+    const flags = runnerSignInV2FormSubmittedEmailFlags(req, application);
     return res.render("titan-mvp-1.2/runner-sign-in-v2/emails/form-submitted", {
       ...base,
       toEmail: email,
@@ -24139,9 +24252,7 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
       applicationId: target.applicationId,
       formName: application.formName || "Apply to volunteer",
       answers: runnerSignInV2VolunteerApplicationEmailAnswers(application),
-      referenceNumber: "YCU-C8R-7KY",
-      previousReference: "FL3-5H4-L8N",
-      submittedAt: "11:10am on Tuesday 7 July 2026",
+      ...flags,
       linkExpiresAt: "1:49pm on Wednesday 20 January 2027",
       whatHappensNext: "We'll review your application and contact you if we need more information.",
       helpTelephone: "N/A",
@@ -24149,6 +24260,63 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
       helpResponseTime: "We aim to get back to you as soon as I can.",
       helpContactLinkText: "Online contact link",
       helpContactLinkHref: signInUrl,
+    });
+  }
+
+  if (slug === "email-form-submitted-edited") {
+    const target = runnerSignInV2FormSubmittedEmailTargetIds(req, formKey, applicationId);
+    const signInUrl = runnerSignInV2FormSubmittedEmailSignInUrl(target.formKey, target.applicationId);
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/emails/form-submitted", {
+      ...base,
+      toEmail: email,
+      formKey: target.formKey,
+      applicationId: target.applicationId,
+      formName: application.formName || "Apply to volunteer",
+      answers: runnerSignInV2VolunteerApplicationEmailAnswers(application),
+      resubmitted: true,
+      showCopiedAnswersNote: false,
+      referenceNumber: "4Q3-4D8-AQJ",
+      previousReference: "FL3-5H4-L8N",
+      submittedAt: "11:10am on Tuesday 7 July 2026",
+      whatHappensNext: "We'll review your application and contact you if we need more information.",
+      helpEmail: "daniel.dasilveira@defra.gov.uk",
+      helpContactLinkHref: signInUrl,
+    });
+  }
+
+  if (slug === "email-form-submitted-team") {
+    const target = runnerSignInV2FormSubmittedEmailTargetIds(req, formKey, applicationId);
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/emails/form-submitted-team", {
+      ...base,
+      formKey: target.formKey,
+      applicationId: target.applicationId,
+      formName: application.formName || "Apply to volunteer",
+      answers: runnerSignInV2VolunteerApplicationEmailAnswers(application),
+      resubmitted: true,
+      showCopiedAnswersNote: false,
+      referenceNumber: "FL3-5H4-L8N",
+      previousReference: "FL3-5H4-L8N",
+      previousSubmittedOn: "18 April 2026",
+      submittedAt: "11:10am on Tuesday 7 July 2026",
+      teamEmail: "forms-processing@defra.gov.uk",
+      downloadCsvHref: "#",
+      compareUrl: runnerSignInV2ProcessingComparePath(target.formKey, target.applicationId),
+    });
+  }
+
+  if (slug === "processing-compare") {
+    const target = runnerSignInV2FormSubmittedEmailTargetIds(req, formKey, applicationId);
+    const compareApp = runnerSignInV2ResolveApplication(req, target.formKey, target.applicationId) || application;
+    const compare = runnerSignInV2ProcessingCompare(compareApp, { demo: true });
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/processing-submission", {
+      ...base,
+      formName: (compareApp && compareApp.formName) || "Apply to volunteer",
+      formKey: target.formKey,
+      applicationId: target.applicationId,
+      compare,
+      previousSubmittedOn: formatRunnerSignInDate(compare.previousSubmittedIso),
+      currentSubmittedOn: formatRunnerSignInDate(compare.currentSubmittedIso),
+      teamEmailUrl: runnerSignInV2JourneyPreviewPath("email-form-submitted-team"),
     });
   }
 
@@ -24249,6 +24417,10 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
 
   if (slug === "manage-form-checked") {
     return res.redirect("/runner-sign-in-v2/static/manage-form-checked");
+  }
+
+  if (slug === "manage-form-after-delete") {
+    return res.redirect("/runner-sign-in-v2/static/manage-form-after-delete");
   }
 
   if (slug === "form-start-page") {
@@ -25740,6 +25912,32 @@ router.get("/runner-sign-in-v2/static/manage-form-checked", function (req, res) 
   });
 });
 
+router.get("/runner-sign-in-v2/static/manage-form-after-delete", function (req, res) {
+  const data = ensureRunnerSignInSession(req);
+  const formKey = SEED.inProgress.formKey;
+  const applicationId = SEED.inProgress.applicationId;
+  const application = {
+    id: applicationId,
+    formKey,
+    formName: "Report a local issue",
+    reference: "FL3-5H4-L8N",
+    status: "Deleted",
+  };
+  const continueUrl = `/runner-sign-in/forms/${encodeURIComponent(formKey)}/${encodeURIComponent(applicationId)}/${encodeURIComponent(SEED.inProgress.step || "name")}`;
+  const deleteUrl = `/runner-sign-in-v2/forms/${encodeURIComponent(formKey)}/${encodeURIComponent(applicationId)}/delete`;
+  const startNewUrl = `/runner-sign-in-v2/forms/${encodeURIComponent(formKey)}/${encodeURIComponent(applicationId)}/start-new`;
+
+  return res.render("titan-mvp-1.2/runner-sign-in-v2/static/manage-form-after-delete", {
+    data,
+    application,
+    continueUrl,
+    deleteUrl,
+    startNewUrl,
+    lastUpdatedText: "Deleted today",
+    expiryText: "",
+  });
+});
+
 router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/manage", function (req, res) {
   const data = ensureRunnerSignInSession(req);
   if (!data.runnerSignInAuthed) {
@@ -25766,10 +25964,13 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/manage", function (
   }
   setRunnerSignInV2ManageFocus(req, application.formKey, application.id);
 
+  const allowEditSubmissions = runnerSignInV2AllowEditSubmissions(req);
+
   // Compute display status locally (the v1 applications list does this too).
   ensureRunnerSignInChecking(application);
   function runnerSignInV2DisplayStatusFor(a) {
     if (!a) return "";
+    if (a.status === "Deleted") return "Deleted";
     if (a.status === "Replaced") return "Replaced";
     if (a.amending || a.status === "Changes in progress") return "In progress";
     if (a.status === "Submitted") return "Submitted";
@@ -25807,10 +26008,15 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/manage", function (
     const sortIso = (isSubmitted && a.submittedIso) ? a.submittedIso : (a.updatedIso || a.submittedIso || "");
     const sortTs = Date.parse(sortIso) || 0;
     const lastUpdatedText =
-      (isSubmitted || statusText === "Replaced") && a.submittedIso
+      statusText === "Deleted"
+        ? `Deleted ${formatRunnerSignInDate(a.updatedIso)}`
+        : (isSubmitted || statusText === "Replaced") && a.submittedIso
         ? `Submitted ${formatRunnerSignInDate(a.submittedIso)}`
         : formatRunnerSignInLastUpdated(a.updatedIso);
-    const expiryText = isSubmitted || statusText === "Replaced" ? "" : formatRunnerSignInDate(a.expiryIso);
+    const expiryText =
+      isSubmitted || statusText === "Replaced" || statusText === "Deleted"
+        ? ""
+        : formatRunnerSignInDate(a.expiryIso);
     const resumeStepId = getRunnerSignInResumeStepId(a) || "name";
     const continueHref = `/runner-sign-in/forms/${encodeURIComponent(a.formKey)}/${encodeURIComponent(a.id)}/${encodeURIComponent(resumeStepId)}`;
     const readyToSubmitHref = `/runner-sign-in-v2/forms/${encodeURIComponent(a.formKey)}/${encodeURIComponent(a.id)}/ready-to-submit`;
@@ -25821,11 +26027,16 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/manage", function (
     const viewHref = runnerSignInV2ViewSubmissionPath(a.formKey, a.id);
     const makeChangesHref = runnerSignInV2MakeChangesPath(a.formKey, a.id);
     let actionsHtml;
-    if (statusText === "Replaced") {
+    if (statusText === "Deleted") {
+      actionsHtml = "";
+    } else if (statusText === "Replaced") {
       actionsHtml = `<a class="govuk-link" href="${copyHref}">Copy</a>`;
     } else if (isSubmitted) {
+      const editLink = allowEditSubmissions
+        ? `<a class="govuk-link" href="${makeChangesHref}">Edit</a>`
+        : "";
       actionsHtml = runnerSignInV2ActionJoin([
-        `<a class="govuk-link" href="${makeChangesHref}">Edit</a>`,
+        editLink,
         `<a class="govuk-link" href="${copyHref}">Copy</a>`,
       ]);
     } else {
@@ -25841,10 +26052,10 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/manage", function (
     return {
       id: a.id,
       formName: a.formName,
-      reference: a.amending ? `Changes to ${a.reference}` : a.reference,
+      reference: a.reference,
       referenceHtml: a.amending
-        ? escapeHtml(`Changes to ${a.reference}`)
-        : runnerSignInV2ReferenceHtml(a.reference, a.previousReference),
+        ? runnerSignInV2ReferenceCellHtml(a.reference, "Not submitted yet")
+        : runnerSignInV2ReferenceHtml(a.reference, a.previousSubmittedIso),
       statusText,
       isLatest: isSubmitted,
       statusTagClasses: runnerSignInV2StatusTagClassesFor(statusText),
@@ -25860,10 +26071,10 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/manage", function (
     const viewHref = runnerSignInV2ViewSubmissionPath(a.formKey, a.id, snapshot.reference);
     const copyHref = `/runner-sign-in/applications/${encodeURIComponent(a.id)}/clone?from=${encodeURIComponent(snapshot.reference || "")}`;
     return {
-      id: `${a.id}-${snapshot.reference}`,
+      id: `${a.id}-${snapshot.submittedIso || snapshot.reference || "previous"}`,
       formName: a.formName,
-      reference: snapshot.reference,
-      referenceHtml: escapeHtml(snapshot.reference || "Not provided"),
+      reference: a.reference,
+      referenceHtml: runnerSignInV2ReferenceCellHtml(a.reference),
       statusText: "Replaced",
       isLatest: false,
       statusTagClasses: runnerSignInV2StatusTagClassesFor("Replaced"),
@@ -25882,8 +26093,8 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/manage", function (
     return {
       id: `${a.id}-official`,
       formName: a.formName,
-      reference: snapshot.reference || a.reference,
-      referenceHtml: escapeHtml(snapshot.reference || a.reference || "Not provided"),
+      reference: a.reference,
+      referenceHtml: escapeHtml(a.reference || snapshot.reference || "Not provided"),
       statusText: "Submitted",
       isLatest: true,
       statusTagClasses: runnerSignInV2StatusTagClassesFor("Submitted"),
@@ -25988,7 +26199,7 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/manage", function (
   const startNewUrl = `/runner-sign-in-v2/forms/${encodeURIComponent(application.formKey)}/${encodeURIComponent(application.id)}/start-new`;
   const makeChangesUrl = runnerSignInV2MakeChangesPath(application.formKey, application.id);
   const viewSubmissionUrl = runnerSignInV2ViewSubmissionPath(application.formKey, application.id);
-  const canMakeChanges = application.status === "Submitted" || Boolean(application.amending);
+  const canMakeChanges = (application.status === "Submitted" || Boolean(application.amending)) && allowEditSubmissions;
   const hasUnsubmittedChanges = Boolean(application.amending);
 
   return res.render("titan-mvp-1.2/runner-sign-in-v2/manage-form", {
@@ -26683,7 +26894,8 @@ router.post("/runner-sign-in-v2/forms/:formKey/:applicationId/delete", function 
   }
   if (applications[idx].status === "Submitted") return res.redirect(manageUrl);
 
-  applications.splice(idx, 1);
+  runnerSignInResetDraftAfterDelete(applications[idx]);
+  runnerSignInRememberDeletedApplication(req, applications[idx].id);
   data.runnerSignInApplications = applications;
 
   return res.redirect(`${manageUrl}?deleted=1`);
@@ -26789,6 +27001,157 @@ function runnerSignInV2FormSubmittedEmailSignInUrl(formKey, applicationId) {
   );
 }
 
+function runnerSignInV2FormSubmittedEmailFlags(req, application) {
+  const editedQuery = req.query.edited === "1" || req.query.edited === "true";
+  const isVolunteerEditDemo =
+    String((application && application.formKey) || req.query.formKey || "") === "volunteer-application" &&
+    String((application && application.id) || req.query.applicationId || "") === "app-1721152526408";
+  const resubmitted =
+    editedQuery ||
+    Boolean(application && application.resubmitted) ||
+    (isVolunteerEditDemo && req.query.edited !== "0");
+  const copiedFrom = application && application.copiedFrom;
+  const previousReference = String(
+    req.query.previousReference ||
+      (application && application.previousReference) ||
+      (copiedFrom && copiedFrom.reference) ||
+      (resubmitted ? "FL3-5H4-L8N" : "")
+  ).trim();
+  const previousSubmittedIso =
+    (application && application.previousSubmittedIso) ||
+    (copiedFrom && copiedFrom.submittedIso) ||
+    (Array.isArray(application && application.submissionHistory) &&
+      application.submissionHistory.length &&
+      application.submissionHistory[application.submissionHistory.length - 1].submittedIso) ||
+    (resubmitted ? "2026-04-18T09:02:00+01:00" : "");
+  const previousSubmittedOn =
+    String(req.query.previousSubmittedOn || "").trim() ||
+    (previousSubmittedIso ? formatRunnerSignInDate(previousSubmittedIso) : "");
+  const referenceNumber = String(
+    req.query.referenceNumber ||
+      (application && application.reference) ||
+      "FL3-5H4-L8N"
+  ).trim();
+  const submittedAt = String(
+    req.query.submittedAt ||
+      (application && application.submittedIso
+        ? formatRunnerSignInSubmittedDateTime(application.submittedIso)
+        : "11:10am on Tuesday 7 July 2026")
+  ).trim();
+  return {
+    resubmitted,
+    showCopiedAnswersNote: Boolean(copiedFrom) && !resubmitted,
+    allowEditSubmissions: runnerSignInV2AllowEditSubmissions(req) || resubmitted,
+    previousReference,
+    previousSubmittedOn,
+    referenceNumber,
+    submittedAt,
+  };
+}
+
+function runnerSignInV2ProcessingComparePath(formKey, applicationId) {
+  return `/runner-sign-in-v2/processing/forms/${encodeURIComponent(formKey)}/${encodeURIComponent(applicationId)}`;
+}
+
+function runnerSignInV2DisplayAnswerValue(field, answers) {
+  const value = answers && answers[field.id];
+  if (field.id === "declarationAccepted") {
+    return value === "yes" ? "Accepted" : "Not provided";
+  }
+  if (field.id === "amountRequested") {
+    return value ? `£${String(value).replace(/^£/, "")}` : "Not provided";
+  }
+  return String(value || "").trim() || "Not provided";
+}
+
+function runnerSignInV2ProcessingFieldDefs(formKey) {
+  if (formKey === "apply-small-grant") {
+    return [
+      { id: "organisationName", key: "Organisation name" },
+      { id: "organisationType", key: "Organisation type" },
+      { id: "amountRequested", key: "Amount requested" },
+      { id: "projectSummary", key: "Project summary" },
+      { id: "declarationAccepted", key: "Declaration" },
+    ];
+  }
+  return [
+    { id: "fullName", key: "Full name" },
+    { id: "email", key: "Email address" },
+    { id: "volunteerRole", key: "Volunteer role" },
+    { id: "declarationAccepted", key: "Declaration" },
+  ];
+}
+
+function runnerSignInV2HighlightCompareValue(text, changed) {
+  const safe = escapeHtml(text || "Not provided");
+  if (!changed) return safe;
+  return `<span class="hods-highlight"><strong>${safe}</strong><span class="govuk-visually-hidden"> (changed)</span></span>`;
+}
+
+function runnerSignInV2ProcessingCompare(application, options) {
+  const opts = options || {};
+  const formKey = (application && application.formKey) || "volunteer-application";
+  const history = Array.isArray(application && application.submissionHistory)
+    ? application.submissionHistory
+    : [];
+  const previousSnapshot = history.length ? history[history.length - 1] : null;
+  const demoPreviousAnswers = {
+    fullName: "Alex Taylor",
+    email: "alex.taylor@example.com",
+    volunteerRole: "Gardening",
+    declarationAccepted: "yes",
+    organisationName: "Riverside Community Garden",
+    organisationType: "Charity",
+    amountRequested: "6500",
+    projectSummary: "Rainwater harvesting equipment and community workshops for local primary schools.",
+  };
+  const demoCurrentAnswers = {
+    ...demoPreviousAnswers,
+    email: "a.taylor@example.com",
+    volunteerRole: "Events",
+    amountRequested: "7200",
+    projectSummary: "Rainwater harvesting equipment, raised beds and community workshops for local primary schools.",
+  };
+  const previousAnswers = (previousSnapshot && previousSnapshot.answers) || demoPreviousAnswers;
+  let currentAnswers =
+    application && application.answers && Object.keys(application.answers).length
+      ? application.answers
+      : demoCurrentAnswers;
+  const defs = runnerSignInV2ProcessingFieldDefs(formKey);
+  const hasDiff = defs.some(
+    (field) =>
+      runnerSignInV2DisplayAnswerValue(field, previousAnswers) !==
+      runnerSignInV2DisplayAnswerValue(field, currentAnswers)
+  );
+  if (!hasDiff || Boolean(opts.demo)) {
+    currentAnswers = { ...previousAnswers, ...currentAnswers, ...demoCurrentAnswers };
+  }
+
+  const fields = defs.map((field) => {
+    const previousText = runnerSignInV2DisplayAnswerValue(field, previousAnswers);
+    const currentText = runnerSignInV2DisplayAnswerValue(field, currentAnswers);
+    const changed = previousText !== currentText;
+    return {
+      key: field.key,
+      changed,
+      previousHtml: runnerSignInV2HighlightCompareValue(previousText, changed),
+      currentHtml: runnerSignInV2HighlightCompareValue(currentText, changed),
+    };
+  });
+
+  return {
+    previousReference:
+      (previousSnapshot && previousSnapshot.reference) ||
+      (application && application.previousReference) ||
+      "FL3-5H4-L8N",
+    currentReference: (application && application.reference) || "4Q3-4D8-AQJ",
+    previousSubmittedIso: (previousSnapshot && previousSnapshot.submittedIso) || "2026-04-18T09:02:00+01:00",
+    currentSubmittedIso: (application && application.submittedIso) || new Date().toISOString(),
+    fields,
+    changeCount: fields.filter((field) => field.changed).length,
+  };
+}
+
 function runnerSignInV2FormSubmittedEmailContext(req) {
   const data = ensureRunnerSignInSession(req);
   const toEmail = String(req.query.email || data.runnerSignInEmail || "").trim();
@@ -26799,6 +27162,7 @@ function runnerSignInV2FormSubmittedEmailContext(req) {
   const formName = (application && application.formName) || "Apply to volunteer";
   const answers = runnerSignInV2VolunteerApplicationEmailAnswers(application);
   const signInUrl = runnerSignInV2FormSubmittedEmailSignInUrl(target.formKey, target.applicationId);
+  const flags = runnerSignInV2FormSubmittedEmailFlags(req, application);
   return {
     toEmail,
     formKey: target.formKey,
@@ -26806,9 +27170,7 @@ function runnerSignInV2FormSubmittedEmailContext(req) {
     application,
     formName,
     answers,
-    referenceNumber: String(req.query.referenceNumber || "YCU-C8R-7KY").trim(),
-    previousReference: String(req.query.previousReference || "FL3-5H4-L8N").trim(),
-    submittedAt: String(req.query.submittedAt || "11:10am on Tuesday 7 July 2026").trim(),
+    ...flags,
     linkExpiresAt: String(req.query.linkExpiresAt || "1:49pm on Wednesday 20 January 2027").trim(),
     whatHappensNext: String(
       req.query.whatHappensNext ||
@@ -26821,6 +27183,9 @@ function runnerSignInV2FormSubmittedEmailContext(req) {
     helpContactLinkHref: req.query.helpContactLinkHref
       ? String(req.query.helpContactLinkHref).trim()
       : signInUrl,
+    teamEmail: String(req.query.teamEmail || "forms-processing@defra.gov.uk").trim(),
+    compareUrl: runnerSignInV2ProcessingComparePath(target.formKey, target.applicationId),
+    downloadCsvHref: String(req.query.downloadCsvHref || "#").trim(),
   };
 }
 
@@ -26836,6 +27201,35 @@ router.get("/runner-sign-in-v2/emails/form-submitted", function (req, res) {
     "titan-mvp-1.2/runner-sign-in-v2/emails/form-submitted",
     runnerSignInV2FormSubmittedEmailContext(req)
   );
+});
+
+router.get("/runner-sign-in-v2/emails/form-submitted/team", function (req, res) {
+  return res.render(
+    "titan-mvp-1.2/runner-sign-in-v2/emails/form-submitted-team",
+    runnerSignInV2FormSubmittedEmailContext(req)
+  );
+});
+
+router.get("/runner-sign-in-v2/processing/forms/:formKey/:applicationId", function (req, res) {
+  const formKey = String(req.params.formKey || "volunteer-application").trim();
+  const applicationId = String(req.params.applicationId || "").trim();
+  const application =
+    runnerSignInV2ResolveApplication(req, formKey, applicationId) ||
+    runnerSignInV2EnsureApplication(req, formKey, applicationId);
+  const compare = runnerSignInV2ProcessingCompare(application, {
+    demo: req.query.demo === "1" || req.query.edited === "1",
+  });
+  const teamEmailUrl = `/runner-sign-in-v2/emails/form-submitted/team?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}&edited=1`;
+  return res.render("titan-mvp-1.2/runner-sign-in-v2/processing-submission", {
+    application,
+    formName: (application && application.formName) || "Apply to volunteer",
+    formKey,
+    applicationId,
+    compare,
+    previousSubmittedOn: formatRunnerSignInDate(compare.previousSubmittedIso),
+    currentSubmittedOn: formatRunnerSignInDate(compare.currentSubmittedIso),
+    teamEmailUrl,
+  });
 });
 
 router.get("/runner-sign-in-v2/emails/form-submitted-checked/public", function (req, res) {
@@ -26943,6 +27337,10 @@ router.get("/runner-sign-in-v2/emails/form-submitted-checked/team", function (re
     submittedAt: String(req.query.submittedAt || "11:10am on 7 July 2026").trim(),
     linkExpiresAt: String(req.query.linkExpiresAt || "11:10am on Wednesday 7 April 2027").trim(),
     downloadCsvHref: String(req.query.downloadCsvHref || "#").trim(),
+    resubmitted: Boolean(req.query.edited === "1" || (application && application.resubmitted)),
+    previousReference: String(
+      req.query.previousReference || (application && application.previousReference) || ""
+    ).trim(),
   });
 });
 

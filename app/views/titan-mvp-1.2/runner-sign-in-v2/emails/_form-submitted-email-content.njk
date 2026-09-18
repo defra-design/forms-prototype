@@ -19,7 +19,7 @@
       </tr>
       <tr>
         <th scope="row">Subject</th>
-        <td>Form submission{% if formTitle %}: {{ formTitle }}{% endif %}</td>
+        <td>{{ "Updated form submitted" if resubmitted else "Form submitted" }}{% if formTitle %}: {{ formTitle }}{% endif %}</td>
       </tr>
     </tbody>
   </table>

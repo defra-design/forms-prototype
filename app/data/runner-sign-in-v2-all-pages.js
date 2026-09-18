@@ -46,6 +46,7 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
         },
         { text: "Check before submission", href: urls.formEditorCheckBeforeSubmission },
         { text: "Reuse previous answers", href: urls.formEditorReusePreviousAnswers },
+        { text: "Edit a submitted form", href: urls.formEditorEditSubmittedForm },
         {
           text: "Reuse previous answers — no selected (static)",
           href: `${STATIC_BASE}/reuse-previous-answers/no-selected`,
@@ -61,6 +62,22 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
         {
           text: "Advanced settings overview — reuse on (static)",
           href: `${STATIC_BASE}/reuse-previous-answers-on`,
+        },
+        {
+          text: "Edit a submitted form — no selected (static)",
+          href: `${STATIC_BASE}/edit-submitted-form/no-selected`,
+        },
+        {
+          text: "Edit a submitted form — yes selected (static)",
+          href: `${STATIC_BASE}/edit-submitted-form/yes-selected`,
+        },
+        {
+          text: "Advanced settings overview — edit submitted form off (static)",
+          href: `${STATIC_BASE}/edit-submitted-form-off`,
+        },
+        {
+          text: "Advanced settings overview — edit submitted form on (static)",
+          href: `${STATIC_BASE}/edit-submitted-form-on`,
         },
         {
           text: "Email actions (live)",
@@ -83,8 +100,12 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
         { text: "Your submitted form", href: urls.viewSubmission },
         { text: "Edit form (are you sure?)", href: urls.makeChanges },
         { text: "Form submitted confirmation email", href: urls.emailFormSubmitted },
+        { text: "Changes submitted email (form filler)", href: urls.emailFormSubmittedEdited },
+        { text: "Updated form received email (processing team)", href: urls.emailFormSubmittedTeam },
+        { text: "Compare edited submissions (processing team)", href: urls.processingCompare },
         { text: "Start a new application", href: urls.startNewForm },
         { text: "Manage your form (checked example)", href: urls.staticManageFormChecked },
+        { text: "Manage your form (after deleting an in-progress form)", href: urls.staticManageFormAfterDelete },
       ],
     },
     {
@@ -307,6 +328,7 @@ function buildRunnerSignInV2AllPagesStaticSections(urls, { unexpectedPages }) {
         { text: "Advanced settings", href: STATIC_BASE },
         { text: "Check before submission", href: `${STATIC_BASE}/check-before-submission/yes-with-description` },
         { text: "Reuse previous answers", href: `${STATIC_BASE}/reuse-previous-answers/yes-selected` },
+        { text: "Edit a submitted form", href: `${STATIC_BASE}/edit-submitted-form/yes-selected` },
         {
           text: "Reuse previous answers — no selected",
           href: `${STATIC_BASE}/reuse-previous-answers/no-selected`,
@@ -323,6 +345,22 @@ function buildRunnerSignInV2AllPagesStaticSections(urls, { unexpectedPages }) {
           text: "Advanced settings overview — reuse on",
           href: `${STATIC_BASE}/reuse-previous-answers-on`,
         },
+        {
+          text: "Edit a submitted form — no selected",
+          href: `${STATIC_BASE}/edit-submitted-form/no-selected`,
+        },
+        {
+          text: "Edit a submitted form — yes selected",
+          href: `${STATIC_BASE}/edit-submitted-form/yes-selected`,
+        },
+        {
+          text: "Advanced settings overview — edit submitted form off",
+          href: `${STATIC_BASE}/edit-submitted-form-off`,
+        },
+        {
+          text: "Advanced settings overview — edit submitted form on",
+          href: `${STATIC_BASE}/edit-submitted-form-on`,
+        },
         { text: "Email actions", href: mailboxStatic },
       ],
     },
@@ -337,6 +375,7 @@ function buildRunnerSignInV2AllPagesStaticSections(urls, { unexpectedPages }) {
         { text: "Form submitted confirmation email", href: p.emailFormSubmitted },
         { text: "Start a new application", href: preview("form-start-page") },
         { text: "Manage your form (checked example)", href: urls.staticManageFormChecked },
+        { text: "Manage your form (after deleting an in-progress form)", href: urls.staticManageFormAfterDelete },
       ],
     },
     {

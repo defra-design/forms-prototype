@@ -260,16 +260,24 @@
       <div class="journey-docs__section">
         <p class="govuk-body">Someone signs in and lands on Manage your form. From there they can continue a draft, view a submitted form, edit it, copy, or start a new form. Editing a submitted form lets them change previous answers. Submitting those changes replaces the previous submission.</p>
         {{ journeyDocs.journeyPath([
+          { text: "Advanced settings", href: urls.formEditorAdvancedSettings },
+          { text: "Edit a submitted form", href: urls.formEditorEditSubmittedForm },
           { text: "Manage your form", href: urls.manage },
           { text: "Your submitted form", href: urls.viewSubmission },
           { text: "Edit form", href: urls.makeChanges },
           { text: "Check your answers", href: "/runner-sign-in/forms/volunteer-application/app-1721152526408/check-answers" },
-          { text: "Changes submitted", href: urls.formSubmitted }
+          { text: "Changes submitted", href: urls.formSubmitted },
+          { text: "Confirmation email (form filler)", href: urls.emailFormSubmittedEdited },
+          { text: "Processing team email", href: urls.emailFormSubmittedTeam }
         ]) }}
         {{ journeyDocs.journeyPreviews([
+          { caption: "Form designer", title: "Edit a submitted form", href: urls.formEditorEditSubmittedForm },
           { caption: "Return and edit", title: "Manage your form", href: urls.manage },
           { caption: "Return and edit", title: "Your submitted form", href: urls.viewSubmission },
-          { caption: "Return and edit", title: "Changes submitted", href: urls.formSubmitted }
+          { caption: "Return and edit", title: "Changes submitted", href: urls.formSubmitted },
+          { caption: "Return and edit", title: "Confirmation email (form filler)", href: urls.emailFormSubmittedEdited, previewHref: urls.preview.emailFormSubmittedEdited },
+          { caption: "Return and edit", title: "Processing team email", href: urls.emailFormSubmittedTeam, previewHref: urls.preview.emailFormSubmittedTeam },
+          { caption: "Return and edit", title: "Compare submissions", href: urls.processingCompare, previewHref: urls.preview.processingCompare }
         ]) }}
       </div>
     {% endset %}
@@ -302,6 +310,9 @@
           { caption: "Emails", title: "Save and exit (without sign-in)", href: urls.emailSaveExitWithoutSignIn },
           { caption: "Emails", title: "Security code", href: urls.emailConfirmation, previewHref: urls.preview.emailConfirmation },
           { caption: "Emails", title: "Form submitted (copied answers)", href: urls.emailFormSubmitted, previewHref: urls.preview.emailFormSubmitted },
+          { caption: "Emails", title: "Changes submitted (form filler)", href: urls.emailFormSubmittedEdited, previewHref: urls.preview.emailFormSubmittedEdited },
+          { caption: "Emails", title: "Updated form received (processing team)", href: urls.emailFormSubmittedTeam, previewHref: urls.preview.emailFormSubmittedTeam },
+          { caption: "Processing", title: "Compare edited submissions", href: urls.processingCompare, previewHref: urls.preview.processingCompare },
           { caption: "Emails", title: "Form submitted – public view (copied answers)", href: urls.emailFormSubmittedPublic, previewHref: urls.preview.emailFormSubmittedPublic },
           { caption: "Emails", title: "Form submitted – public view (checked)", href: urls.emailFormSubmittedCheckedPublic, previewHref: urls.preview.emailFormSubmittedCheckedPublic },
           { caption: "Emails", title: "Form submitted – processing team (checked)", href: urls.emailFormSubmittedCheckedTeam, previewHref: urls.preview.emailFormSubmittedCheckedTeam },
