@@ -3,6 +3,7 @@ const SEED = {
   inProgress: { formKey: "report-local-issue", applicationId: "app-1721152526404", step: "when" },
   inProgressRefund: { formKey: "request-refund", applicationId: "app-1721152526405", step: "bank-details" },
   awaitingCheck: { formKey: "apply-small-grant", applicationId: "app-1721152526407" },
+  checkerNotStarted: { formKey: "apply-small-grant", applicationId: "app-checker-not-started" },
   readyToInvite: { formKey: "apply-small-grant", applicationId: "app-checker-ready-to-invite" },
   submittedCopy: { formKey: "volunteer-application", applicationId: "app-1721152526408" },
   copyDraft: { formKey: "volunteer-application", applicationId: "app-copy-volunteer-draft" },
@@ -177,7 +178,8 @@ function runnerSignInV2ChooseJourneyRedirect(
     case "manage":
       return managePath(SEED.inProgress.formKey, SEED.inProgress.applicationId);
     case "return-resubmit":
-      return managePath(SEED.submittedCopy.formKey, SEED.submittedCopy.applicationId);
+      // Form start → why-sign-in → email OTP → Manage (do not skip sign-in).
+      return formStart(SEED.submittedCopy.formKey, SEED.submittedCopy.applicationId);
     case "copy-submission":
       return managePath(SEED.submittedCopy.formKey, SEED.submittedCopy.applicationId);
     case "prototype-hub":
@@ -242,10 +244,17 @@ function runnerSignInV2PrepareChooseJourneySession(req, journeyId, helpers) {
       setFocus(SEED.inProgress.formKey, SEED.inProgress.applicationId);
       return;
     case "return-resubmit":
-      signIn();
+      clearAuth();
+      if (typeof seedExistingAccount === "function") {
+        seedExistingAccount(PROTOTYPE_EXISTING_SIGN_IN_EMAIL, PROTOTYPE_EXISTING_SIGN_IN_PHONE);
+      }
       setFocus(SEED.submittedCopy.formKey, SEED.submittedCopy.applicationId);
       if (typeof helpers.enableEditSubmittedForms === "function") {
         helpers.enableEditSubmittedForms();
+      }
+      // Manage auto-signs when prototype mode is on — turn it off so research goes through OTP.
+      if (typeof helpers.disablePrototypeMode === "function") {
+        helpers.disablePrototypeMode();
       }
       return;
     case "copy-submission":

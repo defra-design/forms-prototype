@@ -23,7 +23,7 @@ activeLinkId: "nav-editor"
 <div class="x-govuk-masthead x-govuk-masthead--large">
   <div class="govuk-width-container">
     {{ govukBackLink({ classes: "govuk-back-link--inverse govuk-!-margin-bottom-0", text:
-    commonTerms.form_editor.information_type.back, href: "/titan-mvp-1.2/form-editor/listing.html" }) }}
+    commonTerms.form_editor.information_type.back, href: backHref or "/titan-mvp-1.2/form-editor/listing.html" }) }}
 
     <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"
       style="border-bottom: 1px solid white; margin-bottom: 0" />
@@ -68,7 +68,7 @@ activeLinkId: "nav-editor"
                             </li> #}
                             <li class="moj-sub-navigation__item">
                               <a class="moj-sub-navigation__link" aria-current="page" id="edit-page"
-                                href="#question-1-information-type">Question {{ questionNumber }}</a>
+                                href="#question-1-information-type">{{ relatedQuestionHeading or ("Question " ~ questionNumber) }}</a>
                             </li>
                           </ul>
                         </nav>
@@ -76,7 +76,7 @@ activeLinkId: "nav-editor"
                         <div class="govuk-summary-card__title-wrapper govuk-!-padding-top-0"></div>
 
                         <span class="govuk-caption-l">Page {{ pageNumber }}</span>
-                        <h2 class="govuk-heading-l">Edit question {{ questionNumber }}</h2>
+                        <h2 class="govuk-heading-l">{% if relatedQuestionHeading %}{{ relatedQuestionHeading }}{% else %}Edit question {{ questionNumber }}{% endif %}</h2>
 
                         <form id="s" action="/titan-mvp-1.2/question-configuration-save" method="post">
 
@@ -86,7 +86,7 @@ activeLinkId: "nav-editor"
                               {{ commonTerms.form_editor.question_settings.question }}
                             </label>
                             <input class="govuk-input" id="question-label-input-shorttext"
-                              name="questionLabelInputShortText" type="text" value="">
+                              name="questionLabelInputShortText" type="text" value="{{ relatedQuestionPrefill.label if relatedQuestionPrefill else (data.questionLabelInputShortText or '') }}">
                           </div>
 
                           <!-- Hint Text Input -->
@@ -97,7 +97,7 @@ activeLinkId: "nav-editor"
                           },
                           id: "hint-text-input-shorttext",
                           name: "hintTextInputShorttext",
-                          value: data['hint-text-input-shorttext'],
+                          value: relatedQuestionPrefill.hint if relatedQuestionPrefill else data['hint-text-input-shorttext'],
                           classes: "govuk-textarea",
                           rows: 3,
                           describedBy: "hint-text-input-shorttext"
@@ -126,7 +126,8 @@ activeLinkId: "nav-editor"
                           text: commonTerms.form_editor.question_settings.short_description.hint
                           },
                           id: "error-message-input-shorttext",
-                          name: "errorMessageInputShorttext"
+                          name: "errorMessageInputShorttext",
+                          value: relatedQuestionPrefill.settings.shortDescription if relatedQuestionPrefill and relatedQuestionPrefill.settings else (data.errorMessageInputShorttext or "")
                           }) }}
 
                           <!-- Answer limits -->
@@ -152,6 +153,7 @@ activeLinkId: "nav-editor"
                                 },
                                 id: "min-characters",
                                 name: "minCharacters",
+                                value: relatedQuestionPrefill.settings.min if relatedQuestionPrefill and relatedQuestionPrefill.settings else (data.minCharacters or ""),
                                 inputmode: "numeric",
                                 spellcheck: false
                                 }) }}
@@ -168,6 +170,7 @@ activeLinkId: "nav-editor"
                                 },
                                 id: "max-characters",
                                 name: "minCharacters",
+                                value: relatedQuestionPrefill.settings.max if relatedQuestionPrefill and relatedQuestionPrefill.settings else (data.maxCharacters or ""),
                                 inputmode: "numeric",
                                 spellcheck: false
                                 }) }}

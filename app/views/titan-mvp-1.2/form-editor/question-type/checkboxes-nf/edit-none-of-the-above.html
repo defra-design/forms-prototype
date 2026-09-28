@@ -1,0 +1,2979 @@
+{% extends "layouts/main.html" %}
+{% from "components/service-header/macro.njk" import serviceHeader %}
+{% set pageName %}Edit page {{ pageNumber }}: question {{ questionNumber }} - {{ form.name }}{% endset %}
+{% set headingPlaceholder = "Page heading" %}
+{% set guidancePlaceholder = "" %}
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+containerClasses: containerClasses,
+accountName: "Chris Smith",
+homepageLink: "/",
+signOutLink: "/onboarding/sign-out-confirmation",
+navigationItems: [
+{ href: "/titan-mvp-1/library.html", text: "Forms library", id: "nav-library" },
+{ href: "/cph-overview/draft/complete-clean.html", text: "Overview", id: "nav-overview" },
+{ href: "/titan-mvp-1/form-editor/listing", text: "Editor", id: "nav-editor" }
+],
+activeLinkId: "nav-editor"
+}) }}
+
+<div class="x-govuk-masthead x-govuk-masthead--large">
+	<div class="govuk-width-container">
+		{{ govukBackLink({ classes: "govuk-back-link--inverse govuk-!-margin-bottom-0", text:
+		commonTerms.form_editor.information_type.back, href: "/titan-mvp-1/form-editor/listing.html" }) }}
+
+		<hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"
+			style="border-bottom: 1px solid white; margin-bottom: 0" />
+
+		<div class="govuk-grid-row">
+			<div class="govuk-grid-column-full-from-desktop">
+				<h1 class="x-govuk-masthead__title">
+					{{ form.name }}
+				</h1>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+	<div class="govuk-grid-column-full">
+		<div class="govuk-grid-row">
+			<!-- Left Column for Form Controls -->
+			<div class="govuk-grid-column-one-half-from-desktop" id="container" style="flex: 1 1 75%; overflow-y: auto">
+				<div class="govuk-summary-card govuk-!-margin-top-0" style="border-left: 10px solid #008938">
+					<div class="govuk-summary-card__content govuk-!-padding-top-0" style="background-color: #f3f2f1">
+
+						<dl class="govuk-summary-list">
+							<div class="govuk-summary-list__row">
+								<dd class="govuk-summary-list__value">
+									<!-- Dynamic Summary List -->
+
+									<!-- Question Settings Container -->
+									<div class="govuk-grid-row" id="page-settings-container-1">
+										<div id="question-1">
+											<div class="govuk-summary-card__content" style="margin-bottom: 0">
+												<!-- Sub Navigation for Question -->
+												<nav class="moj-sub-navigation govuk-!-padding-top-0 govuk-!-margin-bottom-2"
+													aria-label="Sub navigation">
+													<ul class="moj-sub-navigation__list" id="nav-list2">
+														<li class="moj-sub-navigation__item">
+															<a class="moj-sub-navigation__link" aria-current="page"
+																href="#question-1-information-type">Question {{
+																questionNumber }}</a>
+														</li>
+													</ul>
+												</nav>
+
+												<div class="govuk-summary-card__title-wrapper govuk-!-padding-top-0">
+												</div>
+
+												<span class="govuk-caption-l">Page {{ pageNumber }}</span>
+												<h2 class="govuk-heading-l">Edit question {{ questionNumber }}</h2>
+
+												<form id="question-form"
+													action="/titan-mvp-1.2/form-editor/question-type/checkboxes-nf/edit-none-of-the-above"
+													method="post">
+
+
+													<!-- Hidden inputs for question type and configuration -->
+													<input type="hidden" name="questionType" value="list">
+													<input type="hidden" name="questionSubType" value="checkboxes">
+													<input type="hidden" name="pageId" value="{{ pageId }}">
+													<input type="hidden" name="questionId" value="{{ questionId }}">
+													<input type="hidden" name="questionNumber"
+														value="{{ questionNumber }}">
+
+													<!-- Question Label Input -->
+													{{ govukInput({
+													label: {
+													text: commonTerms.form_editor.question_settings.question,
+													classes: "govuk-label--m"
+													},
+													id: "question-label-input-checkboxes",
+													name: "questionLabelInputCheckboxes",
+													value: data['question-label-input-checkboxes']
+													}) }}
+
+													<!-- Hidden input for question label -->
+													<input type="hidden" name="questionLabel"
+														value="{{ data['question-label-input-checkboxes'] }}">
+
+													<!-- Hint Text Input -->
+													{{ govukTextarea({
+													label: {
+													text: commonTerms.form_editor.question_settings.hint,
+													classes: "govuk-label--m"
+													},
+													id: "question-hint-text-input-radios",
+													name: "questionHintTextInputRadios",
+													value: data['question-hint-text-input-radios'],
+													rows: 3
+													}) }}
+
+													<!-- Make Optional Checkbox -->
+													<div class="govuk-form-group">
+														<div class="govuk-checkboxes--small">
+															<div class="govuk-checkboxes__item">
+																<input class="govuk-checkboxes__input" type="checkbox"
+																	id="makeOptional" name="makeOptional"
+																	value="{{ data['optional-label-q1'] }}">
+																<label class="govuk-label govuk-checkboxes__label"
+																	for="makeOptional">
+																	{{
+																	commonTerms.form_editor.question_settings.optional
+																	}}
+																</label>
+															</div>
+														</div>
+													</div>
+
+													<!-- Error Message Input -->
+													{{ govukInput({
+													label: {
+													text:
+													commonTerms.form_editor.question_settings.short_description.title,
+													classes: "govuk-label--m",
+													isPageHeading: false
+													},
+													hint: {
+													text:
+													commonTerms.form_editor.question_settings.short_description.hint
+													},
+													id: "error-message-input",
+													name: "errorMessageInput"
+													}) }}
+
+
+													<!-- Hidden input for hint text -->
+													<input type="hidden" name="hintText"
+														value="{{ data['question-hint-text-input-radios'] }}">
+
+													<!-- List items -->
+													<div class="govuk-form-group">
+														{% if noneOfTheAboveMovedFrom %}
+														{{ govukNotificationBanner({
+															titleText: "Important",
+															html: "<p class=\"govuk-notification-banner__heading\">‘" ~ noneOfTheAboveMovedFrom ~ "’ is no longer the ‘none of the above’ item. Only one item in a list can have that setting.</p>"
+														}) }}
+														{% endif %}
+														<div id="none-of-the-above-moved-banner" hidden>
+															<div class="govuk-notification-banner" role="region" aria-labelledby="none-of-the-above-moved-title" data-module="govuk-notification-banner">
+																<div class="govuk-notification-banner__header">
+																	<h2 class="govuk-notification-banner__title" id="none-of-the-above-moved-title">Important</h2>
+																</div>
+																<div class="govuk-notification-banner__content">
+																	<p class="govuk-notification-banner__heading" id="none-of-the-above-moved-text"></p>
+																</div>
+															</div>
+														</div>
+														<h2 class="govuk-heading-m moj-add-another__heading"
+															tabindex="-1">
+															<svg class="govuk-!-margin-right-1"
+																style="position: relative; top: -1px; vertical-align: middle;"
+																width="28" height="28" viewBox="0 0 24 24" fill="none"
+																xmlns="http://www.w3.org/2000/svg">
+																<circle cx="12" cy="12" r="11" fill="currentColor" />
+																<path d="M6 8h12M6 12h12M6 16h12" stroke="white"
+																	stroke-width="2" stroke-linecap="round" />
+															</svg>
+															List items
+														</h2>
+														<hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"
+															style="border-color:black; border-width: 3px;">
+														<ol class="gem-c-reorderable-list js-enabled"
+															id="options-container" data-module="reorderable-list">
+															{% for radio in radioList %}
+															<li class="gem-c-reorderable-list__item" draggable="true"
+																data-index="{{ loop.index }}"
+																{% if reopenOptionIndex and loop.index == reopenOptionIndex %}style="display: none;"{% endif %}>
+																<div class="gem-c-reorderable-list__wrapper">
+																	<div class="gem-c-reorderable-list__content">
+																		<div class="govuk-!-margin-bottom-2">
+																			<p class="govuk-body fauxlabel option-label-display"
+																				id="option-{{ loop.index }}-label-display">
+																				{{ radio.label }}{% if radio.isNoneOfTheAbove %}
+																				<strong class="govuk-tag govuk-tag--grey govuk-!-margin-left-1" style="vertical-align: middle;">None of the above</strong>{% endif %}
+																			</p>
+																			{% if radio.hint %}
+																			<p class="govuk-body-s govuk-!-margin-top-0 govuk-!-margin-bottom-0"
+																				style="color: #505a5f;">
+																				{{ radio.hint }}
+																			</p>
+																			{% endif %}
+																			{% if radio.relatedQuestion and radio.relatedQuestion.type %}
+																			<div class="govuk-!-margin-top-2 related-question-summary" style="color: #505a5f;">
+																				<p class="govuk-body-s govuk-!-margin-bottom-1">
+																					<span class="govuk-!-font-weight-bold">Related question</span>
+																				</p>
+																				{% if radio.relatedQuestion.label %}
+																				<p class="govuk-body-s govuk-!-margin-bottom-1">{{ radio.relatedQuestion.label }}</p>
+																				<p class="govuk-body-s govuk-!-margin-bottom-1">
+																					{% if radio.relatedQuestion.type == 'number' %}Numbers only{% elif radio.relatedQuestion.type == 'long' %}Long answer{% else %}Short answer{% endif %}
+																				</p>
+																				{% else %}
+																				<p class="govuk-body-s govuk-!-margin-bottom-1">
+																					{% if radio.relatedQuestion.type == 'number' %}Numbers only{% elif radio.relatedQuestion.type == 'long' %}Long answer{% else %}Short answer{% endif %} (not configured yet)
+																				</p>
+																				{% endif %}
+																			</div>
+																			{% endif %}
+																			{% if radio.condition %}
+																			<p class="govuk-body-s govuk-!-margin-top-2"
+																				style="color: #505a5f;">
+																				<span
+																					class="govuk-!-font-weight-bold">Shown
+																					if:</span> {{
+																				radio.condition.conditionName }}
+																				{% for rule in radio.condition.rules %}
+																				{% if loop.first %}
+																				'{{ rule.questionText }}' {{
+																				rule.operator | replace("-", " ") }} '{{
+																				rule.value }}'
+																				{% else %}
+																				<span
+																					class="govuk-!-font-weight-bold">{{
+																					rule.logicalOperator |
+																					default('AND') }}</span>
+																				'{{ rule.questionText }}' {{
+																				rule.operator | replace("-", " ") }} '{{
+																				rule.value }}'
+																				{% endif %}
+																				{% endfor %}
+																			</p>
+																			{% endif %}
+																		</div>
+																		<input type="hidden"
+																			id="option-{{ loop.index }}-label"
+																			name="option[{{ loop.index }}][option_label]"
+																			value="{{ radio.label }}"
+																			class="option-label-input-hidden">
+																		<input class="option-hint-input" type="hidden"
+																			id="option-{{ loop.index }}-hint"
+																			name="option[{{ loop.index }}][option_hint]"
+																			value="{{ radio.hint }}">
+																		<input class="option-related-input" type="hidden"
+																			id="option-{{ loop.index }}-related"
+																			name="option[{{ loop.index }}][related_question]"
+																			value="{{ radio.relatedQuestion | dump | e }}">
+																		<input class="option-none-of-the-above-input" type="hidden"
+																			id="option-{{ loop.index }}-none-of-the-above"
+																			name="option[{{ loop.index }}][is_none_of_the_above]"
+																			value="{{ 'true' if radio.isNoneOfTheAbove else '' }}">
+																	</div>
+
+																	<div class="gem-c-reorderable-list__actions">
+																		<button
+																			class="gem-c-button govuk-button govuk-button--secondary js-reorderable-list-up"
+																			type="button" aria-label="Move option up"
+																			style="display: none;">Up</button>
+																		<button
+																			class="gem-c-button govuk-button govuk-button--secondary js-reorderable-list-down"
+																			type="button" aria-label="Move option down"
+																			style="display: inline-block;">Down</button>
+																		<a href="#"
+																			class="govuk-link govuk-link--destructive js-remove-option"
+																			role="button"
+																			aria-label="Remove option">Remove</a>
+																	</div>
+																	<div class="edit-item">
+																		<a class="govuk-link govuk-link--no-visited-state js-edit-option"
+																			href="#add-option-form"
+																			data-index="{{ loop.index }}">
+																			Edit
+																			<span class="govuk-visually-hidden">
+																				option number {{ loop.index }}
+																				{% if radio.label %} - {{ radio.label
+																				}}{% endif %}
+																			</span>
+																		</a>
+																	</div>
+																</div>
+															</li>
+															{% endfor %}
+														</ol>
+													</div>
+
+													<!-- Add Option Form (hidden unless reopening after related hop) -->
+													<div id="add-option-form"
+														class="govuk-!-margin-bottom-6 gem-c-reorderable-list__item"
+														{% if reopenOptionIndex %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+														<h2 <span class="govuk-caption-m" id="add-option-heading">Item
+															{{ reopenOptionIndex or 1 }}</span></h2>
+
+														{% if selectError %}
+														<div class="govuk-error-summary" data-module="govuk-error-summary">
+															<div role="alert">
+																<h2 class="govuk-error-summary__title">There is a problem</h2>
+																<div class="govuk-error-summary__body">
+																	<ul class="govuk-list govuk-error-summary__list">
+																		<li><a href="#existing-related-question">Select a related question</a></li>
+																	</ul>
+																</div>
+															</div>
+														</div>
+														{% endif %}
+
+														<!-- Option Value (Label) -->
+														<div class="govuk-form-group">
+															<label class="govuk-label govuk-label--m"
+																for="new-option-label">{{
+																commonTerms.form_editor.information_type.list.types.radios.option.text.label
+																}}</label>
+															<input class="govuk-input" id="new-option-label"
+																name="label" type="text"
+																value="{{ reopenOption.label if reopenOption and reopenOption.label != 'Item text' else '' }}">
+														</div>
+
+														<!-- Hint Text -->
+														<div class="govuk-form-group">
+															<label class="govuk-label govuk-label--m"
+																for="new-option-hint">{{
+																commonTerms.form_editor.information_type.list.types.radios.option.hint.label
+																}}</label>
+															<div class="govuk-hint">{{
+																commonTerms.form_editor.information_type.list.types.radios.option.hint.hint
+																}}</div>
+															<input class="govuk-input" id="new-option-hint" name="hint"
+																type="text" value="{{ reopenOption.hint if reopenOption else '' }}">
+														</div>
+
+														<!-- Advanced Features Section -->
+														<details class="govuk-details" data-module="govuk-details" id="add-option-advanced-features"{% if reopenOptionIndex %} open{% endif %}>
+															<summary class="govuk-details__summary">
+																<span class="govuk-details__summary-text">Advanced
+																	features</span>
+															</summary>
+															<div class="govuk-details__text">
+																{% set relatedQuestionMarkup %}
+																<div id="related-question-summary-panel"{% if not relatedConfigured %} hidden{% endif %}>
+																	<h3 class="govuk-heading-s govuk-!-margin-bottom-3">Related question</h3>
+																	<dl class="govuk-summary-list">
+																		<div class="govuk-summary-list__row">
+																			<dt class="govuk-summary-list__key">Question</dt>
+																			<dd class="govuk-summary-list__value" id="related-summary-question">{{ relatedQuestion.label if relatedQuestion else '' }}</dd>
+																			<dd class="govuk-summary-list__actions">
+																				<button type="submit"
+																					class="govuk-link govuk-body"
+																					style="background: none; border: none; padding: 0; color: #1d70b8; cursor: pointer; text-decoration: underline;"
+																					form="edit-related-form"
+																					id="change-related-question">
+																					Change<span class="govuk-visually-hidden"> related question</span>
+																				</button>
+																			</dd>
+																		</div>
+																		<div class="govuk-summary-list__row">
+																			<dt class="govuk-summary-list__key">Type</dt>
+																			<dd class="govuk-summary-list__value" id="related-summary-type">{{ relatedTypeLabel }}</dd>
+																			<dd class="govuk-summary-list__actions">
+																				<button type="submit"
+																					class="govuk-link govuk-body"
+																					style="background: none; border: none; padding: 0; color: #1d70b8; cursor: pointer; text-decoration: underline;"
+																					form="add-related-form"
+																					id="change-related-question-type">
+																					Change<span class="govuk-visually-hidden"> question type</span>
+																				</button>
+																			</dd>
+																		</div>
+																	</dl>
+																</div>
+																<div id="related-question-add-panel"{% if relatedConfigured %} hidden{% endif %}>
+																	<div id="related-question-existing-choice"{% if not hasExistingRelatedQuestions or relatedConfigured %} hidden{% endif %}>
+																		{% if selectError %}
+																		{{ govukSelect({
+																			id: "existing-related-question",
+																			name: "existingRelatedQuestion",
+																			label: {
+																				text: "Choose a related question you’ve already created."
+																			},
+																			items: existingRelatedSelectItems if existingRelatedSelectItems else [{ value: "", text: "Select a related question" }],
+																			errorMessage: {
+																				text: "Select a related question"
+																			},
+																			attributes: {
+																				form: "use-existing-related-form"
+																			}
+																		}) }}
+																		{% else %}
+																		{{ govukSelect({
+																			id: "existing-related-question",
+																			name: "existingRelatedQuestion",
+																			label: {
+																				text: "Choose a related question you’ve already created."
+																			},
+																			items: existingRelatedSelectItems if existingRelatedSelectItems else [{ value: "", text: "Select a related question" }],
+																			attributes: {
+																				form: "use-existing-related-form"
+																			}
+																		}) }}
+																		{% endif %}
+																		<div class="govuk-button-group govuk-!-margin-top-4">
+																			<button type="submit"
+																				class="govuk-button govuk-button--secondary"
+																				id="select-existing-related-question"
+																				form="use-existing-related-form"
+																				data-module="govuk-button">
+																				Use selected question
+																			</button>
+																			<span class="govuk-body govuk-!-margin-right-1">or</span>
+																			<button type="submit"
+																				class="govuk-link govuk-body"
+																				style="background: none; border: none; padding: 0; color: #1d70b8; cursor: pointer; text-decoration: underline;"
+																				id="add-related-question-from-choice"
+																				form="add-related-form">
+																				create a new question
+																			</button>
+																		</div>
+																	</div>
+
+																	<div id="related-question-add-only"{% if hasExistingRelatedQuestions or relatedConfigured %} hidden{% endif %}>
+																		<button type="submit"
+																			class="govuk-button govuk-button--secondary"
+																			id="add-related-question"
+																			form="add-related-form"
+																			data-module="govuk-button">
+																			Create related question
+																		</button>
+																	</div>
+																</div>
+																{% endset %}
+
+																{{ govukCheckboxes({
+																	name: "noneOfTheAbove",
+																	items: [
+																		{
+																			value: "yes",
+																			text: "Make this a ‘none of the above’ item",
+																			hint: {
+																				text: "Use this when none of the other options apply. It will always appear last, after a text divider that says ‘or’."
+																			},
+																			checked: askNoneOfTheAboveOnReopen
+																		}
+																	]
+																}) }}
+
+																{{ govukCheckboxes({
+																	name: "askRelatedQuestion",
+																	items: [
+																		{
+																			value: "yes",
+																			text: "Ask a related question when this option is selected",
+																			checked: askRelatedOnReopen,
+																			conditional: {
+																				html: relatedQuestionMarkup
+																			}
+																		}
+																	]
+																}) }}
+
+																<!-- Additional Value -->
+																<div class="govuk-form-group">
+																	<label class="govuk-label govuk-label--m"
+																		for="new-option-value">{{
+																		commonTerms.form_editor.information_type.list.types.radios.option.value.label
+																		}}</label>
+																	<div class="govuk-hint">{{
+																		commonTerms.form_editor.information_type.list.types.radios.option.value.hint
+																		}}</div>
+																	<input class="govuk-input" id="new-option-value"
+																		name="value" type="text" value="">
+																</div>
+															</div>
+														</details>
+
+														<div class="govuk-button-group">
+															<button type="button" class="govuk-button"
+																id="save-new-option">Save item</button>
+															<a class="govuk-link" href="#"
+																id="cancel-add-option">Cancel</a>
+														</div>
+													</div>
+
+													<!-- Buttons -->
+													<div class="govuk-button-group">
+														<!-- Add Another Option Button -->
+														<button id="add-option-button" type="button"
+															class="govuk-button moj-add-another__add-button govuk-!-margin-bottom-4 govuk-!-margin-bottom-6">
+															Add item
+														</button>
+
+														<button id="edit-options-button" type="button"
+															class="govuk-button govuk-button--inverse"
+															style="display: none;">
+															{{ commonTerms.form_editor.common.edit_list }}
+														</button>
+													</div>
+
+													<!-- Hidden input for radio options -->
+													<input type="hidden" name="radioOptions" id="radio-options-data"
+														value="">
+
+													<div id="summary-container">
+														<hr
+															class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+
+														<!-- The dynamic summary list will be populated here -->
+														<h2 class="govuk-heading-m">{{
+															commonTerms.form_editor.question_settings.title }}</h2>
+
+														{{ govukSummaryList({
+														classes: "govuk-summary-list govuk-section-break
+														govuk-section-break--visible govuk-!-margin-bottom-6",
+														rows: [
+														{
+														key: {
+														text: "Type of information"
+														},
+														value: {
+														html: "List: radios"
+														},
+														actions: {
+														items: [
+														{
+														href:
+														"/titan-mvp-1/form-editor/templates/1-question/information-type.html",
+														text: "Change",
+														visuallyHiddenText: "name"
+														}
+														]
+														}
+														}
+														]
+														}) }}
+													</div>
+													<div class="moj-button-action">
+														{{ govukButton({
+														text: commonTerms.form_editor.common.continue,
+														type: 'submit'
+														}) }}
+													</div>
+												</form>
+											</div>
+										</div>
+									</div>
+								</dd>
+							</div>
+						</dl>
+					</div>
+				</div>
+			</div>
+
+			<!-- Right Column for Preview -->
+			<div class="govuk-grid-column-one-half-from-desktop" id="second-container"
+				style="outline: solid 1px #008938; height: 100%; position: sticky; top: 0; padding: 20px; box-shadow: 5px 10px #008938;">
+				<!-- Before content -->
+				<div id="before-content" style="background-color: #cce2d8;">
+					<p class="govuk-body-s"
+						style="margin-bottom: 0; color: #005a30; padding: 2px 8px 3px; text-align: center;">
+						{{
+						commonTerms.form_editor.common.previews }}</p>
+				</div>
+
+				<div style="margin-top: 60px;">
+					{% from "govuk/components/tabs/macro.njk" import govukTabs %}
+
+					<div class="govuk-tabs" data-module="govuk-tabs">
+						<h2 class="govuk-tabs__title">{{ commonTerms.form_editor.common.contents }}</h2>
+						<ul class="govuk-tabs__list">
+							<li class="govuk-tabs__list-item govuk-tabs__list-item--selected">
+								<a class="govuk-tabs__tab" href="#tab-one">{{
+									commonTerms.form_editor.common.page_preview }}</a>
+							</li>
+							<li class="govuk-tabs__list-item">
+								<a class="govuk-tabs__tab" href="#tab-two">{{
+									commonTerms.form_editor.common.error_messages }}</a>
+							</li>
+						</ul>
+
+						<div class="govuk-tabs__panel" id="tab-one">
+							<!-- Page Preview Content -->
+							<p class="govuk-body-s" style="margin-bottom: 30px; border-bottom: #008938 1px;">
+								<a href="#" class="govuk-link govuk-link--no-visited-state" rel="noreferrer noopener"
+									target="_blank">{{ commonTerms.form_editor.common.preview }}</a>
+							</p>
+
+							<!-- Ensure this included template contains the #checkbox-list .govuk-checkboxes element -->
+							{% include "/titan-mvp-1.2/form-editor/question-type/checkboxes/previews/edit-v2.html" %}
+
+							<a href="#edit-page" class="govuk-skip-link" style="margin-bottom: 30px!important;"
+								data-module="govuk-skip-link">{{ commonTerms.form_editor.common.skip_to_edit }}</a>
+						</div>
+
+						<div class="govuk-tabs__panel" id="tab-two">
+							<p class="govuk-body-s" style="margin-bottom: 30px; border-bottom: #008938 1px;">
+								<a href="#" class="govuk-link govuk-link--no-visited-state" rel="noreferrer noopener"
+									target="_blank">{{ commonTerms.form_editor.common.preview_error }}</a>
+							</p>
+							<!-- Error Messages Content -->
+							<!-- Error Messages Section -->
+							<div class="govuk-error-summary" data-disable-auto-focus="true">
+								<h2 class="govuk-error-summary__title">{{
+									commonTerms.form_editor.common.there_is_a_problem }}</h2>
+								<ul class="govuk-list govuk-error-summary__list">
+									<!-- List of errors -->
+									<li><a id="empty-input-error-shorttext" class="govuk-error-message">Select <span
+												id="error-dynamic-text">[short description]</span></a></li>
+								</ul>
+							</div>
+							<a href="#error-message-input-shorttext" class="govuk-skip-link"
+								style="margin-bottom: 30px!important;" data-module="govuk-skip-link">{{
+								commonTerms.form_editor.common.skip_to_short_description }}</a>
+						</div>
+					</div>
+				</div> <!-- Closing the govuk-tabs div -->
+			</div>
+		</div>
+	</div>
+</div>
+
+</div>
+</div>
+</div>
+
+<!-- Include SortableJS Library -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+<style>
+	/* Styling for fauxlabel */
+	.fauxlabel {
+		border: 0;
+		/* font-size: 1rem; */
+		margin: 0;
+
+	}
+
+	#checkbox-list .govuk-checkboxes__item label,
+	#radio-list .govuk-radios__item label {
+		text-transform: capitalize;
+	}
+
+	.fauxlabel:focus,
+	.fauxlabel:active {
+		background-color: transparent !important;
+	}
+
+	.gem-c-reorderable-list .gem-c-reorderable-list__item:hover,
+	.gem-c-reorderable-list__item:hover .fauxlabel {
+		background-color: #fff;
+		cursor: initial;
+	}
+
+	.gem-c-reorderable-list__item:hover .fauxlabel:focus {
+		cursor: initial;
+	}
+
+	/* Highlighting styles */
+	.highlight {
+		background-color: #ffe5cc;
+		border-bottom: 2px solid #ffb266;
+	}
+
+	.highlight-dragging {
+		border: 2px dotted #ffb266;
+		/* Example highlight style */
+		background-color: #f0f0f0;
+	}
+
+	.highlight-moving {
+		border: 2px dashed #ff0;
+		/* During drag over */
+	}
+
+	/* Styles for the reorderable list */
+	.gem-c-reorderable-list {
+		list-style-type: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	.gem-c-reorderable-list__item {
+		margin-bottom: 15px;
+		border-left: 5px solid #008938;
+		outline: 1px solid #b1b4b6;
+		padding: 15px;
+		background-color: #fff;
+	}
+
+	.gem-c-reorderable-list__wrapper {
+		display: flex;
+		/* align-items: flex-start; */
+	}
+
+	.gem-c-reorderable-list__content {
+		flex-grow: 1;
+	}
+
+	.gem-c-reorderable-list__actions {
+		display: none;
+		/* Hide by default */
+		flex-direction: column;
+		margin-left: 15px;
+	}
+
+	.gem-c-reorderable-list__actions .govuk-button {
+		margin-bottom: 10px;
+	}
+
+	.govuk-body.fauxlabel.option-label-display {
+		white-space: normal;
+		/* Allow text to wrap */
+		word-wrap: break-word;
+		/* Break long words if necessary */
+		overflow-wrap: break-word;
+		/* Ensure wrapping for long words */
+		margin-bottom: 0;
+	}
+
+	.related-question-summary {
+		max-width: 36em;
+	}
+
+
+	.sortable-ghost {
+		opacity: 0.4;
+	}
+
+	.sortable-chosen {
+		background-color: #e5f5ff;
+	}
+
+	/* Style for hover state of the list item */
+	.gem-c-reorderable-list__item:hover {
+		background-color: #f0f0f0;
+		cursor: move;
+	}
+
+	/* Style for the chosen item (when selected) */
+	.gem-c-reorderable-list__item.sortable-chosen {
+		background-color: #e5f5ff;
+		outline: 4px solid #ffdd00;
+		box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	}
+
+	#second-container {
+		padding: 0;
+		box-sizing: border-box;
+	}
+
+	#second-container>* {
+		padding-left: 0px;
+		z-index: 2;
+	}
+
+	.border-left-container {
+		border-left: 10px solid #ffb266;
+		padding-left: 20px;
+	}
+
+	.edit-item {
+		margin-left: 15px;
+		white-space: nowrap;
+	}
+
+	/* Add option form styles */
+	#add-option-form {
+		background: #ffffff;
+		border-radius: 5px;
+		margin-top: 20px;
+	}
+
+	#add-option-form .govuk-button-group {
+		margin-top: 20px;
+	}
+
+	/* Animation for form appearance */
+	#add-option-form {
+		transition: all 0.3s ease-in-out;
+	}
+
+	#add-option-form:not([style*="display: none"]) {
+		animation: slideDown 0.3s ease-in-out;
+	}
+
+	@keyframes slideDown {
+		from {
+			opacity: 0;
+			transform: translateY(-10px);
+		}
+
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+</style>
+
+<script>
+	document.addEventListener('DOMContentLoaded', function () {
+		// Get form elements
+		const addOptionForm = document.querySelector('#add-option-form');
+		const addOptionButton = document.querySelector('#add-option-button');
+		const saveItemButton = document.querySelector('#save-new-option');
+		const cancelButton = document.querySelector('#cancel-add-option');
+		const newOptionLabel = document.querySelector('#new-option-label');
+		const newOptionHint = document.querySelector('#new-option-hint');
+		const newOptionValue = document.querySelector('#new-option-value');
+		const optionsContainer = document.querySelector('#options-container');
+		const radioList = document.querySelector('#checkbox-list .govuk-checkboxes') ||
+			document.querySelector('#radio-list .govuk-radios');
+		const questionForm = document.getElementById('question-form');
+		const addOptionHeading = document.querySelector('#add-option-heading');
+		const noneOfTheAboveCheckbox = document.querySelector('input[name="noneOfTheAbove"]');
+		const askRelatedCheckbox = document.querySelector('input[name="askRelatedQuestion"]');
+		const editRelatedButton = document.getElementById('edit-related-question');
+
+		function getItemLabelText(item) {
+			return item.querySelector('.option-label-input-hidden')?.value?.trim()
+				|| item.querySelector('.option-label-display')?.childNodes[0]?.textContent?.trim()
+				|| '';
+		}
+		const relatedQuestionEditHint = document.getElementById('related-question-edit-hint');
+		const relatedQuestionSetup = document.getElementById('related-question-setup');
+		const relatedQuestionSetupSolo = document.getElementById('related-question-setup-solo');
+		const relatedQuestionNewSlot = document.getElementById('related-question-new-slot');
+		const relatedQuestionSummaryPanel = document.getElementById('related-question-summary-panel');
+		const relatedSummaryQuestion = document.getElementById('related-summary-question');
+		const relatedSummaryType = document.getElementById('related-summary-type');
+		const changeRelatedQuestionLink = document.getElementById('change-related-question');
+		const changeRelatedQuestionTypeLink = document.getElementById('change-related-question-type');
+		const cancelChangeRelatedTypeLink = document.getElementById('cancel-change-related-type');
+		const editRelatedForm = document.getElementById('edit-related-form');
+		const existingRelatedQuestionSelect = document.getElementById('existing-related-question');
+		const relatedQuestionExistingChoice = document.getElementById('related-question-existing-choice');
+		const relatedQuestionAddOnly = document.getElementById('related-question-add-only');
+		let editingOptionIndex = null;
+		let pendingRelatedQuestion = null;
+		let isChangingRelatedType = false;
+		let relatedTypeChangeBackup = null;
+		let existingRelatedQuestionsCache = {{ existingRelatedQuestions | dump | safe if existingRelatedQuestions else '[]' }};
+
+		const RELATED_SETUP_HINT =
+			'This opens the usual question settings screen for that type. Write the question there, then continue to come back to this list of options.';
+		const RELATED_CHANGE_TYPE_HINT =
+			'If you keep this type, you can carry on editing the related question. If you choose a different type, you’ll need to set it up again.';
+
+		function selectedRelatedType() {
+			const typeInput = document.querySelector('input[name="relatedQuestionType"]:checked');
+			return typeInput ? typeInput.value : null;
+		}
+
+		function relatedTypeLabel(type) {
+			if (type === 'number') return 'Numbers only';
+			if (type === 'long') return 'Long answer (more than a single line)';
+			return 'Short answer (a single line)';
+		}
+
+		function relatedTypeShortLabel(type) {
+			if (type === 'number') return 'Numbers only';
+			if (type === 'long') return 'Long answer';
+			return 'Short answer';
+		}
+
+		function relatedQuestionKey(related) {
+			if (!related) return '';
+			return [
+				related.type || '',
+				related.label || '',
+				related.hint || '',
+				Boolean(related.isOptional)
+			].join('::');
+		}
+
+		function collectExistingRelatedFromList(excludeIndex) {
+			const seen = new Map();
+			const items = optionsContainer
+				? optionsContainer.querySelectorAll('.gem-c-reorderable-list__item')
+				: [];
+			items.forEach((item) => {
+				const index = parseInt(item.getAttribute('data-index'), 10);
+				if (excludeIndex != null && index === parseInt(excludeIndex, 10)) {
+					return;
+				}
+				const related = getRelatedQuestionFromItem(item);
+				if (!related || !related.label || !related.type) {
+					return;
+				}
+				const key = relatedQuestionKey(related);
+				if (!seen.has(key)) {
+					seen.set(key, {
+						type: related.type,
+						label: related.label,
+						hint: related.hint || '',
+						settings: related.settings ? { ...related.settings } : {},
+						isOptional: Boolean(related.isOptional)
+					});
+				}
+			});
+			return Array.from(seen.values());
+		}
+
+		function refreshExistingRelatedSelect(existing) {
+			if (!existingRelatedQuestionSelect) {
+				return;
+			}
+			const previous = existingRelatedQuestionSelect.value;
+			existingRelatedQuestionSelect.innerHTML = '';
+			const placeholder = document.createElement('option');
+			placeholder.value = '';
+			placeholder.textContent = 'Select a related question';
+			existingRelatedQuestionSelect.appendChild(placeholder);
+			(existing || []).forEach((related, index) => {
+				const option = document.createElement('option');
+				option.value = String(index);
+				option.textContent = `${related.label} – ${relatedTypeShortLabel(related.type)}`;
+				existingRelatedQuestionSelect.appendChild(option);
+			});
+			if (previous && [...existingRelatedQuestionSelect.options].some((opt) => opt.value === previous)) {
+				existingRelatedQuestionSelect.value = previous;
+			}
+		}
+
+		function syncExistingRelatedChoiceVisibility() {
+			const configured = hasConfiguredRelatedQuestion();
+			const excludeIndex = editingOptionIndex
+				? parseInt(editingOptionIndex, 10)
+				: null;
+			existingRelatedQuestionsCache = collectExistingRelatedFromList(excludeIndex);
+			refreshExistingRelatedSelect(existingRelatedQuestionsCache);
+			const hasExisting = existingRelatedQuestionsCache.length > 0;
+
+			if (relatedQuestionExistingChoice) {
+				relatedQuestionExistingChoice.hidden = configured || !hasExisting;
+			}
+			if (relatedQuestionAddOnly) {
+				relatedQuestionAddOnly.hidden = configured || hasExisting;
+			}
+		}
+
+		function hasConfiguredRelatedQuestion() {
+			return Boolean(
+				pendingRelatedQuestion &&
+				pendingRelatedQuestion.label &&
+				pendingRelatedQuestion.type
+			);
+		}
+
+		function updateEditRelatedButtonState() {
+			const configured = hasConfiguredRelatedQuestion();
+			const addPanel = document.getElementById('related-question-add-panel');
+
+			if (relatedQuestionSummaryPanel) {
+				relatedQuestionSummaryPanel.hidden = !configured;
+			}
+			if (addPanel) {
+				addPanel.hidden = configured;
+			}
+
+			if (configured) {
+				if (relatedSummaryQuestion) {
+					relatedSummaryQuestion.textContent = pendingRelatedQuestion.label;
+				}
+				if (relatedSummaryType) {
+					relatedSummaryType.textContent = relatedTypeLabel(pendingRelatedQuestion.type);
+				}
+			}
+
+			syncExistingRelatedChoiceVisibility();
+		}
+
+		function getRelatedQuestionFromForm() {
+			if (!askRelatedCheckbox || !askRelatedCheckbox.checked) {
+				return null;
+			}
+			if (pendingRelatedQuestion && pendingRelatedQuestion.type) {
+				return { ...pendingRelatedQuestion };
+			}
+			return null;
+		}
+
+		function isNoneOfTheAboveChecked() {
+			return Boolean(noneOfTheAboveCheckbox && noneOfTheAboveCheckbox.checked);
+		}
+
+		function getNoneOfTheAboveFromItem(item) {
+			const input = item.querySelector('.option-none-of-the-above-input');
+			return Boolean(input && (input.value === 'true' || input.value === 'yes' || input.value === '1'));
+		}
+
+		function noneOfTheAboveBadgeHTML(isNone) {
+			if (!isNone) return '';
+			return ' <strong class="govuk-tag govuk-tag--grey govuk-!-margin-left-1" style="vertical-align: middle;">None of the above</strong>';
+		}
+
+		function showNoneOfTheAboveMovedBanner(previousLabel) {
+			const banner = document.getElementById('none-of-the-above-moved-banner');
+			const text = document.getElementById('none-of-the-above-moved-text');
+			if (!banner || !text || !previousLabel) return;
+			text.textContent = `‘${previousLabel}’ is no longer the ‘none of the above’ item. Only one item in a list can have that setting.`;
+			banner.hidden = false;
+		}
+
+		function clearOtherNoneOfTheAbove(exceptIndex) {
+			let previousLabel = null;
+			optionsContainer.querySelectorAll('.gem-c-reorderable-list__item').forEach((item) => {
+				const index = item.getAttribute('data-index');
+				if (String(index) === String(exceptIndex)) return;
+				const noneInput = item.querySelector('.option-none-of-the-above-input');
+				if (noneInput && (noneInput.value === 'true' || noneInput.value === 'yes')) {
+					previousLabel = item.querySelector('.option-label-display')?.childNodes[0]?.textContent?.trim()
+						|| item.querySelector('.option-label-input-hidden')?.value
+						|| previousLabel;
+					noneInput.value = '';
+					const labelEl = item.querySelector('.option-label-display');
+					if (labelEl) {
+						const labelText = item.querySelector('.option-label-input-hidden')?.value || labelEl.textContent.replace(/\s*None of the above\s*$/, '').trim();
+						labelEl.innerHTML = `${labelText}`;
+					}
+				}
+			});
+			return previousLabel;
+		}
+
+		function reindexListItems() {
+			optionsContainer.querySelectorAll('.gem-c-reorderable-list__item').forEach((item, index) => {
+				const nextIndex = index + 1;
+				item.setAttribute('data-index', String(nextIndex));
+				const editLink = item.querySelector('.js-edit-option');
+				if (editLink) editLink.setAttribute('data-index', String(nextIndex));
+				item.querySelectorAll('[id]').forEach((el) => {
+					el.id = el.id.replace(/option-\d+/, `option-${nextIndex}`);
+				});
+				item.querySelectorAll('[name^="option["]').forEach((el) => {
+					el.name = el.name.replace(/option\[\d+\]/, `option[${nextIndex}]`);
+				});
+			});
+		}
+
+		function findNoneOfTheAboveItem() {
+			return Array.from(optionsContainer.querySelectorAll('.gem-c-reorderable-list__item')).find((item) =>
+				getNoneOfTheAboveFromItem(item)
+			) || null;
+		}
+
+		function ensureNoneOfTheAboveIsLast() {
+			const noneItem = findNoneOfTheAboveItem();
+			if (!noneItem || !optionsContainer) return;
+			const items = optionsContainer.querySelectorAll('.gem-c-reorderable-list__item');
+			const lastItem = items[items.length - 1];
+			if (lastItem !== noneItem) {
+				optionsContainer.appendChild(noneItem);
+			}
+			reindexListItems();
+		}
+
+		function packRelatedHandoffFields(prefix) {
+			const optionIndex = editingOptionIndex || (optionsContainer.querySelectorAll('.gem-c-reorderable-list__item').length + 1);
+			const draft = collectOptionsDraft(true);
+			const optionIndexInput = document.getElementById(`${prefix}-option-index`);
+			const optionLabelInput = document.getElementById(`${prefix}-option-label`);
+			const optionHintInput = document.getElementById(`${prefix}-option-hint`);
+			const optionsDraftInput = document.getElementById(`${prefix}-options-draft`);
+			const parentInput = document.getElementById(`${prefix}-parent-question`);
+			const noneInput = document.getElementById(`${prefix}-none-of-the-above`);
+			if (optionIndexInput) optionIndexInput.value = String(optionIndex);
+			if (optionLabelInput) optionLabelInput.value = newOptionLabel ? newOptionLabel.value.trim() : '';
+			if (optionHintInput) optionHintInput.value = newOptionHint ? newOptionHint.value.trim() : '';
+			if (optionsDraftInput) optionsDraftInput.value = JSON.stringify(draft);
+			if (noneInput) noneInput.value = isNoneOfTheAboveChecked() ? 'true' : '';
+			const parentQuestionInput = document.querySelector('#question-label-input-checkboxes');
+			if (parentInput) {
+				parentInput.value = parentQuestionInput ? parentQuestionInput.value.trim() : '';
+			}
+			return optionIndex;
+		}
+
+		function syncRelatedSetupVisibility() {
+			updateEditRelatedButtonState();
+		}
+
+		function getRelatedQuestionFromItem(item) {
+			const relatedInput = item.querySelector('.option-related-input');
+			if (!relatedInput || !relatedInput.value || relatedInput.value === 'null' || relatedInput.value === '') {
+				return null;
+			}
+			try {
+				const related = JSON.parse(relatedInput.value);
+				if (related && related.type) {
+					return related;
+				}
+			} catch (error) {
+				return null;
+			}
+			return null;
+		}
+
+		function updateItemRelatedQuestion(item, related) {
+			const relatedInput = item.querySelector('.option-related-input');
+			if (relatedInput) {
+				relatedInput.value = related ? JSON.stringify(related) : '';
+			}
+			const content = item.querySelector('.govuk-!-margin-bottom-2') || item.querySelector('.gem-c-reorderable-list__content');
+			const existingSummary = item.querySelector('.related-question-summary');
+			const summaryHTML = relatedQuestionSummaryHTML(related);
+			if (existingSummary) {
+				if (summaryHTML) {
+					existingSummary.outerHTML = summaryHTML;
+				} else {
+					existingSummary.remove();
+				}
+			} else if (summaryHTML && content) {
+				content.insertAdjacentHTML('beforeend', summaryHTML);
+			}
+		}
+
+				function relatedQuestionSummaryHTML(related) {
+			if (!related || !related.type) {
+				return '';
+			}
+			const typeLabel = relatedTypeShortLabel(related.type);
+			const questionLine = related.label
+				? `<p class="govuk-body-s govuk-!-margin-bottom-1">${related.label}</p>
+					<p class="govuk-body-s govuk-!-margin-bottom-1">${typeLabel}</p>`
+				: `<p class="govuk-body-s govuk-!-margin-bottom-1">${typeLabel} (not configured yet)</p>`;
+			return `<div class="govuk-!-margin-top-2 related-question-summary" style="color: #505a5f;">
+				<p class="govuk-body-s govuk-!-margin-bottom-1">
+					<span class="govuk-!-font-weight-bold">Related question</span>
+				</p>
+				${questionLine}
+			</div>`;
+		}
+
+		function relatedQuestionFieldHTML(id, related) {
+			if (!related || !related.type) {
+				return '';
+			}
+			const settings = related.settings || {};
+			const extraClasses = settings.classes ? ` ${settings.classes}` : '';
+			const label = related.label || relatedTypeLabel(related.type);
+			let fieldHTML = '';
+			if (related.type === 'number') {
+				const prefix = settings.prefix ? `<div class="govuk-input__prefix" aria-hidden="true">${settings.prefix}</div>` : '';
+				const suffix = settings.suffix ? `<div class="govuk-input__suffix" aria-hidden="true">${settings.suffix}</div>` : '';
+				const wrapperClass = (settings.prefix || settings.suffix) ? 'govuk-input__wrapper' : '';
+				fieldHTML = `<div class="govuk-form-group">
+					<label class="govuk-label" for="${id}-input">${label}</label>
+					${related.hint ? `<div class="govuk-hint" id="${id}-hint">${related.hint}</div>` : ''}
+					<div class="${wrapperClass}">
+						${prefix}
+						<input class="govuk-input govuk-input--width-10${extraClasses}" id="${id}-input" name="${id}" type="text" inputmode="numeric"${related.hint ? ` aria-describedby="${id}-hint"` : ''}>
+						${suffix}
+					</div>
+				</div>`;
+			} else if (related.type === 'long') {
+				fieldHTML = `<div class="govuk-form-group">
+					<label class="govuk-label" for="${id}-input">${label}</label>
+					${related.hint ? `<div class="govuk-hint" id="${id}-hint">${related.hint}</div>` : ''}
+					<textarea class="govuk-textarea${extraClasses}" id="${id}-input" name="${id}" rows="${settings.rows || 5}"${related.hint ? ` aria-describedby="${id}-hint"` : ''}></textarea>
+				</div>`;
+			} else {
+				fieldHTML = `<div class="govuk-form-group">
+					<label class="govuk-label" for="${id}-input">${label}</label>
+					${related.hint ? `<div class="govuk-hint" id="${id}-hint">${related.hint}</div>` : ''}
+					<input class="govuk-input${extraClasses}" id="${id}-input" name="${id}" type="text"${related.hint ? ` aria-describedby="${id}-hint"` : ''}>
+				</div>`;
+			}
+			return `<div class="govuk-checkboxes__conditional govuk-checkboxes__conditional--hidden" id="${id}">${fieldHTML}</div>`;
+		}
+
+		function previewDividerHTML() {
+			return '<div class="govuk-checkboxes__divider">or</div>';
+		}
+
+		function previewOptionHTML(index, label, hint, related, isNew, isNoneOfTheAbove, withOrDivider) {
+			const inputId = isNew ? 'listPreviewCheckboxes-option-new' : `listPreviewCheckboxes-option${index}`;
+			const conditionalId = `conditional-${inputId}`;
+			const relatedAttr = related && related.type ? ` data-aria-controls="${conditionalId}"` : '';
+			const exclusiveAttr = isNoneOfTheAbove ? ' data-behaviour="exclusive"' : '';
+			const itemHTML = `
+				<div class="govuk-checkboxes__item">
+					<input class="govuk-checkboxes__input" id="${inputId}" name="listPreviewCheckboxes" type="checkbox" value="${label}"${relatedAttr}${exclusiveAttr}>
+					<label class="govuk-label govuk-checkboxes__label" for="${inputId}">${label || 'Item text'}</label>
+					${hint ? `<div class="govuk-hint govuk-checkboxes__hint">${hint}</div>` : ''}
+				</div>
+				${relatedQuestionFieldHTML(conditionalId, related)}
+			`;
+			if (isNoneOfTheAbove && withOrDivider !== false) {
+				return previewDividerHTML() + itemHTML;
+			}
+			return itemHTML;
+		}
+
+		function setAddOptionAdvancedOpen(open) {
+			const advanced = document.getElementById('add-option-advanced-features');
+			if (advanced) {
+				advanced.open = Boolean(open);
+			}
+		}
+
+		function syncNoneOfTheAboveConditional() {
+			// Standalone checkbox — no nested conditional panel
+		}
+
+		function syncAskRelatedConditional() {
+			if (!askRelatedCheckbox) {
+				return;
+			}
+			const controlsId = askRelatedCheckbox.getAttribute('data-aria-controls') ||
+				askRelatedCheckbox.getAttribute('aria-controls');
+			const conditional = controlsId
+				? document.getElementById(controlsId)
+				: document.getElementById('conditional-askRelatedQuestion');
+			if (!conditional) {
+				return;
+			}
+			const show = askRelatedCheckbox.checked;
+			conditional.classList.toggle('govuk-checkboxes__conditional--hidden', !show);
+			askRelatedCheckbox.setAttribute('aria-expanded', show ? 'true' : 'false');
+		}
+
+		function resetRelatedQuestionForm() {
+			pendingRelatedQuestion = null;
+			isChangingRelatedType = false;
+			relatedTypeChangeBackup = null;
+			if (noneOfTheAboveCheckbox) {
+				noneOfTheAboveCheckbox.checked = false;
+			}
+			if (askRelatedCheckbox) {
+				askRelatedCheckbox.checked = false;
+				syncAskRelatedConditional();
+				askRelatedCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
+			}
+			updateEditRelatedButtonState();
+			setAddOptionAdvancedOpen(false);
+		}
+
+		function fillRelatedQuestionForm(related, isNoneOfTheAbove) {
+			resetRelatedQuestionForm();
+			if (isNoneOfTheAbove && noneOfTheAboveCheckbox) {
+				setAddOptionAdvancedOpen(true);
+				noneOfTheAboveCheckbox.checked = true;
+			}
+			if (!related || !related.type) {
+				updateEditRelatedButtonState();
+				return;
+			}
+			pendingRelatedQuestion = { ...related };
+			setAddOptionAdvancedOpen(true);
+			if (askRelatedCheckbox) {
+				askRelatedCheckbox.checked = true;
+				syncAskRelatedConditional();
+				askRelatedCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
+			}
+			updateEditRelatedButtonState();
+		}
+
+		function collectOptionsDraft(includeCurrentForm) {
+			const options = [];
+			const items = optionsContainer.querySelectorAll('.gem-c-reorderable-list__item');
+			items.forEach((item) => {
+				const index = item.getAttribute('data-index');
+				if (includeCurrentForm && editingOptionIndex && String(editingOptionIndex) === String(index)) {
+					return;
+				}
+				const label = item.querySelector('.option-label-input-hidden')?.value?.trim()
+					|| item.querySelector('.option-label-display')?.childNodes[0]?.textContent?.trim()
+					|| '';
+				const hint = item.querySelector('.option-hint-input')?.value || '';
+				const related = getRelatedQuestionFromItem(item);
+				const isNoneOfTheAbove = getNoneOfTheAboveFromItem(item);
+				options.push({
+					label,
+					hint,
+					relatedQuestion: related || undefined,
+					isNoneOfTheAbove: isNoneOfTheAbove || undefined
+				});
+			});
+			if (includeCurrentForm && addOptionForm && addOptionForm.style.display === 'block') {
+				const label = newOptionLabel ? newOptionLabel.value.trim() : '';
+				const hint = newOptionHint ? newOptionHint.value.trim() : '';
+				const related = getRelatedQuestionFromForm();
+				const isNone = isNoneOfTheAboveChecked();
+				const insertAt = editingOptionIndex ? (parseInt(editingOptionIndex, 10) - 1) : options.length;
+				options.splice(Math.max(0, insertAt), 0, {
+					label: label || 'Item text',
+					hint,
+					relatedQuestion: related || undefined,
+					isNoneOfTheAbove: isNone || undefined
+				});
+			}
+			return options;
+		}
+
+		function submitEditRelated() {
+			if (!editRelatedForm || !pendingRelatedQuestion || !pendingRelatedQuestion.type) {
+				return;
+			}
+			packRelatedHandoffFields('edit-related');
+			document.getElementById('edit-related-type').value = pendingRelatedQuestion.type;
+			document.getElementById('edit-related-existing').value = JSON.stringify(pendingRelatedQuestion);
+			editRelatedForm.submit();
+		}
+
+		function optionListItemHTML(index, labelValue, hintValue, related, conditions, isNoneOfTheAbove) {
+			const relatedJSON = related ? JSON.stringify(related).replace(/'/g, '&#39;') : '';
+			const noneValue = isNoneOfTheAbove ? 'true' : '';
+			return `
+				<li class="gem-c-reorderable-list__item" draggable="true" data-index="${index}">
+					<div class="gem-c-reorderable-list__wrapper">
+						<div class="gem-c-reorderable-list__content">
+							<div class="govuk-!-margin-bottom-2">
+								<p class="govuk-body fauxlabel option-label-display" id="option-${index}-label-display">
+									${labelValue}${noneOfTheAboveBadgeHTML(isNoneOfTheAbove)}
+								</p>
+								${hintValue ? `<p class="govuk-body-s govuk-!-margin-top-0 govuk-!-margin-bottom-0" style="color: #505a5f;">${hintValue}</p>` : ''}
+								${relatedQuestionSummaryHTML(related)}
+							</div>
+							<input type="hidden" id="option-${index}-label" class="option-label-input-hidden"
+								name="option[${index}][option_label]" value="${labelValue}">
+							<input type="hidden" id="option-${index}-hint" class="option-hint-input"
+								name="option[${index}][option_hint]" value="${hintValue}">
+							<input type="hidden" id="option-${index}-related" class="option-related-input"
+								name="option[${index}][related_question]" value='${relatedJSON}'>
+							<input type="hidden" id="option-${index}-none-of-the-above" class="option-none-of-the-above-input"
+								name="option[${index}][is_none_of_the_above]" value="${noneValue}">
+							${conditions && conditions.length > 0 ? `
+							<input type="hidden" id="option-${index}-conditions" class="option-conditions-input"
+								name="option[${index}][conditions]" value='${JSON.stringify(conditions)}'>
+							` : ''}
+						</div>
+						<div class="gem-c-reorderable-list__actions">
+							<button class="gem-c-button govuk-button govuk-button--secondary js-reorderable-list-up"
+								type="button" aria-label="Move option up">Up</button>
+							<button class="gem-c-button govuk-button govuk-button--secondary js-reorderable-list-down"
+								type="button" aria-label="Move option down">Down</button>
+							<a href="#" class="govuk-link govuk-link--destructive js-remove-option" role="button" aria-label="Remove option">Remove</a>
+						</div>
+						<div class="edit-item">
+							<a class="govuk-link govuk-link--no-visited-state js-edit-option" href="#add-option-form" data-index="${index}">
+								Edit<span class="govuk-visually-hidden"> option ${index}${labelValue ? ' - ' + labelValue : ''}</span>
+							</a>
+						</div>
+					</div>
+				</li>
+			`;
+		}
+
+		// Main question elements
+		const questionLabelInput = document.querySelector('#question-label-input-checkboxes');
+		const questionHintInput = document.querySelector('#question-hint-text-input-radios');
+		const questionLabelPreview = document.querySelector('#question-label-preview');
+		const questionHintPreview = document.querySelector('#question-hint-preview');
+
+		// Initialize question label and hint text
+		function initializeQuestionPreview() {
+			if (questionLabelInput && questionLabelPreview) {
+				const labelValue = questionLabelInput.value.trim();
+				questionLabelPreview.textContent = labelValue || 'Question';
+			}
+
+			if (questionHintInput && questionHintPreview) {
+				const hintValue = questionHintInput.value.trim();
+				if (hintValue) {
+					questionHintPreview.textContent = hintValue;
+					questionHintPreview.style.display = 'block';
+				} else {
+					questionHintPreview.style.display = 'none';
+				}
+			}
+		}
+
+		// Add event listeners for main question label and hint
+		if (questionLabelInput && questionLabelPreview) {
+			questionLabelInput.addEventListener('input', () => {
+				const value = questionLabelInput.value.trim();
+				questionLabelPreview.textContent = value || 'Question';
+			});
+
+			questionLabelInput.addEventListener('focus', () => {
+				questionLabelPreview.classList.add('highlight');
+			});
+
+			questionLabelInput.addEventListener('blur', () => {
+				questionLabelPreview.classList.remove('highlight');
+			});
+		}
+
+		if (questionHintInput && questionHintPreview) {
+			questionHintInput.addEventListener('input', () => {
+				const value = questionHintInput.value.trim();
+				questionHintPreview.textContent = value || 'Hint text';
+				questionHintPreview.style.display = value || document.activeElement === questionHintInput ? 'block' : 'none';
+			});
+
+			questionHintInput.addEventListener('focus', () => {
+				questionHintPreview.classList.add('highlight');
+				questionHintPreview.style.display = 'block';
+				if (!questionHintInput.value.trim()) {
+					questionHintPreview.textContent = 'Hint text';
+				}
+			});
+
+			questionHintInput.addEventListener('blur', () => {
+				questionHintPreview.classList.remove('highlight');
+				if (!questionHintInput.value.trim()) {
+					questionHintPreview.style.display = 'none';
+				}
+			});
+		}
+
+		// Initialize the question preview
+		initializeQuestionPreview();
+		updateAllOptionsPreview();
+
+		if (radioList) {
+			function syncPreviewExclusiveBehaviour(changedInput) {
+				if (!changedInput || changedInput.name !== 'listPreviewCheckboxes' || !changedInput.checked) {
+					return;
+				}
+
+				const isExclusive = changedInput.getAttribute('data-behaviour') === 'exclusive';
+				const inputs = radioList.querySelectorAll('input[name="listPreviewCheckboxes"]');
+
+				inputs.forEach((input) => {
+					if (input === changedInput) {
+						return;
+					}
+					const inputIsExclusive = input.getAttribute('data-behaviour') === 'exclusive';
+					if (isExclusive || inputIsExclusive) {
+						input.checked = false;
+					}
+				});
+			}
+
+			function syncPreviewConditionals(changedInput) {
+				radioList.querySelectorAll('.govuk-checkboxes__conditional').forEach((panel) => {
+					panel.classList.add('govuk-checkboxes__conditional--hidden');
+				});
+
+				radioList.querySelectorAll('input[name="listPreviewCheckboxes"]:checked').forEach((input) => {
+					const controls = input.getAttribute('aria-controls') || input.getAttribute('data-aria-controls');
+					if (!controls) {
+						return;
+					}
+					const panel = document.getElementById(controls);
+					if (panel) {
+						panel.classList.remove('govuk-checkboxes__conditional--hidden');
+					}
+				});
+			}
+
+			radioList.addEventListener('change', function (event) {
+				if (event.target.name !== 'listPreviewCheckboxes') {
+					return;
+				}
+				syncPreviewExclusiveBehaviour(event.target);
+				syncPreviewConditionals(event.target);
+			});
+		}
+
+		// Add option button click
+		addOptionButton.addEventListener('click', function (e) {
+			e.preventDefault();
+			showAllListItems();
+			editingOptionIndex = null;
+			resetRelatedQuestionForm();
+			const currentOptions = optionsContainer.querySelectorAll('.gem-c-reorderable-list__item');
+			const nextItemNumber = currentOptions.length + 1;
+			addOptionHeading.textContent = `Item ${nextItemNumber}`;
+			addOptionForm.style.display = 'block';
+			addOptionButton.style.display = 'none';
+			newOptionLabel.focus();
+			updatePreview(); // Update preview for any existing items
+		});
+
+		// Cancel button click
+		cancelButton.addEventListener('click', function (e) {
+			e.preventDefault();
+			hideForm();
+		});
+
+		// Add live preview event listeners
+		newOptionLabel.addEventListener('input', updatePreview);
+		newOptionHint.addEventListener('input', updatePreview);
+		if (newOptionValue) {
+			newOptionValue.addEventListener('input', updatePreview);
+		}
+		if (noneOfTheAboveCheckbox) {
+			noneOfTheAboveCheckbox.addEventListener('change', function () {
+				updatePreview();
+			});
+		}
+		if (askRelatedCheckbox) {
+			askRelatedCheckbox.addEventListener('change', function () {
+				syncAskRelatedConditional();
+				updateEditRelatedButtonState();
+				updatePreview();
+			});
+			askRelatedCheckbox.addEventListener('click', syncAskRelatedConditional);
+		}
+		const addRelatedButton = document.getElementById('add-related-question');
+		const addRelatedFromChoiceButton = document.getElementById('add-related-question-from-choice');
+		const addRelatedForm = document.getElementById('add-related-form');
+		const useExistingRelatedForm = document.getElementById('use-existing-related-form');
+		const selectExistingRelatedButton = document.getElementById('select-existing-related-question');
+		function packAddRelatedHandoff() {
+			packRelatedHandoffFields('add-related');
+		}
+		if (addRelatedButton && addRelatedForm) {
+			addRelatedButton.addEventListener('click', packAddRelatedHandoff);
+		}
+		if (addRelatedFromChoiceButton && addRelatedForm) {
+			addRelatedFromChoiceButton.addEventListener('click', packAddRelatedHandoff);
+		}
+		if (selectExistingRelatedButton && useExistingRelatedForm) {
+			selectExistingRelatedButton.addEventListener('click', function () {
+				packRelatedHandoffFields('use-existing');
+			});
+		}
+		const changeRelatedTypeButton = document.getElementById('change-related-question-type');
+		if (changeRelatedTypeButton && addRelatedForm) {
+			changeRelatedTypeButton.addEventListener('click', function () {
+				packRelatedHandoffFields('add-related');
+			});
+		}
+		if (changeRelatedQuestionLink) {
+			changeRelatedQuestionLink.addEventListener('click', function () {
+				packRelatedHandoffFields('edit-related');
+				if (pendingRelatedQuestion && pendingRelatedQuestion.type) {
+					document.getElementById('edit-related-type').value = pendingRelatedQuestion.type;
+					document.getElementById('edit-related-existing').value = JSON.stringify(pendingRelatedQuestion);
+				}
+			});
+		}
+		updateEditRelatedButtonState();
+
+		// Add focus/blur event listeners for highlighting
+		newOptionLabel.addEventListener('focus', () => applyHighlight('label'));
+		newOptionLabel.addEventListener('blur', () => removeHighlight('label'));
+		newOptionHint.addEventListener('focus', () => {
+			applyHighlight('hint');
+			showHintPlaceholder();
+		});
+		newOptionHint.addEventListener('blur', () => {
+			removeHighlight('hint');
+			removeHintPlaceholder();
+		});
+
+		// Save item button click
+		saveItemButton.addEventListener('click', function (e) {
+			e.preventDefault();
+			e.stopPropagation();
+
+			try {
+				const labelValue = newOptionLabel.value.trim();
+
+				// Get conditions data
+				const conditions = [];
+				const conditionName = document.getElementById('condition-name')?.value.trim();
+				const questionSelect = document.getElementById('condition-question');
+				const operatorSelect = document.getElementById('condition-operator');
+				const valueContainer = document.getElementById('condition-value-container');
+
+				if (conditionName && questionSelect && operatorSelect && valueContainer && questionSelect.selectedIndex >= 0) {
+					// Add first condition
+					const firstQuestionText = questionSelect.options[questionSelect.selectedIndex].text.replace(/\s*\([^)]*\)/, '').trim();
+					const firstQuestionType = questionSelect.options[questionSelect.selectedIndex].getAttribute("data-type");
+					let firstValue = "";
+
+					if (firstQuestionType === "radios") {
+						const selectedRadio = valueContainer.querySelector('input[type="radio"]:checked');
+						firstValue = selectedRadio ? selectedRadio.value : "";
+					} else if (firstQuestionType === "checkboxes") {
+						const checkedBoxes = valueContainer.querySelectorAll('input[type="checkbox"]:checked');
+						firstValue = Array.from(checkedBoxes).map(cb => cb.value);
+					} else {
+						const selectElement = valueContainer.querySelector('select');
+						firstValue = selectElement ? selectElement.value : "";
+					}
+
+					conditions.push({
+						conditionName: conditionName,
+						rules: [{
+							questionText: firstQuestionText,
+							operator: operatorSelect.value,
+							value: firstValue,
+							logicalOperator: null
+						}]
+					});
+
+					// Get additional conditions
+					const additionalConditions = document.querySelectorAll('#additional-conditions .condition-item');
+					additionalConditions.forEach((condition) => {
+						const logicalOperator = condition.querySelector('select[name^="logical-operator"]')?.value || 'AND';
+						const extraQuestionSelect = condition.querySelector('.condition-question');
+						const extraOperatorSelect = condition.querySelector('select[id^="condition-operator"]');
+						const extraValueContainer = condition.querySelector('.condition-value-container');
+
+						if (extraQuestionSelect && extraOperatorSelect && extraValueContainer && extraQuestionSelect.selectedIndex >= 0) {
+							const questionText = extraQuestionSelect.options[extraQuestionSelect.selectedIndex].text.replace(/\s*\([^)]*\)/, '').trim();
+							const questionType = extraQuestionSelect.options[extraQuestionSelect.selectedIndex].getAttribute("data-type");
+							let value = '';
+
+							if (questionType === "radios") {
+								const selectedRadio = extraValueContainer.querySelector('input[type="radio"]:checked');
+								value = selectedRadio ? selectedRadio.value : "";
+							} else if (questionType === "checkboxes") {
+								const checkedBoxes = extraValueContainer.querySelectorAll('input[type="checkbox"]:checked');
+								value = Array.from(checkedBoxes).map(cb => cb.value);
+							} else {
+								const selectElement = extraValueContainer.querySelector('select');
+								value = selectElement ? selectElement.value : "";
+							}
+
+							conditions[0].rules.push({
+								questionText: questionText,
+								operator: extraOperatorSelect.value,
+								value: value,
+								logicalOperator: logicalOperator
+							});
+						}
+					});
+				}
+
+				const related = getRelatedQuestionFromForm();
+				const isNone = isNoneOfTheAboveChecked();
+				const currentOptions = optionsContainer.querySelectorAll('.gem-c-reorderable-list__item');
+				const saveIndex = editingOptionIndex || (currentOptions.length + 1);
+
+				if (isNone) {
+					const previousLabel = clearOtherNoneOfTheAbove(saveIndex);
+					if (previousLabel) {
+						showNoneOfTheAboveMovedBanner(previousLabel);
+					}
+				}
+
+				if (editingOptionIndex) {
+					const existingItem = optionsContainer.querySelector(`.gem-c-reorderable-list__item[data-index="${editingOptionIndex}"]`);
+					if (existingItem) {
+						existingItem.outerHTML = optionListItemHTML(editingOptionIndex, labelValue, newOptionHint.value.trim(), related, conditions, isNone);
+					}
+				} else {
+					const html = optionListItemHTML(currentOptions.length + 1, labelValue, newOptionHint.value.trim(), related, conditions, isNone);
+					const existingNone = findNoneOfTheAboveItem();
+					if (!isNone && existingNone) {
+						existingNone.insertAdjacentHTML('beforebegin', html);
+					} else {
+						optionsContainer.insertAdjacentHTML('beforeend', html);
+					}
+				}
+
+				ensureNoneOfTheAboveIsLast();
+			} catch (error) {
+				console.error('Could not save list item', error);
+			}
+
+			hideForm();
+			try {
+				ensureNoneOfTheAboveIsLast();
+				updateAllOptionsPreview();
+				updateHiddenOptionsData();
+				updateEditButtonVisibility();
+			} catch (error) {
+				console.error('Could not refresh options after save', error);
+			}
+		});
+
+		// Function to update the edit button visibility
+		function updateEditButtonVisibility() {
+			const editButton = document.getElementById('edit-options-button');
+			const optionItems = optionsContainer.querySelectorAll('.gem-c-reorderable-list__item');
+			if (editButton) {
+				editButton.style.display = optionItems.length > 1 ? 'inline-block' : 'none';
+			}
+		}
+
+		// Initialize edit button visibility on page load
+		document.addEventListener('DOMContentLoaded', updateEditButtonVisibility);
+
+		function hideForm() {
+			if (addOptionForm) {
+				addOptionForm.style.display = 'none';
+			}
+			if (addOptionButton) {
+				addOptionButton.style.display = 'inline-block';
+			}
+			if (newOptionLabel) newOptionLabel.value = '';
+			if (newOptionHint) newOptionHint.value = '';
+			if (newOptionValue) newOptionValue.value = '';
+			editingOptionIndex = null;
+			showAllListItems();
+			try {
+				resetRelatedQuestionForm();
+			} catch (error) {
+				console.error('Could not reset related question form', error);
+			}
+			try {
+				removeHighlight('label');
+				removeHighlight('hint');
+				updateAllOptionsPreview();
+				updateEditButtonVisibility();
+			} catch (error) {
+				console.error('Could not refresh preview after closing option form', error);
+			}
+			if (addOptionButton) {
+				addOptionButton.focus();
+			}
+		}
+
+		function hideListItemBeingEdited() {
+			if (!optionsContainer || !editingOptionIndex) {
+				return;
+			}
+			optionsContainer.querySelectorAll('.gem-c-reorderable-list__item').forEach((item) => {
+				item.style.display = item.getAttribute('data-index') === String(editingOptionIndex)
+					? 'none'
+					: '';
+			});
+		}
+
+		function showAllListItems() {
+			if (!optionsContainer) {
+				return;
+			}
+			optionsContainer.querySelectorAll('.gem-c-reorderable-list__item').forEach((item) => {
+				item.style.display = '';
+			});
+		}
+
+		optionsContainer.addEventListener('click', function (e) {
+			const editLink = e.target.closest('.js-edit-option');
+			if (!editLink) {
+				return;
+			}
+			e.preventDefault();
+			const item = editLink.closest('.gem-c-reorderable-list__item');
+			if (!item) {
+				return;
+			}
+			showAllListItems();
+			editingOptionIndex = item.getAttribute('data-index');
+			newOptionLabel.value = item.querySelector('.option-label-input-hidden')?.value?.trim()
+				|| item.querySelector('.option-label-display')?.childNodes[0]?.textContent?.trim()
+				|| '';
+			newOptionHint.value = item.querySelector('.option-hint-input')?.value || '';
+			fillRelatedQuestionForm(getRelatedQuestionFromItem(item), getNoneOfTheAboveFromItem(item));
+			addOptionHeading.textContent = `Item ${editingOptionIndex}`;
+			addOptionForm.style.display = 'block';
+			addOptionButton.style.display = 'none';
+			hideListItemBeingEdited();
+			newOptionLabel.focus();
+			updatePreview();
+		});
+
+		// After returning from related-question setup / Select, resume that list item
+		const reopenOptionIndex = {{ reopenOptionIndex if reopenOptionIndex else 'null' }};
+		if (reopenOptionIndex) {
+			editingOptionIndex = String(reopenOptionIndex);
+			if (addOptionButton) {
+				addOptionButton.style.display = 'none';
+			}
+			{% if reopenOption and reopenOption.isNoneOfTheAbove %}
+			if (noneOfTheAboveCheckbox) {
+				noneOfTheAboveCheckbox.checked = true;
+			}
+			{% endif %}
+			{% if relatedConfigured and relatedQuestion %}
+			pendingRelatedQuestion = {{ relatedQuestion | dump | safe }};
+			if (askRelatedCheckbox) {
+				askRelatedCheckbox.checked = true;
+				syncAskRelatedConditional();
+			}
+			{% endif %}
+			hideListItemBeingEdited();
+			updateEditRelatedButtonState();
+			syncRelatedSetupVisibility();
+			updatePreview();
+		}
+
+		// Function to update the live preview of the option being added
+		function updatePreview() {
+			if (!radioList) return;
+
+			const labelValue = newOptionLabel.value.trim();
+			const hintValue = newOptionHint.value.trim();
+			const valueAttr = newOptionValue.value.trim() || labelValue;
+
+			// Get existing options
+			const existingOptions = Array.from(optionsContainer.querySelectorAll('.gem-c-reorderable-list__item'));
+
+			// Start with existing options HTML
+			let allOptionsHTML = '';
+
+			// Always show either existing options or the new option being added
+			if (existingOptions.length === 0 && addOptionForm.style.display === 'none') {
+				allOptionsHTML = `
+					<div class="govuk-inset-text">
+						<p class="govuk-body">No items added yet.</p>
+					</div>
+				`;
+			} else {
+				allOptionsHTML = existingOptions.map((item, index) => {
+					if (editingOptionIndex && item.getAttribute('data-index') === String(editingOptionIndex)) {
+						return '';
+					}
+					const label = getItemLabelText(item);
+					const hintInput = item.querySelector('input[name$="[option_hint]"]');
+					const hint = hintInput ? hintInput.value : '';
+					const relatedForItem = getRelatedQuestionFromItem(item);
+					const isNone = getNoneOfTheAboveFromItem(item);
+					const precedingCount = existingOptions.filter((opt, optIndex) => {
+						if (editingOptionIndex && opt.getAttribute('data-index') === String(editingOptionIndex)) {
+							return false;
+						}
+						return optIndex < index && !getNoneOfTheAboveFromItem(opt);
+					}).length;
+					const showDivider = isNone && precedingCount > 0;
+					return previewOptionHTML(index, label, hint, relatedForItem, false, isNone, showDivider);
+				}).join('');
+
+				if (addOptionForm.style.display === 'block') {
+					const formRelated = getRelatedQuestionFromForm();
+					const previewHint = hintValue || (document.activeElement === newOptionHint ? 'Hint text' : '');
+					const isNone = isNoneOfTheAboveChecked();
+					const precedingExisting = existingOptions.filter((item) => {
+						if (editingOptionIndex && item.getAttribute('data-index') === String(editingOptionIndex)) {
+							return false;
+						}
+						return !getNoneOfTheAboveFromItem(item);
+					}).length;
+					allOptionsHTML += previewOptionHTML('new', labelValue || 'Item text', previewHint, formRelated, true, isNone, isNone && precedingExisting > 0);
+				}
+			}
+
+			radioList.innerHTML = allOptionsHTML;
+
+			// Reapply highlights if needed
+			if (document.activeElement === newOptionLabel) {
+				applyHighlight('label');
+			} else if (document.activeElement === newOptionHint) {
+				applyHighlight('hint');
+			}
+		}
+
+		// Function to update the preview of all existing options
+		function updateAllOptionsPreview() {
+			if (!radioList) return;
+
+			const items = optionsContainer.querySelectorAll('.gem-c-reorderable-list__item');
+			radioList.innerHTML = '';
+
+			if (items.length === 0) {
+				radioList.innerHTML = `
+					<div class="govuk-inset-text">
+						<p class="govuk-body">No items added yet.</p>
+					</div>
+				`;
+				return;
+			}
+
+			items.forEach((item, index) => {
+				const label = getItemLabelText(item);
+				const hintInput = item.querySelector('input[name$="[option_hint]"]');
+				const hint = hintInput ? hintInput.value : '';
+				const isNone = getNoneOfTheAboveFromItem(item);
+				const showDivider = isNone && index > 0;
+				radioList.insertAdjacentHTML(
+					'beforeend',
+					previewOptionHTML(index, label, hint, getRelatedQuestionFromItem(item), false, isNone, showDivider)
+				);
+			});
+		}
+
+		// Function to apply highlight to the preview
+		function applyHighlight(type) {
+			if (!radioList) return;
+			const lastOption = radioList.querySelector('.govuk-checkboxes__item:last-of-type, .govuk-radios__item:last-child');
+			if (!lastOption) return;
+
+			const elementToHighlight = type === 'label'
+				? lastOption.querySelector('.govuk-checkboxes__label, .govuk-radios__label')
+				: lastOption.querySelector('.govuk-checkboxes__hint, .govuk-radios__hint');
+
+			if (elementToHighlight) {
+				elementToHighlight.classList.add('highlight');
+			} else if (type === 'hint') {
+				const hintElement = document.createElement('div');
+				hintElement.className = 'govuk-hint govuk-checkboxes__hint highlight';
+				hintElement.textContent = 'Hint text';
+				lastOption.appendChild(hintElement);
+			}
+		}
+
+		function removeHighlight(type) {
+			if (!radioList) return;
+			const lastOption = radioList.querySelector('.govuk-checkboxes__item:last-of-type, .govuk-radios__item:last-child');
+			if (!lastOption) return;
+
+			const elementToUnhighlight = type === 'label'
+				? lastOption.querySelector('.govuk-checkboxes__label, .govuk-radios__label')
+				: lastOption.querySelector('.govuk-checkboxes__hint, .govuk-radios__hint');
+
+			if (elementToUnhighlight) {
+				elementToUnhighlight.classList.remove('highlight');
+				if (type === 'hint' && !newOptionHint.value.trim() && elementToUnhighlight.textContent === 'Hint text') {
+					elementToUnhighlight.remove();
+				}
+			}
+		}
+
+		function showHintPlaceholder() {
+			if (!radioList || newOptionHint.value.trim()) return;
+			const lastOption = radioList.querySelector('.govuk-checkboxes__item:last-of-type, .govuk-radios__item:last-child');
+			if (!lastOption) return;
+
+			let hintElement = lastOption.querySelector('.govuk-checkboxes__hint, .govuk-radios__hint');
+			if (!hintElement) {
+				hintElement = document.createElement('div');
+				hintElement.className = 'govuk-hint govuk-checkboxes__hint highlight';
+				lastOption.appendChild(hintElement);
+			}
+			hintElement.textContent = 'Hint text';
+		}
+
+		// Function to remove hint placeholder
+		function removeHintPlaceholder() {
+			if (!radioList || newOptionHint.value.trim()) return;
+			const lastOption = radioList.querySelector('.govuk-checkboxes__item:last-of-type, .govuk-radios__item:last-child');
+			if (!lastOption) return;
+
+			const hintElement = lastOption.querySelector('.govuk-checkboxes__hint, .govuk-radios__hint');
+			if (hintElement && !newOptionHint.value.trim()) {
+				hintElement.remove();
+			}
+		}
+
+		// Initialize the preview
+		updateAllOptionsPreview();
+
+		// Add event delegation for edit form hint text inputs
+		document.addEventListener('focus', function (e) {
+			if (e.target.classList.contains('option-hint-input')) {
+				const optionIndex = e.target.closest('.gem-c-reorderable-list__item').dataset.index;
+				const previewOption = radioList?.querySelector(`#listPreviewCheckboxes-option${optionIndex - 1}`)?.closest('.govuk-checkboxes__item');
+				if (!previewOption) return;
+				let hintElement = previewOption.querySelector('.govuk-checkboxes__hint');
+
+				if (!hintElement) {
+					hintElement = document.createElement('div');
+					hintElement.className = 'govuk-hint govuk-checkboxes__hint highlight';
+					hintElement.textContent = 'Hint text';
+					previewOption.appendChild(hintElement);
+				} else {
+					hintElement.classList.add('highlight');
+				}
+			}
+		}, true);
+
+		document.addEventListener('blur', function (e) {
+			if (e.target.classList.contains('option-hint-input')) {
+				const optionIndex = e.target.closest('.gem-c-reorderable-list__item').dataset.index;
+				const previewOption = radioList?.querySelector(`#listPreviewCheckboxes-option${optionIndex - 1}`)?.closest('.govuk-checkboxes__item');
+				if (!previewOption) return;
+				const hintElement = previewOption.querySelector('.govuk-checkboxes__hint');
+
+				if (hintElement) {
+					hintElement.classList.remove('highlight');
+					if (!e.target.value.trim() && hintElement.textContent === 'Hint text') {
+						hintElement.remove();
+					}
+				}
+			}
+		}, true);
+
+		// Function to update the hidden input with all current options
+		function updateHiddenOptionsData() {
+			const options = [];
+			const optionItems = optionsContainer.querySelectorAll('.gem-c-reorderable-list__item');
+
+			optionItems.forEach((item, index) => {
+				const labelInput = item.querySelector('.option-label-input-hidden');
+				const hintInput = item.querySelector('.option-hint-input');
+
+				if (labelInput) {
+					const label = labelInput.value;
+					const hint = hintInput ? hintInput.value : '';
+					const value = label.toLowerCase().replace(/\s+/g, '-');
+
+					options.push({
+						label: label,
+						hint: hint,
+						value: value
+					});
+				}
+			});
+
+			document.getElementById('radio-options-data').value = JSON.stringify(options);
+		}
+
+		// Form submission handler
+		questionForm.addEventListener('submit', function (e) {
+			updateHiddenOptionsData(); // Ensure options are up to date before submitting
+			return true;
+		});
+
+		// Initialize Sortable for the options container
+		const sortableContainer = document.getElementById('options-container');
+		ensureNoneOfTheAboveIsLast();
+		if (sortableContainer) {
+			new Sortable(sortableContainer, {
+				animation: 150,
+				ghostClass: 'sortable-ghost',
+				chosenClass: 'sortable-chosen',
+				dragClass: 'highlight-dragging',
+				onMove: function (evt) {
+					const dragged = evt.dragged;
+					const related = evt.related;
+					if (getNoneOfTheAboveFromItem(dragged) || getNoneOfTheAboveFromItem(related)) {
+						return false;
+					}
+					return true;
+				},
+				onStart: function (evt) {
+					const index = evt.oldIndex;
+					highlightPreviewItem(index);
+				},
+				onEnd: function (evt) {
+					ensureNoneOfTheAboveIsLast();
+					updateAllOptionsPreview();
+					updateHiddenOptionsData();
+					updateMoveButtons();
+					removePreviewHighlights();
+				}
+			});
+		}
+
+		// Function to highlight preview item
+		function highlightPreviewItem(index) {
+			if (!radioList) return;
+
+			// Remove any existing highlights
+			removePreviewHighlights();
+
+			// Add highlight to the corresponding preview item
+			const previewItem = radioList.querySelector(`#listPreviewCheckboxes-option${index}`)?.closest('.govuk-checkboxes__item');
+			if (previewItem) {
+				previewItem.classList.add('highlight');
+			}
+		}
+
+		// Function to remove all preview highlights
+		function removePreviewHighlights() {
+			if (!radioList) return;
+
+			const items = radioList.querySelectorAll('.govuk-checkboxes__item');
+			items.forEach(item => item.classList.remove('highlight'));
+		}
+
+		// Add focus/blur handlers for list items in edit mode
+		document.addEventListener('focusin', function (e) {
+			if (e.target.classList.contains('js-reorderable-list-up') ||
+				e.target.classList.contains('js-reorderable-list-down')) {
+				const listItem = e.target.closest('.gem-c-reorderable-list__item');
+				if (listItem) {
+					const index = Array.from(listItem.parentNode.children).indexOf(listItem);
+					highlightPreviewItem(index);
+				}
+			}
+		});
+
+		document.addEventListener('focusout', function (e) {
+			if (e.target.classList.contains('js-reorderable-list-up') ||
+				e.target.classList.contains('js-reorderable-list-down')) {
+				removePreviewHighlights();
+			}
+		});
+
+		// Add hover handlers for list items in edit mode
+		document.addEventListener('mouseover', function (e) {
+			const listItem = e.target.closest('.gem-c-reorderable-list__item');
+			if (listItem && editOptionsButton.textContent.trim() === 'Re-order') {
+				const index = Array.from(listItem.parentNode.children).indexOf(listItem);
+				highlightPreviewItem(index);
+			}
+		});
+
+		document.addEventListener('mouseout', function (e) {
+			const listItem = e.target.closest('.gem-c-reorderable-list__item');
+			if (listItem && editOptionsButton.textContent.trim() === 'Re-order') {
+				removePreviewHighlights();
+			}
+		});
+
+		// Add edit options button functionality
+		const editOptionsButton = document.getElementById('edit-options-button');
+		if (editOptionsButton) {
+			editOptionsButton.addEventListener('click', function () {
+				const listItems = document.querySelectorAll('.gem-c-reorderable-list__item');
+				const actionButtons = document.querySelectorAll('.gem-c-reorderable-list__actions');
+				const editDeleteLinks = document.querySelectorAll('.edit-item');
+				const addButton = document.getElementById('add-option-button');
+
+				// Toggle button text and state
+				const isEditing = editOptionsButton.textContent.trim() === 'Done';
+				editOptionsButton.textContent = isEditing ? 'Re-order' : 'Done';
+
+				// Toggle button style - add inverse when NOT editing (showing "Re-order")
+				if (isEditing) {
+					editOptionsButton.classList.add('govuk-button--inverse');
+				} else {
+					editOptionsButton.classList.remove('govuk-button--inverse');
+				}
+
+				// Show/hide add button based on edit state
+				if (addButton) {
+					addButton.style.display = isEditing ? 'inline-block' : 'none';
+				}
+
+				// Toggle action buttons visibility
+				actionButtons.forEach(actions => {
+					actions.style.display = isEditing ? 'none' : 'flex';
+				});
+
+				// Toggle edit/delete links visibility
+				editDeleteLinks.forEach(links => {
+					links.style.display = isEditing ? 'block' : 'none';
+				});
+
+				// Update cursor style and hover effect
+				listItems.forEach(item => {
+					if (isEditing) {
+						item.style.cursor = 'default';
+						item.classList.remove('sortable-enabled');
+					} else {
+						item.style.cursor = 'move';
+						item.classList.add('sortable-enabled');
+					}
+				});
+
+				// Enable/disable sorting
+				if (sortableContainer) {
+					sortableContainer.sortable = !isEditing;
+				}
+
+				// Update button visibility and focus when entering edit mode
+				if (!isEditing) {
+					updateMoveButtons();
+					const firstItem = listItems[0];
+					if (firstItem) {
+						const firstDownButton = firstItem.querySelector('.js-reorderable-list-down');
+						if (firstDownButton) {
+							firstDownButton.focus();
+						}
+					}
+				}
+			});
+		}
+
+		// Function to update the visibility of Up/Down buttons
+		function updateMoveButtons() {
+			const items = optionsContainer.querySelectorAll('.gem-c-reorderable-list__item');
+			items.forEach((item, index) => {
+				const upButton = item.querySelector('.js-reorderable-list-up');
+				const downButton = item.querySelector('.js-reorderable-list-down');
+				const isNone = getNoneOfTheAboveFromItem(item);
+				const nextIsNone = index < items.length - 1 && getNoneOfTheAboveFromItem(items[index + 1]);
+
+				if (upButton && downButton) {
+					if (isNone) {
+						// None of the above stays last — no reorder controls
+						upButton.style.display = 'none';
+						downButton.style.display = 'none';
+					} else if (index === 0) {
+						upButton.style.display = 'none';
+						downButton.style.display = nextIsNone ? 'none' : 'inline-block';
+					} else if (nextIsNone || index === items.length - 1) {
+						upButton.style.display = 'inline-block';
+						downButton.style.display = 'none';
+					} else {
+						upButton.style.display = 'inline-block';
+						downButton.style.display = 'inline-block';
+					}
+				}
+			});
+		}
+
+		// Add Up/Down button functionality
+		document.addEventListener('click', function (e) {
+			if (e.target.classList.contains('js-reorderable-list-up')) {
+				const item = e.target.closest('.gem-c-reorderable-list__item');
+				const prevItem = item.previousElementSibling;
+				// Do not move a normal item below the none-of-the-above item by swapping up past it incorrectly —
+				// and never let none-of-the-above leave last place.
+				if (prevItem && !getNoneOfTheAboveFromItem(item)) {
+					item.parentNode.insertBefore(item, prevItem);
+					ensureNoneOfTheAboveIsLast();
+					updateAllOptionsPreview();
+					updateHiddenOptionsData();
+				}
+			} else if (e.target.classList.contains('js-reorderable-list-down')) {
+				const item = e.target.closest('.gem-c-reorderable-list__item');
+				const nextItem = item.nextElementSibling;
+				if (nextItem && !getNoneOfTheAboveFromItem(nextItem)) {
+					item.parentNode.insertBefore(nextItem, item);
+					ensureNoneOfTheAboveIsLast();
+					updateAllOptionsPreview();
+					updateHiddenOptionsData();
+				}
+			} else if (e.target.classList.contains('js-remove-option')) {
+				// Legacy client-side remove only; server Remove uses formaction POST
+				e.preventDefault();
+				const item = e.target.closest('.gem-c-reorderable-list__item');
+				if (confirm('Are you sure you want to remove this option?')) {
+					item.remove();
+					ensureNoneOfTheAboveIsLast();
+					updateAllOptionsPreview();
+					updateHiddenOptionsData();
+					updateEditButtonVisibility();
+				}
+			}
+		});
+
+		// Function to convert a list item to editable form
+		function makeItemEditable(listItem) {
+			const labelDisplay = listItem.querySelector('.option-label-display');
+			const labelInput = listItem.querySelector('.option-label-input-hidden');
+			const hintInput = listItem.querySelector('.option-hint-input');
+			const editLink = listItem.querySelector('.edit-item a');
+
+			// Create the edit form HTML
+			const editFormHTML = `
+				<div class="edit-option-form govuk-!-margin-bottom-6">
+					<h2 class="govuk-heading-m">Edit option</h2>
+					
+					<!-- Option Value (Label) -->
+					<div class="govuk-form-group">
+						<label class="govuk-label govuk-label--m" for="edit-option-label">Item</label>
+						<input class="govuk-input" id="edit-option-label" name="edit-label" type="text" 
+							value="${labelInput.value}">
+					</div>
+
+					<!-- Hint Text -->
+					<div class="govuk-form-group">
+						<label class="govuk-label govuk-label--m" for="edit-option-hint">Hint text (optional)</label>
+						<div class="govuk-hint">Use single short sentence without a full stop</div>
+						<input class="govuk-input" id="edit-option-hint" name="edit-hint" type="text" 
+							value="${hintInput.value}">
+					</div>
+
+					<!-- Advanced Features Section -->
+					<details class="govuk-details" data-module="govuk-details">
+						<summary class="govuk-details__summary">
+							<span class="govuk-details__summary-text">Advanced features</span>
+						</summary>
+						<div class="govuk-details__text">
+							<!-- Additional Value -->
+							<div class="govuk-form-group">
+								<label class="govuk-label govuk-label--m" for="edit-option-value">Unique identifier (optional)</label>
+								<div class="govuk-hint">Used in databases to identify the item</div>
+								<input class="govuk-input" id="edit-option-value" name="edit-value" type="text" 
+									value="${listItem.querySelector('.option-value-input')?.value || ''}">
+							</div>
+						</div>
+					</details>
+
+					<div class="govuk-button-group">
+						<button type="button" class="govuk-button save-edit-button">Save changes</button>
+						<a class="govuk-link cancel-edit-link" href="#">Cancel</a>
+					</div>
+      </div>
+    `;
+
+			// Hide the display elements
+			labelDisplay.style.display = 'none';
+			editLink.style.display = 'none';
+			listItem.querySelector('.delete-option-link').style.display = 'none';
+
+			// Insert the edit form
+			listItem.querySelector('.gem-c-reorderable-list__content').insertAdjacentHTML('beforeend', editFormHTML);
+
+			// Add event listeners for the new form
+			const editForm = listItem.querySelector('.edit-option-form');
+			const saveButton = editForm.querySelector('.save-edit-button');
+			const cancelButton = editForm.querySelector('.cancel-edit-link');
+			const editLabelInput = editForm.querySelector('#edit-option-label');
+			const editHintInput = editForm.querySelector('#edit-option-hint');
+
+			// Focus the label input
+			editLabelInput.focus();
+
+			// Save changes
+			saveButton.addEventListener('click', () => {
+				const newLabel = editLabelInput.value.trim();
+				const newHint = editHintInput.value.trim();
+				const newValue = editForm.querySelector('#edit-option-value')?.value.trim() || '';
+
+				// Update the values
+				labelDisplay.textContent = newLabel;
+				labelInput.value = newLabel;
+				hintInput.value = newHint;
+
+				// Update or create the value input
+				let valueInput = listItem.querySelector('.option-value-input');
+				if (!valueInput) {
+					valueInput = document.createElement('input');
+					valueInput.type = 'hidden';
+					valueInput.className = 'option-value-input';
+					valueInput.name = `option[${listItem.dataset.index}][option_value]`;
+					listItem.querySelector('.gem-c-reorderable-list__content').appendChild(valueInput);
+				}
+				valueInput.value = newValue;
+
+				// Restore the display
+				restoreItemDisplay(listItem);
+
+				// Update the preview
+				updateAllOptionsPreview();
+				updateHiddenOptionsData();
+			});
+
+			// Cancel editing
+			cancelButton.addEventListener('click', (e) => {
+				e.preventDefault();
+				restoreItemDisplay(listItem);
+			});
+
+			// Add preview updating on input
+			editLabelInput.addEventListener('input', () => {
+				updateEditPreview(listItem, editLabelInput.value, editHintInput.value);
+			});
+
+			editHintInput.addEventListener('input', () => {
+				updateEditPreview(listItem, editLabelInput.value, editHintInput.value);
+			});
+
+			// Add focus/blur event listeners for highlighting
+			editLabelInput.addEventListener('focus', () => {
+				const previewItem = document.querySelector(`#listPreviewCheckboxes-option${listItem.dataset.index - 1}`)?.closest('.govuk-checkboxes__item');
+				if (previewItem) {
+					const labelElement = previewItem.querySelector('.govuk-checkboxes__label');
+					if (labelElement) {
+						labelElement.classList.add('highlight');
+					}
+				}
+			});
+
+			editLabelInput.addEventListener('blur', () => {
+				const previewItem = document.querySelector(`#listPreviewCheckboxes-option${listItem.dataset.index - 1}`)?.closest('.govuk-checkboxes__item');
+				if (previewItem) {
+					const labelElement = previewItem.querySelector('.govuk-checkboxes__label');
+					if (labelElement) {
+						labelElement.classList.remove('highlight');
+					}
+				}
+			});
+
+			// Update preview immediately to show current state
+			updateEditPreview(listItem, editLabelInput.value, editHintInput.value);
+
+			// If label input is already focused, apply highlight immediately
+			if (document.activeElement === editLabelInput) {
+				const previewItem = document.querySelector(`#listPreviewCheckboxes-option${listItem.dataset.index - 1}`)?.closest('.govuk-checkboxes__item');
+				if (previewItem) {
+					const labelElement = previewItem.querySelector('.govuk-checkboxes__label');
+					if (labelElement) {
+						labelElement.classList.add('highlight');
+					}
+				}
+			}
+		}
+
+		// Function to restore item to display mode
+		function restoreItemDisplay(listItem) {
+			const labelDisplay = listItem.querySelector('.option-label-display');
+			const editLink = listItem.querySelector('.edit-item a');
+			const deleteLink = listItem.querySelector('.delete-option-link');
+			const editForm = listItem.querySelector('.edit-option-form');
+
+			if (editForm) {
+				editForm.remove();
+			}
+
+			labelDisplay.style.display = 'block';
+			editLink.style.display = 'inline-block';
+			if (deleteLink) {
+				deleteLink.style.display = 'inline-block';
+			}
+		}
+
+		// Function to update preview while editing
+		function updateEditPreview(listItem, labelValue, hintValue) {
+			const index = listItem.dataset.index - 1;
+			const previewItem = radioList?.querySelector(`#listPreviewCheckboxes-option${index}`)?.closest('.govuk-checkboxes__item');
+
+			if (previewItem) {
+				const label = previewItem.querySelector('.govuk-checkboxes__label');
+				let hint = previewItem.querySelector('.govuk-checkboxes__hint');
+
+				if (label) {
+					label.textContent = labelValue || 'Item text';
+				}
+
+				if (hintValue) {
+					if (!hint) {
+						hint = document.createElement('div');
+						hint.className = 'govuk-hint govuk-checkboxes__hint';
+						previewItem.appendChild(hint);
+					}
+					hint.textContent = hintValue;
+				} else if (hint) {
+					hint.remove();
+				}
+			}
+		}
+
+		// Add click handler for edit links
+		document.addEventListener('click', function (e) {
+			if (e.target.closest('.edit-item a')) {
+				e.preventDefault();
+				const listItem = e.target.closest('.gem-c-reorderable-list__item');
+				if (listItem) {
+					makeItemEditable(listItem);
+				}
+			}
+		});
+
+		// Remove all existing delete-related event handlers and add a single, clean handler
+		document.addEventListener('click', function (e) {
+			const deleteLink = e.target.closest('.delete-option-link');
+			if (deleteLink) {
+				// Let the link navigate naturally to the delete confirmation page
+				return true;
+			}
+		});
+
+		// Add delete functionality
+		document.addEventListener('DOMContentLoaded', function () {
+			const urlParams = new URLSearchParams(window.location.search);
+			const deleteIndex = urlParams.get('deleteIndex');
+
+			console.log("Parsed deleteIndex:", deleteIndex);
+
+			if (deleteIndex !== null) {
+				const itemToDelete = document.querySelector(`.gem-c-reorderable-list__item[data-index="${deleteIndex}"]`);
+				if (itemToDelete) {
+					console.log("Found item to delete:", itemToDelete);
+					itemToDelete.remove();
+					updateAllOptionsPreview(); // Update the preview after deletion
+					updateHiddenOptionsData(); // Update the hidden input data
+					updateEditButtonVisibility(); // Update edit button visibility after deleting an option
+				} else {
+					console.error("Item to delete not found for index:", deleteIndex);
+				}
+
+				// Clean up the URL
+				const newUrl = window.location.href.split('?')[0];
+				window.history.replaceState({}, document.title, newUrl);
+			}
+		});
+
+		// Conditions functionality
+		const questionSelect = document.getElementById('condition-question');
+		const valueContainer = document.getElementById('condition-value-container');
+		const addConditionLink = document.getElementById('add-condition-link');
+		const additionalConditions = document.getElementById('additional-conditions');
+		let conditionCount = 1;
+
+		// Function to update value options based on selected question
+		function updateValueOptions(questionSelect, valueSelect) {
+			const selectedOption = questionSelect.options[questionSelect.selectedIndex];
+			const questionType = selectedOption.getAttribute('data-type');
+			const rawOptions = selectedOption.getAttribute('data-options');
+
+			// Clear existing options
+			valueSelect.innerHTML = '<option value="">Select a value</option>';
+
+			try {
+				if (questionType === 'yes-no') {
+					valueSelect.innerHTML += `
+						<option value="yes">Yes</option>
+						<option value="no">No</option>
+					`;
+				} else if (['radios', 'checkboxes', 'select'].includes(questionType)) {
+					const options = JSON.parse(rawOptions);
+					options.forEach(option => {
+						const value = option.value || option.text;
+						valueSelect.innerHTML += `
+							<option value="${value}">${option.text}</option>
+						`;
+					});
+				}
+			} catch (e) {
+				console.error('Error parsing options:', e);
+			}
+		}
+
+		// Add event listener to first question select
+		if (questionSelect) {
+			questionSelect.addEventListener('change', () => {
+				const valueSelect = document.getElementById('condition-value');
+				updateValueOptions(questionSelect, valueSelect);
+			});
+		}
+
+		// Handle adding new conditions
+		if (addConditionLink) {
+			addConditionLink.addEventListener('click', function (e) {
+				e.preventDefault();
+
+				const newCondition = document.createElement('div');
+				newCondition.className = 'condition-item govuk-!-margin-top-4 govuk-!-padding-4';
+				newCondition.style.position = 'relative';
+				newCondition.style.background = '#f3f2f1';
+
+				newCondition.innerHTML = `
+					<!-- Remove link positioned absolutely in top right -->
+					<a href="#" class="govuk-link govuk-link--no-visited-state govuk-link--destructive govuk-!-font-size-16" 
+						onclick="event.preventDefault(); removeCondition(this);"
+						style="position: absolute; top: 15px; right: 15px;">
+							<svg class="govuk-!-margin-right-1" style="position: relative; top: 2px" width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+								<path d="M10.5 1.5L1.5 10.5" stroke="currentColor" stroke-width="2"/>
+								<path d="M1.5 1.5L10.5 10.5" stroke="currentColor" stroke-width="2"/>
+							</svg>
+							Remove this condition
+					</a>
+
+					<div class="govuk-form-group">
+						<label class="govuk-label">Combine with</label>
+						<select class="govuk-select" name="logical-operator-${conditionCount}">
+							<option value="AND">AND</option>
+							<option value="OR">OR</option>
+						</select>
+					</div>
+					
+					<div class="govuk-form-group">
+						<label class="govuk-label" for="condition-question-${conditionCount}">Select a question</label>
+						<select class="govuk-select condition-question" 
+								id="condition-question-${conditionCount}" 
+								name="question-${conditionCount}">
+							${questionSelect.innerHTML}
+						</select>
+					</div>
+
+					<div class="govuk-form-group">
+						<label class="govuk-label" for="condition-operator-${conditionCount}">Condition type</label>
+						<select class="govuk-select" id="condition-operator-${conditionCount}" name="operator-${conditionCount}">
+							<option value="">Select a condition type</option>
+							<option value="is" selected>is</option>
+							<option value="is-not">is not</option>
+						</select>
+					</div>
+
+					<div class="govuk-form-group">
+						<label class="govuk-label" for="condition-value-${conditionCount}">Select a value</label>
+						<div class="condition-value-container">
+							<select class="govuk-select condition-value" 
+									id="condition-value-${conditionCount}" 
+									name="value-${conditionCount}">
+								<option value="">Select a value</option>
+							</select>
+						</div>
+					</div>
+				`;
+
+				// Add event listener to new question select
+				const newQuestionSelect = newCondition.querySelector('.condition-question');
+				const newValueContainer = newCondition.querySelector('.condition-value-container');
+				newQuestionSelect.addEventListener('change', () => {
+					const selectedOption = newQuestionSelect.options[newQuestionSelect.selectedIndex];
+					const questionType = selectedOption.getAttribute("data-type") || "";
+					const rawOptions = selectedOption.getAttribute("data-options");
+
+					// Clear existing options
+					newValueContainer.innerHTML = ''; // Clear the entire container
+
+					try {
+						// Handle yes/no questions with dropdown
+						if (questionType === "yes-no") {
+							const select = document.createElement("select");
+							select.classList.add("govuk-select");
+							select.id = `condition-value-${conditionCount}`;
+							select.name = `value-${conditionCount}`;
+
+							select.innerHTML = `
+								<option value="">Select yes or no</option>
+								<option value="yes">Yes</option>
+								<option value="no">No</option>
+							`;
+
+							const label = document.createElement("label");
+							label.classList.add("govuk-label");
+							label.setAttribute("for", `condition-value-${conditionCount}`);
+							label.textContent = "Select yes or no";
+
+							newValueContainer.appendChild(label);
+							newValueContainer.appendChild(select);
+							newValueContainer.style.display = "block";
+							return;
+						}
+
+						// Handle radio questions with radio buttons
+						if (questionType === "radios") {
+							const options = rawOptions ? JSON.parse(rawOptions) : [];
+
+							if (Array.isArray(options) && options.length > 0) {
+								const fieldset = document.createElement("fieldset");
+								fieldset.classList.add("govuk-fieldset");
+
+								const legend = document.createElement("legend");
+								legend.classList.add("govuk-fieldset__legend", "govuk-fieldset__legend--s");
+								legend.textContent = "Select an option";
+								fieldset.appendChild(legend);
+
+								const radiosDiv = document.createElement("div");
+								radiosDiv.classList.add("govuk-radios", "govuk-radios--small");
+								radiosDiv.setAttribute("data-module", "govuk-radios");
+
+								options.forEach((option, index) => {
+									const itemDiv = document.createElement("div");
+									itemDiv.classList.add("govuk-radios__item");
+
+									const radio = document.createElement("input");
+									radio.classList.add("govuk-radios__input");
+									radio.type = "radio";
+									radio.id = `radio-${index}`;
+									radio.name = "value";
+									radio.value = option.value || option.label;
+
+									const label = document.createElement("label");
+									label.classList.add("govuk-label", "govuk-radios__label");
+									label.setAttribute("for", `radio-${index}`);
+									label.textContent = option.label;
+
+									itemDiv.appendChild(radio);
+									itemDiv.appendChild(label);
+
+									radiosDiv.appendChild(itemDiv);
+								});
+
+								fieldset.appendChild(radiosDiv);
+								valueContainer.appendChild(fieldset);
+								valueContainer.style.display = "block";
+								return;
+							}
+						}
+
+						// Handle checkbox questions with actual checkboxes
+						if (questionType === "checkboxes") {
+							const options = rawOptions ? JSON.parse(rawOptions) : [];
+
+							if (Array.isArray(options) && options.length > 0) {
+								const fieldset = document.createElement("fieldset");
+								fieldset.classList.add("govuk-fieldset");
+
+								const legend = document.createElement("legend");
+								legend.classList.add("govuk-fieldset__legend", "govuk-fieldset__legend--s");
+								legend.textContent = "Select all that apply";
+								fieldset.appendChild(legend);
+
+								const checkboxesDiv = document.createElement("div");
+								checkboxesDiv.classList.add("govuk-checkboxes", "govuk-checkboxes--small");
+								checkboxesDiv.setAttribute("data-module", "govuk-checkboxes");
+
+								options.forEach((option, index) => {
+									const itemDiv = document.createElement("div");
+									itemDiv.classList.add("govuk-checkboxes__item");
+
+									const checkbox = document.createElement("input");
+									checkbox.classList.add("govuk-checkboxes__input");
+									checkbox.type = "checkbox";
+									checkbox.id = `checkbox-${index}`;
+									checkbox.name = "value";
+									checkbox.value = option.value || option.label;
+
+									const label = document.createElement("label");
+									label.classList.add("govuk-label", "govuk-checkboxes__label");
+									label.setAttribute("for", `checkbox-${index}`);
+									label.textContent = option.label;
+
+									itemDiv.appendChild(checkbox);
+									itemDiv.appendChild(label);
+									checkboxesDiv.appendChild(itemDiv);
+								});
+
+								fieldset.appendChild(checkboxesDiv);
+								valueContainer.appendChild(fieldset);
+								valueContainer.style.display = "block";
+								return;
+							}
+						}
+
+						// Handle select questions with dropdown
+						if (questionType === "select") {
+							const select = document.createElement("select");
+							select.classList.add("govuk-select");
+							select.id = `condition-value-${conditionCount}`;
+							select.name = `value-${conditionCount}`;
+
+							const defaultOption = document.createElement("option");
+							defaultOption.value = "";
+							defaultOption.textContent = "Select from the list";
+							select.appendChild(defaultOption);
+
+							const options = rawOptions ? JSON.parse(rawOptions) : [];
+
+							if (Array.isArray(options) && options.length > 0) {
+								options.forEach(option => {
+									const newOption = document.createElement("option");
+									newOption.value = option.value || option.label;
+									newOption.textContent = option.label;
+									select.appendChild(newOption);
+								});
+
+								const label = document.createElement("label");
+								label.classList.add("govuk-label");
+								label.setAttribute("for", `condition-value-${conditionCount}`);
+								label.textContent = "Select from the list";
+
+								valueContainer.appendChild(label);
+								valueContainer.appendChild(select);
+								valueContainer.style.display = "block";
+							}
+						}
+					} catch (e) {
+						console.error("Error parsing options:", e);
+					}
+				});
+
+				additionalConditions.appendChild(newCondition);
+				conditionCount++;
+			});
+		}
+
+		function removeCondition(element) {
+			// Find the closest parent condition-item div and remove it
+			const conditionItem = element.closest('.condition-item');
+			if (conditionItem) {
+				conditionItem.remove();
+			}
+		}
+
+		// Add click handlers to all remove condition links
+		document.addEventListener('click', function (event) {
+			const removeLink = event.target.closest('.govuk-link--destructive');
+			if (removeLink && removeLink.textContent.trim() === 'Remove this condition') {
+				event.preventDefault();
+				const conditionItem = removeLink.closest('.condition-item');
+				if (conditionItem) {
+					conditionItem.remove();
+				}
+			}
+		});
+	});
+</script>
+
+<script>
+	document.addEventListener("DOMContentLoaded", function () {
+		// Get all radio buttons with name "conditionType"
+		const conditionTypeRadios = document.querySelectorAll('input[name="conditionType"]');
+		const newConditionContent = document.querySelector('[value="new"]')?.closest('.govuk-radios__item')?.querySelector('.govuk-radios__conditional');
+
+		// Initially hide all conditional content
+		if (newConditionContent) {
+			newConditionContent.classList.add('govuk-radios__conditional--hidden');
+		}
+
+		// Add event listeners to radio buttons
+		conditionTypeRadios.forEach(radio => {
+			radio.addEventListener('change', function () {
+				if (this.value === 'new' && newConditionContent) {
+					newConditionContent.classList.remove('govuk-radios__conditional--hidden');
+				} else if (newConditionContent) {
+					newConditionContent.classList.add('govuk-radios__conditional--hidden');
+				}
+			});
+		});
+
+		// Function to update value options based on selected question
+		function updateValueOptions(questionSelect, valueContainer) {
+			const selectedOption = questionSelect.options[questionSelect.selectedIndex];
+			const questionType = selectedOption.getAttribute('data-type');
+			const rawOptions = selectedOption.getAttribute('data-options');
+
+			// Clear existing options
+			valueContainer.innerHTML = '';
+
+			try {
+				if (questionType === 'yes-no') {
+					const select = document.createElement('select');
+					select.classList.add('govuk-select');
+					select.id = 'condition-value';
+					select.name = 'value';
+
+					select.innerHTML = `
+						<option value="">Select yes or no</option>
+						<option value="yes">Yes</option>
+						<option value="no">No</option>
+					`;
+
+					const label = document.createElement('label');
+					label.classList.add('govuk-label');
+					label.setAttribute('for', 'condition-value');
+					label.textContent = 'Select yes or no';
+
+					valueContainer.appendChild(label);
+					valueContainer.appendChild(select);
+					return;
+				}
+
+				if (['radios', 'checkboxes', 'select'].includes(questionType)) {
+					const options = JSON.parse(rawOptions);
+					if (Array.isArray(options) && options.length > 0) {
+						const select = document.createElement('select');
+						select.classList.add('govuk-select');
+						select.id = 'condition-value';
+						select.name = 'value';
+
+						const defaultOption = document.createElement('option');
+						defaultOption.value = '';
+						defaultOption.textContent = 'Select from the list';
+						select.appendChild(defaultOption);
+
+						options.forEach(option => {
+							const newOption = document.createElement('option');
+							newOption.value = option.value || option.label;
+							newOption.textContent = option.label;
+							select.appendChild(newOption);
+						});
+
+						const label = document.createElement('label');
+						label.classList.add('govuk-label');
+						label.setAttribute('for', 'condition-value');
+						label.textContent = 'Select from the list';
+
+						valueContainer.appendChild(label);
+						valueContainer.appendChild(select);
+					}
+				}
+			} catch (e) {
+				console.error('Error parsing options:', e);
+			}
+		}
+
+		// Add event listener to question select
+		const questionSelect = document.getElementById('condition-question');
+		const valueContainer = document.getElementById('condition-value-container');
+
+		if (questionSelect && valueContainer) {
+			questionSelect.addEventListener('change', () => {
+				updateValueOptions(questionSelect, valueContainer);
+			});
+		}
+
+		// Handle adding new conditions
+		const addConditionLink = document.getElementById('add-condition-link');
+		const additionalConditions = document.getElementById('additional-conditions');
+		let conditionCount = 1;
+
+		if (addConditionLink && additionalConditions) {
+			addConditionLink.addEventListener('click', function (e) {
+				e.preventDefault();
+
+				const newCondition = document.createElement('div');
+				newCondition.className = 'condition-item govuk-!-margin-top-4 govuk-!-padding-4';
+				newCondition.style.position = 'relative';
+				newCondition.style.background = '#f3f2f1';
+
+				newCondition.innerHTML = `
+					<a href="#" class="govuk-link govuk-link--no-visited-state govuk-link--destructive govuk-!-font-size-16" 
+						onclick="event.preventDefault(); removeCondition(this);"
+						style="position: absolute; top: 15px; right: 15px;">
+						<svg class="govuk-!-margin-right-1" style="position: relative; top: 2px" width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path d="M10.5 1.5L1.5 10.5" stroke="currentColor" stroke-width="2"/>
+							<path d="M1.5 1.5L10.5 10.5" stroke="currentColor" stroke-width="2"/>
+						</svg>
+						Remove this condition
+					</a>
+
+					<div class="govuk-form-group">
+						<label class="govuk-label">Combine with</label>
+						<select class="govuk-select" name="logical-operator-${conditionCount}">
+							<option value="AND">AND</option>
+							<option value="OR">OR</option>
+						</select>
+					</div>
+					
+					<div class="govuk-form-group">
+						<label class="govuk-label" for="condition-question-${conditionCount}">Select a question</label>
+						<select class="govuk-select condition-question" 
+								id="condition-question-${conditionCount}" 
+								name="question-${conditionCount}">
+							${questionSelect.innerHTML}
+						</select>
+					</div>
+
+					<div class="govuk-form-group">
+						<label class="govuk-label" for="condition-operator-${conditionCount}">Condition type</label>
+						<select class="govuk-select" id="condition-operator-${conditionCount}" name="operator-${conditionCount}">
+							<option value="">Select a condition type</option>
+							<option value="is" selected>is</option>
+							<option value="is-not">is not</option>
+						</select>
+					</div>
+
+					<div class="govuk-form-group">
+						<label class="govuk-label" for="condition-value-${conditionCount}">Select a value</label>
+						<div class="condition-value-container">
+							<select class="govuk-select condition-value" 
+									id="condition-value-${conditionCount}" 
+									name="value-${conditionCount}">
+								<option value="">Select a value</option>
+							</select>
+						</div>
+					</div>
+				`;
+
+				// Add event listener to new question select
+				const newQuestionSelect = newCondition.querySelector('.condition-question');
+				const newValueContainer = newCondition.querySelector('.condition-value-container');
+				newQuestionSelect.addEventListener('change', () => {
+					updateValueOptions(newQuestionSelect, newValueContainer);
+				});
+
+				additionalConditions.appendChild(newCondition);
+				conditionCount++;
+			});
+		}
+
+		function removeCondition(element) {
+			const conditionItem = element.closest('.condition-item');
+			if (conditionItem) {
+				conditionItem.remove();
+			}
+		}
+	});
+</script>
+
+<form id="add-related-form" method="post" action="/titan-mvp-1.2/form-editor/question-type/checkboxes-nf/edit-none-of-the-above/add-related" hidden>
+	<input type="hidden" name="optionIndex" id="add-related-option-index" value="{{ reopenOptionIndex or '' }}">
+	<input type="hidden" name="optionLabel" id="add-related-option-label" value="{{ reopenOption.label if reopenOption and reopenOption.label != 'Item text' else '' }}">
+	<input type="hidden" name="optionHint" id="add-related-option-hint" value="{{ reopenOption.hint if reopenOption else '' }}">
+	<input type="hidden" name="optionsDraft" id="add-related-options-draft" value="{{ radioList | dump | e }}">
+	<input type="hidden" name="parentQuestionLabel" id="add-related-parent-question" value="">
+	<input type="hidden" name="isNoneOfTheAbove" id="add-related-none-of-the-above" value="{{ 'true' if reopenOption and reopenOption.isNoneOfTheAbove else '' }}">
+</form>
+
+<form id="edit-related-form" method="post" action="/titan-mvp-1.2/form-editor/question-type/checkboxes-nf/edit-none-of-the-above/edit-related" hidden>
+	<input type="hidden" name="optionIndex" id="edit-related-option-index" value="{{ reopenOptionIndex or '' }}">
+	<input type="hidden" name="relatedType" id="edit-related-type" value="{{ relatedQuestion.type if relatedQuestion else '' }}">
+	<input type="hidden" name="optionLabel" id="edit-related-option-label" value="{{ reopenOption.label if reopenOption and reopenOption.label != 'Item text' else '' }}">
+	<input type="hidden" name="optionHint" id="edit-related-option-hint" value="{{ reopenOption.hint if reopenOption else '' }}">
+	<input type="hidden" name="optionsDraft" id="edit-related-options-draft" value="{{ radioList | dump | e }}">
+	<input type="hidden" name="existingRelated" id="edit-related-existing" value="{{ relatedQuestion | dump | e if relatedQuestion else '' }}">
+	<input type="hidden" name="parentQuestionLabel" id="edit-related-parent-question" value="">
+	<input type="hidden" name="isNoneOfTheAbove" id="edit-related-none-of-the-above" value="{{ 'true' if reopenOption and reopenOption.isNoneOfTheAbove else '' }}">
+</form>
+
+<form id="use-existing-related-form" method="post" action="/titan-mvp-1.2/form-editor/question-type/checkboxes-nf/edit-none-of-the-above/use-existing" hidden>
+	<input type="hidden" name="optionIndex" id="use-existing-option-index" value="{{ reopenOptionIndex or '' }}">
+	<input type="hidden" name="optionLabel" id="use-existing-option-label" value="{{ reopenOption.label if reopenOption and reopenOption.label != 'Item text' else '' }}">
+	<input type="hidden" name="optionHint" id="use-existing-option-hint" value="{{ reopenOption.hint if reopenOption else '' }}">
+	<input type="hidden" name="optionsDraft" id="use-existing-options-draft" value="{{ radioList | dump | e }}">
+	<input type="hidden" name="parentQuestionLabel" id="use-existing-parent-question" value="">
+	<input type="hidden" name="isNoneOfTheAbove" id="use-existing-none-of-the-above" value="{{ 'true' if reopenOption and reopenOption.isNoneOfTheAbove else '' }}">
+</form>
+
+{% endblock %}
