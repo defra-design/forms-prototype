@@ -3893,6 +3893,29 @@ router.get("/titan-mvp-1.2/question-configuration", function (req, res) {
     ...existingConditions,
   ];
 
+  const relatedQuestionEditMode = Boolean(formData.relatedQuestionEditMode);
+  const relatedDraftKey =
+    formData.relatedQuestionDraftKey || "conditionalRevealDraft";
+  const relatedDraft = relatedQuestionEditMode
+    ? formData[relatedDraftKey]
+    : null;
+  const relatedListItemNumber = relatedDraft
+    ? relatedDraft.optionIndex || 1
+    : null;
+  const listItemLabel = (
+    (relatedDraft &&
+      (relatedDraft.optionLabel ||
+        relatedDraft.radioList?.[
+          Math.max(0, (relatedListItemNumber || 1) - 1)
+        ]?.label)) ||
+    ""
+  ).trim();
+  const relatedQuestionHeading = relatedListItemNumber
+    ? `Question for list item ${relatedListItemNumber} (${
+        listItemLabel || "Item text"
+      })`
+    : null;
+
   res.render(templateToRender, {
     form: {
       name: formData.formName || "Form name",
@@ -3904,11 +3927,70 @@ router.get("/titan-mvp-1.2/question-configuration", function (req, res) {
     availableQuestions: availableQuestions,
     existingConditions: existingConditions,
     selectItems: selectItems,
+    relatedQuestionEditMode: relatedQuestionEditMode,
+    relatedQuestionHeading: relatedQuestionHeading,
+    relatedListItemNumber: relatedListItemNumber,
+    backHref: relatedQuestionEditMode
+      ? formData.relatedQuestionReturnUrl ||
+        "/titan-mvp-1.2/form-editor/question-type/radios-nf/edit-conditional-reveal"
+      : "/titan-mvp-1.2/form-editor/listing.html",
+    relatedQuestionPrefill:
+      relatedQuestionEditMode &&
+      relatedDraft &&
+      relatedDraft.radioList
+        ? relatedDraft.radioList[
+            Math.max(0, (relatedListItemNumber || 1) - 1)
+          ]?.relatedQuestion || null
+        : null,
   });
 });
 
 // Question configuration save
 router.post("/titan-mvp-1.2/question-configuration-save", function (req, res) {
+  // Related question nested edit: save onto list-item draft, not page questions
+  if (req.session.data["relatedQuestionEditMode"]) {
+    const draftKey =
+      req.session.data["relatedQuestionDraftKey"] || "conditionalRevealDraft";
+    const preserveKey =
+      req.session.data["relatedQuestionPreserveKey"] ||
+      "preserveConditionalRevealDraft";
+    const draft = req.session.data[draftKey] || {
+      radioList: [],
+      optionIndex: 1,
+      relatedType: "short",
+    };
+    const relatedType = draft.relatedType || "short";
+    const optionIndex = draft.optionIndex || 1;
+    const relatedQuestion = buildRelatedQuestionFromConfigBody(req, relatedType);
+
+    let radioList = Array.isArray(draft.radioList)
+      ? draft.radioList.slice()
+      : [];
+    const listIndex = Math.max(0, optionIndex - 1);
+    while (radioList.length <= listIndex) {
+      radioList.push({ label: "Item text", hint: "" });
+    }
+    radioList[listIndex] = {
+      ...radioList[listIndex],
+      relatedQuestion,
+    };
+
+    req.session.data[draftKey] = {
+      ...draft,
+      radioList,
+    };
+    const returnUrl =
+      req.session.data["relatedQuestionReturnUrl"] ||
+      "/titan-mvp-1.2/form-editor/question-type/radios-nf/edit-conditional-reveal";
+    delete req.session.data["relatedQuestionEditMode"];
+    delete req.session.data["relatedQuestionReturnUrl"];
+    delete req.session.data["relatedQuestionDraftKey"];
+    delete req.session.data["relatedQuestionPreserveKey"];
+    req.session.data[preserveKey] = true;
+
+    return res.redirect(returnUrl);
+  }
+
   if (!req.session.data["formPages"]) {
     req.session.data["formPages"] = [];
   }
@@ -8408,6 +8490,1102 @@ router.get(
     });
   }
 );
+
+// Concept: conditionally reveal a related question on a radio option
+// No-JS multi-page flow: parent list → option editor → (optional) child question editor
+const CONDITIONAL_REVEAL_BASE =
+  "/titan-mvp-1.2/form-editor/question-type/radios-nf/edit-conditional-reveal";
+const CONDITIONAL_REVEAL_RETURN_URL = CONDITIONAL_REVEAL_BASE;
+
+function mapRelatedTypeToSession(relatedType) {
+  const type = relatedType || "short";
+  if (type === "number") {
+    return { currentQuestionType: "text", writtenSubType: "numbers" };
+  }
+  if (type === "long") {
+    return { currentQuestionType: "text", writtenSubType: "long-answer" };
+  }
+  return { currentQuestionType: "text", writtenSubType: "short-answer-nf" };
+}
+
+function relatedTypeLabel(type) {
+  if (type === "number") return "Numbers only";
+  if (type === "long") return "Long answer (more than a single line)";
+  return "Short answer (a single line)";
+}
+
+function relatedTypeShortLabel(type) {
+  if (type === "number") return "Numbers only";
+  if (type === "long") return "Long answer";
+  return "Short answer";
+}
+
+function existingRelatedSelectItems(existingRelatedQuestions) {
+  return [
+    { value: "", text: "Select a related question" },
+    ...existingRelatedQuestions.map((related, index) => ({
+      value: String(index),
+      text: `${related.label} – ${relatedTypeShortLabel(related.type)}`,
+    })),
+  ];
+}
+
+function buildRelatedQuestionFromConfigBody(req, relatedType) {
+  const type = relatedType || "short";
+  let label = "";
+  let hint = "";
+  const settings = {};
+
+  if (type === "number") {
+    label =
+      req.body["questionLabelInputNumber"] ||
+      req.body["questionLabelInputNumbers"] ||
+      "";
+    hint = req.body["hintTextInputNumber"] || "";
+    if (req.body["classes"]) settings.classes = req.body["classes"];
+    if (req.body["errorMessageInputNumber"]) {
+      settings.shortDescription = req.body["errorMessageInputNumber"];
+    }
+  } else if (type === "long") {
+    label = req.body["questionLabelInputTextArea"] || "";
+    hint = req.body["hintTextInputTextarea"] || "";
+    if (req.body["minCharacters"]) settings.min = req.body["minCharacters"];
+    if (req.body["maxCharacters"]) settings.max = req.body["maxCharacters"];
+    if (req.body["rows"]) settings.rows = req.body["rows"];
+    if (req.body["classes"]) settings.classes = req.body["classes"];
+    if (req.body["errorMessageInputTextarea"]) {
+      settings.shortDescription = req.body["errorMessageInputTextarea"];
+    }
+  } else {
+    label = req.body["questionLabelInputShortText"] || "";
+    hint = req.body["hintTextInputShorttext"] || "";
+    if (req.body["minCharacters"]) settings.min = req.body["minCharacters"];
+    // shorttext template accidentally names max field minCharacters; accept maxCharacters too
+    const maxChars =
+      req.body["maxCharacters"] ||
+      (Array.isArray(req.body["minCharacters"])
+        ? req.body["minCharacters"][1]
+        : undefined);
+    if (maxChars && maxChars !== settings.min) settings.max = maxChars;
+    if (req.body["classes"]) settings.classes = req.body["classes"];
+    if (req.body["errorMessageInputShorttext"]) {
+      settings.shortDescription = req.body["errorMessageInputShorttext"];
+    }
+  }
+
+  return {
+    type,
+    label: label || relatedTypeLabel(type),
+    hint,
+    settings,
+    isOptional: req.body["makeOptional"] === "optional",
+  };
+}
+
+function prefillSessionFromRelatedQuestion(req, related) {
+  if (!related) return;
+  const type = related.type || "short";
+  const settings = related.settings || {};
+
+  if (type === "number") {
+    req.session.data["questionLabelInputNumber"] = related.label || "";
+    req.session.data["hint-text-input-number"] = related.hint || "";
+    req.session.data["hintTextInputNumber"] = related.hint || "";
+    req.session.data["errorMessageInputNumber"] =
+      settings.shortDescription || "";
+    req.session.data["classes"] = settings.classes || "";
+  } else if (type === "long") {
+    req.session.data["questionLabelInputTextArea"] = related.label || "";
+    req.session.data["hint-text-input-textarea"] = related.hint || "";
+    req.session.data["hintTextInputTextarea"] = related.hint || "";
+    req.session.data["errorMessageInputTextarea"] =
+      settings.shortDescription || "";
+    req.session.data["minCharacters"] = settings.min || "";
+    req.session.data["maxCharacters"] = settings.max || "";
+    req.session.data["rows"] = settings.rows || "";
+    req.session.data["classes"] = settings.classes || "";
+  } else {
+    req.session.data["questionLabelInputShortText"] = related.label || "";
+    req.session.data["hint-text-input-shorttext"] = related.hint || "";
+    req.session.data["hintTextInputShorttext"] = related.hint || "";
+    req.session.data["errorMessageInputShorttext"] =
+      settings.shortDescription || "";
+    req.session.data["minCharacters"] = settings.min || "";
+    req.session.data["maxCharacters"] = settings.max || "";
+    req.session.data["classes"] = settings.classes || "";
+  }
+}
+
+function optionEditorUrl(optionIndex) {
+  return `${CONDITIONAL_REVEAL_BASE}/option/${optionIndex}`;
+}
+
+function parseOptionIndex(value) {
+  const n = parseInt(value, 10);
+  return Number.isFinite(n) && n >= 1 ? n : null;
+}
+
+function getConditionalRevealDraft(req) {
+  const existing = req.session.data["conditionalRevealDraft"];
+  if (existing && Array.isArray(existing.radioList)) {
+    return {
+      radioList: existing.radioList.slice(),
+      optionIndex: existing.optionIndex || 1,
+      relatedType: existing.relatedType || "short",
+      parentQuestionLabel: existing.parentQuestionLabel || "",
+      optionLabel: existing.optionLabel || "",
+    };
+  }
+  return {
+    radioList: [],
+    optionIndex: 1,
+    relatedType: "short",
+    parentQuestionLabel: "",
+    optionLabel: "",
+  };
+}
+
+function setConditionalRevealDraft(req, draft) {
+  req.session.data["conditionalRevealDraft"] = {
+    radioList: Array.isArray(draft.radioList) ? draft.radioList : [],
+    optionIndex: draft.optionIndex || 1,
+    relatedType: draft.relatedType || "short",
+    parentQuestionLabel: draft.parentQuestionLabel || "",
+    optionLabel: draft.optionLabel || "",
+  };
+  req.session.data["preserveConditionalRevealDraft"] = true;
+}
+
+function getNoneOfTheAboveDraft(req) {
+  const existing = req.session.data["noneOfTheAboveDraft"];
+  if (existing && Array.isArray(existing.radioList)) {
+    return {
+      radioList: existing.radioList.slice(),
+      optionIndex: existing.optionIndex || 1,
+      relatedType: existing.relatedType || "short",
+      parentQuestionLabel: existing.parentQuestionLabel || "",
+      optionLabel: existing.optionLabel || "",
+      noneOfTheAboveMovedFrom: existing.noneOfTheAboveMovedFrom || "",
+    };
+  }
+  return {
+    radioList: [],
+    optionIndex: 1,
+    relatedType: "short",
+    parentQuestionLabel: "",
+    optionLabel: "",
+    noneOfTheAboveMovedFrom: "",
+  };
+}
+
+function setNoneOfTheAboveDraft(req, draft) {
+  req.session.data["noneOfTheAboveDraft"] = {
+    radioList: Array.isArray(draft.radioList) ? draft.radioList : [],
+    optionIndex: draft.optionIndex || 1,
+    relatedType: draft.relatedType || "short",
+    parentQuestionLabel: draft.parentQuestionLabel || "",
+    optionLabel: draft.optionLabel || "",
+    noneOfTheAboveMovedFrom: draft.noneOfTheAboveMovedFrom || "",
+  };
+  req.session.data["preserveNoneOfTheAboveDraft"] = true;
+}
+
+function defaultNoneOfTheAboveList() {
+  return [];
+}
+
+function ensureOptionInDraft(draft, optionIndex, overrides = {}) {
+  const radioList = Array.isArray(draft.radioList)
+    ? draft.radioList.slice()
+    : [];
+  const listIndex = Math.max(0, optionIndex - 1);
+  while (radioList.length <= listIndex) {
+    radioList.push({ label: "Item text", hint: "" });
+  }
+  const next = { ...radioList[listIndex], ...overrides };
+  if (Object.prototype.hasOwnProperty.call(overrides, "relatedQuestion")) {
+    if (overrides.relatedQuestion === undefined) {
+      delete next.relatedQuestion;
+    } else {
+      next.relatedQuestion = overrides.relatedQuestion;
+    }
+  }
+  radioList[listIndex] = next;
+  return { ...draft, radioList, optionIndex };
+}
+
+function relatedQuestionKey(related) {
+  return [
+    related.type,
+    related.label,
+    related.hint || "",
+    JSON.stringify(related.settings || {}),
+  ].join("::");
+}
+
+function collectExistingRelatedQuestions(radioList, excludeIndex) {
+  const seen = new Map();
+  (radioList || []).forEach((option, index) => {
+    if (index === excludeIndex) return;
+    const related = option && option.relatedQuestion;
+    if (!related || !related.label || !related.type) return;
+    const key = relatedQuestionKey(related);
+    if (!seen.has(key)) {
+      seen.set(key, {
+        type: related.type,
+        label: related.label,
+        hint: related.hint || "",
+        settings: related.settings ? { ...related.settings } : {},
+        isOptional: Boolean(related.isOptional),
+      });
+    }
+  });
+  return Array.from(seen.values());
+}
+
+function startRelatedQuestionEdit(req, res, options) {
+  const relatedType = options.relatedType || "short";
+  const optionIndex = options.optionIndex || 1;
+  const radioList = Array.isArray(options.radioList)
+    ? options.radioList.slice()
+    : [];
+  const listIndex = Math.max(0, optionIndex - 1);
+  while (radioList.length <= listIndex) {
+    radioList.push({ label: "Item text", hint: "" });
+  }
+
+  const existingRelated = options.existingRelated || null;
+  const relatedStub = {
+    ...(existingRelated && existingRelated.type === relatedType
+      ? existingRelated
+      : {}),
+    type: relatedType,
+  };
+  radioList[listIndex] = {
+    ...radioList[listIndex],
+    relatedQuestion: relatedStub,
+  };
+
+  const optionLabel = (
+    options.optionLabel ||
+    radioList[listIndex].label ||
+    ""
+  ).trim();
+
+  const draftPayload = {
+    radioList,
+    optionIndex,
+    relatedType,
+    parentQuestionLabel: (options.parentQuestionLabel || "").trim(),
+    optionLabel,
+  };
+  const draftKey = options.draftKey || "conditionalRevealDraft";
+  const preserveKey =
+    options.preserveKey || "preserveConditionalRevealDraft";
+
+  if (draftKey === "noneOfTheAboveDraft") {
+    setNoneOfTheAboveDraft(req, draftPayload);
+  } else {
+    setConditionalRevealDraft(req, draftPayload);
+  }
+
+  req.session.data["relatedQuestionEditMode"] = true;
+  req.session.data["relatedQuestionReturnUrl"] =
+    options.returnUrl || optionEditorUrl(optionIndex);
+  req.session.data["relatedQuestionDraftKey"] = draftKey;
+  req.session.data["relatedQuestionPreserveKey"] = preserveKey;
+
+  const sessionTypes = mapRelatedTypeToSession(relatedType);
+  req.session.data["currentQuestionType"] = sessionTypes.currentQuestionType;
+  req.session.data["writtenSubType"] = sessionTypes.writtenSubType;
+  delete req.session.data["dateSubType"];
+  delete req.session.data["listSubType"];
+  delete req.session.data["locationSubType"];
+
+  prefillSessionFromRelatedQuestion(req, relatedStub);
+  return res.redirect("/titan-mvp-1.2/question-configuration");
+}
+
+router.get(CONDITIONAL_REVEAL_BASE, (req, res) => {
+  const formPages = req.session.data["formPages"] || [];
+  const pageIndex = req.session.data["currentPageIndex"] || 0;
+  const pageNumber = pageIndex + 1;
+  const questionIndex = req.session.data["currentQuestionIndex"] || 0;
+  const questionNumber = questionIndex + 1;
+  const formData = req.session.data || {};
+
+  const draft = req.session.data["conditionalRevealDraft"];
+  const preserveDraft = Boolean(
+    req.session.data["preserveConditionalRevealDraft"]
+  );
+  delete req.session.data["preserveConditionalRevealDraft"];
+
+  let radioList = [];
+  let reopenOptionIndex = null;
+  if (draft && Array.isArray(draft.radioList) && draft.radioList.length > 0) {
+    // Keep the list across page loads once related hops have written a draft
+    radioList = draft.radioList;
+    if (preserveDraft) {
+      reopenOptionIndex = draft.optionIndex || null;
+    }
+  } else if (!preserveDraft) {
+    delete req.session.data["conditionalRevealDraft"];
+  }
+
+  // Validation errors from Select (use existing) reopen the list-item form
+  const queryReopen = parseInt(req.query.reopen, 10);
+  if (!reopenOptionIndex && queryReopen) {
+    reopenOptionIndex = queryReopen;
+  }
+  if (
+    !reopenOptionIndex &&
+    req.query.error === "select-related" &&
+    draft &&
+    draft.optionIndex
+  ) {
+    reopenOptionIndex = draft.optionIndex;
+  }
+
+  // Leaving related config via Back keeps the draft; clear edit-mode flag
+  delete req.session.data["relatedQuestionEditMode"];
+  delete req.session.data["relatedQuestionReturnUrl"];
+
+  const availableQuestions = formPages
+    .flatMap((page) => page.questions || [])
+    .filter((question) => {
+      const type = question.subType || question.type;
+      return ["radios", "checkboxes", "yes-no"].includes(type);
+    })
+    .map((question) => ({
+      value: question.questionId,
+      text: question.label,
+      type: question.subType || question.type,
+      options: question.options,
+    }));
+
+  const existingConditions = formPages
+    .flatMap((page) => page.conditions || [])
+    .map((condition) => ({
+      value: condition.id.toString(),
+      text: condition.conditionName,
+      hint: {
+        text: (condition.rules || [])
+          .map(
+            (rule) =>
+              `${rule.questionText} ${rule.operator} ${
+                Array.isArray(rule.value)
+                  ? rule.value.join(" or ")
+                  : rule.value
+              }`
+          )
+          .join(" AND "),
+      },
+    }));
+
+  const selectError = req.query.error === "select-related";
+
+  const reopenListIndex =
+    reopenOptionIndex != null ? Math.max(0, reopenOptionIndex - 1) : null;
+  const reopenOption =
+    reopenListIndex != null && radioList[reopenListIndex]
+      ? radioList[reopenListIndex]
+      : null;
+  const reopenRelated = reopenOption?.relatedQuestion || null;
+  const relatedConfigured = Boolean(
+    reopenRelated && reopenRelated.label && reopenRelated.type
+  );
+  const existingRelatedQuestions = collectExistingRelatedQuestions(
+    radioList,
+    reopenListIndex
+  );
+  const hasExistingRelatedQuestions = existingRelatedQuestions.length > 0;
+  const showExistingChoice =
+    hasExistingRelatedQuestions && !relatedConfigured;
+  const askRelatedOnReopen =
+    Boolean(reopenOptionIndex) &&
+    (relatedConfigured ||
+      showExistingChoice ||
+      Boolean(reopenRelated) ||
+      selectError);
+
+  res.render(
+    "titan-mvp-1.2/form-editor/question-type/radios-nf/edit-conditional-reveal.html",
+    {
+      radioList: radioList,
+      pageNumber: pageNumber,
+      questionNumber: questionNumber,
+      form: {
+        name: formData.formDetails?.name || formData.formName || "Form name",
+      },
+      commonTerms: terms,
+      availableQuestions: availableQuestions,
+      existingConditions: existingConditions,
+      reopenOptionIndex: reopenOptionIndex,
+      reopenOption: reopenOption,
+      relatedConfigured: relatedConfigured,
+      relatedQuestion: reopenRelated,
+      relatedTypeLabel: reopenRelated
+        ? relatedTypeLabel(reopenRelated.type)
+        : "",
+      existingRelatedQuestions: existingRelatedQuestions,
+      existingRelatedSelectItems: existingRelatedSelectItems(
+        existingRelatedQuestions
+      ),
+      hasExistingRelatedQuestions: hasExistingRelatedQuestions,
+      showExistingChoice: showExistingChoice,
+      askRelatedOnReopen: askRelatedOnReopen,
+      selectError: selectError,
+      conditionalRevealBase: CONDITIONAL_REVEAL_BASE,
+    }
+  );
+});
+
+function parseOptionsDraftBody(req) {
+  let radioList = [];
+  try {
+    radioList = JSON.parse(req.body.optionsDraft || "[]");
+  } catch (e) {
+    radioList = [];
+  }
+  if (!Array.isArray(radioList)) {
+    radioList = [];
+  }
+  return radioList;
+}
+
+function mapWrittenToRelatedType(written) {
+  if (written === "numbers") return "number";
+  if (written === "long-answer") return "long";
+  if (written === "short-answer-nf" || written === "short") return "short";
+  return null;
+}
+
+const RELATED_INFO_TYPE_URL = `${CONDITIONAL_REVEAL_BASE}/related-information-type`;
+
+function prepareRelatedHandoffDraft(req) {
+  const optionIndex = parseInt(req.body.optionIndex, 10) || 1;
+  let radioList = parseOptionsDraftBody(req);
+  if (radioList.length === 0) {
+    radioList = getConditionalRevealDraft(req).radioList.slice();
+  }
+  const listIndex = Math.max(0, optionIndex - 1);
+  while (radioList.length <= listIndex) {
+    radioList.push({ label: "Item text", hint: "" });
+  }
+  if (typeof req.body.optionLabel === "string" && req.body.optionLabel.trim()) {
+    radioList[listIndex].label = req.body.optionLabel.trim();
+  }
+  if (typeof req.body.optionHint === "string") {
+    radioList[listIndex].hint = req.body.optionHint;
+  }
+  const parentQuestionLabel = (
+    req.body.parentQuestionLabel ||
+    req.session.data["question-label-input-radios"] ||
+    ""
+  ).trim();
+  if (parentQuestionLabel) {
+    req.session.data["question-label-input-radios"] = parentQuestionLabel;
+  }
+  const optionLabel = (radioList[listIndex].label || "").trim();
+  setConditionalRevealDraft(req, {
+    radioList,
+    optionIndex,
+    parentQuestionLabel,
+    optionLabel,
+    relatedType:
+      req.session.data["conditionalRevealDraft"]?.relatedType || "short",
+  });
+  return { radioList, optionIndex, listIndex, parentQuestionLabel, optionLabel };
+}
+
+// Save list-item draft, then open filtered information-type page for related question
+router.post(`${CONDITIONAL_REVEAL_BASE}/add-related`, (req, res) => {
+  prepareRelatedHandoffDraft(req);
+  return res.redirect(RELATED_INFO_TYPE_URL);
+});
+
+router.get(RELATED_INFO_TYPE_URL, (req, res) => {
+  const formData = req.session.data || {};
+  const pageIndex = req.session.data["currentPageIndex"] || 0;
+  const questionIndex = req.session.data["currentQuestionIndex"] || 0;
+  const draft = getConditionalRevealDraft(req);
+  const optionIndex = draft.optionIndex || 1;
+  const listIndex = Math.max(0, optionIndex - 1);
+  const option = draft.radioList[listIndex] || { label: "Item text", hint: "" };
+  const selectError = req.query.error === "select-related";
+  const typeError = req.query.error === "select-type";
+
+  res.render("titan-mvp-1.2/form-editor/information-type-related-nf.html", {
+    pageNumber: pageIndex + 1,
+    questionNumber: questionIndex + 1,
+    optionIndex,
+    optionLabel: option.label || "",
+    optionHint: option.hint || "",
+    radioList: draft.radioList,
+    parentQuestionLabel:
+      draft.parentQuestionLabel ||
+      formData["question-label-input-radios"] ||
+      "",
+    // Existing related reuse lives on the parent ask-related panel
+    showExistingChoice: false,
+    selectError,
+    typeError,
+    form: {
+      name: formData.formDetails?.name || formData.formName || "Form name",
+    },
+    commonTerms: terms,
+    parentUrl: CONDITIONAL_REVEAL_BASE,
+    conditionalRevealBase: CONDITIONAL_REVEAL_BASE,
+  });
+});
+
+router.post(RELATED_INFO_TYPE_URL, (req, res) => {
+  const source = req.body.relatedQuestionSource || "new";
+  const prepared = prepareRelatedHandoffDraft(req);
+
+  if (source === "existing") {
+    const existingRelatedQuestions = collectExistingRelatedQuestions(
+      prepared.radioList,
+      prepared.listIndex
+    );
+    const selectedIndex = parseInt(req.body.existingRelatedQuestion, 10);
+    const selected = existingRelatedQuestions[selectedIndex];
+    if (!selected) {
+      return res.redirect(`${RELATED_INFO_TYPE_URL}?error=select-related`);
+    }
+    prepared.radioList[prepared.listIndex] = {
+      ...prepared.radioList[prepared.listIndex],
+      relatedQuestion: {
+        type: selected.type,
+        label: selected.label,
+        hint: selected.hint || "",
+        settings: selected.settings ? { ...selected.settings } : {},
+        isOptional: Boolean(selected.isOptional),
+      },
+    };
+    setConditionalRevealDraft(req, {
+      radioList: prepared.radioList,
+      optionIndex: prepared.optionIndex,
+      relatedType: selected.type,
+      parentQuestionLabel: prepared.parentQuestionLabel,
+      optionLabel: prepared.optionLabel,
+    });
+    return res.redirect(CONDITIONAL_REVEAL_BASE);
+  }
+
+  const relatedType = mapWrittenToRelatedType(req.body.written);
+  if (!relatedType) {
+    return res.redirect(`${RELATED_INFO_TYPE_URL}?error=select-type`);
+  }
+
+  const current = prepared.radioList[prepared.listIndex] || {};
+  return startRelatedQuestionEdit(req, res, {
+    radioList: prepared.radioList,
+    optionIndex: prepared.optionIndex,
+    relatedType,
+    parentQuestionLabel: prepared.parentQuestionLabel,
+    optionLabel: prepared.optionLabel,
+    existingRelated:
+      current.relatedQuestion && current.relatedQuestion.type === relatedType
+        ? current.relatedQuestion
+        : null,
+    returnUrl: CONDITIONAL_REVEAL_BASE,
+  });
+});
+
+// Related question only: Select button POSTs an existing related question
+router.post(`${CONDITIONAL_REVEAL_BASE}/use-existing`, (req, res) => {
+  const optionIndex = parseInt(req.body.optionIndex, 10) || 1;
+  let radioList = parseOptionsDraftBody(req);
+  // No-JS: fall back to session draft when the form only has the server-seeded list
+  if (radioList.length === 0) {
+    radioList = getConditionalRevealDraft(req).radioList.slice();
+  }
+  const listIndex = Math.max(0, optionIndex - 1);
+  while (radioList.length <= listIndex) {
+    radioList.push({ label: "Item text", hint: "" });
+  }
+  if (typeof req.body.optionLabel === "string" && req.body.optionLabel.trim()) {
+    radioList[listIndex].label = req.body.optionLabel.trim();
+  } else if (typeof req.body.label === "string" && req.body.label.trim()) {
+    radioList[listIndex].label = req.body.label.trim();
+  }
+  if (typeof req.body.optionHint === "string") {
+    radioList[listIndex].hint = req.body.optionHint;
+  } else if (typeof req.body.hint === "string") {
+    radioList[listIndex].hint = req.body.hint;
+  }
+
+  const existingRelatedQuestions = collectExistingRelatedQuestions(
+    radioList,
+    listIndex
+  );
+  const selectedIndex = parseInt(req.body.existingRelatedQuestion, 10);
+  const selected = existingRelatedQuestions[selectedIndex];
+
+  if (!selected) {
+    setConditionalRevealDraft(req, {
+      radioList,
+      optionIndex,
+      parentQuestionLabel: (
+        req.body.parentQuestionLabel ||
+        req.session.data["question-label-input-radios"] ||
+        ""
+      ).trim(),
+      optionLabel: (radioList[listIndex].label || "").trim(),
+    });
+    return res.redirect(
+      `${CONDITIONAL_REVEAL_BASE}?error=select-related&reopen=${optionIndex}`
+    );
+  }
+
+  radioList[listIndex] = {
+    ...radioList[listIndex],
+    relatedQuestion: {
+      type: selected.type,
+      label: selected.label,
+      hint: selected.hint || "",
+      settings: selected.settings ? { ...selected.settings } : {},
+      isOptional: Boolean(selected.isOptional),
+    },
+  };
+
+  setConditionalRevealDraft(req, {
+    radioList,
+    optionIndex,
+    relatedType: selected.type,
+    parentQuestionLabel: (
+      req.body.parentQuestionLabel ||
+      req.session.data["question-label-input-radios"] ||
+      ""
+    ).trim(),
+    optionLabel: (radioList[listIndex].label || "").trim(),
+  });
+  req.session.data["preserveConditionalRevealDraft"] = true;
+  return res.redirect(CONDITIONAL_REVEAL_BASE);
+});
+
+// Related question only: leave parent to set up a new child question, then return
+router.post(`${CONDITIONAL_REVEAL_BASE}/edit-related`, (req, res) => {
+  const relatedType =
+    req.body.relatedType || req.body.relatedQuestionType || "short";
+  const optionIndex = parseInt(req.body.optionIndex, 10) || 1;
+  let radioList = parseOptionsDraftBody(req);
+  if (radioList.length === 0) {
+    radioList = getConditionalRevealDraft(req).radioList.slice();
+  }
+
+  const listIndex = Math.max(0, optionIndex - 1);
+  while (radioList.length <= listIndex) {
+    radioList.push({ label: "Item text", hint: "" });
+  }
+  if (typeof req.body.optionLabel === "string" && req.body.optionLabel.trim()) {
+    radioList[listIndex].label = req.body.optionLabel.trim();
+  } else if (req.body.optionLabel) {
+    radioList[listIndex].label = req.body.optionLabel;
+  }
+  if (typeof req.body.optionHint === "string") {
+    radioList[listIndex].hint = req.body.optionHint;
+  }
+
+  let existingRelated = null;
+  try {
+    existingRelated = req.body.existingRelated
+      ? JSON.parse(req.body.existingRelated)
+      : null;
+  } catch (e) {
+    existingRelated = null;
+  }
+
+  return startRelatedQuestionEdit(req, res, {
+    radioList,
+    optionIndex,
+    relatedType,
+    parentQuestionLabel:
+      req.body.parentQuestionLabel ||
+      req.session.data["question-label-input-radios"] ||
+      "",
+    optionLabel: (req.body.optionLabel || radioList[listIndex].label || "").trim(),
+    existingRelated,
+    // Return to parent so Save item stays on the existing add/edit item flow
+    returnUrl: CONDITIONAL_REVEAL_BASE,
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Concept: none of the above item + related question (same flows as conditional reveal)
+// ---------------------------------------------------------------------------
+const NONE_OF_ABOVE_BASE =
+  "/titan-mvp-1.2/form-editor/question-type/checkboxes-nf/edit-none-of-the-above";
+const NONE_OF_ABOVE_RELATED_INFO_TYPE_URL = `${NONE_OF_ABOVE_BASE}/related-information-type`;
+
+function prepareNoneOfAboveHandoffDraft(req) {
+  const optionIndex = parseInt(req.body.optionIndex, 10) || 1;
+  let radioList = parseOptionsDraftBody(req);
+  if (radioList.length === 0) {
+    radioList = getNoneOfTheAboveDraft(req).radioList.slice();
+  }
+  const listIndex = Math.max(0, optionIndex - 1);
+  while (radioList.length <= listIndex) {
+    radioList.push({ label: "Item text", hint: "" });
+  }
+  if (typeof req.body.optionLabel === "string" && req.body.optionLabel.trim()) {
+    radioList[listIndex].label = req.body.optionLabel.trim();
+  }
+  if (typeof req.body.optionHint === "string") {
+    radioList[listIndex].hint = req.body.optionHint;
+  }
+  // Preserve none-of-the-above flag from the current item or posted form
+  const bodyNone =
+    req.body.noneOfTheAbove === "yes" ||
+    req.body.isNoneOfTheAbove === "true" ||
+    req.body.isNoneOfTheAbove === true;
+  const keepNone =
+    bodyNone || Boolean(radioList[listIndex] && radioList[listIndex].isNoneOfTheAbove);
+  let movedFrom = "";
+  if (keepNone) {
+    radioList = radioList.map((option, index) => {
+      if (index === listIndex) {
+        return { ...option, isNoneOfTheAbove: true };
+      }
+      if (option && option.isNoneOfTheAbove) {
+        movedFrom = option.label || movedFrom;
+        return { ...option, isNoneOfTheAbove: false };
+      }
+      return option;
+    });
+    // None of the above is always last
+    const noneItem = radioList[listIndex];
+    radioList = radioList.filter((_, index) => index !== listIndex);
+    radioList.push(noneItem);
+  } else {
+    // Keep any existing none-of-the-above item at the end
+    const noneIndex = radioList.findIndex((option) => option && option.isNoneOfTheAbove);
+    if (noneIndex >= 0 && noneIndex !== radioList.length - 1) {
+      const noneItem = radioList[noneIndex];
+      radioList = radioList.filter((_, index) => index !== noneIndex);
+      radioList.push(noneItem);
+    }
+  }
+
+  const noneIndexAfter = radioList.findIndex((option) => option && option.isNoneOfTheAbove);
+  const finalOptionIndex =
+    keepNone && noneIndexAfter >= 0 ? noneIndexAfter + 1 : optionIndex;
+  const finalListIndex = Math.max(0, finalOptionIndex - 1);
+  const parentQuestionLabel = (
+    req.body.parentQuestionLabel ||
+    req.session.data["question-label-input-checkboxes"] ||
+    ""
+  ).trim();
+  if (parentQuestionLabel) {
+    req.session.data["question-label-input-checkboxes"] = parentQuestionLabel;
+  }
+  const optionLabel = (radioList[finalListIndex]?.label || "").trim();
+  setNoneOfTheAboveDraft(req, {
+    radioList,
+    optionIndex: finalOptionIndex,
+    parentQuestionLabel,
+    optionLabel,
+    relatedType:
+      req.session.data["noneOfTheAboveDraft"]?.relatedType || "short",
+    noneOfTheAboveMovedFrom: movedFrom,
+  });
+  return {
+    radioList,
+    optionIndex: finalOptionIndex,
+    listIndex: finalListIndex,
+    parentQuestionLabel,
+    optionLabel,
+    movedFrom,
+  };
+}
+
+router.get(NONE_OF_ABOVE_BASE, (req, res) => {
+  const formPages = req.session.data["formPages"] || [];
+  const pageIndex = req.session.data["currentPageIndex"] || 0;
+  const pageNumber = pageIndex + 1;
+  const questionIndex = req.session.data["currentQuestionIndex"] || 0;
+  const questionNumber = questionIndex + 1;
+  const formData = req.session.data || {};
+
+  const draft = req.session.data["noneOfTheAboveDraft"];
+  const preserveDraft = Boolean(req.session.data["preserveNoneOfTheAboveDraft"]);
+  delete req.session.data["preserveNoneOfTheAboveDraft"];
+
+  let radioList = [];
+  let reopenOptionIndex = null;
+  let noneOfTheAboveMovedFrom = "";
+  if (draft && Array.isArray(draft.radioList) && draft.radioList.length > 0) {
+    radioList = draft.radioList.slice();
+    // Always keep none of the above last when rendering
+    const noneIndex = radioList.findIndex((option) => option && option.isNoneOfTheAbove);
+    if (noneIndex >= 0 && noneIndex !== radioList.length - 1) {
+      const noneItem = radioList[noneIndex];
+      radioList = radioList.filter((_, index) => index !== noneIndex);
+      radioList.push(noneItem);
+      if (preserveDraft && draft.optionIndex === noneIndex + 1) {
+        reopenOptionIndex = radioList.length;
+      }
+    }
+    noneOfTheAboveMovedFrom = draft.noneOfTheAboveMovedFrom || "";
+    if (preserveDraft && !reopenOptionIndex) {
+      reopenOptionIndex = draft.optionIndex || null;
+    }
+  } else if (!preserveDraft) {
+    radioList = [];
+    delete req.session.data["noneOfTheAboveDraft"];
+  }
+
+  // Drop the old seeded colour sample so the POC starts empty
+  const isSeededColourSample =
+    radioList.length === 6 &&
+    radioList[0]?.label === "Green" &&
+    radioList[5]?.label === "None of These Colours" &&
+    !radioList.some((item) => item?.relatedQuestion?.label);
+  if (isSeededColourSample && !preserveDraft) {
+    radioList = [];
+    delete req.session.data["noneOfTheAboveDraft"];
+    noneOfTheAboveMovedFrom = "";
+  }
+
+  const queryReopen = parseInt(req.query.reopen, 10);
+  if (!reopenOptionIndex && queryReopen) {
+    reopenOptionIndex = queryReopen;
+  }
+  if (
+    !reopenOptionIndex &&
+    req.query.error === "select-related" &&
+    draft &&
+    draft.optionIndex
+  ) {
+    reopenOptionIndex = draft.optionIndex;
+  }
+
+  // Clear one-shot moved banner after render data captured
+  if (draft && draft.noneOfTheAboveMovedFrom) {
+    setNoneOfTheAboveDraft(req, {
+      ...draft,
+      radioList,
+      noneOfTheAboveMovedFrom: "",
+    });
+    delete req.session.data["preserveNoneOfTheAboveDraft"];
+  }
+
+  delete req.session.data["relatedQuestionEditMode"];
+  delete req.session.data["relatedQuestionReturnUrl"];
+
+  const selectError = req.query.error === "select-related";
+  const reopenListIndex =
+    reopenOptionIndex != null ? Math.max(0, reopenOptionIndex - 1) : null;
+  const reopenOption =
+    reopenListIndex != null && radioList[reopenListIndex]
+      ? radioList[reopenListIndex]
+      : null;
+  const reopenRelated = reopenOption?.relatedQuestion || null;
+  const relatedConfigured = Boolean(
+    reopenRelated && reopenRelated.label && reopenRelated.type
+  );
+  const existingRelatedQuestions = collectExistingRelatedQuestions(
+    radioList,
+    reopenListIndex
+  );
+  const hasExistingRelatedQuestions = existingRelatedQuestions.length > 0;
+  const askNoneOfTheAboveOnReopen = Boolean(
+    reopenOptionIndex && reopenOption?.isNoneOfTheAbove
+  );
+  const askRelatedOnReopen =
+    Boolean(reopenOptionIndex) &&
+    (relatedConfigured ||
+      (hasExistingRelatedQuestions && !relatedConfigured) ||
+      Boolean(reopenRelated) ||
+      selectError);
+
+  const availableQuestions = formPages
+    .flatMap((page) => page.questions || [])
+    .filter((question) => {
+      const type = question.subType || question.type;
+      return ["radios", "checkboxes", "yes-no"].includes(type);
+    })
+    .map((question) => ({
+      value: question.questionId,
+      text: question.label,
+      type: question.subType || question.type,
+      options: question.options,
+    }));
+
+  const existingConditions = formPages
+    .flatMap((page) => page.conditions || [])
+    .map((condition) => ({
+      value: condition.id.toString(),
+      text: condition.conditionName,
+      hint: {
+        text: (condition.rules || [])
+          .map(
+            (rule) =>
+              `${rule.questionText} ${rule.operator} ${
+                Array.isArray(rule.value)
+                  ? rule.value.join(" or ")
+                  : rule.value
+              }`
+          )
+          .join(" AND "),
+      },
+    }));
+
+  res.render(
+    "titan-mvp-1.2/form-editor/question-type/checkboxes-nf/edit-none-of-the-above.html",
+    {
+      radioList,
+      pageNumber,
+      questionNumber,
+      form: {
+        name: formData.formDetails?.name || formData.formName || "Form name",
+      },
+      commonTerms: terms,
+      availableQuestions,
+      existingConditions,
+      reopenOptionIndex,
+      reopenOption,
+      relatedConfigured,
+      relatedQuestion: reopenRelated,
+      relatedTypeLabel: reopenRelated ? relatedTypeLabel(reopenRelated.type) : "",
+      existingRelatedQuestions,
+      existingRelatedSelectItems: existingRelatedSelectItems(
+        existingRelatedQuestions
+      ),
+      hasExistingRelatedQuestions,
+      askNoneOfTheAboveOnReopen,
+      askRelatedOnReopen,
+      selectError,
+      noneOfTheAboveMovedFrom,
+      conditionalRevealBase: NONE_OF_ABOVE_BASE,
+      data: formData,
+    }
+  );
+});
+
+router.post(`${NONE_OF_ABOVE_BASE}/add-related`, (req, res) => {
+  prepareNoneOfAboveHandoffDraft(req);
+  return res.redirect(NONE_OF_ABOVE_RELATED_INFO_TYPE_URL);
+});
+
+router.get(NONE_OF_ABOVE_RELATED_INFO_TYPE_URL, (req, res) => {
+  const formData = req.session.data || {};
+  const pageIndex = req.session.data["currentPageIndex"] || 0;
+  const questionIndex = req.session.data["currentQuestionIndex"] || 0;
+  const draft = getNoneOfTheAboveDraft(req);
+  const optionIndex = draft.optionIndex || 1;
+  const listIndex = Math.max(0, optionIndex - 1);
+  const option = draft.radioList[listIndex] || { label: "Item text", hint: "" };
+  const typeError = req.query.error === "select-type";
+
+  res.render("titan-mvp-1.2/form-editor/information-type-related-nf.html", {
+    pageNumber: pageIndex + 1,
+    questionNumber: questionIndex + 1,
+    optionIndex,
+    optionLabel: option.label || "",
+    optionHint: option.hint || "",
+    radioList: draft.radioList,
+    parentQuestionLabel:
+      draft.parentQuestionLabel ||
+      formData["question-label-input-checkboxes"] ||
+      "",
+    showExistingChoice: false,
+    selectError: false,
+    typeError,
+    form: {
+      name: formData.formDetails?.name || formData.formName || "Form name",
+    },
+    commonTerms: terms,
+    parentUrl: NONE_OF_ABOVE_BASE,
+    conditionalRevealBase: NONE_OF_ABOVE_BASE,
+  });
+});
+
+router.post(NONE_OF_ABOVE_RELATED_INFO_TYPE_URL, (req, res) => {
+  const prepared = prepareNoneOfAboveHandoffDraft(req);
+  const relatedType = mapWrittenToRelatedType(req.body.written);
+  if (!relatedType) {
+    return res.redirect(`${NONE_OF_ABOVE_RELATED_INFO_TYPE_URL}?error=select-type`);
+  }
+  const current = prepared.radioList[prepared.listIndex] || {};
+  return startRelatedQuestionEdit(req, res, {
+    radioList: prepared.radioList,
+    optionIndex: prepared.optionIndex,
+    relatedType,
+    parentQuestionLabel: prepared.parentQuestionLabel,
+    optionLabel: prepared.optionLabel,
+    existingRelated:
+      current.relatedQuestion && current.relatedQuestion.type === relatedType
+        ? current.relatedQuestion
+        : null,
+    returnUrl: NONE_OF_ABOVE_BASE,
+    draftKey: "noneOfTheAboveDraft",
+    preserveKey: "preserveNoneOfTheAboveDraft",
+  });
+});
+
+router.post(`${NONE_OF_ABOVE_BASE}/use-existing`, (req, res) => {
+  const prepared = prepareNoneOfAboveHandoffDraft(req);
+  const existingRelatedQuestions = collectExistingRelatedQuestions(
+    prepared.radioList,
+    prepared.listIndex
+  );
+  const selectedIndex = parseInt(req.body.existingRelatedQuestion, 10);
+  const selected = existingRelatedQuestions[selectedIndex];
+
+  if (!selected) {
+    return res.redirect(
+      `${NONE_OF_ABOVE_BASE}?error=select-related&reopen=${prepared.optionIndex}`
+    );
+  }
+
+  prepared.radioList[prepared.listIndex] = {
+    ...prepared.radioList[prepared.listIndex],
+    relatedQuestion: {
+      type: selected.type,
+      label: selected.label,
+      hint: selected.hint || "",
+      settings: selected.settings ? { ...selected.settings } : {},
+      isOptional: Boolean(selected.isOptional),
+    },
+  };
+  setNoneOfTheAboveDraft(req, {
+    radioList: prepared.radioList,
+    optionIndex: prepared.optionIndex,
+    relatedType: selected.type,
+    parentQuestionLabel: prepared.parentQuestionLabel,
+    optionLabel: prepared.optionLabel,
+    noneOfTheAboveMovedFrom: prepared.movedFrom,
+  });
+  return res.redirect(NONE_OF_ABOVE_BASE);
+});
+
+router.post(`${NONE_OF_ABOVE_BASE}/edit-related`, (req, res) => {
+  const relatedType =
+    req.body.relatedType || req.body.relatedQuestionType || "short";
+  const prepared = prepareNoneOfAboveHandoffDraft(req);
+  let existingRelated = null;
+  try {
+    existingRelated = req.body.existingRelated
+      ? JSON.parse(req.body.existingRelated)
+      : null;
+  } catch (e) {
+    existingRelated = null;
+  }
+
+  return startRelatedQuestionEdit(req, res, {
+    radioList: prepared.radioList,
+    optionIndex: prepared.optionIndex,
+    relatedType,
+    parentQuestionLabel: prepared.parentQuestionLabel,
+    optionLabel: prepared.optionLabel,
+    existingRelated,
+    returnUrl: NONE_OF_ABOVE_BASE,
+    draftKey: "noneOfTheAboveDraft",
+    preserveKey: "preserveNoneOfTheAboveDraft",
+  });
+});
 
 // Guidance configuration edit route
 router.get(
@@ -18165,6 +19343,19 @@ function seedRunnerSignInApplicationsPrototype() {
       expiryIso: "2026-06-06T23:59:00+01:00",
     },
     {
+      // Start-page journey 3: complete a form that requires checking, from before submit.
+      id: "app-checker-not-started",
+      formKey: "apply-small-grant",
+      formName: "Apply for a small grant",
+      reference: "N2K-5R8-T3W",
+      status: "Not yet started",
+      step: "organisation",
+      answers: {},
+      checking: { required: true, status: "not_started" },
+      updatedIso: "2026-05-08T10:05:00+01:00",
+      expiryIso: "2026-06-08T23:59:00+01:00",
+    },
+    {
       // All-pages / journeys deep-link: applicant check answers before invite.
       id: "app-checker-ready-to-invite",
       formKey: "apply-small-grant",
@@ -23282,6 +24473,28 @@ router.get("/runner-sign-in-v2/start-page", function (req, res) {
       }
     : null;
 
+  const checkerNotStartedExample = applications.find(
+    (a) => a && a.id === SEED.checkerNotStarted.applicationId
+  );
+  const checkerJourneyApp = checkerNotStartedExample
+    ? {
+        id: checkerNotStartedExample.id,
+        formKey: checkerNotStartedExample.formKey,
+        formName: checkerNotStartedExample.formName,
+        reference: checkerNotStartedExample.reference,
+        hint: "Not yet started",
+      }
+    : null;
+  const awaitingCheckApp = awaitingCheckExample
+    ? {
+        id: awaitingCheckExample.id,
+        formKey: awaitingCheckExample.formKey,
+        formName: awaitingCheckExample.formName,
+        reference: awaitingCheckExample.reference,
+        hint: "Awaiting check",
+      }
+    : null;
+
   const saveAndExitDemoApp = applications.find((a) => a && a.id === RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_APP_ID) || null;
   const saveAndExitDemoStartUrl = "/runner-sign-in-v2/demo/save-and-exit/start-page";
 
@@ -23292,6 +24505,8 @@ router.get("/runner-sign-in-v2/start-page", function (req, res) {
     manageUrl,
     seedApplications,
     copyJourneyApp,
+    checkerJourneyApp,
+    awaitingCheckApp,
     saveAndExitDemoApp,
     saveAndExitDemoStartUrl,
   });
@@ -23343,6 +24558,9 @@ function runnerSignInV2ChooseJourneyHelpers(req) {
     },
     enableEditSubmittedForms: () => setAllowEditSubmissions(data, "yes"),
     enableReusePreviousAnswers: () => setReusePreviousAnswers(data, "yes"),
+    disablePrototypeMode: () => {
+      data.runnerSignInV2PrototypeMode = false;
+    },
   };
 }
 
@@ -23378,6 +24596,39 @@ router.post("/runner-sign-in-v2/choose-journey", function (req, res) {
       })
     );
   }
+
+  runnerSignInV2PrepareChooseJourneySession(req, journeyId, helpers);
+  return res.redirect(redirectUrl);
+});
+
+// Dedicated entry for user research — same setup as choose-journey "return-resubmit".
+router.get("/runner-sign-in-v2/user-research", function (req, res) {
+  const helpers = runnerSignInV2ChooseJourneyHelpers(req);
+  // Always land unsigned so the research session goes through sign-in.
+  helpers.clearAuth();
+  ensureRunnerSignInApplications(req);
+  return res.render("titan-mvp-1.2/runner-sign-in-v2/user-research", {
+    data: ensureRunnerSignInSession(req),
+  });
+});
+
+router.get("/runner-sign-in-v2/user-research.html", function (req, res) {
+  return res.redirect(301, "/runner-sign-in-v2/user-research");
+});
+
+router.post("/runner-sign-in-v2/user-research", function (req, res) {
+  const journeyId = "return-resubmit";
+  const helpers = runnerSignInV2ChooseJourneyHelpers(req);
+  const redirectUrl = runnerSignInV2ChooseJourneyRedirect(journeyId, {
+    demoFormKey: helpers.demoFormKey,
+    demoApplicationId: helpers.demoApplicationId,
+    managePath: runnerSignInV2ManagePath,
+    securityPath: runnerSignInV2SecurityPath,
+    deleteSignInCheckEmailPath: (formKey, applicationId) =>
+      runnerSignInV2SecurityDeleteSignInPath(formKey, applicationId, "check-email"),
+    formStepPath: (formKey, applicationId, step) =>
+      `/runner-sign-in/forms/${encodeURIComponent(formKey)}/${encodeURIComponent(applicationId)}/${encodeURIComponent(step)}`,
+  });
 
   runnerSignInV2PrepareChooseJourneySession(req, journeyId, helpers);
   return res.redirect(redirectUrl);

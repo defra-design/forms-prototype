@@ -77,6 +77,17 @@ router.get(
   }
 );
 
+// View-file URL for user research — use the routed page (session setup on POST).
+router.get(
+  [
+    "/titan-mvp-1.2/runner-sign-in-v2/user-research",
+    "/titan-mvp-1.2/runner-sign-in-v2/user-research.html",
+  ],
+  function (req, res) {
+    return res.redirect(301, "/runner-sign-in-v2/user-research");
+  }
+);
+
 // Import and use titan-mvp-1.2 routes
 router.use("/titan-mvp-1.2", require("./routes/titan-mvp-1.2/routes.js"));
 // Also mount titan-mvp-1.2 routes at root for legacy URLs (e.g. /runner-v5/*)
