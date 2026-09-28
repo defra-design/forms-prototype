@@ -20489,6 +20489,10 @@ function runnerSignInV2RedirectToFormStart(res, application) {
   );
 }
 
+function runnerSignInV2RedirectToCheckAnswers(res, application) {
+  return res.redirect(runnerSignInCheckAnswersUrl(application));
+}
+
 router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/make-changes", function (req, res) {
   const application = runnerSignInV2LoadMakeChangesApplication(req, res);
   if (!application) return;
@@ -20496,7 +20500,7 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/make-changes", func
     return res.redirect(runnerSignInV2ManagePath(application.formKey, application.id));
   }
   if (application.amending) {
-    return runnerSignInV2RedirectToFormStart(res, application);
+    return runnerSignInV2RedirectToCheckAnswers(res, application);
   }
   return res.render("titan-mvp-1.2/runner-sign-in-v2/confirm-resubmit", {
     data: ensureRunnerSignInSession(req),
@@ -20517,7 +20521,7 @@ router.post("/runner-sign-in-v2/forms/:formKey/:applicationId/make-changes", fun
   }
   runnerSignInV2StartAmend(application);
   setRunnerSignInV2ManageFocus(req, application.formKey, application.id);
-  return runnerSignInV2RedirectToFormStart(res, application);
+  return runnerSignInV2RedirectToCheckAnswers(res, application);
 });
 
 router.post("/runner-sign-in/forms/:formKey/:id/send-for-checking", function (req, res) {
@@ -21101,7 +21105,7 @@ router.post("/runner-sign-in/forms/:formKey/:id/:step", function (req, res) {
     return res.redirect("/runner-sign-in/choose-method");
   }
 
-  if (runnerSignInIsCopiedJourney(req.query, application)) {
+  if (runnerSignInIsCopiedJourney(req.query, application) || application.amending) {
     return res.redirect(runnerSignInCheckAnswersUrl(application, req.query));
   }
 
@@ -23706,6 +23710,7 @@ function runnerSignInV2ClearSignIn(data) {
   delete data.runnerSignInV2ChangeEmailPending;
   delete data.runnerSignInV2ChangePhoneEmailVerified;
   delete data.runnerSignInV2DeleteSignInVerified;
+  delete data.runnerSignInV2ResearchExistingAccount;
   delete data.runnerSignInV2Error;
   delete data.runnerSignInError;
 }
@@ -23981,14 +23986,17 @@ function applyRunnerSignInV2EmailAuth(req, email, recoveryMobile) {
 
 /** True when this email already has a recovery phone on the prototype session account. */
 function runnerSignInV2AccountHasRecoveryPhone(data, email) {
-  const knownEmail = String((data && data.runnerSignInEmail) || "")
-    .trim()
-    .toLowerCase();
+  const phone = String((data && data.runnerSignInPhone) || "").trim();
   const submitted = String(email || "")
     .trim()
     .toLowerCase();
-  const phone = String((data && data.runnerSignInPhone) || "").trim();
-  return Boolean(knownEmail && submitted && knownEmail === submitted && phone);
+  if (!phone || !submitted) return false;
+  // User research entry: phone is seeded but email field stays empty — any email counts as known.
+  if (data && data.runnerSignInV2ResearchExistingAccount) return true;
+  const knownEmail = String((data && data.runnerSignInEmail) || "")
+    .trim()
+    .toLowerCase();
+  return Boolean(knownEmail && knownEmail === submitted);
 }
 
 /** After email OTP, ask for a recovery phone when the account is new / phone is missing. */
@@ -24631,6 +24639,10 @@ router.post("/runner-sign-in-v2/user-research", function (req, res) {
   });
 
   runnerSignInV2PrepareChooseJourneySession(req, journeyId, helpers);
+  // Keep existing-account behaviour, but leave the email field blank for research.
+  const data = ensureRunnerSignInSession(req);
+  delete data.runnerSignInEmail;
+  data.runnerSignInV2ResearchExistingAccount = true;
   return res.redirect(redirectUrl);
 });
 
