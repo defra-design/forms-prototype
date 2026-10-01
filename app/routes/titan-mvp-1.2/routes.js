@@ -27969,10 +27969,15 @@ router.get("/runner-sign-in-v2/save-and-exit/with-sign-in/leave", function (req,
 
 router.get("/runner-sign-in-v2/save-and-exit/with-sign-in/resume", function (req, res) {
   const { formKey, applicationId } = runnerSignInV2ReadTriple(req, req.query);
+  if (!formKey || !applicationId) {
+    return res.redirect("/runner-sign-in-v2/start-page");
+  }
+  const application = runnerSignInV2ResolveApplication(req, formKey, applicationId);
   const manageUrl = runnerSignInV2ManagePath(formKey, applicationId);
   const signInUrl = `/runner-sign-in-v2/sign-in/email?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}&next=${encodeURIComponent(manageUrl)}`;
   return res.render("titan-mvp-1.2/runner-sign-in-v2/save-and-exit/with-sign-in/resume", {
     data: ensureRunnerSignInSession(req),
+    application,
     formKey,
     applicationId,
     signInUrl,
