@@ -15,6 +15,18 @@
 {% block content %}
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-full">
+    {% if isPreview %}
+      {% set previewBannerHtml %}
+        <p class="govuk-notification-banner__heading">This is a preview of the Manage form page.</p>
+        <p class="govuk-body">
+          <a class="govuk-notification-banner__link" href="{{ previewBackUrl or '/titan-mvp-1.2/form-editor/advanced-settings/manage-form-guidance' }}">Back to Manage form guidance</a>
+        </p>
+      {% endset %}
+      {{ govukNotificationBanner({
+        titleText: "Preview",
+        html: previewBannerHtml
+      }) }}
+    {% endif %}
     {% if query and query.submitted %}
       {{ govukNotificationBanner({ type: "success", html: "<p class=\"govuk-notification-banner__heading\">Form submitted</p>" }) }}
     {% endif %}
@@ -27,6 +39,12 @@
 
     <span class="govuk-caption-l">Manage your form</span>
     <h1 class="govuk-heading-xl">{{ application.formName }}</h1>
+
+    {% if manageFormGuidanceText %}
+      <div class="govuk-!-margin-bottom-6" style="overflow-wrap: anywhere; word-break: break-word;">
+        {{ manageFormGuidanceText | markdown | safe }}
+      </div>
+    {% endif %}
 
     {# {% if hasUnsubmittedChanges %}
       <p class="govuk-body">You’ve started making changes. Your previous submission stays in place until you submit your changes.</p>

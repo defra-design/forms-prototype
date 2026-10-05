@@ -15,15 +15,7 @@ const { buildLibraryQuery } = require("./lib/build-library-query");
 // Import the marked package for Markdown parsing
 const marked = require("marked");
 
-// Configure marked options
-marked.setOptions({
-  renderer: new marked.Renderer(),
-  gfm: true,
-  breaks: true,
-  pedantic: false,
-});
-
-// Custom renderer for images
+// Custom renderer for GOV.UK-styled Markdown output
 const renderer = new marked.Renderer();
 renderer.image = (href, title, text) => {
   // Clean up the title by removing newlines and extra spaces
@@ -42,15 +34,49 @@ renderer.paragraph = (text) => {
   return `<p class="govuk-body">${text}</p>`;
 };
 
+renderer.heading = (text, level) => {
+  const classes =
+    level === 1
+      ? "govuk-heading-l"
+      : level === 2
+        ? "govuk-heading-m"
+        : "govuk-heading-s";
+  return `<h${level} class="${classes}">${text}</h${level}>`;
+};
+
+renderer.link = (href, title, text) => {
+  const titleAttr = title ? ` title="${title}"` : "";
+  return `<a class="govuk-link" href="${href}"${titleAttr}>${text}</a>`;
+};
+
+renderer.list = (body, ordered) => {
+  const tag = ordered ? "ol" : "ul";
+  const classes = ordered
+    ? "govuk-list govuk-list--number"
+    : "govuk-list govuk-list--bullet";
+  return `<${tag} class="${classes}">${body}</${tag}>`;
+};
+
+marked.setOptions({
+  gfm: true,
+  breaks: true,
+  pedantic: false,
+});
+marked.use({ renderer });
+
+function renderMarkdown(text) {
+  if (!text || typeof text !== "string") return "";
+  return marked.parse(text);
+}
+
+addFilter("markdown", function (text) {
+  return renderMarkdown(text);
+});
+
 // Define filters
 module.exports = function (env) {
   // Define a Markdown filter
-  env.addFilter("markdown", (text) => {
-    if (text && typeof text === "string") {
-      return marked(text, { renderer });
-    }
-    return text;
-  });
+  env.addFilter("markdown", (text) => renderMarkdown(text));
 };
 
 addFunction("require", (path) => {

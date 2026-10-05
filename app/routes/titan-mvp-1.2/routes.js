@@ -2665,6 +2665,23 @@ const ADVANCED_SETTINGS_PAGES = {
     autoEnableWarning:
       "If people can edit a submitted form, the confirmation email and reference number will be switched on automatically.",
   },
+  "manage-form-guidance": {
+    key: "manageFormGuidance",
+    slug: "manage-form-guidance",
+    summaryLabel: "Manage form guidance",
+    summaryValueYes: "Guidance text shown on the Manage form page",
+    summaryValueNo: "No guidance text",
+    label: "Do you want to add guidance text to the Manage form page?",
+    hint:
+      "Use guidance text to help people manage their form. For example, you can explain when to continue an existing form, start a new one, or delete a draft.",
+    yesDescription:
+      "People will see your guidance text when they manage this form.",
+    noDescription:
+      "People will only see the standard status table and actions.",
+    changeHiddenText: "whether to add guidance text to the Manage form page",
+    guidanceLabel: "Guidance text",
+    guidanceHint: "This appears at the top of the Manage form page and you can use Markdown to format it.",
+  },
 };
 
 function enableConfirmationEmailAndReferenceNumber(formData) {
@@ -2677,6 +2694,15 @@ function resolveAdvancedSettingsYesNo(...candidates) {
     if (value === "yes" || value === "no") return value;
   }
   return "no";
+}
+
+function truncateAdvancedSettingsSummaryText(text, maxLength = 80) {
+  const normalised = String(text || "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!normalised) return "Not added yet";
+  if (normalised.length <= maxLength) return normalised;
+  return `${normalised.slice(0, maxLength - 1).trimEnd()}…`;
 }
 
 function setReusePreviousAnswers(formData, value) {
@@ -2724,6 +2750,8 @@ function getAdvancedSettings(formData) {
       formData.savedAnswersEnabled
     ),
     allowEditSubmissions: resolveAdvancedSettingsYesNo(settings.allowEditSubmissions),
+    manageFormGuidance: resolveAdvancedSettingsYesNo(settings.manageFormGuidance),
+    manageFormGuidanceText: settings.manageFormGuidanceText || "",
   };
 }
 
@@ -2734,24 +2762,37 @@ function runnerSignInV2AllowEditSubmissions(req) {
 
 function getAdvancedSettingsSummaryRows(formData) {
   const data = getAdvancedSettings(formData);
-  const rows = Object.values(ADVANCED_SETTINGS_PAGES).map((setting) => ({
-    key: { text: setting.summaryLabel },
-    value: {
-      text:
-        data[setting.key] === "yes"
-          ? setting.summaryValueYes
-          : setting.summaryValueNo,
-    },
-    actions: {
-      items: [
-        {
-          href: `/titan-mvp-1.2/form-editor/advanced-settings/${setting.slug}`,
-          text: "Change",
-          visuallyHiddenText: setting.changeHiddenText,
-        },
-      ],
-    },
-  }));
+  const rows = Object.values(ADVANCED_SETTINGS_PAGES).map((setting) => {
+    let valueText =
+      data[setting.key] === "yes"
+        ? setting.summaryValueYes
+        : setting.summaryValueNo;
+
+    if (
+      setting.slug === "manage-form-guidance" &&
+      data.manageFormGuidance === "yes"
+    ) {
+      valueText = truncateAdvancedSettingsSummaryText(
+        data.manageFormGuidanceText || "Not added yet"
+      );
+    }
+
+    return {
+      key: { text: setting.summaryLabel },
+      value: {
+        text: valueText,
+      },
+      actions: {
+        items: [
+          {
+            href: `/titan-mvp-1.2/form-editor/advanced-settings/${setting.slug}`,
+            text: "Change",
+            visuallyHiddenText: setting.changeHiddenText,
+          },
+        ],
+      },
+    };
+  });
 
   if (data.checkBeforeSubmission === "yes") {
     const checkSetting = ADVANCED_SETTINGS_PAGES["check-before-submission"];
@@ -3206,6 +3247,29 @@ router.get(
 );
 
 router.get(
+  "/titan-mvp-1.2/form-editor/advanced-settings/static/manage-form-guidance/:variant",
+  function (req, res) {
+    const context = buildStaticAdvancedSettingsChangeContext(
+      "manage-form-guidance",
+      req.params.variant
+    );
+    if (!context) {
+      return res.redirect("/titan-mvp-1.2/form-editor/advanced-settings/static");
+    }
+    res.render("titan-mvp-1.2/form-editor/advanced-settings/change", context);
+  }
+);
+
+router.get(
+  "/titan-mvp-1.2/form-editor/advanced-settings/static/manage-form-guidance/:variant.html",
+  function (req, res) {
+    res.redirect(
+      `/titan-mvp-1.2/form-editor/advanced-settings/static/manage-form-guidance/${req.params.variant}`
+    );
+  }
+);
+
+router.get(
   "/titan-mvp-1.2/form-editor/advanced-settings/static/:variant",
   function (req, res) {
     const context = buildStaticAdvancedSettingsOverviewContext(req.params.variant);
@@ -3413,6 +3477,92 @@ function renderAdvancedSettingsChange(req, res) {
   });
 }
 
+function renderManageFormGuidancePreview(req, res, options = {}) {
+  const formData = req.session.data || {};
+  const settings = getAdvancedSettings(formData);
+  const selectedValue =
+    options.manageFormGuidance === "yes" || options.manageFormGuidance === "no"
+      ? options.manageFormGuidance
+      : settings.manageFormGuidance;
+  const guidanceTextRaw =
+    typeof options.manageFormGuidanceText === "string"
+      ? options.manageFormGuidanceText
+      : settings.manageFormGuidanceText || "";
+  const manageFormGuidanceText =
+    selectedValue === "yes" ? String(guidanceTextRaw || "").trim() : "";
+
+  if (options.fromPost && selectedValue === "yes" && !manageFormGuidanceText) {
+    return res.render("titan-mvp-1.2/form-editor/advanced-settings/change", {
+      data: {
+        ...settings,
+        manageFormGuidance: selectedValue,
+        manageFormGuidanceText: guidanceTextRaw,
+      },
+      setting: ADVANCED_SETTINGS_PAGES["manage-form-guidance"],
+      form: {
+        name: formData.formName || "Form name",
+      },
+      errors: {
+        manageFormGuidanceText: "Enter guidance text",
+      },
+    });
+  }
+
+  const formName = formData.formName || "Apply to volunteer";
+  const application = {
+    id: "app-guidance-preview",
+    formKey: "volunteer-application",
+    formName,
+    reference: "D8M-4K2-R9N",
+    status: "Draft",
+  };
+  const statusText = "In progress";
+  const statusTagClasses = "govuk-tag--teal";
+  const tableRow = {
+    reference: application.reference,
+    referenceHtml: application.reference,
+    statusText,
+    statusTagClasses,
+    lastUpdatedText: "Today",
+    expiryText: "In 28 days",
+    actionsHtml:
+      '<a class="govuk-link" href="#">Continue</a> <span class="govuk-body govuk-!-margin-left-2 govuk-!-margin-right-2">|</span> <a class="govuk-link" href="#">Delete</a>',
+  };
+
+  return res.render("titan-mvp-1.2/runner-sign-in-v2/manage-form", {
+    data: formData,
+    application,
+    tableRow,
+    tableRows: [tableRow],
+    query: {},
+    manageFormGuidanceText,
+    startNewUrl: "#",
+    isPreview: true,
+    previewBackUrl: "/titan-mvp-1.2/form-editor/advanced-settings/manage-form-guidance",
+    checkingRequired: false,
+    canMakeChanges: false,
+    hasUnsubmittedChanges: false,
+  });
+}
+
+router.get(
+  "/titan-mvp-1.2/form-editor/advanced-settings/manage-form-guidance/preview",
+  function (req, res) {
+    renderManageFormGuidancePreview(req, res);
+  }
+);
+
+router.post(
+  "/titan-mvp-1.2/form-editor/advanced-settings/manage-form-guidance/preview",
+  function (req, res) {
+    renderManageFormGuidancePreview(req, res, {
+      fromPost: true,
+      manageFormGuidance: req.body.manageFormGuidance || "no",
+      manageFormGuidanceText: req.body.manageFormGuidanceText || "",
+    });
+  }
+);
+
 router.get(
   "/titan-mvp-1.2/form-editor/advanced-settings/:setting",
   renderAdvancedSettingsChange
@@ -3496,6 +3646,36 @@ router.post(
 
     if (setting.slug === "edit-submitted-form") {
       setAllowEditSubmissions(formData, selectedValue);
+    }
+
+    if (setting.slug === "manage-form-guidance") {
+      const manageFormGuidanceText = String(
+        req.body.manageFormGuidanceText || ""
+      ).trim();
+      const errors = {};
+
+      if (selectedValue === "yes" && !manageFormGuidanceText) {
+        errors.manageFormGuidanceText = "Enter guidance text";
+      }
+
+      if (Object.keys(errors).length) {
+        return res.render("titan-mvp-1.2/form-editor/advanced-settings/change", {
+          data: {
+            ...getAdvancedSettings(formData),
+            manageFormGuidance: selectedValue,
+            manageFormGuidanceText,
+          },
+          setting,
+          form: {
+            name: formData.formName || "Form name",
+          },
+          errors,
+        });
+      }
+
+      formData.advancedSettings.manageFormGuidance = selectedValue;
+      formData.advancedSettings.manageFormGuidanceText =
+        selectedValue === "yes" ? manageFormGuidanceText : "";
     }
 
     req.session.data = formData;
@@ -27916,6 +28096,11 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/manage", function (
   const viewSubmissionUrl = runnerSignInV2ViewSubmissionPath(application.formKey, application.id);
   const canMakeChanges = (application.status === "Submitted" || Boolean(application.amending)) && allowEditSubmissions;
   const hasUnsubmittedChanges = Boolean(application.amending);
+  const advancedSettings = getAdvancedSettings(data);
+  const manageFormGuidanceText =
+    advancedSettings.manageFormGuidance === "yes"
+      ? String(advancedSettings.manageFormGuidanceText || "").trim()
+      : "";
 
   return res.render("titan-mvp-1.2/runner-sign-in-v2/manage-form", {
     data,
@@ -27943,6 +28128,7 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/manage", function (
     viewSubmissionUrl,
     canMakeChanges,
     hasUnsubmittedChanges,
+    manageFormGuidanceText,
   });
 });
 

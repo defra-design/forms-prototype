@@ -51,7 +51,7 @@ href: backUrl
 
             <span class="govuk-caption-l">{{ form.name }}</span>
 
-            {% if errors and (errors.whoCanCheckDescription or errors.checkBeforeSubmissionOptional) %}
+            {% if errors and (errors.whoCanCheckDescription or errors.checkBeforeSubmissionOptional or errors.manageFormGuidanceText) %}
             {% set errorList = [] %}
             {% if errors.whoCanCheckDescription %}
             {% set errorList = (errorList.push({
@@ -63,6 +63,12 @@ href: backUrl
             {% set errorList = (errorList.push({
             text: errors.checkBeforeSubmissionOptional,
             href: "#check-before-submission-optional"
+            }), errorList) %}
+            {% endif %}
+            {% if errors.manageFormGuidanceText %}
+            {% set errorList = (errorList.push({
+            text: errors.manageFormGuidanceText,
+            href: "#manage-form-guidance-text"
             }), errorList) %}
             {% endif %}
             {{ govukErrorSummary({
@@ -152,6 +158,58 @@ href: backUrl
             }
             ]
             }) }}
+            {% elif setting.slug == "manage-form-guidance" %}
+            {% set markdownHelpHtml %}{% include "titan-mvp-1.2/form-editor/welsh-translation/_markdown-help-panel.html" %}{% endset %}
+            {% set guidanceTextHtml %}
+            {{ govukTextarea({
+            id: "manage-form-guidance-text",
+            name: "manageFormGuidanceText",
+            value: data.manageFormGuidanceText,
+            label: {
+            text: setting.guidanceLabel
+            },
+            hint: {
+            text: setting.guidanceHint
+            },
+            errorMessage: {
+            text: errors.manageFormGuidanceText
+            } if errors and errors.manageFormGuidanceText else false
+            }) }}
+
+            {{ govukDetails({
+            summaryText: "Help with Markdown",
+            html: markdownHelpHtml
+            }) }}
+            {% endset -%}
+
+            {{ govukRadios({
+            name: setting.key,
+            fieldset: {
+            legend: {
+            text: setting.label,
+            isPageHeading: true,
+            classes: "govuk-fieldset__legend--l"
+            }
+            },
+            hint: {
+            text: setting.hint
+            },
+            items: [
+            {
+            value: "yes",
+            text: "Yes",
+            checked: data[setting.key] == "yes",
+            conditional: {
+            html: guidanceTextHtml
+            }
+            },
+            {
+            value: "no",
+            text: "No",
+            checked: data[setting.key] == "no" or not data[setting.key]
+            }
+            ]
+            }) }}
             {% else %}
             {{ govukRadios({
             classes: "govuk-radios--inline",
@@ -196,16 +254,30 @@ href: backUrl
             <p class="govuk-body govuk-!-margin-bottom-0">{{ setting.noDescription }}</p>
             {% endset %}
 
+            {% if setting.slug != "manage-form-guidance" %}
             {{ govukDetails({
             summaryText: "What your choice means",
             html: detailsHtml,
             classes: "govuk-!-margin-top-6 govuk-!-margin-bottom-6"
             }) }}
+            {% endif %}
 
-            {{ govukButton({
-            text: "Save and continue",
-            disabled: staticPage
-            }) }}
+            <div class="govuk-button-group">
+              {{ govukButton({
+              text: "Save changes" if setting.slug == "manage-form-guidance" else "Save and continue",
+              disabled: staticPage
+              }) }}
+              {% if setting.slug == "manage-form-guidance" and not staticPage %}
+              {{ govukButton({
+              text: "Preview page",
+              classes: "govuk-button--secondary",
+              attributes: {
+                formaction: "/titan-mvp-1.2/form-editor/advanced-settings/manage-form-guidance/preview",
+                formmethod: "post"
+              }
+              }) }}
+              {% endif %}
+            </div>
 
         </form>
 
@@ -215,6 +287,9 @@ href: backUrl
           {% if setting.slug == "edit-submitted-form" %}
           <li><a class="govuk-link" href="/runner-sign-in-v2/forms/volunteer-application/app-1721152526408/manage">Manage your form (submitted volunteer example)</a></li>
           <li><a class="govuk-link" href="/runner-sign-in-v2/forms/volunteer-application/app-1721152526408/make-changes">Edit form</a></li>
+          {% elif setting.slug == "manage-form-guidance" %}
+          <li><a class="govuk-link" href="/runner-sign-in-v2/forms/volunteer-application/app-1721152526408/manage">Manage your form (submitted volunteer example)</a></li>
+          <li><a class="govuk-link" href="/runner-sign-in-v2/forms/report-local-issue/app-1721152526404/manage">Manage your form (in-progress example)</a></li>
           {% else %}
           <li><a class="govuk-link" href="/runner-sign-in-v2/emails/form-submitted?formKey=volunteer-application&applicationId=app-save-exit-demo">Form submitted email (copied answers)</a></li>
           <li><a class="govuk-link" href="/runner-sign-in-v2/emails/form-submitted/public?formKey=volunteer-application&applicationId=app-save-exit-demo">Form submitted email – public view (copied answers)</a></li>
