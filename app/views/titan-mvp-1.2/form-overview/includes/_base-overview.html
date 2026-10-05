@@ -17,10 +17,20 @@ text: "Forms library",
 id: "nav-library"
 },
 {
-href: "/titan-mvp-1.2/form-overview/{{ form.id }}",
+href: "/titan-mvp-1.2/form-overview/index/",
 text: "Overview",
 id: "nav-overview",
 active: true
+},
+{
+href: "/titan-mvp-1.2/form-overview/submissions/improved-2-table",
+text: "Responses",
+id: "nav-responses"
+},
+{
+href: "/titan-mvp-1.2/form-overview/form-history",
+text: "Form history",
+id: "nav-history"
 },
 {
 href: "/titan-mvp-1.2/form-editor/listing",
@@ -48,28 +58,24 @@ href: "/titan-mvp-1.2/library"
         <h1 class="govuk-heading-xl">{{ form.name }}</h1>
 
         {% include "titan-mvp-1.2/form-overview/includes/_form-status.html" %}
+        {% include "titan-mvp-1.2/form-overview/includes/_organisation-details.html" %}
         {% include "titan-mvp-1.2/form-overview/includes/_submission-details.html" %}
         {% include "titan-mvp-1.2/form-overview/includes/_support-details.html" %}
         {% include "titan-mvp-1.2/form-overview/includes/_next-steps.html" %}
         {% include "titan-mvp-1.2/form-overview/includes/_data-protection.html" %}
-        {% include "titan-mvp-1.2/form-overview/includes/_organisation-details.html" %}
     </div>
 
     <div class="govuk-grid-column-one-third-from-desktop">
         <div style="background-color: #f3f2f1; padding: 15px;">
             <h2 class="govuk-heading-m">{{ commonTerms.form_editor.overview.manage_form.title }}</h2>
 
-            <a href="/titan-mvp-1.2/form-overview/manage-form/migrate-confirmation"
-                class="gem-c-button govuk-button gem-c-button--secondary" style="width: 100%; margin-bottom: 15px;">Edit
-                draft (new
-                editor)</a>
-
+            {% if not form.status or form.status.text === "Draft" %}
             <a href="/titan-mvp-1.2/form-editor/listing"
                 class="gem-c-button govuk-button gem-c-button-publishing--secondary-quiet"
-                style="width: 100%; margin-bottom: 15px;">Edit draft</a>
+                style="width: 100%; margin-bottom: 15px;">{{ commonTerms.form_editor.overview.manage_form.edit_draft }}</a>
 
             <a href="/titan-mvp-1.2/form-overview/manage-form/make-draft-live/passed-validation">
-                <button type="submit" class="govuk-button" data-module="govuk-button"
+                <button type="button" class="govuk-button" data-module="govuk-button"
                     style="width: 100%; margin-bottom: 15px;">
                     {{ commonTerms.form_editor.overview.manage_form.make_live }}
                 </button>
@@ -77,6 +83,46 @@ href: "/titan-mvp-1.2/library"
 
             <a href="/titan-mvp-1.2/form-overview/manage-form/delete-draft" class="govuk-link">{{
                 commonTerms.form_editor.overview.manage_form.delete_draft }}</a>
+            {% endif %}
+
+            {% if form.status.text === "Live" %}
+            <a href="/titan-mvp-1.2/form-overview/live-draft">
+                <button type="button" class="govuk-button" data-module="govuk-button"
+                    style="width: 100%; margin-bottom: 15px;">
+                    {{ commonTerms.form_editor.overview.manage_form.create_draft }}
+                </button>
+            </a>
+
+            <a href="/titan-mvp-1.2/form-overview/manage-form/take-offline/confirm">
+                <button type="button" class="govuk-button govuk-button--secondary" data-module="govuk-button"
+                    style="width: 100%; margin-bottom: 15px;">
+                    {{ commonTerms.form_editor.overview.manage_form.take_offline }}
+                </button>
+            </a>
+            {% endif %}
+
+            {% if form.status.text === "Draft-Live" %}
+            <a href="/titan-mvp-1.2/form-editor/listing"
+                class="gem-c-button govuk-button gem-c-button-publishing--secondary-quiet"
+                style="width: 100%; margin-bottom: 15px;">{{ commonTerms.form_editor.overview.manage_form.edit_draft }}</a>
+
+            <a href="/titan-mvp-1.2/form-overview/manage-form/make-draft-live/passed-validation">
+                <button type="button" class="govuk-button" data-module="govuk-button"
+                    style="width: 100%; margin-bottom: 15px;">
+                    {{ commonTerms.form_editor.overview.manage_form.make_live }}
+                </button>
+            </a>
+
+            <a href="/titan-mvp-1.2/form-overview/manage-form/take-offline/confirm">
+                <button type="button" class="govuk-button govuk-button--secondary" data-module="govuk-button"
+                    style="width: 100%; margin-bottom: 15px;">
+                    {{ commonTerms.form_editor.overview.manage_form.take_offline }}
+                </button>
+            </a>
+
+            <a href="/titan-mvp-1.2/form-overview/manage-form/delete-draft" class="govuk-link">{{
+                commonTerms.form_editor.overview.manage_form.delete_draft }}</a>
+            {% endif %}
         </div>
 
 

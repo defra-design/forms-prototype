@@ -1,78 +1,92 @@
 {% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
 
-<h2 class="govuk-heading-m govuk-!-padding-top-2">
-    {{ commonTerms.form_editor.overview.sections.organisation.title }}
-</h2>
+<div class="govuk-!-margin-top-6 govuk-!-margin-bottom-4" style="background-color: #f3f2f1; padding: 20px 20px 5px;">
+    <h2 class="govuk-heading-m">
+        {{ commonTerms.form_editor.overview.sections.organisation.title }}
+    </h2>
 
-{{ govukSummaryList({
-rows: [
-{
-key: {
-text: commonTerms.form_editor.overview.sections.organisation.form_name.label
-},
-value: {
-text: form.name
-},
-actions: {
-items: [
-{
-href: "/titan-mvp-1.2/form-overview/index/organisation/form-name",
-text: commonTerms.form_editor.overview.sections.organisation.form_name.change,
-visuallyHiddenText: commonTerms.form_editor.overview.sections.organisation.form_name.label
-}
-]
-}
-},
-{
-key: {
-text: commonTerms.form_editor.overview.sections.organisation.lead_org.label
-},
-value: {
-text: form.organisation.name
-},
-actions: {
-items: [
-{
-href: "/titan-mvp-1.2/create-new-form/organisation-name",
-text: commonTerms.form_editor.overview.sections.organisation.lead_org.change,
-visuallyHiddenText: commonTerms.form_editor.overview.sections.organisation.lead_org.label
-}
-]
-}
-},
-{
-key: {
-text: "Team name"
-},
-value: {
-text: form.team.name
-},
-actions: {
-items: [
-{
-href: "/titan-mvp-1.2/create-new-form/policy-sme",
-text: "Change",
-visuallyHiddenText: "team name"
-}
-]
-}
-},
-{
-key: {
-text: "Shared email address"
-},
-value: {
-text: form.team.email
-},
-actions: {
-items: [
-{
-href: "/titan-mvp-1.2/create-new-form/policy-sme",
-text: "Change",
-visuallyHiddenText: "shared email address"
-}
-]
-}
-}
-]
-}) }}
+    <p class="govuk-body">{{ commonTerms.form_editor.overview.sections.organisation.description }}</p>
+
+    {% set sharedEmailHtml %}
+    <a href="/titan-mvp-1.2/create-new-form/policy-sme" class="govuk-link govuk-link--no-visited-state">
+        {{ commonTerms.form_editor.overview.sections.organisation.shared_email.add }}
+    </a>
+    {% endset %}
+
+    {% set sharedEmailValue = form.team.email if form.team.email and form.team.email !== "Not set" else null %}
+
+    {% set sharedEmailActions = {
+    items: [
+    {
+    href: "/titan-mvp-1.2/create-new-form/policy-sme",
+    text: "Change",
+    visuallyHiddenText: commonTerms.form_editor.overview.sections.organisation.shared_email.label
+    }
+    ]
+    } if sharedEmailValue else null %}
+
+    {{ govukSummaryList({
+    rows: [
+    {
+    key: {
+    text: commonTerms.form_editor.overview.sections.organisation.form_name.label
+    },
+    value: {
+    text: form.name
+    },
+    actions: {
+    items: [
+    {
+    href: "/titan-mvp-1.2/form-overview/index/organisation/form-name",
+    text: commonTerms.form_editor.overview.sections.organisation.form_name.change,
+    visuallyHiddenText: commonTerms.form_editor.overview.sections.organisation.form_name.label
+    }
+    ]
+    }
+    },
+    {
+    key: {
+    text: commonTerms.form_editor.overview.sections.organisation.lead_org.label
+    },
+    value: {
+    text: form.organisation.name
+    },
+    actions: {
+    items: [
+    {
+    href: "/titan-mvp-1.2/create-new-form/organisation-name",
+    text: commonTerms.form_editor.overview.sections.organisation.lead_org.change,
+    visuallyHiddenText: commonTerms.form_editor.overview.sections.organisation.lead_org.label
+    }
+    ]
+    }
+    },
+    {
+    key: {
+    text: commonTerms.form_editor.overview.sections.organisation.team_name.label
+    },
+    value: {
+    text: form.team.name
+    },
+    actions: {
+    items: [
+    {
+    href: "/titan-mvp-1.2/create-new-form/policy-sme",
+    text: "Change",
+    visuallyHiddenText: commonTerms.form_editor.overview.sections.organisation.team_name.label
+    }
+    ]
+    }
+    },
+    {
+    key: {
+    text: commonTerms.form_editor.overview.sections.organisation.shared_email.label
+    },
+    value: {
+    html: sharedEmailValue or sharedEmailHtml
+    },
+    actions: sharedEmailActions
+    }
+    ]
+    }) }}
+</div>

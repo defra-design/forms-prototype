@@ -16,19 +16,19 @@
 
     <div class="govuk-summary-list__row">
         <dt class="govuk-summary-list__key">
-            {{ commonTerms.form_editor.overview.sections.form_status.created }}
+            {{ commonTerms.form_editor.overview.sections.form_status.updated }}
         </dt>
         <dd class="govuk-summary-list__value">
-            {{ form.createdAt | date("DD MMM YYYY") }} by {{ form.createdBy }}
+            {{ form.updatedAt | date("DD MMM YYYY") }} by {{ form.updatedBy }}
         </dd>
     </div>
 
     <div class="govuk-summary-list__row">
         <dt class="govuk-summary-list__key">
-            Updated
+            {{ commonTerms.form_editor.overview.sections.form_status.created }}
         </dt>
         <dd class="govuk-summary-list__value">
-            {{ form.updatedAt | date("DD MMM YYYY") }} by {{ form.updatedBy }}
+            {{ form.createdAt | date("DD MMM YYYY") }} by {{ form.createdBy }}
         </dd>
     </div>
 
@@ -59,12 +59,23 @@
 
     <div class="govuk-summary-list__row">
         <dt class="govuk-summary-list__key">
-            Went live
+            {{ commonTerms.form_editor.overview.sections.form_status.made_live }}
         </dt>
         <dd class="govuk-summary-list__value">
             {{ form.publishedAt | date("DD MMM YYYY") }} by {{ form.publishedBy }}
         </dd>
     </div>
+
+    {% if form.liveUpdatedAt or form.lastUpdatedAt %}
+    <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+            {{ commonTerms.form_editor.overview.sections.form_status.last_updated }}
+        </dt>
+        <dd class="govuk-summary-list__value">
+            {{ (form.liveUpdatedAt or form.lastUpdatedAt) | date("DD MMM YYYY") }} by {{ form.liveUpdatedBy or form.lastUpdatedBy or form.updatedBy }}
+        </dd>
+    </div>
+    {% endif %}
 
     <div class="govuk-summary-list__row">
         <dt class="govuk-summary-list__key">
@@ -78,7 +89,7 @@
 
     <div class="govuk-summary-list__row">
         <dt class="govuk-summary-list__key">
-            Live link
+            {{ commonTerms.form_editor.overview.sections.form_status.live_link }}
         </dt>
         <dd class="govuk-summary-list__value" style="padding-right:0!important;">
             <a href="{{ form.liveUrl }}" class="govuk-link" rel="noreferrer noopener" target="_blank">{{
@@ -104,19 +115,19 @@
 
     <div class="govuk-summary-list__row">
         <dt class="govuk-summary-list__key">
-            {{ commonTerms.form_editor.overview.sections.form_status.created }}
+            {{ commonTerms.form_editor.overview.sections.form_status.updated }}
         </dt>
         <dd class="govuk-summary-list__value">
-            {{ form.draftCreatedAt | date("DD MMM YYYY") }} by {{ form.draftCreatedBy }}
+            {{ form.updatedAt | date("DD MMM YYYY") }} by {{ form.updatedBy }}
         </dd>
     </div>
 
     <div class="govuk-summary-list__row">
         <dt class="govuk-summary-list__key">
-            Updated
+            {{ commonTerms.form_editor.overview.sections.form_status.created }}
         </dt>
         <dd class="govuk-summary-list__value">
-            {{ form.updatedAt | date("DD MMM YYYY") }} by {{ form.updatedBy }}
+            {{ form.draftCreatedAt | date("DD MMM YYYY") }} by {{ form.draftCreatedBy }}
         </dd>
     </div>
 
@@ -147,26 +158,37 @@
 
     <div class="govuk-summary-list__row">
         <dt class="govuk-summary-list__key">
-            Went live
+            {{ commonTerms.form_editor.overview.sections.form_status.made_live }}
         </dt>
         <dd class="govuk-summary-list__value">
             {{ form.publishedAt | date("DD MMM YYYY") }} by {{ form.publishedBy }}
         </dd>
     </div>
 
+    {% if form.liveUpdatedAt or form.lastUpdatedAt %}
+    <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+            {{ commonTerms.form_editor.overview.sections.form_status.last_updated }}
+        </dt>
+        <dd class="govuk-summary-list__value">
+            {{ (form.liveUpdatedAt or form.lastUpdatedAt) | date("DD MMM YYYY") }} by {{ form.liveUpdatedBy or form.lastUpdatedBy or form.updatedBy }}
+        </dd>
+    </div>
+    {% endif %}
+
     <div class="govuk-summary-list__row">
         <dt class="govuk-summary-list__key">
             {{ commonTerms.form_editor.overview.sections.form_status.preview_link }}
         </dt>
         <dd class="govuk-summary-list__value" style="padding-right:0!important;">
-            <a href="{{ form.previewUrl }}" class="govuk-link" rel="noreferrer noopener" target="_blank">{{
-                form.previewUrl }} (opens in new tab)</a>
+            <a href="{{ form.livePreviewUrl or form.previewUrl }}" class="govuk-link" rel="noreferrer noopener" target="_blank">{{
+                form.livePreviewUrl or form.previewUrl }} (opens in new tab)</a>
         </dd>
     </div>
 
     <div class="govuk-summary-list__row">
         <dt class="govuk-summary-list__key">
-            Live link
+            {{ commonTerms.form_editor.overview.sections.form_status.live_link }}
         </dt>
         <dd class="govuk-summary-list__value" style="padding-right:0!important;">
             <a href="{{ form.liveUrl }}" class="govuk-link" rel="noreferrer noopener" target="_blank">{{

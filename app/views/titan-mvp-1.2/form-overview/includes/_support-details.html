@@ -5,7 +5,6 @@
 </h2>
 
 <p class="govuk-body">{{ commonTerms.form_editor.overview.sections.support.description }}</p>
-<p class="govuk-body">{{ commonTerms.form_editor.overview.sections.support.footer_note }}</p>
 
 {% set phoneHtml %}
 <a href="/titan-mvp-1.2/form-overview/index/support/phone" class="govuk-link govuk-link--no-visited-state">
@@ -23,6 +22,15 @@
 <a href="/titan-mvp-1.2/form-overview/index/support/link" class="govuk-link govuk-link--no-visited-state">
     {{ commonTerms.form_editor.overview.sections.support.link.add }}
 </a>
+{% endset %}
+
+{% set emailValueHtml %}
+{% if form.support.email %}
+{{ form.support.email }}
+<p class="govuk-body govuk-!-margin-top-1 govuk-!-margin-bottom-0">{{ form.support.responseTime or commonTerms.form_editor.overview.sections.support.email.default_response_time }}</p>
+{% else %}
+{{ emailHtml | safe }}
+{% endif %}
 {% endset %}
 
 {% set phoneActions = {
@@ -71,7 +79,7 @@ key: {
 text: commonTerms.form_editor.overview.sections.support.email.label
 },
 value: {
-html: form.support.email or emailHtml
+html: emailValueHtml
 },
 actions: emailActions
 },

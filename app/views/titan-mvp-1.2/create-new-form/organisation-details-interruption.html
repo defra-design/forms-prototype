@@ -1,0 +1,51 @@
+{% extends "layouts/main.html" %}
+
+{% from "components/service-header/macro.njk" import serviceHeader %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% set pageName = "Before you continue - Create a new form" %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Forms designer",
+serviceName: "",
+accountName: "Chris Smith",
+homepageLink: "/",
+signOutLink: "/titan-mvp-1.2/onboarding/sign-out-confirmation",
+navigationItems: [{
+href: "/titan-mvp-1.2/library",
+text: "Forms library",
+id: "titan-mvp-1.2/library"
+}]
+}) }}
+{% endblock %}
+
+{% block beforeContent %}
+{{ govukBackLink({
+text: "Back",
+href: "/titan-mvp-1.2/create-new-form/form-name"
+}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+<div class="moj-interruption-card">
+  <div class="moj-interruption-card__content">
+    <h1 class="govuk-heading-xl moj-interruption-card__heading">Before you continue</h1>
+    <div class="govuk-body moj-interruption-card__body">
+      <p>You’ll need to add organisation and team details for this form, including a shared team email address.</p>
+      <p>We'll use this information to contact the team responsible for managing the form when needed.</p>
+    </div>
+    <div class="govuk-button-group moj-interruption-card__actions">
+      {{ govukButton({
+        text: "Continue",
+        classes: "govuk-button--inverse",
+        href: "/titan-mvp-1.2/create-new-form/organisation-name"
+      }) }}
+        </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

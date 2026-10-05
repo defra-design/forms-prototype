@@ -458,7 +458,10 @@
           "status": "Status",
           "updated": "Updated",
           "created": "Created",
-          "preview_link": "Preview link"
+          "made_live": "Made live",
+          "last_updated": "Last updated",
+          "preview_link": "Preview link",
+          "live_link": "Live link"
         },
         "submission": {
           "title": "Where submitted forms are sent",
@@ -467,7 +470,7 @@
         },
         "support": {
           "title": "Contact details for support",
-          "description": "You must provide at least one way for users to get help.",
+          "description": "You must provide at least one way for users to get help. The contact details are shown in the footer of every page of the form.",
           "footer_note": "The contact details are shown in the footer of every page of the form.",
           "phone": {
             "label": "Phone",
@@ -477,7 +480,8 @@
           "email": {
             "label": "Email address",
             "add": "Enter email address for support",
-            "change": "Change"
+            "change": "Change",
+            "default_response_time": "We aim to respond within 2 working days."
           },
           "link": {
             "label": "Online contact link",
@@ -497,10 +501,15 @@
             "label": "Privacy notice",
             "add": "Enter link to privacy notice",
             "change": "Change"
+          },
+          "terms_and_conditions": {
+            "label": "Terms and conditions",
+            "agreed": "Agreed"
           }
         },
         "organisation": {
           "title": "Organisation details",
+          "description": "These details identify the organisation and team responsible for the form. We'll use them if we need to contact you about it.",
           "form_name": {
             "label": "Form name",
             "change": "Change"
@@ -508,6 +517,16 @@
           "lead_org": {
             "label": "Lead organisation",
             "change": "Change"
+          },
+          "team_name": {
+            "label": "Team name",
+            "change": "Change"
+          },
+          "shared_email": {
+            "label": "Shared team email address",
+            "add": "Enter shared team email address",
+            "change": "Change",
+            "requirement": "Every form must have a shared team email address. We'll use this to contact the team responsible for the form."
           }
         }
       },
@@ -515,6 +534,8 @@
         "title": "Manage form",
         "edit_draft": "Edit draft",
         "make_live": "Make draft live",
+        "create_draft": "Create draft to edit",
+        "take_offline": "Take form offline",
         "delete_draft": "Delete draft"
       },
       "internal_notes": {
