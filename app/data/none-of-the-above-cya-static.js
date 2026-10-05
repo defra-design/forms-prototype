@@ -31,6 +31,32 @@ const VARIANTS = [
     ],
   },
   {
+    slug: "checkboxes-option-with-related",
+    title: "Checkboxes – Listed option with related question",
+    description:
+      "Someone selected a listed option that has a related question. The follow-up appears as its own row.",
+    questionType: "checkboxes",
+    rows: [
+      {
+        key: "Organisation name",
+        value: "Riverside Community Garden",
+      },
+      {
+        key: "Which improvements will you make?",
+        value: "Tree planting",
+      },
+      {
+        key: "How many trees will you plant?",
+        value: "250",
+        optional: false,
+      },
+      {
+        key: "Amount requested",
+        value: "£1,500",
+      },
+    ],
+  },
+  {
     slug: "checkboxes-options-selected",
     title: "Checkboxes – Listed options selected",
     description:
@@ -69,6 +95,32 @@ const VARIANTS = [
       {
         key: "Tell us how volunteers will be supervised",
         value: "A trained site lead will be on site during every session",
+        optional: false,
+      },
+      {
+        key: "Amount requested",
+        value: "£1,500",
+      },
+    ],
+  },
+  {
+    slug: "radios-option-with-related",
+    title: "Radios – Listed option with related question",
+    description:
+      "Someone selected a listed option that has a related question. The follow-up appears as its own row.",
+    questionType: "radios",
+    rows: [
+      {
+        key: "Organisation name",
+        value: "Riverside Community Garden",
+      },
+      {
+        key: "How will volunteers be supervised?",
+        value: "By a named volunteer coordinator",
+      },
+      {
+        key: "Name of the volunteer coordinator",
+        value: "Sam Patel",
         optional: false,
       },
       {
