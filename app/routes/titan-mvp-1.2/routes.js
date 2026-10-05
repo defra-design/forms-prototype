@@ -24,6 +24,10 @@ const {
   buildStaticConditionDeleteIndexContext,
 } = require("../../data/conditions-manager-static");
 const {
+  buildStaticIndexContext: buildNoneOfTheAboveCyaStaticIndexContext,
+  buildStaticVariantContext: buildNoneOfTheAboveCyaStaticVariantContext,
+} = require("../../data/none-of-the-above-cya-static");
+const {
   enrichConditionsWithUsedInLabels,
   getEmailAddressesForCondition,
 } = require("../../lib/titan-mvp-1.2/condition-usage");
@@ -9711,6 +9715,52 @@ router.get(NONE_OF_ABOVE_BASE, (req, res) => {
     }
   );
 });
+
+router.get(
+  "/titan-mvp-1.2/form-editor/question-type/none-of-the-above/static",
+  function (req, res) {
+    res.render(
+      "titan-mvp-1.2/form-editor/question-type/none-of-the-above/static/index",
+      buildNoneOfTheAboveCyaStaticIndexContext()
+    );
+  }
+);
+
+router.get(
+  "/titan-mvp-1.2/form-editor/question-type/none-of-the-above/static.html",
+  function (req, res) {
+    res.redirect(
+      "/titan-mvp-1.2/form-editor/question-type/none-of-the-above/static"
+    );
+  }
+);
+
+router.get(
+  "/titan-mvp-1.2/form-editor/question-type/none-of-the-above/static/:variant",
+  function (req, res) {
+    const context = buildNoneOfTheAboveCyaStaticVariantContext(
+      req.params.variant
+    );
+    if (!context) {
+      return res.redirect(
+        "/titan-mvp-1.2/form-editor/question-type/none-of-the-above/static"
+      );
+    }
+    res.render(
+      "titan-mvp-1.2/form-editor/question-type/none-of-the-above/static/check-answers",
+      context
+    );
+  }
+);
+
+router.get(
+  "/titan-mvp-1.2/form-editor/question-type/none-of-the-above/static/:variant.html",
+  function (req, res) {
+    res.redirect(
+      `/titan-mvp-1.2/form-editor/question-type/none-of-the-above/static/${req.params.variant}`
+    );
+  }
+);
 
 router.post(`${NONE_OF_ABOVE_BASE}/add-related`, (req, res) => {
   prepareNoneOfAboveHandoffDraft(req);
