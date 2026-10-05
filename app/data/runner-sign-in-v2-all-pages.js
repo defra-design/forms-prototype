@@ -106,6 +106,7 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
         { text: "Start a new application", href: urls.startNewForm },
         { text: "Manage your form (checked example)", href: urls.staticManageFormChecked },
         { text: "Manage your form (after deleting an in-progress form)", href: urls.staticManageFormAfterDelete },
+        { text: "Manage your form (expired example)", href: urls.staticManageFormExpired },
       ],
     },
     {
@@ -376,6 +377,7 @@ function buildRunnerSignInV2AllPagesStaticSections(urls, { unexpectedPages }) {
         { text: "Start a new application", href: preview("form-start-page") },
         { text: "Manage your form (checked example)", href: urls.staticManageFormChecked },
         { text: "Manage your form (after deleting an in-progress form)", href: urls.staticManageFormAfterDelete },
+        { text: "Manage your form (expired example)", href: urls.staticManageFormExpired },
       ],
     },
     {

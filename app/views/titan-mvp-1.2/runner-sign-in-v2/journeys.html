@@ -243,7 +243,7 @@
           { text: "Form submitted", href: urls.formSubmitted },
           { text: "Start new form", href: urls.startNewForm }
         ]) }}
-        <p class="govuk-body">Static examples on the start page also include <strong>Awaiting check</strong>, <strong>Checked</strong> and <strong>Submitted</strong> states.</p>
+        <p class="govuk-body">Static examples on the start page also include <strong>Awaiting check</strong>, <strong>Checked</strong>, <strong>Submitted</strong> and <strong>Expired</strong> states.</p>
         {{ journeyDocs.journeyPreviews([
           { caption: "Manage form", title: "Manage your form", href: urls.manage, previewHref: urls.preview.manage },
           { caption: "Manage form", title: "Delete draft", href: urls.deleteDraft, previewHref: urls.preview.deleteDraft },
@@ -251,7 +251,8 @@
           { caption: "Manage form", title: "Form submitted", href: urls.formSubmitted },
           { caption: "Manage form", title: "Form submitted email (checked)", href: urls.emailFormSubmittedCheckedPublic, previewHref: urls.preview.emailFormSubmittedCheckedPublic },
           { caption: "Manage form", title: "Form submitted email – processing team (checked)", href: urls.emailFormSubmittedCheckedTeam, previewHref: urls.preview.emailFormSubmittedCheckedTeam },
-          { caption: "Manage form", title: "Checked (static example)", href: "/runner-sign-in-v2/static/manage-form-checked", previewHref: urls.preview.manageFormChecked }
+          { caption: "Manage form", title: "Checked (static example)", href: "/runner-sign-in-v2/static/manage-form-checked", previewHref: urls.preview.manageFormChecked },
+          { caption: "Manage form", title: "Expired (static example)", href: "/runner-sign-in-v2/static/manage-form-expired", previewHref: urls.preview.manageFormExpired }
         ]) }}
       </div>
     {% endset %}

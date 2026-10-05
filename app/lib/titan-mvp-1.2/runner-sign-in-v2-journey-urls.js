@@ -96,6 +96,7 @@ function runnerSignInV2BuildJourneyUrls({
     textChangeEmailSecurityCode: "/runner-sign-in-v2/texts/change-email-security-code",
     staticManageFormChecked: "/runner-sign-in-v2/static/manage-form-checked",
     staticManageFormAfterDelete: "/runner-sign-in-v2/static/manage-form-after-delete",
+    staticManageFormExpired: "/runner-sign-in-v2/static/manage-form-expired",
     staticChangeEmailNewEmailSameAsCurrent:
       "/runner-sign-in-v2/static/change-email-new-email-same-as-current",
     staticChangeEmailUsedOnOtherAccount: "/runner-sign-in-v2/static/change-email-used-on-other-account",
@@ -169,6 +170,7 @@ function runnerSignInV2BuildJourneyUrls({
           emailFormSubmittedCheckedTeam: journeyPreviewPath("email-form-submitted-checked-team"),
           manageFormChecked: journeyPreviewPath("manage-form-checked"),
           manageFormAfterDelete: journeyPreviewPath("manage-form-after-delete"),
+          manageFormExpired: journeyPreviewPath("manage-form-expired"),
           saveExitCheckEmail: journeyPreviewPath("save-exit-check-email"),
           saveExitResumeWithSignIn: journeyPreviewPath("save-exit-resume-with-sign-in"),
           saveExitResumeWithoutSignIn: journeyPreviewPath("save-exit-resume-without-sign-in"),
@@ -189,6 +191,7 @@ function runnerSignInV2ResolvePageKey(pageKey, urls) {
     const slug = pageKey.slice("static:".length);
     if (slug === "manage-form-checked") return urls.staticManageFormChecked;
     if (slug === "manage-form-after-delete") return urls.staticManageFormAfterDelete;
+    if (slug === "manage-form-expired") return urls.staticManageFormExpired;
     if (slug === "change-email-new-email-same-as-current") {
       return urls.staticChangeEmailNewEmailSameAsCurrent;
     }

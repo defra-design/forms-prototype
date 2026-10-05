@@ -461,7 +461,7 @@ function buildRunnerSignInV2SaveExitStories(urls) {
             { label: "THEN", text: "Manage your form is displayed" },
             { label: "AND", text: "the deleted submission no longer appears in the list" },
             { label: "AND", text: "a success banner confirms the draft was deleted" },
-            { label: "AND", text: "the remaining form shows as Not yet started" },
+            { label: "AND", text: "the remaining form shows as In progress" },
           ],
           links: [
             { text: "Delete draft confirmation", href: preview(urls, "delete-draft") },
@@ -503,7 +503,7 @@ function buildRunnerSignInV2SaveExitStories(urls) {
             "Submissions listed in expiry order (earliest expiry first → latest)",
             "Only submissions for the current form are shown",
             "Start a new form creates a new application; saved in-progress instances are unchanged",
-            "Expired submissions show status Deleted (govuk-tag--red) below active in-progress rows",
+            "Expired submissions show status Expired (govuk-tag--grey) below active in-progress rows, with Saved until empty",
             "When a form is submitted, that in-progress row must not appear on the dashboard",
             "Submitted forms show Submitted status (govuk-tag--green) where applicable",
           ],

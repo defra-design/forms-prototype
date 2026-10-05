@@ -92,7 +92,6 @@ Your forms – {{ serviceName }} – GOV.UK
     {% for application in applications %}
       {% set statusText = application.displayStatus or application.status %}
       {% set isSubmitted = (statusText == "Submitted") %}
-      {% set isDraft = (statusText == "Not yet started") %}
       {% set isAwaiting = (statusText == "Awaiting check") %}
       {% set isChecked = (statusText == "Checked") %}
       {% if isSubmitted %}
@@ -103,7 +102,7 @@ Your forms – {{ serviceName }} – GOV.UK
           classes: (
             "govuk-tag--yellow" if isAwaiting
             else ("govuk-tag--turquoise" if isChecked
-            else ("govuk-tag--grey" if isDraft else "govuk-tag--teal"))
+            else "govuk-tag--teal")
           )
         }) %}
       {% endif %}

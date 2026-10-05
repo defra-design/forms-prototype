@@ -299,7 +299,6 @@ Start – Runner sign-in v2 baseline – GOV.UK
       <p class="govuk-body">
         <a class="govuk-link" href="/runner-sign-in-v2-baseline/forms/{{ notStartedApp.formKey | urlencode }}/{{ notStartedApp.id | urlencode }}/start-page">Open start page</a>
         <span class="govuk-!-margin-left-1">for {{ notStartedApp.formName }} — {{ notStartedApp.reference }}</span>
-        <span class="govuk-!-margin-left-2">{{ govukTag({ text: "Not yet started", classes: "govuk-tag--grey" }) }}</span>
       </p>
     {% else %}
       {{ govukInsetText({ text: "No not-started example found. Use “Clear cache and reset examples” to restore the default set." }) }}
@@ -322,7 +321,6 @@ Start – Runner sign-in v2 baseline – GOV.UK
       <p class="govuk-body">
         <a class="govuk-link" href="{{ saveAndExitDemoStartUrl }}">Open start page</a>
         <span class="govuk-!-margin-left-1">for {{ saveAndExitDemoApp.formName }} — {{ saveAndExitDemoApp.reference }}</span>
-        <span class="govuk-!-margin-left-2">{{ govukTag({ text: "Not yet started", classes: "govuk-tag--grey" }) }}</span>
       </p>
     {% else %}
       {{ govukInsetText({ text: "No save-and-exit demo found. Use “Clear cache and reset examples” to restore the default set." }) }}

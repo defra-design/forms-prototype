@@ -105,13 +105,13 @@ activeLinkId: "nav-editor"
 												<h2 class="govuk-heading-l">Edit question {{ questionNumber }}</h2>
 
 												<form id="question-form"
-													action="/titan-mvp-1.2/form-editor/question-type/checkboxes-nf/edit-none-of-the-above"
+													action="/titan-mvp-1.2/form-editor/question-type/radios-nf/edit-none-of-the-above"
 													method="post">
 
 
 													<!-- Hidden inputs for question type and configuration -->
 													<input type="hidden" name="questionType" value="list">
-													<input type="hidden" name="questionSubType" value="checkboxes">
+													<input type="hidden" name="questionSubType" value="radios">
 													<input type="hidden" name="pageId" value="{{ pageId }}">
 													<input type="hidden" name="questionId" value="{{ questionId }}">
 													<input type="hidden" name="questionNumber"
@@ -123,14 +123,14 @@ activeLinkId: "nav-editor"
 													text: commonTerms.form_editor.question_settings.question,
 													classes: "govuk-label--m"
 													},
-													id: "question-label-input-checkboxes",
-													name: "questionLabelInputCheckboxes",
-													value: data['question-label-input-checkboxes']
+													id: "question-label-input-radios",
+													name: "questionLabelInputRadios",
+													value: data['question-label-input-radios']
 													}) }}
 
 													<!-- Hidden input for question label -->
 													<input type="hidden" name="questionLabel"
-														value="{{ data['question-label-input-checkboxes'] }}">
+														value="{{ data['question-label-input-radios'] }}">
 
 													<!-- Hint Text Input -->
 													{{ govukTextarea({
@@ -619,8 +619,8 @@ activeLinkId: "nav-editor"
 									target="_blank">{{ commonTerms.form_editor.common.preview }}</a>
 							</p>
 
-							<!-- Ensure this included template contains the #checkbox-list .govuk-checkboxes element -->
-							{% include "/titan-mvp-1.2/form-editor/question-type/checkboxes/previews/edit-v2.html" %}
+							<!-- Ensure this included template contains the #radio-list .govuk-radios element -->
+							{% include "/titan-mvp-1.2/form-editor/question-type/radios-nf/previews/edit-v2.html" %}
 
 							<a href="#edit-page" class="govuk-skip-link" style="margin-bottom: 30px!important;"
 								data-module="govuk-skip-link">{{ commonTerms.form_editor.common.skip_to_edit }}</a>
@@ -836,8 +836,8 @@ activeLinkId: "nav-editor"
 		const newOptionHint = document.querySelector('#new-option-hint');
 		const newOptionValue = document.querySelector('#new-option-value');
 		const optionsContainer = document.querySelector('#options-container');
-		const radioList = document.querySelector('#checkbox-list .govuk-checkboxes') ||
-			document.querySelector('#radio-list .govuk-radios');
+		const radioList = document.querySelector('#radio-list .govuk-radios') ||
+			document.querySelector('#checkbox-list .govuk-checkboxes');
 		const questionForm = document.getElementById('question-form');
 		const addOptionHeading = document.querySelector('#add-option-heading');
 		const noneOfTheAboveCheckbox = document.querySelector('input[name="noneOfTheAbove"]');
@@ -1236,7 +1236,7 @@ activeLinkId: "nav-editor"
 			if (optionHintInput) optionHintInput.value = newOptionHint ? newOptionHint.value.trim() : '';
 			if (optionsDraftInput) optionsDraftInput.value = JSON.stringify(draft);
 			if (noneInput) noneInput.value = isNoneOfTheAboveChecked() ? 'true' : '';
-			const parentQuestionInput = document.querySelector('#question-label-input-checkboxes');
+			const parentQuestionInput = document.querySelector('#question-label-input-radios');
 			if (parentInput) {
 				parentInput.value = parentQuestionInput ? parentQuestionInput.value.trim() : '';
 			}
@@ -1333,23 +1333,22 @@ activeLinkId: "nav-editor"
 					<input class="govuk-input${extraClasses}" id="${id}-input" name="${id}" type="text"${related.hint ? ` aria-describedby="${id}-hint"` : ''}>
 				</div>`;
 			}
-			return `<div class="govuk-checkboxes__conditional govuk-checkboxes__conditional--hidden" id="${id}">${fieldHTML}</div>`;
+			return `<div class="govuk-radios__conditional govuk-radios__conditional--hidden" id="${id}">${fieldHTML}</div>`;
 		}
 
 		function previewDividerHTML() {
-			return '<div class="govuk-checkboxes__divider">or</div>';
+			return '<div class="govuk-radios__divider">or</div>';
 		}
 
 		function previewOptionHTML(index, label, hint, related, isNew, isNoneOfTheAbove, withOrDivider) {
-			const inputId = isNew ? 'listPreviewCheckboxes-option-new' : `listPreviewCheckboxes-option${index}`;
+			const inputId = isNew ? 'listPreview-option-new' : `listPreview-option${index}`;
 			const conditionalId = `conditional-${inputId}`;
 			const relatedAttr = related && related.type ? ` data-aria-controls="${conditionalId}"` : '';
-			const exclusiveAttr = isNoneOfTheAbove ? ' data-behaviour="exclusive"' : '';
 			const itemHTML = `
-				<div class="govuk-checkboxes__item">
-					<input class="govuk-checkboxes__input" id="${inputId}" name="listPreviewCheckboxes" type="checkbox" value="${label}"${relatedAttr}${exclusiveAttr}>
-					<label class="govuk-label govuk-checkboxes__label" for="${inputId}">${label || 'Item text'}</label>
-					${hint ? `<div class="govuk-hint govuk-checkboxes__hint">${hint}</div>` : ''}
+				<div class="govuk-radios__item">
+					<input class="govuk-radios__input" id="${inputId}" name="listPreview" type="radio" value="${label}"${relatedAttr}>
+					<label class="govuk-label govuk-radios__label" for="${inputId}">${label || 'Item text'}</label>
+					${hint ? `<div class="govuk-hint govuk-radios__hint">${hint}</div>` : ''}
 				</div>
 				${relatedQuestionFieldHTML(conditionalId, related)}
 			`;
@@ -1515,7 +1514,7 @@ activeLinkId: "nav-editor"
 		}
 
 		// Main question elements
-		const questionLabelInput = document.querySelector('#question-label-input-checkboxes');
+		const questionLabelInput = document.querySelector('#question-label-input-radios');
 		const questionHintInput = document.querySelector('#question-hint-text-input-radios');
 		const questionLabelPreview = document.querySelector('#question-label-preview');
 		const questionHintPreview = document.querySelector('#question-hint-preview');
@@ -1582,48 +1581,30 @@ activeLinkId: "nav-editor"
 		updateAllOptionsPreview();
 
 		if (radioList) {
-			function syncPreviewExclusiveBehaviour(changedInput) {
-				if (!changedInput || changedInput.name !== 'listPreviewCheckboxes' || !changedInput.checked) {
+			function syncPreviewConditionals() {
+				radioList.querySelectorAll('.govuk-radios__conditional').forEach((panel) => {
+					panel.classList.add('govuk-radios__conditional--hidden');
+				});
+
+				const checked = radioList.querySelector('input[name="listPreview"]:checked');
+				if (!checked) {
 					return;
 				}
-
-				const isExclusive = changedInput.getAttribute('data-behaviour') === 'exclusive';
-				const inputs = radioList.querySelectorAll('input[name="listPreviewCheckboxes"]');
-
-				inputs.forEach((input) => {
-					if (input === changedInput) {
-						return;
-					}
-					const inputIsExclusive = input.getAttribute('data-behaviour') === 'exclusive';
-					if (isExclusive || inputIsExclusive) {
-						input.checked = false;
-					}
-				});
-			}
-
-			function syncPreviewConditionals(changedInput) {
-				radioList.querySelectorAll('.govuk-checkboxes__conditional').forEach((panel) => {
-					panel.classList.add('govuk-checkboxes__conditional--hidden');
-				});
-
-				radioList.querySelectorAll('input[name="listPreviewCheckboxes"]:checked').forEach((input) => {
-					const controls = input.getAttribute('aria-controls') || input.getAttribute('data-aria-controls');
-					if (!controls) {
-						return;
-					}
-					const panel = document.getElementById(controls);
-					if (panel) {
-						panel.classList.remove('govuk-checkboxes__conditional--hidden');
-					}
-				});
+				const controls = checked.getAttribute('aria-controls') || checked.getAttribute('data-aria-controls');
+				if (!controls) {
+					return;
+				}
+				const panel = document.getElementById(controls);
+				if (panel) {
+					panel.classList.remove('govuk-radios__conditional--hidden');
+				}
 			}
 
 			radioList.addEventListener('change', function (event) {
-				if (event.target.name !== 'listPreviewCheckboxes') {
+				if (event.target.name !== 'listPreview') {
 					return;
 				}
-				syncPreviewExclusiveBehaviour(event.target);
-				syncPreviewConditionals(event.target);
+				syncPreviewConditionals();
 			});
 		}
 
@@ -2111,18 +2092,18 @@ activeLinkId: "nav-editor"
 		// Function to apply highlight to the preview
 		function applyHighlight(type) {
 			if (!radioList) return;
-			const lastOption = radioList.querySelector('.govuk-checkboxes__item:last-of-type, .govuk-radios__item:last-child');
+			const lastOption = radioList.querySelector('.govuk-radios__item:last-of-type, .govuk-radios__item:last-child');
 			if (!lastOption) return;
 
 			const elementToHighlight = type === 'label'
-				? lastOption.querySelector('.govuk-checkboxes__label, .govuk-radios__label')
-				: lastOption.querySelector('.govuk-checkboxes__hint, .govuk-radios__hint');
+				? lastOption.querySelector('.govuk-radios__label')
+				: lastOption.querySelector('.govuk-radios__hint');
 
 			if (elementToHighlight) {
 				elementToHighlight.classList.add('highlight');
 			} else if (type === 'hint') {
 				const hintElement = document.createElement('div');
-				hintElement.className = 'govuk-hint govuk-checkboxes__hint highlight';
+				hintElement.className = 'govuk-hint govuk-radios__hint highlight';
 				hintElement.textContent = 'Hint text';
 				lastOption.appendChild(hintElement);
 			}
@@ -2130,12 +2111,12 @@ activeLinkId: "nav-editor"
 
 		function removeHighlight(type) {
 			if (!radioList) return;
-			const lastOption = radioList.querySelector('.govuk-checkboxes__item:last-of-type, .govuk-radios__item:last-child');
+			const lastOption = radioList.querySelector('.govuk-radios__item:last-of-type, .govuk-radios__item:last-child');
 			if (!lastOption) return;
 
 			const elementToUnhighlight = type === 'label'
-				? lastOption.querySelector('.govuk-checkboxes__label, .govuk-radios__label')
-				: lastOption.querySelector('.govuk-checkboxes__hint, .govuk-radios__hint');
+				? lastOption.querySelector('.govuk-radios__label')
+				: lastOption.querySelector('.govuk-radios__hint');
 
 			if (elementToUnhighlight) {
 				elementToUnhighlight.classList.remove('highlight');
@@ -2147,13 +2128,13 @@ activeLinkId: "nav-editor"
 
 		function showHintPlaceholder() {
 			if (!radioList || newOptionHint.value.trim()) return;
-			const lastOption = radioList.querySelector('.govuk-checkboxes__item:last-of-type, .govuk-radios__item:last-child');
+			const lastOption = radioList.querySelector('.govuk-radios__item:last-of-type, .govuk-radios__item:last-child');
 			if (!lastOption) return;
 
-			let hintElement = lastOption.querySelector('.govuk-checkboxes__hint, .govuk-radios__hint');
+			let hintElement = lastOption.querySelector('.govuk-radios__hint');
 			if (!hintElement) {
 				hintElement = document.createElement('div');
-				hintElement.className = 'govuk-hint govuk-checkboxes__hint highlight';
+				hintElement.className = 'govuk-hint govuk-radios__hint highlight';
 				lastOption.appendChild(hintElement);
 			}
 			hintElement.textContent = 'Hint text';
@@ -2162,10 +2143,10 @@ activeLinkId: "nav-editor"
 		// Function to remove hint placeholder
 		function removeHintPlaceholder() {
 			if (!radioList || newOptionHint.value.trim()) return;
-			const lastOption = radioList.querySelector('.govuk-checkboxes__item:last-of-type, .govuk-radios__item:last-child');
+			const lastOption = radioList.querySelector('.govuk-radios__item:last-of-type, .govuk-radios__item:last-child');
 			if (!lastOption) return;
 
-			const hintElement = lastOption.querySelector('.govuk-checkboxes__hint, .govuk-radios__hint');
+			const hintElement = lastOption.querySelector('.govuk-radios__hint');
 			if (hintElement && !newOptionHint.value.trim()) {
 				hintElement.remove();
 			}
@@ -2178,13 +2159,13 @@ activeLinkId: "nav-editor"
 		document.addEventListener('focus', function (e) {
 			if (e.target.classList.contains('option-hint-input')) {
 				const optionIndex = e.target.closest('.gem-c-reorderable-list__item').dataset.index;
-				const previewOption = radioList?.querySelector(`#listPreviewCheckboxes-option${optionIndex - 1}`)?.closest('.govuk-checkboxes__item');
+				const previewOption = radioList?.querySelector(`#listPreview-option${optionIndex - 1}`)?.closest('.govuk-radios__item');
 				if (!previewOption) return;
-				let hintElement = previewOption.querySelector('.govuk-checkboxes__hint');
+				let hintElement = previewOption.querySelector('.govuk-radios__hint');
 
 				if (!hintElement) {
 					hintElement = document.createElement('div');
-					hintElement.className = 'govuk-hint govuk-checkboxes__hint highlight';
+					hintElement.className = 'govuk-hint govuk-radios__hint highlight';
 					hintElement.textContent = 'Hint text';
 					previewOption.appendChild(hintElement);
 				} else {
@@ -2196,9 +2177,9 @@ activeLinkId: "nav-editor"
 		document.addEventListener('blur', function (e) {
 			if (e.target.classList.contains('option-hint-input')) {
 				const optionIndex = e.target.closest('.gem-c-reorderable-list__item').dataset.index;
-				const previewOption = radioList?.querySelector(`#listPreviewCheckboxes-option${optionIndex - 1}`)?.closest('.govuk-checkboxes__item');
+				const previewOption = radioList?.querySelector(`#listPreview-option${optionIndex - 1}`)?.closest('.govuk-radios__item');
 				if (!previewOption) return;
-				const hintElement = previewOption.querySelector('.govuk-checkboxes__hint');
+				const hintElement = previewOption.querySelector('.govuk-radios__hint');
 
 				if (hintElement) {
 					hintElement.classList.remove('highlight');
@@ -2280,7 +2261,7 @@ activeLinkId: "nav-editor"
 			removePreviewHighlights();
 
 			// Add highlight to the corresponding preview item
-			const previewItem = radioList.querySelector(`#listPreviewCheckboxes-option${index}`)?.closest('.govuk-checkboxes__item');
+			const previewItem = radioList.querySelector(`#listPreview-option${index}`)?.closest('.govuk-radios__item');
 			if (previewItem) {
 				previewItem.classList.add('highlight');
 			}
@@ -2290,7 +2271,7 @@ activeLinkId: "nav-editor"
 		function removePreviewHighlights() {
 			if (!radioList) return;
 
-			const items = radioList.querySelectorAll('.govuk-checkboxes__item');
+			const items = radioList.querySelectorAll('.govuk-radios__item');
 			items.forEach(item => item.classList.remove('highlight'));
 		}
 
@@ -2583,9 +2564,9 @@ activeLinkId: "nav-editor"
 
 			// Add focus/blur event listeners for highlighting
 			editLabelInput.addEventListener('focus', () => {
-				const previewItem = document.querySelector(`#listPreviewCheckboxes-option${listItem.dataset.index - 1}`)?.closest('.govuk-checkboxes__item');
+				const previewItem = document.querySelector(`#listPreview-option${listItem.dataset.index - 1}`)?.closest('.govuk-radios__item');
 				if (previewItem) {
-					const labelElement = previewItem.querySelector('.govuk-checkboxes__label');
+					const labelElement = previewItem.querySelector('.govuk-radios__label');
 					if (labelElement) {
 						labelElement.classList.add('highlight');
 					}
@@ -2593,9 +2574,9 @@ activeLinkId: "nav-editor"
 			});
 
 			editLabelInput.addEventListener('blur', () => {
-				const previewItem = document.querySelector(`#listPreviewCheckboxes-option${listItem.dataset.index - 1}`)?.closest('.govuk-checkboxes__item');
+				const previewItem = document.querySelector(`#listPreview-option${listItem.dataset.index - 1}`)?.closest('.govuk-radios__item');
 				if (previewItem) {
-					const labelElement = previewItem.querySelector('.govuk-checkboxes__label');
+					const labelElement = previewItem.querySelector('.govuk-radios__label');
 					if (labelElement) {
 						labelElement.classList.remove('highlight');
 					}
@@ -2607,9 +2588,9 @@ activeLinkId: "nav-editor"
 
 			// If label input is already focused, apply highlight immediately
 			if (document.activeElement === editLabelInput) {
-				const previewItem = document.querySelector(`#listPreviewCheckboxes-option${listItem.dataset.index - 1}`)?.closest('.govuk-checkboxes__item');
+				const previewItem = document.querySelector(`#listPreview-option${listItem.dataset.index - 1}`)?.closest('.govuk-radios__item');
 				if (previewItem) {
-					const labelElement = previewItem.querySelector('.govuk-checkboxes__label');
+					const labelElement = previewItem.querySelector('.govuk-radios__label');
 					if (labelElement) {
 						labelElement.classList.add('highlight');
 					}
@@ -2638,11 +2619,11 @@ activeLinkId: "nav-editor"
 		// Function to update preview while editing
 		function updateEditPreview(listItem, labelValue, hintValue) {
 			const index = listItem.dataset.index - 1;
-			const previewItem = radioList?.querySelector(`#listPreviewCheckboxes-option${index}`)?.closest('.govuk-checkboxes__item');
+			const previewItem = radioList?.querySelector(`#listPreview-option${index}`)?.closest('.govuk-radios__item');
 
 			if (previewItem) {
-				const label = previewItem.querySelector('.govuk-checkboxes__label');
-				let hint = previewItem.querySelector('.govuk-checkboxes__hint');
+				const label = previewItem.querySelector('.govuk-radios__label');
+				let hint = previewItem.querySelector('.govuk-radios__hint');
 
 				if (label) {
 					label.textContent = labelValue || 'Item text';
@@ -2651,7 +2632,7 @@ activeLinkId: "nav-editor"
 				if (hintValue) {
 					if (!hint) {
 						hint = document.createElement('div');
-						hint.className = 'govuk-hint govuk-checkboxes__hint';
+						hint.className = 'govuk-hint govuk-radios__hint';
 						previewItem.appendChild(hint);
 					}
 					hint.textContent = hintValue;
@@ -3183,7 +3164,7 @@ activeLinkId: "nav-editor"
 	});
 </script>
 
-<form id="add-related-form" method="post" action="/titan-mvp-1.2/form-editor/question-type/checkboxes-nf/edit-none-of-the-above/add-related" hidden>
+<form id="add-related-form" method="post" action="/titan-mvp-1.2/form-editor/question-type/radios-nf/edit-none-of-the-above/add-related" hidden>
 	<input type="hidden" name="optionIndex" id="add-related-option-index" value="{{ reopenOptionIndex or '' }}">
 	<input type="hidden" name="optionLabel" id="add-related-option-label" value="{{ reopenOption.label if reopenOption and reopenOption.label != 'Item text' else '' }}">
 	<input type="hidden" name="optionHint" id="add-related-option-hint" value="{{ reopenOption.hint if reopenOption else '' }}">
@@ -3192,7 +3173,7 @@ activeLinkId: "nav-editor"
 	<input type="hidden" name="isNoneOfTheAbove" id="add-related-none-of-the-above" value="{{ 'true' if reopenOption and reopenOption.isNoneOfTheAbove else '' }}">
 </form>
 
-<form id="edit-related-form" method="post" action="/titan-mvp-1.2/form-editor/question-type/checkboxes-nf/edit-none-of-the-above/edit-related" hidden>
+<form id="edit-related-form" method="post" action="/titan-mvp-1.2/form-editor/question-type/radios-nf/edit-none-of-the-above/edit-related" hidden>
 	<input type="hidden" name="optionIndex" id="edit-related-option-index" value="{{ reopenOptionIndex or '' }}">
 	<input type="hidden" name="relatedType" id="edit-related-type" value="{{ relatedQuestion.type if relatedQuestion else '' }}">
 	<input type="hidden" name="optionLabel" id="edit-related-option-label" value="{{ reopenOption.label if reopenOption and reopenOption.label != 'Item text' else '' }}">
@@ -3203,7 +3184,7 @@ activeLinkId: "nav-editor"
 	<input type="hidden" name="isNoneOfTheAbove" id="edit-related-none-of-the-above" value="{{ 'true' if reopenOption and reopenOption.isNoneOfTheAbove else '' }}">
 </form>
 
-<form id="use-existing-related-form" method="post" action="/titan-mvp-1.2/form-editor/question-type/checkboxes-nf/edit-none-of-the-above/use-existing" hidden>
+<form id="use-existing-related-form" method="post" action="/titan-mvp-1.2/form-editor/question-type/radios-nf/edit-none-of-the-above/use-existing" hidden>
 	<input type="hidden" name="optionIndex" id="use-existing-option-index" value="{{ reopenOptionIndex or '' }}">
 	<input type="hidden" name="optionLabel" id="use-existing-option-label" value="{{ reopenOption.label if reopenOption and reopenOption.label != 'Item text' else '' }}">
 	<input type="hidden" name="optionHint" id="use-existing-option-hint" value="{{ reopenOption.hint if reopenOption else '' }}">
