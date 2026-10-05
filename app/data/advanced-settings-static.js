@@ -66,6 +66,24 @@ const ALLOW_EDIT_SUBMITTED_FORM_SETTING = {
     "If people can edit a submitted form, the confirmation email and reference number will be switched on automatically.",
 };
 
+const MANAGE_FORM_GUIDANCE_SETTING = {
+  key: "manageFormGuidance",
+  slug: "manage-form-guidance",
+  summaryLabel: "Manage form guidance",
+  summaryValueYes: "Guidance text shown on the Manage form page",
+  summaryValueNo: "No guidance text",
+  label: "Do you want to add guidance text to the Manage form page?",
+  hint:
+    "Use guidance text to help people manage their form. For example, you can explain when to continue an existing form, start a new one, or delete a draft.",
+  yesDescription:
+    "People will see your guidance text when they manage this form.",
+  noDescription:
+    "People will only see the standard status table and actions.",
+  changeHiddenText: "whether to add guidance text to the Manage form page",
+  guidanceLabel: "Guidance text",
+  guidanceHint: "This appears at the top of the Manage form page and you can use Markdown to format it.",
+};
+
 const OVERVIEW_VARIANTS = [
   {
     slug: "default",
@@ -101,6 +119,11 @@ const OVERVIEW_VARIANTS = [
     slug: "edit-submitted-form-on",
     title: "Edit a submitted form on",
     description: "People can edit a form they've already submitted.",
+  },
+  {
+    slug: "manage-form-guidance-on",
+    title: "Manage form guidance on",
+    description: "Guidance text shown on the Manage form page.",
   },
   {
     // Keep the older slug so existing handover links still work.
@@ -172,6 +195,33 @@ const ALLOW_EDIT_SUBMITTED_FORM_VARIANTS = [
   },
 ];
 
+const MANAGE_FORM_GUIDANCE_VARIANTS = [
+  {
+    slug: "no-selected",
+    title: "No selected",
+    description: "No guidance text on the Manage form page.",
+  },
+  {
+    slug: "yes-with-text",
+    title: "Yes selected with guidance text",
+    description: "Guidance text filled in for the Manage form page.",
+  },
+  {
+    slug: "validation-error",
+    title: "Validation error",
+    description: "Yes selected but guidance text is missing.",
+  },
+];
+
+function truncateSummaryText(text, maxLength = 80) {
+  const normalised = String(text || "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!normalised) return "Not added yet";
+  if (normalised.length <= maxLength) return normalised;
+  return `${normalised.slice(0, maxLength - 1).trimEnd()}…`;
+}
+
 function buildSummaryRows(settings) {
   const {
     checkBeforeSubmission = "no",
@@ -179,6 +229,8 @@ function buildSummaryRows(settings) {
     checkBeforeSubmissionOptional = "no",
     reusePreviousAnswers = "no",
     allowEditSubmissions = "no",
+    manageFormGuidance = "no",
+    manageFormGuidanceText = "",
     additionalEmailCount = 0,
     staticPageBase = STATIC_BASE,
   } = settings;
@@ -197,6 +249,10 @@ function buildSummaryRows(settings) {
     allowEditSubmissions === "yes"
       ? `${staticPageBase}/edit-submitted-form/yes-selected`
       : `${staticPageBase}/edit-submitted-form/no-selected`;
+  const manageFormGuidanceChangeHref =
+    manageFormGuidance === "yes"
+      ? `${staticPageBase}/manage-form-guidance/yes-with-text`
+      : `${staticPageBase}/manage-form-guidance/no-selected`;
 
   const rows = [
     {
@@ -249,6 +305,24 @@ function buildSummaryRows(settings) {
             href: allowEditSubmissionsChangeHref,
             text: "Change",
             visuallyHiddenText: ALLOW_EDIT_SUBMITTED_FORM_SETTING.changeHiddenText,
+          },
+        ],
+      },
+    },
+    {
+      key: { text: MANAGE_FORM_GUIDANCE_SETTING.summaryLabel },
+      value: {
+        text:
+          manageFormGuidance === "yes"
+            ? truncateSummaryText(manageFormGuidanceText || "Not added yet")
+            : MANAGE_FORM_GUIDANCE_SETTING.summaryValueNo,
+      },
+      actions: {
+        items: [
+          {
+            href: manageFormGuidanceChangeHref,
+            text: "Change",
+            visuallyHiddenText: MANAGE_FORM_GUIDANCE_SETTING.changeHiddenText,
           },
         ],
       },
@@ -335,6 +409,8 @@ function buildStaticAdvancedSettingsOverviewContext(variant) {
   let checkBeforeSubmissionOptional = "no";
   let reusePreviousAnswers = "no";
   let allowEditSubmissions = "no";
+  let manageFormGuidance = "no";
+  let manageFormGuidanceText = "";
   let additionalEmailCount = 0;
   let saved = false;
 
@@ -372,6 +448,12 @@ function buildStaticAdvancedSettingsOverviewContext(variant) {
     allowEditSubmissions = "no";
   }
 
+  if (variant === "manage-form-guidance-on" || variant === "fully-configured") {
+    manageFormGuidance = "yes";
+    manageFormGuidanceText =
+      "You can continue a draft, delete one you no longer need, or start a new form.";
+  }
+
   if (variant === "with-email-actions" || variant === "fully-configured") {
     additionalEmailCount = 2;
   }
@@ -383,6 +465,8 @@ function buildStaticAdvancedSettingsOverviewContext(variant) {
       checkBeforeSubmissionOptional,
       reusePreviousAnswers,
       allowEditSubmissions,
+      manageFormGuidance,
+      manageFormGuidanceText,
       additionalEmailCount,
     }),
     form: { name: FORM_NAME },
@@ -405,7 +489,9 @@ function buildStaticAdvancedSettingsChangeContext(settingSlug, variant) {
         ? REUSE_PREVIOUS_ANSWERS_VARIANTS
         : settingSlug === "edit-submitted-form"
           ? ALLOW_EDIT_SUBMITTED_FORM_VARIANTS
-          : [];
+          : settingSlug === "manage-form-guidance"
+            ? MANAGE_FORM_GUIDANCE_VARIANTS
+            : [];
 
   const page = variants.find((item) => item.slug === variant);
   if (!page) {
@@ -417,7 +503,9 @@ function buildStaticAdvancedSettingsChangeContext(settingSlug, variant) {
       ? CHECK_BEFORE_SUBMISSION_SETTING
       : settingSlug === "edit-submitted-form"
         ? ALLOW_EDIT_SUBMITTED_FORM_SETTING
-        : REUSE_PREVIOUS_ANSWERS_SETTING;
+        : settingSlug === "manage-form-guidance"
+          ? MANAGE_FORM_GUIDANCE_SETTING
+          : REUSE_PREVIOUS_ANSWERS_SETTING;
 
   let data = {
     checkBeforeSubmission: "no",
@@ -425,6 +513,8 @@ function buildStaticAdvancedSettingsChangeContext(settingSlug, variant) {
     checkBeforeSubmissionOptional: "",
     reusePreviousAnswers: "no",
     allowEditSubmissions: "no",
+    manageFormGuidance: "no",
+    manageFormGuidanceText: "",
   };
   let errors = {};
 
@@ -463,12 +553,30 @@ function buildStaticAdvancedSettingsChangeContext(settingSlug, variant) {
     data.allowEditSubmissions = "yes";
   }
 
+  if (settingSlug === "manage-form-guidance") {
+    if (variant === "yes-with-text") {
+      data.manageFormGuidance = "yes";
+      data.manageFormGuidanceText =
+        "You can continue a draft, delete one you no longer need, or start a new form.";
+    }
+
+    if (variant === "validation-error") {
+      data.manageFormGuidance = "yes";
+      data.manageFormGuidanceText = "";
+      errors = {
+        manageFormGuidanceText: "Enter guidance text",
+      };
+    }
+  }
+
   const overviewStaticUrl =
     settingSlug === "reuse-previous-answers"
       ? `${STATIC_BASE}/${variant === "yes-selected" ? "reuse-previous-answers-on" : "reuse-previous-answers-off"}`
       : settingSlug === "edit-submitted-form"
         ? `${STATIC_BASE}/${variant === "yes-selected" ? "edit-submitted-form-on" : "edit-submitted-form-off"}`
-        : `${STATIC_BASE}/default`;
+        : settingSlug === "manage-form-guidance"
+          ? `${STATIC_BASE}/${variant === "yes-with-text" || variant === "validation-error" ? "manage-form-guidance-on" : "default"}`
+          : `${STATIC_BASE}/default`;
 
   return {
     data,
@@ -509,6 +617,10 @@ function buildStaticAdvancedSettingsIndexContext() {
     allowEditSubmittedFormPages: ALLOW_EDIT_SUBMITTED_FORM_VARIANTS.map((page) => ({
       ...page,
       href: `${STATIC_BASE}/edit-submitted-form/${page.slug}`,
+    })),
+    manageFormGuidancePages: MANAGE_FORM_GUIDANCE_VARIANTS.map((page) => ({
+      ...page,
+      href: `${STATIC_BASE}/manage-form-guidance/${page.slug}`,
     })),
     emailActionsStaticUrl:
       "/titan-mvp-1.2/form-editor/advanced-settings/conditional-mailbox-routing/static",

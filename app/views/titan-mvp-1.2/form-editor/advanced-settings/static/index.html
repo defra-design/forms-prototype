@@ -102,6 +102,19 @@ activeLinkId: "nav-editor"
         rows: editRows
         }) }}
 
+        <h2 class="govuk-heading-m govuk-!-margin-top-8">Manage form guidance</h2>
+        {% set guidanceRows = [] %}
+        {% for page in manageFormGuidancePages %}
+        {% set guidanceRows = guidanceRows.concat([[
+        { html: '<a class="govuk-link" href="' + page.href + '">' + page.title + '</a>' },
+        { text: page.description }
+        ]]) %}
+        {% endfor %}
+        {{ govukTable({
+        head: [{ text: "Page" }, { text: "Description" }],
+        rows: guidanceRows
+        }) }}
+
         <h2 class="govuk-heading-m govuk-!-margin-top-8">Email actions</h2>
         <p class="govuk-body"><a class="govuk-link" href="{{ emailActionsStaticUrl }}">Email actions static pages</a></p>
 
