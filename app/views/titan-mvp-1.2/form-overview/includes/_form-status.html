@@ -1,7 +1,9 @@
 {% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
 
+{% set statusText = form.status.text if form.status and form.status.text else "Draft" %}
+
 {# Draft status summary list #}
-{% if form.status.text === "Draft" %}
+{% if statusText === "Draft" %}
 <dl class="govuk-summary-list">
     <div class="govuk-summary-list__row">
         <dt class="govuk-summary-list__key">
@@ -44,7 +46,7 @@
 </dl>
 
 {# Live status summary list #}
-{% elif form.status.text === "Live" %}
+{% elif statusText === "Live" %}
 <dl class="govuk-summary-list">
     <div class="govuk-summary-list__row">
         <dt class="govuk-summary-list__key">
@@ -99,7 +101,7 @@
 </dl>
 
 {# Draft-Live status summary lists #}
-{% elif form.status.text === "Draft-Live" %}
+{% elif statusText === "Draft-Live" or statusText === "Live-Draft" %}
 {# Draft section #}
 <dl class="govuk-summary-list">
     <div class="govuk-summary-list__row">

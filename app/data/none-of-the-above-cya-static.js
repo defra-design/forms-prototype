@@ -203,13 +203,42 @@ function buildSummaryRows(variant) {
   });
 }
 
+function buildEmailAnswerRows(variant) {
+  return (variant.rows || []).map((row) => {
+    const keyText = row.optional ? `${row.key} (optional)` : row.key;
+    const valueHtml = String(row.value || "")
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .join("<br>");
+
+    return {
+      key: keyText,
+      valueHtml,
+    };
+  });
+}
+
+function emailUrlsForVariant(slug) {
+  return {
+    fillerHref: `${STATIC_BASE}/${slug}/email/filler`,
+    teamHref: `${STATIC_BASE}/${slug}/email/team`,
+    checkAnswersHref: `${STATIC_BASE}/${slug}`,
+  };
+}
+
 function buildStaticIndexContext() {
   return {
     form: { name: FORM_NAME },
-    staticPages: VARIANTS.map((page) => ({
-      ...page,
-      href: `${STATIC_BASE}/${page.slug}`,
-    })),
+    staticPages: VARIANTS.map((page) => {
+      const urls = emailUrlsForVariant(page.slug);
+      return {
+        ...page,
+        href: urls.checkAnswersHref,
+        fillerEmailHref: urls.fillerHref,
+        teamEmailHref: urls.teamHref,
+      };
+    }),
     liveCheckboxesUrl:
       "/titan-mvp-1.2/form-editor/question-type/checkboxes-nf/edit-none-of-the-above",
     liveRadiosUrl:
@@ -221,6 +250,7 @@ function buildStaticIndexContext() {
 function buildStaticVariantContext(slug) {
   const variant = VARIANTS.find((item) => item.slug === slug);
   if (!variant) return null;
+  const urls = emailUrlsForVariant(slug);
 
   return {
     form: { name: FORM_NAME },
@@ -230,10 +260,45 @@ function buildStaticVariantContext(slug) {
     staticPageTitle: variant.title,
     staticPageDescription: variant.description,
     staticIndexUrl: STATIC_BASE,
+    fillerEmailHref: urls.fillerHref,
+    teamEmailHref: urls.teamHref,
     liveEditorUrl:
       variant.questionType === "radios"
         ? "/titan-mvp-1.2/form-editor/question-type/radios-nf/edit-none-of-the-above"
         : "/titan-mvp-1.2/form-editor/question-type/checkboxes-nf/edit-none-of-the-above",
+  };
+}
+
+function buildStaticEmailContext(slug, audience) {
+  const variant = VARIANTS.find((item) => item.slug === slug);
+  if (!variant) return null;
+  if (audience !== "filler" && audience !== "team") return null;
+
+  const urls = emailUrlsForVariant(slug);
+  const isFiller = audience === "filler";
+
+  return {
+    form: { name: FORM_NAME },
+    formName: FORM_NAME,
+    variant,
+    audience,
+    isFiller,
+    answerRows: buildEmailAnswerRows(variant),
+    staticPage: true,
+    staticPageTitle: `${variant.title} – ${isFiller ? "form filler" : "processing team"} email`,
+    staticPageDescription: variant.description,
+    staticIndexUrl: STATIC_BASE,
+    checkAnswersHref: urls.checkAnswersHref,
+    fillerEmailHref: urls.fillerHref,
+    teamEmailHref: urls.teamHref,
+    toEmail: isFiller ? "alex.taylor@example.com" : "forms-processing@defra.gov.uk",
+    teamEmail: "forms-processing@defra.gov.uk",
+    referenceNumber: "P7D-2K9-Q4M",
+    submittedAt: "11:10am on Tuesday 7 July 2026",
+    whatHappensNext:
+      "We'll review your application and contact you if we need more information.",
+    helpEmail: "grants@example.gov.uk",
+    downloadCsvHref: "#",
   };
 }
 
@@ -242,4 +307,5 @@ module.exports = {
   VARIANTS,
   buildStaticIndexContext,
   buildStaticVariantContext,
+  buildStaticEmailContext,
 };

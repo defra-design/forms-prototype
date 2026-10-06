@@ -1,0 +1,39 @@
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% set formTitle = formName or "Apply for a small grant" %}
+{% set referenceNumber = referenceNumber or "P7D-2K9-Q4M" %}
+{% set submittedAt = submittedAt or "11:10am on Tuesday 7 July 2026" %}
+{% set whatHappensNext = whatHappensNext or "We'll review your application and contact you if we need more information." %}
+{% set helpEmail = helpEmail or "grants@example.gov.uk" %}
+
+<h1 class="govuk-heading-l govuk-!-margin-top-6">Form submitted</h1>
+
+{{ govukInsetText({
+  text: "Your reference number: " ~ referenceNumber
+}) }}
+
+<p class="govuk-body">We received your form submission for ‘{{ formTitle }}’ at {{ submittedAt }}.</p>
+
+<h2 class="govuk-heading-m">What happens next</h2>
+<p class="govuk-body">{{ whatHappensNext }}</p>
+
+<h2 class="govuk-heading-m">Get help</h2>
+<p class="govuk-body">
+  <a class="govuk-link" href="mailto:{{ helpEmail }}">{{ helpEmail }}</a>
+</p>
+<p class="govuk-body">We aim to get back to you within 10 working days.</p>
+
+<h2 class="govuk-heading-m">Your answers</h2>
+<p class="govuk-body">Find a copy of your answers at the bottom of this email.</p>
+
+<p class="govuk-body">Do not reply to this email. We do not monitor replies to this email address.</p>
+<p class="govuk-body">From Defra</p>
+
+<hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
+
+{% for row in answerRows %}
+  <h2 class="govuk-heading-s">{{ row.key }}</h2>
+  <p class="govuk-body">{{ row.valueHtml | safe }}</p>
+  {% if not loop.last %}
+  <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+  {% endif %}
+{% endfor %}

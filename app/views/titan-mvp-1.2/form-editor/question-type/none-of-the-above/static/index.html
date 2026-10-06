@@ -46,8 +46,8 @@ activeLinkId: "nav-editor"
 
 {% block content %}
 <div class="govuk-grid-row">
-  <div class="govuk-grid-column-two-thirds">
-    <p class="govuk-body">Use these pages for development handover. Each page shows how <strong>None of the above</strong> and any <strong>related question</strong> appear on Check your answers.</p>
+  <div class="govuk-grid-column-full">
+    <p class="govuk-body">Use these pages for development handover. Each variant shows how <strong>None of the above</strong> and any <strong>related question</strong> appear on Check your answers and in confirmation emails.</p>
 
     <p class="govuk-body">
       Open the live editors:
@@ -60,12 +60,19 @@ activeLinkId: "nav-editor"
     {% for page in staticPages %}
     {% set tableRows = tableRows.concat([[
       { html: '<a class="govuk-link" href="' + page.href + '">' + page.title + '</a>' },
-      { text: page.description }
+      { text: page.description },
+      { html: '<a class="govuk-link" href="' + page.fillerEmailHref + '">Form filler</a>' },
+      { html: '<a class="govuk-link" href="' + page.teamEmailHref + '">Processing team</a>' }
     ]]) %}
     {% endfor %}
 
     {{ govukTable({
-      head: [{ text: "Page" }, { text: "Description" }],
+      head: [
+        { text: "Check your answers" },
+        { text: "Description" },
+        { text: "Form filler email" },
+        { text: "Processing team email" }
+      ],
       rows: tableRows
     }) }}
   </div>

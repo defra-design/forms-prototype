@@ -26,6 +26,7 @@ const {
 const {
   buildStaticIndexContext: buildNoneOfTheAboveCyaStaticIndexContext,
   buildStaticVariantContext: buildNoneOfTheAboveCyaStaticVariantContext,
+  buildStaticEmailContext: buildNoneOfTheAboveCyaStaticEmailContext,
 } = require("../../data/none-of-the-above-cya-static");
 const {
   enrichConditionsWithUsedInLabels,
@@ -5821,31 +5822,33 @@ router.post("/titan-mvp-1.2/create-new-form/policy-sme", (req, res) => {
   res.redirect("/titan-mvp-1.2/form-overview/index/");
 });
 
-// Overview page route
-router.get("/titan-mvp-1.2/form-overview/index/", (req, res) => {
-  // Get the form data from the session
+// Overview page route (with and without .html / trailing slash)
+const renderFormOverviewIndex = (req, res) => {
   const formData = req.session.data || {};
 
-  // Map status to GOV.UK Design System tag colors
   const statusColorMap = {
     Draft: "orange",
     Live: "green",
+    "Draft-Live": "blue",
+    "Live-Draft": "blue",
     Closed: "red",
   };
 
-  const status = formData.formDetails?.status || "Draft";
+  // Status may be stored as a string or { text, color }
+  const rawStatus = formData.formDetails?.status;
+  const status =
+    typeof rawStatus === "string"
+      ? rawStatus
+      : rawStatus?.text || "Draft";
   const statusColor = statusColorMap[status] || "grey";
 
-  // Create a URL-friendly version of the form name
   const urlFriendlyName = (formData.formName || "untitled-form")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
 
-  // Create the preview URL
   const previewUrl = `https://forms-runner.prototype.cdp-int.defra.cloud/preview/draft/${urlFriendlyName}`;
 
-  // Create the form object that the templates expect
   const form = {
     name: formData.formName || "Form name",
     status: {
@@ -5890,7 +5893,16 @@ router.get("/titan-mvp-1.2/form-overview/index/", (req, res) => {
     form: form,
     pageName: `Overview - ${form.name}`,
   });
-});
+};
+
+router.get(
+  [
+    "/titan-mvp-1.2/form-overview/index",
+    "/titan-mvp-1.2/form-overview/index/",
+    "/titan-mvp-1.2/form-overview/index.html",
+  ],
+  renderFormOverviewIndex
+);
 
 // POC form overview route
 router.get("/titan-mvp-1.2/form-overview/poc", (req, res) => {
@@ -8130,56 +8142,6 @@ router.get(
   }
 );
 
-// Add non-.html route for form-overview/index
-router.get("/titan-mvp-1.2/form-overview/index", (req, res) => {
-  // Get the form data from the session
-  const formData = req.session.data || {};
-  // Map status to GOV.UK Design System tag colors
-  const statusColorMap = {
-    Draft: "orange",
-    Live: "green",
-    Closed: "red",
-  };
-  const status = formData.formDetails?.status || "Draft";
-  const statusColor = statusColorMap[status] || "grey";
-  // Create a URL-friendly version of the form name
-  const urlFriendlyName = (formData.formName || "untitled-form")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-  // Create the preview URL
-  const previewUrl = `https://forms-runner.prototype.cdp-int.defra.cloud/preview/draft/${urlFriendlyName}`;
-  // Create the form object that the templates expect
-  const form = {
-    name: formData.formName || "Form name",
-    status: {
-      text: status,
-      color: statusColor,
-    },
-    previewUrl: previewUrl,
-    createdAt: formData.formDetails?.createdAt || new Date().toISOString(),
-    updatedAt: formData.formDetails?.lastUpdated || new Date().toISOString(),
-    organisation: {
-      name: formData.formDetails?.organisation || "Not set",
-    },
-    team: {
-      name: formData.formDetails?.teamName || "Not set",
-      email: formData.formDetails?.email || "Not set",
-    },
-    support: {
-      phone: formData.formDetails?.support?.phone,
-      email: formData.formDetails?.support?.email,
-      link: formData.formDetails?.support?.link,
-    },
-    nextSteps: formData.formDetails?.nextSteps,
-    privacyNotice: formData.formDetails?.privacyNotice,
-    notificationEmail: formData.formDetails?.notificationEmail,
-  };
-  res.render("titan-mvp-1.2/form-overview/index", {
-    form: form,
-    pageName: `Overview - ${form.name}`,
-  });
-});
 
 // Add non-.html route for library
 router.get("/titan-mvp-1.2/library.html", function (req, res) {
@@ -9758,6 +9720,25 @@ router.get(
   function (req, res) {
     res.redirect(
       `/titan-mvp-1.2/form-editor/question-type/none-of-the-above/static/${req.params.variant}`
+    );
+  }
+);
+
+router.get(
+  "/titan-mvp-1.2/form-editor/question-type/none-of-the-above/static/:variant/email/:audience",
+  function (req, res) {
+    const context = buildNoneOfTheAboveCyaStaticEmailContext(
+      req.params.variant,
+      req.params.audience
+    );
+    if (!context) {
+      return res.redirect(
+        "/titan-mvp-1.2/form-editor/question-type/none-of-the-above/static"
+      );
+    }
+    res.render(
+      "titan-mvp-1.2/form-editor/question-type/none-of-the-above/static/emails/confirmation",
+      context
     );
   }
 );
