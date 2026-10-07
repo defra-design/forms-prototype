@@ -58,7 +58,7 @@ const ALLOW_EDIT_SUBMITTED_FORM_SETTING = {
   hint:
     "Use when people may need to correct or update answers after sending. This replaces the previous submission. It does not start a new form.",
   yesDescription:
-    "After submitting, they can sign in, change their answers and submit again. The new answers replace the previous submission. The reference number stays the same.",
+    "After submitting, they can sign in, change their answers and submit again. The new answers replace the previous submission. The reference number gets a suffix of -U1, -U2 and so on for each update.",
   noDescription:
     "Once submitted, they cannot change that form. They can still copy answers into a new form if that setting is on.",
   changeHiddenText: "whether people can edit a submitted form",
