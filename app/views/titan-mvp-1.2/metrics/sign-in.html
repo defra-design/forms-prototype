@@ -153,6 +153,45 @@ Defra Form Designer metrics                </h1>
   </div>
 </div>
 
+<!-- Security code problems -->
+<div class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Security code problems</h2>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Too many code requests', 'Number of times a user was locked out for 2 hours after requesting a security code too many times.', 'metric-tip-lockouts-request-7d') }}
+          <span class="gem-c-big-number__value">14</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+16.7%",
+            classes: "govuk-tag--red app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Too many code requests increased by 16.7% compared to the previous 7 days." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">2 more than last week</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Incorrect codes entered', 'Number of times a user was locked out for 2 hours after entering a security code incorrectly too many times.', 'metric-tip-lockouts-incorrect-7d') }}
+          <span class="gem-c-big-number__value">31</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+10.7%",
+            classes: "govuk-tag--red app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Incorrect codes entered increased by 10.7% compared to the previous 7 days." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">3 more than last week</p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Account deletion -->
 <div class="govuk-!-margin-bottom-8">
   <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Account deletion</h2>
@@ -324,6 +363,45 @@ Defra Form Designer metrics                </h1>
   </div>
 </div>
 
+<!-- Security code problems -->
+<div class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Security code problems</h2>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Too many code requests', 'Number of times a user was locked out for 2 hours after requesting a security code too many times.', 'metric-tip-lockouts-request-30d') }}
+          <span class="gem-c-big-number__value">58</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+11.5%",
+            classes: "govuk-tag--red app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Too many code requests increased by 11.5% compared to the previous 30 days." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">6 more than last month</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Incorrect codes entered', 'Number of times a user was locked out for 2 hours after entering a security code incorrectly too many times.', 'metric-tip-lockouts-incorrect-30d') }}
+          <span class="gem-c-big-number__value">127</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+9.5%",
+            classes: "govuk-tag--red app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Incorrect codes entered increased by 9.5% compared to the previous 30 days." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">11 more than last month</p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Account deletion -->
 <div class="govuk-!-margin-bottom-8">
   <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Account deletion</h2>
@@ -490,6 +568,45 @@ Defra Form Designer metrics                </h1>
           }) }}
         </div>
         <p class="govuk-body-xs app-metric-caption">1,860 more than same period last year</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Security code problems -->
+<div class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Security code problems</h2>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Too many code requests', 'Number of times a user was locked out for 2 hours after requesting a security code too many times.', 'metric-tip-lockouts-request-all') }}
+          <span class="gem-c-big-number__value">780</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+11.4%",
+            classes: "govuk-tag--red app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Too many code requests increased by 11.4% compared to the same period last year." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">80 more than same period last year</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Incorrect codes entered', 'Number of times a user was locked out for 2 hours after entering a security code incorrectly too many times.', 'metric-tip-lockouts-incorrect-all') }}
+          <span class="gem-c-big-number__value">1,640</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+10.1%",
+            classes: "govuk-tag--red app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Incorrect codes entered increased by 10.1% compared to the same period last year." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">150 more than same period last year</p>
       </div>
     </div>
   </div>
