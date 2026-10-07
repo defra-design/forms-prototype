@@ -103,6 +103,14 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
           text: "Manage your form (after edit)",
           href: urls.manageResubmitted || "/runner-sign-in-v2/journeys/preview/manage-resubmitted",
         },
+        {
+          text: "Check your answers (edit + new payment)",
+          href: urls.checkAnswersEditedPaymentNew,
+        },
+        {
+          text: "Check your answers (edit + original payment)",
+          href: urls.checkAnswersEditedPaymentOriginal,
+        },
         { text: "Form submitted confirmation email", href: urls.emailFormSubmitted },
         { text: "Changes submitted email (form filler)", href: urls.emailFormSubmittedEdited },
         {
@@ -417,6 +425,18 @@ function buildRunnerSignInV2AllPagesStaticSections(urls, { unexpectedPages }) {
           text: "Manage your form (after edit)",
           href: p.manageResubmitted || preview("manage-resubmitted"),
         },
+        {
+          text: "Check your answers (edit + new payment)",
+          href:
+            urls.checkAnswersEditedPaymentNew ||
+            "/runner-sign-in-v2/static/check-answers/edited-payment-new",
+        },
+        {
+          text: "Check your answers (edit + original payment)",
+          href:
+            urls.checkAnswersEditedPaymentOriginal ||
+            "/runner-sign-in-v2/static/check-answers/edited-payment-original",
+        },
         { text: "Form submitted confirmation email", href: p.emailFormSubmitted },
         {
           text: "Changes submitted email (form filler)",
@@ -463,8 +483,16 @@ function buildRunnerSignInV2AllPagesStaticSections(urls, { unexpectedPages }) {
       ],
     },
     {
-      heading: "Return and edit emails (static)",
+      heading: "Return and edit (static)",
       links: [
+        {
+          text: "Check your answers (new payment)",
+          href: "/runner-sign-in-v2/static/check-answers/edited-payment-new",
+        },
+        {
+          text: "Check your answers (original payment)",
+          href: "/runner-sign-in-v2/static/check-answers/edited-payment-original",
+        },
         {
           text: "Changes submitted with payment (form filler, new payment)",
           href: "/runner-sign-in-v2/static/emails/form-submitted-edited-payment-new",

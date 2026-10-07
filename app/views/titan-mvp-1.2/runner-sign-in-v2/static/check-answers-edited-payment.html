@@ -1,0 +1,124 @@
+{% extends "layouts/runner-sign-in-v2.html" %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
+{% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}
+Check your answers before sending your form – {{ formName }} – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({
+    text: "Back to all pages (static)",
+    href: "/runner-sign-in-v2/all-pages/static"
+  }) }}
+{% endblock %}
+
+{% block header %}
+  {{ v2.v2ServiceHeader("forms", { formName: formName }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {{ govukInsetText({
+      html: '<strong>Static handover page: Check your answers (edit + payment).</strong> ' + staticPageDescription + ' Forms do not save. <a class="govuk-link" href="/runner-sign-in-v2/all-pages/static">View all static pages</a>.'
+    }) }}
+
+    <h1 class="govuk-heading-xl">Check your answers before sending your form</h1>
+
+    {{ govukSummaryList({
+      rows: [
+        {
+          key: { text: "Full name" },
+          value: { text: "Alex Taylor" },
+          actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "full name" }] }
+        },
+        {
+          key: { text: "Email address" },
+          value: { text: "alex.taylor@example.com" },
+          actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "email address" }] }
+        },
+        {
+          key: { text: "Volunteer role" },
+          value: { text: "Gardening" },
+          actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "volunteer role" }] }
+        },
+        {
+          key: { text: "Declaration" },
+          value: { text: "Accepted" },
+          actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "declaration" }] }
+        }
+      ]
+    }) }}
+
+    <h2 class="govuk-heading-m">Form that will be replaced</h2>
+
+    {{ govukSummaryList({
+      rows: [
+        { key: { text: "Form name" }, value: { text: formName } },
+        { key: { text: "Submitted on" }, value: { text: previousSubmittedOn } },
+        { key: { text: "Reference" }, value: { text: previousReference } }
+      ]
+    }) }}
+
+    <div class="payment-summary-wrap">
+      <div class="payment-summary">
+        <h2 class="govuk-heading-m">Payment received</h2>
+        {{ govukSummaryList({
+          classes: "govuk-!-margin-bottom-0",
+          rows: [
+            {
+              key: { text: "Payment for" },
+              value: { text: paymentFor }
+            },
+            {
+              key: { text: "Total amount" },
+              value: { text: paymentAmount }
+            },
+            {
+              key: { text: "Reference" },
+              value: { text: paymentReference }
+            },
+            {
+              key: { text: "Date of payment" },
+              value: { text: paymentDate }
+            }
+          ]
+        }) }}
+      </div>
+    </div>
+
+    {{ govukWarningText({
+      text: "When you select submit, the changes you've made will replace the answers in your previous form.",
+      iconFallbackText: "Warning"
+    }) }}
+
+    <div class="govuk-button-group">
+      {{ govukButton({
+        text: "Accept and send",
+        href: submitHref
+      }) }}
+    </div>
+
+    <h2 class="govuk-heading-m govuk-!-margin-top-8">Related confirmation emails</h2>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><a class="govuk-link" href="{{ fillerEmailHref }}">Form filler confirmation email</a></li>
+      <li><a class="govuk-link" href="{{ teamEmailHref }}">Processing team confirmation email</a></li>
+    </ul>
+  </div>
+</div>
+
+<style>
+  .payment-summary {
+    border-top: 2px solid #1d70b8;
+    padding: 15px;
+    background-color: #f3f2f1;
+    margin-top: 30px;
+    margin-bottom: 30px;
+  }
+</style>
+{% endblock %}

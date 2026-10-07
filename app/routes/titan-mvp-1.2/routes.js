@@ -28015,6 +28015,53 @@ router.get("/runner-sign-in-v2/static/change-phone-used-on-other-account", funct
   );
 });
 
+function runnerSignInV2EditedPaymentCheckAnswersLocals(options) {
+  const paymentScenario = options.paymentScenario === "new" ? "new" : "original";
+  const isNew = paymentScenario === "new";
+  return {
+    formName: "Apply to volunteer",
+    paymentScenario,
+    staticPageDescription: isNew
+      ? "Edit journey with a new payment taken on resubmit."
+      : "Edit journey showing the original payment; no additional payment taken.",
+    previousSubmittedOn: isNew ? "18 April 2026" : "18 April 2026",
+    previousReference: "FL3-5H4-L8N-U1",
+    paymentFor: "You need to pay to attend our design community of practices.",
+    paymentAmount: "£5,000.00",
+    paymentReference: isNew ? "H91KP22N04" : "V44FX85M58",
+    paymentDate: isNew ? "11:10am on 7 July 2026" : "3:25pm on 18 April 2026",
+    submitHref: "/runner-sign-in-v2/journeys/preview/form-submitted",
+    fillerEmailHref: isNew
+      ? "/runner-sign-in-v2/static/emails/form-submitted-edited-payment-new"
+      : "/runner-sign-in-v2/static/emails/form-submitted-edited-payment-original",
+    teamEmailHref: isNew
+      ? "/runner-sign-in-v2/static/emails/form-submitted-edited-team-payment-new"
+      : "/runner-sign-in-v2/static/emails/form-submitted-edited-team-payment-original",
+  };
+}
+
+router.get("/runner-sign-in-v2/static/check-answers/edited-payment-new", function (req, res) {
+  return res.render(
+    "titan-mvp-1.2/runner-sign-in-v2/static/check-answers-edited-payment",
+    runnerSignInV2EditedPaymentCheckAnswersLocals({ paymentScenario: "new" })
+  );
+});
+
+router.get("/runner-sign-in-v2/static/check-answers/edited-payment-original", function (req, res) {
+  return res.render(
+    "titan-mvp-1.2/runner-sign-in-v2/static/check-answers-edited-payment",
+    runnerSignInV2EditedPaymentCheckAnswersLocals({ paymentScenario: "original" })
+  );
+});
+
+router.get("/runner-sign-in-v2/static/check-answers/edited-payment-new.html", function (req, res) {
+  return res.redirect("/runner-sign-in-v2/static/check-answers/edited-payment-new");
+});
+
+router.get("/runner-sign-in-v2/static/check-answers/edited-payment-original.html", function (req, res) {
+  return res.redirect("/runner-sign-in-v2/static/check-answers/edited-payment-original");
+});
+
 router.get("/runner-sign-in-v2/static/emails/form-submitted-edited-payment-new", function (req, res) {
   return res.render(
     "titan-mvp-1.2/runner-sign-in-v2/emails/form-submitted",

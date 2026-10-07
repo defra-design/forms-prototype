@@ -61,6 +61,10 @@ function runnerSignInV2BuildJourneyUrls({
     manageResubmitted: journeyPreviewPath
       ? journeyPreviewPath("manage-resubmitted")
       : `/runner-sign-in-v2/journeys/preview/manage-resubmitted`,
+    checkAnswersEditedPaymentNew:
+      "/runner-sign-in-v2/static/check-answers/edited-payment-new",
+    checkAnswersEditedPaymentOriginal:
+      "/runner-sign-in-v2/static/check-answers/edited-payment-original",
     viewSubmission: `/runner-sign-in-v2/forms/${enc(formKey)}/${enc(applicationId)}/view`,
     makeChanges: `/runner-sign-in-v2/forms/${enc(formKey)}/${enc(applicationId)}/make-changes`,
     startNewForm: `/runner-sign-in-v2/forms/${enc(formKey)}/${enc(applicationId)}/start-new`,
@@ -171,6 +175,10 @@ function runnerSignInV2BuildJourneyUrls({
           readyToSubmit: journeyPreviewPath("ready-to-submit"),
           formSubmitted: journeyPreviewPath("form-submitted"),
           manageResubmitted: journeyPreviewPath("manage-resubmitted"),
+          checkAnswersEditedPaymentNew:
+            "/runner-sign-in-v2/static/check-answers/edited-payment-new",
+          checkAnswersEditedPaymentOriginal:
+            "/runner-sign-in-v2/static/check-answers/edited-payment-original",
           viewSubmission: journeyPreviewPath("view-submission"),
           makeChanges: journeyPreviewPath("make-changes"),
           emailSaveExit: journeyPreviewPath("email-save-exit"),
