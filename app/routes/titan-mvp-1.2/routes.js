@@ -2663,7 +2663,7 @@ const ADVANCED_SETTINGS_PAGES = {
     hint:
       "Use when people may need to correct or update answers after sending. This replaces the previous submission. It does not start a new form.",
     yesDescription:
-      "After submitting, they can sign in, change their answers and submit again. The new answers replace the previous submission. The reference number stays the same.",
+      "After submitting, they can sign in, change their answers and submit again. The new answers replace the previous submission. The reference number gets a suffix of -U1, -U2 and so on for each update.",
     noDescription:
       "Once submitted, they cannot change that form. They can still copy answers into a new form if that setting is on.",
     changeHiddenText: "whether people can edit a submitted form",
@@ -24255,6 +24255,26 @@ function runnerSignInV2ReferenceHtml(reference, previousSubmittedIso) {
   );
 }
 
+function runnerSignInV2BaseReference(reference) {
+  return String(reference || "")
+    .trim()
+    .replace(/-u\d+$/i, "");
+}
+
+function runnerSignInV2UpdateOrdinal(reference) {
+  const match = String(reference || "")
+    .trim()
+    .match(/-u(\d+)$/i);
+  return match ? Number(match[1]) : 0;
+}
+
+function runnerSignInV2NextUpdatedReference(reference) {
+  const base = runnerSignInV2BaseReference(reference);
+  if (!base) return reference;
+  const next = runnerSignInV2UpdateOrdinal(reference) + 1;
+  return `${base}-U${next}`;
+}
+
 function runnerSignInV2CompleteResubmit(req, application) {
   if (!application) return application;
   const previousSnapshot = application.submittedSnapshot || runnerSignInV2SnapshotSubmission(application);
@@ -24262,8 +24282,12 @@ function runnerSignInV2CompleteResubmit(req, application) {
     ? application.submissionHistory
     : [];
   application.submissionHistory.push(previousSnapshot);
-  application.previousReference = previousSnapshot.reference || application.amendingFromReference || application.reference;
+  application.previousReference =
+    previousSnapshot.reference || application.amendingFromReference || application.reference;
   application.previousSubmittedIso = previousSnapshot.submittedIso || application.submittedIso;
+  application.reference = runnerSignInV2NextUpdatedReference(
+    previousSnapshot.reference || application.amendingFromReference || application.reference
+  );
   application.status = "Submitted";
   application.amending = false;
   delete application.amendingFromReference;
@@ -25439,6 +25463,7 @@ function runnerSignInV2ClearAuthForPreview(req, { phone } = {}) {
 const RUNNER_SIGN_IN_V2_JOURNEY_PREVIEW_SIGNED_IN = new Set([
   "manage",
   "manage-submitted",
+  "manage-resubmitted",
   "security",
   "change-email-get-security-code",
   "change-phone-get-security-code",
@@ -25917,10 +25942,13 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
 
   if (slug === "form-submitted") {
     applyRunnerSignInV2EmailAuth(req, email, phone);
+    application.reference = "FL3-5H4-L8N-U2";
+    application.previousReference = "FL3-5H4-L8N-U1";
+    application.resubmitted = true;
     return res.render("titan-mvp-1.2/runner-sign-in-v2/form-submitted", {
       data,
       application,
-      manageUrl,
+      manageUrl: runnerSignInV2JourneyPreviewPath("manage-resubmitted"),
       confirmationEmailUrl: `/runner-sign-in-v2/journeys/preview/email-form-submitted-edited`,
       teamEmailUrl: `/runner-sign-in-v2/journeys/preview/email-form-submitted-team`,
       resubmitted: true,
@@ -26237,13 +26265,69 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
       answers: runnerSignInV2VolunteerApplicationEmailAnswers(application),
       resubmitted: true,
       showCopiedAnswersNote: false,
-      referenceNumber: "4Q3-4D8-AQJ",
-      previousReference: "FL3-5H4-L8N",
+      referenceNumber: "FL3-5H4-L8N-U2",
+      previousReference: "FL3-5H4-L8N-U1",
       submittedAt: "11:10am on Tuesday 7 July 2026",
       whatHappensNext: "We'll review your application and contact you if we need more information.",
       helpEmail: "daniel.dasilveira@defra.gov.uk",
       helpContactLinkHref: signInUrl,
     });
+  }
+
+  if (slug === "email-form-submitted-edited-payment-new") {
+    return res.render(
+      "titan-mvp-1.2/runner-sign-in-v2/emails/form-submitted",
+      runnerSignInV2EditedPaymentEmailLocals(req, {
+        base,
+        toEmail: email,
+        formKey,
+        applicationId,
+        application,
+        paymentScenario: "new",
+      })
+    );
+  }
+
+  if (slug === "email-form-submitted-edited-payment-original") {
+    return res.render(
+      "titan-mvp-1.2/runner-sign-in-v2/emails/form-submitted",
+      runnerSignInV2EditedPaymentEmailLocals(req, {
+        base,
+        toEmail: email,
+        formKey,
+        applicationId,
+        application,
+        paymentScenario: "original",
+      })
+    );
+  }
+
+  if (slug === "email-form-submitted-edited-team-payment-new") {
+    return res.render(
+      "titan-mvp-1.2/runner-sign-in-v2/emails/form-submitted-team",
+      runnerSignInV2EditedPaymentEmailLocals(req, {
+        base,
+        formKey,
+        applicationId,
+        application,
+        forTeam: true,
+        paymentScenario: "new",
+      })
+    );
+  }
+
+  if (slug === "email-form-submitted-edited-team-payment-original") {
+    return res.render(
+      "titan-mvp-1.2/runner-sign-in-v2/emails/form-submitted-team",
+      runnerSignInV2EditedPaymentEmailLocals(req, {
+        base,
+        formKey,
+        applicationId,
+        application,
+        forTeam: true,
+        paymentScenario: "original",
+      })
+    );
   }
 
   if (slug === "email-form-submitted-team") {
@@ -26256,8 +26340,8 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
       answers: runnerSignInV2VolunteerApplicationEmailAnswers(application),
       resubmitted: true,
       showCopiedAnswersNote: false,
-      referenceNumber: "FL3-5H4-L8N",
-      previousReference: "FL3-5H4-L8N",
+      referenceNumber: "FL3-5H4-L8N-U2",
+      previousReference: "FL3-5H4-L8N-U1",
       previousSubmittedOn: "18 April 2026",
       submittedAt: "11:10am on Tuesday 7 July 2026",
       teamEmail: "forms-processing@defra.gov.uk",
@@ -26484,6 +26568,81 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
       checkerInviteEmailPreviewUrl: "#",
       checkingRequired: false,
       startNewUrl: "#",
+    });
+  }
+
+  if (slug === "manage-resubmitted") {
+    applyRunnerSignInV2EmailAuth(req, email, phone);
+    setRunnerSignInV2ManageFocus(req, formKey, applicationId);
+    application.formName = application.formName || "Apply to volunteer";
+    application.reference = "FL3-5H4-L8N-U2";
+    application.previousReference = "FL3-5H4-L8N-U1";
+    application.resubmitted = true;
+    application.status = "Submitted";
+    application.submittedIso = "2026-07-07T11:10:00+01:00";
+    application.previousSubmittedIso = "2026-04-18T09:02:00+01:00";
+    const makeChangesHref = runnerSignInV2JourneyPreviewPath("make-changes");
+    const copyHref = "#";
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/manage-form", {
+      data,
+      application,
+      formKey,
+      applicationId,
+      journeyPreview,
+      tableRow: {
+        reference: "FL3-5H4-L8N-U2",
+        referenceHtml: runnerSignInV2ReferenceHtml(
+          "FL3-5H4-L8N-U2",
+          "2026-04-18T09:02:00+01:00"
+        ),
+        statusText: "Submitted",
+        statusTagClasses: "govuk-tag--green",
+        lastUpdatedText: "Submitted 7 July 2026",
+        expiryText: "",
+        actionsHtml: `<a class="govuk-link" href="${makeChangesHref}">Edit</a> <span class="govuk-body govuk-!-margin-left-2 govuk-!-margin-right-2">|</span> <a class="govuk-link" href="${copyHref}">Copy</a>`,
+      },
+      tableRows: [
+        {
+          reference: "FL3-5H4-L8N-U2",
+          referenceHtml: runnerSignInV2ReferenceHtml(
+            "FL3-5H4-L8N-U2",
+            "2026-04-18T09:02:00+01:00"
+          ),
+          statusText: "Submitted",
+          statusTagClasses: "govuk-tag--green",
+          lastUpdatedText: "Submitted 7 July 2026",
+          expiryText: "",
+          actionsHtml: `<a class="govuk-link" href="${makeChangesHref}">Edit</a> <span class="govuk-body govuk-!-margin-left-2 govuk-!-margin-right-2">|</span> <a class="govuk-link" href="${copyHref}">Copy</a>`,
+        },
+        {
+          reference: "FL3-5H4-L8N-U1",
+          referenceHtml: runnerSignInV2ReferenceCellHtml("FL3-5H4-L8N-U1"),
+          statusText: "Replaced",
+          statusTagClasses: "govuk-tag--grey",
+          lastUpdatedText: "Submitted 18 April 2026",
+          expiryText: "",
+          actionsHtml: `<a class="govuk-link" href="${copyHref}">Copy</a>`,
+        },
+      ],
+      query: {},
+      canMakeChanges: true,
+      allowEditSubmissions: true,
+      v2PrimaryAction: "edit",
+      v2StatusLabel: "Submitted",
+      v2StatusTagClasses: "govuk-tag--green",
+      lastUpdatedText: "Submitted 7 July 2026",
+      expiryText: "",
+      continueUrl: "#",
+      checkAnswersUrl: "#",
+      cloneUrl: copyHref,
+      makeChangesUrl: makeChangesHref,
+      saveExitWithSignInUrl: "#",
+      saveExitWithoutSignInUrl: "#",
+      checkerInviteUrl: "#",
+      checkerStartUrl: "#",
+      checkerInviteEmailPreviewUrl: "#",
+      checkingRequired: false,
+      startNewUrl: `/runner-sign-in-v2/forms/${enc(formKey)}/${enc(applicationId)}/start-new`,
     });
   }
 
@@ -27856,6 +28015,94 @@ router.get("/runner-sign-in-v2/static/change-phone-used-on-other-account", funct
   );
 });
 
+router.get("/runner-sign-in-v2/static/emails/form-submitted-edited-payment-new", function (req, res) {
+  return res.render(
+    "titan-mvp-1.2/runner-sign-in-v2/emails/form-submitted",
+    runnerSignInV2EditedPaymentEmailLocals(req, {
+      toEmail: String(req.query.email || "alex.taylor@example.com").trim(),
+      paymentScenario: "new",
+    })
+  );
+});
+
+router.get(
+  "/runner-sign-in-v2/static/emails/form-submitted-edited-payment-original",
+  function (req, res) {
+    return res.render(
+      "titan-mvp-1.2/runner-sign-in-v2/emails/form-submitted",
+      runnerSignInV2EditedPaymentEmailLocals(req, {
+        toEmail: String(req.query.email || "alex.taylor@example.com").trim(),
+        paymentScenario: "original",
+      })
+    );
+  }
+);
+
+router.get("/runner-sign-in-v2/static/emails/form-submitted-edited-team", function (req, res) {
+  return res.render(
+    "titan-mvp-1.2/runner-sign-in-v2/emails/form-submitted-team",
+    runnerSignInV2EditedPaymentEmailLocals(req, {
+      forTeam: true,
+      showPayment: false,
+    })
+  );
+});
+
+router.get(
+  "/runner-sign-in-v2/static/emails/form-submitted-edited-team-payment-new",
+  function (req, res) {
+    return res.render(
+      "titan-mvp-1.2/runner-sign-in-v2/emails/form-submitted-team",
+      runnerSignInV2EditedPaymentEmailLocals(req, {
+        forTeam: true,
+        paymentScenario: "new",
+      })
+    );
+  }
+);
+
+router.get(
+  "/runner-sign-in-v2/static/emails/form-submitted-edited-team-payment-original",
+  function (req, res) {
+    return res.render(
+      "titan-mvp-1.2/runner-sign-in-v2/emails/form-submitted-team",
+      runnerSignInV2EditedPaymentEmailLocals(req, {
+        forTeam: true,
+        paymentScenario: "original",
+      })
+    );
+  }
+);
+
+router.get("/runner-sign-in-v2/static/emails/form-submitted-edited-payment-new.html", function (req, res) {
+  return res.redirect("/runner-sign-in-v2/static/emails/form-submitted-edited-payment-new");
+});
+
+router.get(
+  "/runner-sign-in-v2/static/emails/form-submitted-edited-payment-original.html",
+  function (req, res) {
+    return res.redirect("/runner-sign-in-v2/static/emails/form-submitted-edited-payment-original");
+  }
+);
+
+router.get("/runner-sign-in-v2/static/emails/form-submitted-edited-team.html", function (req, res) {
+  return res.redirect("/runner-sign-in-v2/static/emails/form-submitted-edited-team");
+});
+
+router.get(
+  "/runner-sign-in-v2/static/emails/form-submitted-edited-team-payment-new.html",
+  function (req, res) {
+    return res.redirect("/runner-sign-in-v2/static/emails/form-submitted-edited-team-payment-new");
+  }
+);
+
+router.get(
+  "/runner-sign-in-v2/static/emails/form-submitted-edited-team-payment-original.html",
+  function (req, res) {
+    return res.redirect("/runner-sign-in-v2/static/emails/form-submitted-edited-team-payment-original");
+  }
+);
+
 router.get("/runner-sign-in-v2/static/manage-form-checked", function (req, res) {
   const data = ensureRunnerSignInSession(req);
   const application = runnerSignInV2EnsureStaticCheckedExample(req);
@@ -28041,9 +28288,14 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/manage", function (
     return {
       id: a.id,
       formName: a.formName,
-      reference: a.reference,
+      reference: a.amending
+        ? runnerSignInV2NextUpdatedReference(a.amendingFromReference || a.reference)
+        : a.reference,
       referenceHtml: a.amending
-        ? runnerSignInV2ReferenceCellHtml(a.reference, "Not submitted yet")
+        ? runnerSignInV2ReferenceCellHtml(
+            runnerSignInV2NextUpdatedReference(a.amendingFromReference || a.reference),
+            "Not submitted yet"
+          )
         : runnerSignInV2ReferenceHtml(a.reference, a.previousSubmittedIso),
       statusText,
       isLatest: isSubmitted,
@@ -28057,13 +28309,14 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/manage", function (
   }
 
   function runnerSignInV2HistoryRowFor(a, snapshot) {
-    const viewHref = runnerSignInV2ViewSubmissionPath(a.formKey, a.id, snapshot.reference);
-    const copyHref = `/runner-sign-in/applications/${encodeURIComponent(a.id)}/clone?from=${encodeURIComponent(snapshot.reference || "")}`;
+    const historyReference = snapshot.reference || a.previousReference || a.reference;
+    const viewHref = runnerSignInV2ViewSubmissionPath(a.formKey, a.id, historyReference);
+    const copyHref = `/runner-sign-in/applications/${encodeURIComponent(a.id)}/clone?from=${encodeURIComponent(historyReference || "")}`;
     return {
-      id: `${a.id}-${snapshot.submittedIso || snapshot.reference || "previous"}`,
+      id: `${a.id}-${snapshot.submittedIso || historyReference || "previous"}`,
       formName: a.formName,
-      reference: a.reference,
-      referenceHtml: runnerSignInV2ReferenceCellHtml(a.reference),
+      reference: historyReference,
+      referenceHtml: runnerSignInV2ReferenceCellHtml(historyReference),
       statusText: "Replaced",
       isLatest: false,
       statusTagClasses: runnerSignInV2StatusTagClassesFor("Replaced"),
@@ -28979,6 +29232,45 @@ function runnerSignInV2VolunteerApplicationEmailAnswers(application) {
   };
 }
 
+function runnerSignInV2EditedPaymentEmailLocals(req, options) {
+  const paymentScenario = options.paymentScenario === "new" ? "new" : "original";
+  const forTeam = options.forTeam === true;
+  const formKey = String(options.formKey || RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_FORM_KEY).trim();
+  const applicationId = String(options.applicationId || "").trim();
+  const application =
+    options.application ||
+    (formKey && applicationId ? runnerSignInV2ResolveApplication(req, formKey, applicationId) : null);
+  const target = runnerSignInV2FormSubmittedEmailTargetIds(req, formKey, applicationId);
+  const signInUrl = runnerSignInV2FormSubmittedEmailSignInUrl(target.formKey, target.applicationId);
+  const baseLocals = options.base || {};
+  return {
+    ...baseLocals,
+    toEmail: options.toEmail || (forTeam ? "forms-processing@defra.gov.uk" : "alex.taylor@example.com"),
+    teamEmail: "forms-processing@defra.gov.uk",
+    formKey: target.formKey,
+    applicationId: target.applicationId,
+    formName: (application && application.formName) || "Apply to volunteer",
+    answers: runnerSignInV2VolunteerApplicationEmailAnswers(application),
+    resubmitted: true,
+    showCopiedAnswersNote: false,
+    showPayment: options.showPayment !== false,
+    paymentScenario,
+    paymentFor: "You need to pay to attend our design community of practices.",
+    paymentAmount: "£5,000.00",
+    paymentDate:
+      paymentScenario === "new" ? "11:10am on 7 July 2026" : "3:25pm on 18 April 2026",
+    referenceNumber: "FL3-5H4-L8N-U2",
+    previousReference: "FL3-5H4-L8N-U1",
+    previousSubmittedOn: "18 April 2026",
+    submittedAt: "11:10am on Tuesday 7 July 2026",
+    whatHappensNext: "We'll review your application and contact you if we need more information.",
+    helpEmail: "daniel.dasilveira@defra.gov.uk",
+    helpContactLinkHref: signInUrl,
+    compareUrl: runnerSignInV2ProcessingComparePath(target.formKey, target.applicationId),
+    downloadCsvHref: "#",
+  };
+}
+
 function runnerSignInV2FormSubmittedEmailTargetIds(req, formKey, applicationId) {
   const fk = String(formKey || RUNNER_SIGN_IN_V2_SAVE_EXIT_DEMO_FORM_KEY).trim();
   const id = String(applicationId || "").trim();
@@ -29011,11 +29303,33 @@ function runnerSignInV2FormSubmittedEmailFlags(req, application) {
     Boolean(application && application.resubmitted) ||
     (isVolunteerEditDemo && req.query.edited !== "0");
   const copiedFrom = application && application.copiedFrom;
+  const rawReference = String(
+    req.query.referenceNumber ||
+      (application && application.reference) ||
+      "FL3-5H4-L8N"
+  ).trim();
+  const baseReference = runnerSignInV2BaseReference(rawReference) || "FL3-5H4-L8N";
+  // Demo/static edited emails: new ref must be a higher -U# than the one it replaces.
+  const useDemoUpdatedRefs =
+    resubmitted &&
+    !Boolean(application && application.resubmitted) &&
+    !/-u\d+$/i.test(rawReference);
+  const referenceNumber = useDemoUpdatedRefs
+    ? `${baseReference}-U2`
+    : resubmitted && !/-u\d+$/i.test(rawReference)
+      ? runnerSignInV2NextUpdatedReference(rawReference)
+      : rawReference;
   const previousReference = String(
     req.query.previousReference ||
       (application && application.previousReference) ||
       (copiedFrom && copiedFrom.reference) ||
-      (resubmitted ? "FL3-5H4-L8N" : "")
+      (useDemoUpdatedRefs
+        ? `${baseReference}-U1`
+        : resubmitted
+          ? runnerSignInV2UpdateOrdinal(referenceNumber) > 1
+            ? `${baseReference}-U${runnerSignInV2UpdateOrdinal(referenceNumber) - 1}`
+            : baseReference
+          : "")
   ).trim();
   const previousSubmittedIso =
     (application && application.previousSubmittedIso) ||
@@ -29027,11 +29341,6 @@ function runnerSignInV2FormSubmittedEmailFlags(req, application) {
   const previousSubmittedOn =
     String(req.query.previousSubmittedOn || "").trim() ||
     (previousSubmittedIso ? formatRunnerSignInDate(previousSubmittedIso) : "");
-  const referenceNumber = String(
-    req.query.referenceNumber ||
-      (application && application.reference) ||
-      "FL3-5H4-L8N"
-  ).trim();
   const submittedAt = String(
     req.query.submittedAt ||
       (application && application.submittedIso
@@ -29143,8 +29452,8 @@ function runnerSignInV2ProcessingCompare(application, options) {
     previousReference:
       (previousSnapshot && previousSnapshot.reference) ||
       (application && application.previousReference) ||
-      "FL3-5H4-L8N",
-    currentReference: (application && application.reference) || "4Q3-4D8-AQJ",
+      "FL3-5H4-L8N-U1",
+    currentReference: (application && application.reference) || "FL3-5H4-L8N-U2",
     previousSubmittedIso: (previousSnapshot && previousSnapshot.submittedIso) || "2026-04-18T09:02:00+01:00",
     currentSubmittedIso: (application && application.submittedIso) || new Date().toISOString(),
     fields,

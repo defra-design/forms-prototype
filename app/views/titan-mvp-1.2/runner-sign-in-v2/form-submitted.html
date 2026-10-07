@@ -14,7 +14,7 @@
   <div class="govuk-grid-column-two-thirds">
     {{ govukPanel({
       titleText: "Changes submitted" if resubmitted else "Form submitted",
-      html: ("Submission reference<br><strong>" + application.reference + "</strong>") if (application.reference and not resubmitted) else ""
+      html: ("Submission reference<br><strong>" + application.reference + "</strong>") if application.reference else ""
     }) }}
 
     {% if resubmitted %}

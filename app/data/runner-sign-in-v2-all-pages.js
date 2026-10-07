@@ -99,9 +99,29 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
         { text: "Form submitted", href: urls.formSubmitted },
         { text: "Your submitted form", href: urls.viewSubmission },
         { text: "Edit form (are you sure?)", href: urls.makeChanges },
+        {
+          text: "Manage your form (after edit)",
+          href: urls.manageResubmitted || "/runner-sign-in-v2/journeys/preview/manage-resubmitted",
+        },
         { text: "Form submitted confirmation email", href: urls.emailFormSubmitted },
         { text: "Changes submitted email (form filler)", href: urls.emailFormSubmittedEdited },
+        {
+          text: "Changes submitted email with payment (new payment)",
+          href: urls.emailFormSubmittedEditedPaymentNew,
+        },
+        {
+          text: "Changes submitted email with payment (original payment)",
+          href: urls.emailFormSubmittedEditedPaymentOriginal,
+        },
         { text: "Updated form received email (processing team)", href: urls.emailFormSubmittedTeam },
+        {
+          text: "Updated form received email with payment (processing team, new payment)",
+          href: urls.emailFormSubmittedTeamPaymentNew,
+        },
+        {
+          text: "Updated form received email with payment (processing team, original payment)",
+          href: urls.emailFormSubmittedTeamPaymentOriginal,
+        },
         { text: "Compare edited submissions (processing team)", href: urls.processingCompare },
         { text: "Start a new application", href: urls.startNewForm },
         { text: "Manage your form (checked example)", href: urls.staticManageFormChecked },
@@ -284,6 +304,24 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
         { text: "Applicant form checked email", href: urls.emailApplicantFormChecked },
         { text: "Form submitted email (copied answers)", href: urls.emailFormSubmitted },
         { text: "Form submitted email – public view (copied answers)", href: urls.emailFormSubmittedPublic },
+        { text: "Changes submitted email (form filler)", href: urls.emailFormSubmittedEdited },
+        {
+          text: "Changes submitted email with payment (new payment)",
+          href: urls.emailFormSubmittedEditedPaymentNew,
+        },
+        {
+          text: "Changes submitted email with payment (original payment)",
+          href: urls.emailFormSubmittedEditedPaymentOriginal,
+        },
+        { text: "Updated form received email (processing team)", href: urls.emailFormSubmittedTeam },
+        {
+          text: "Updated form received email with payment (processing team, new payment)",
+          href: urls.emailFormSubmittedTeamPaymentNew,
+        },
+        {
+          text: "Updated form received email with payment (processing team, original payment)",
+          href: urls.emailFormSubmittedTeamPaymentOriginal,
+        },
         { text: "Form submitted email – public view (checked)", href: urls.emailFormSubmittedCheckedPublic },
         { text: "Form submitted email – processing team (checked)", href: urls.emailFormSubmittedCheckedTeam },
       ],
@@ -375,14 +413,44 @@ function buildRunnerSignInV2AllPagesStaticSections(urls, { unexpectedPages }) {
         { text: "Form submitted", href: preview("form-submitted") },
         { text: "Your submitted form", href: p.viewSubmission || preview("view-submission") },
         { text: "Edit form (are you sure?)", href: p.makeChanges || preview("make-changes") },
+        {
+          text: "Manage your form (after edit)",
+          href: p.manageResubmitted || preview("manage-resubmitted"),
+        },
         { text: "Form submitted confirmation email", href: p.emailFormSubmitted },
         {
           text: "Changes submitted email (form filler)",
           href: p.emailFormSubmittedEdited || preview("email-form-submitted-edited"),
         },
         {
+          text: "Changes submitted email with payment (new payment)",
+          href:
+            urls.emailFormSubmittedEditedPaymentNew ||
+            "/runner-sign-in-v2/static/emails/form-submitted-edited-payment-new",
+        },
+        {
+          text: "Changes submitted email with payment (original payment)",
+          href:
+            urls.emailFormSubmittedEditedPaymentOriginal ||
+            "/runner-sign-in-v2/static/emails/form-submitted-edited-payment-original",
+        },
+        {
           text: "Updated form received email (processing team)",
-          href: p.emailFormSubmittedTeam || preview("email-form-submitted-team"),
+          href:
+            urls.emailFormSubmittedTeam ||
+            "/runner-sign-in-v2/static/emails/form-submitted-edited-team",
+        },
+        {
+          text: "Updated form received email with payment (processing team, new payment)",
+          href:
+            urls.emailFormSubmittedTeamPaymentNew ||
+            "/runner-sign-in-v2/static/emails/form-submitted-edited-team-payment-new",
+        },
+        {
+          text: "Updated form received email with payment (processing team, original payment)",
+          href:
+            urls.emailFormSubmittedTeamPaymentOriginal ||
+            "/runner-sign-in-v2/static/emails/form-submitted-edited-team-payment-original",
         },
         {
           text: "Compare edited submissions (processing team)",
@@ -392,6 +460,31 @@ function buildRunnerSignInV2AllPagesStaticSections(urls, { unexpectedPages }) {
         { text: "Manage your form (checked example)", href: urls.staticManageFormChecked },
         { text: "Manage your form (after deleting an in-progress form)", href: urls.staticManageFormAfterDelete },
         { text: "Manage your form (expired example)", href: urls.staticManageFormExpired },
+      ],
+    },
+    {
+      heading: "Return and edit emails (static)",
+      links: [
+        {
+          text: "Changes submitted with payment (form filler, new payment)",
+          href: "/runner-sign-in-v2/static/emails/form-submitted-edited-payment-new",
+        },
+        {
+          text: "Changes submitted with payment (form filler, original payment)",
+          href: "/runner-sign-in-v2/static/emails/form-submitted-edited-payment-original",
+        },
+        {
+          text: "Updated form received (processing team)",
+          href: "/runner-sign-in-v2/static/emails/form-submitted-edited-team",
+        },
+        {
+          text: "Updated form received with payment (processing team, new payment)",
+          href: "/runner-sign-in-v2/static/emails/form-submitted-edited-team-payment-new",
+        },
+        {
+          text: "Updated form received with payment (processing team, original payment)",
+          href: "/runner-sign-in-v2/static/emails/form-submitted-edited-team-payment-original",
+        },
       ],
     },
     {
@@ -547,8 +640,34 @@ function buildRunnerSignInV2AllPagesStaticSections(urls, { unexpectedPages }) {
           href: p.emailFormSubmittedEdited || preview("email-form-submitted-edited"),
         },
         {
+          text: "Changes submitted email with payment (new payment)",
+          href:
+            urls.emailFormSubmittedEditedPaymentNew ||
+            "/runner-sign-in-v2/static/emails/form-submitted-edited-payment-new",
+        },
+        {
+          text: "Changes submitted email with payment (original payment)",
+          href:
+            urls.emailFormSubmittedEditedPaymentOriginal ||
+            "/runner-sign-in-v2/static/emails/form-submitted-edited-payment-original",
+        },
+        {
           text: "Updated form received email (processing team)",
-          href: p.emailFormSubmittedTeam || preview("email-form-submitted-team"),
+          href:
+            urls.emailFormSubmittedTeam ||
+            "/runner-sign-in-v2/static/emails/form-submitted-edited-team",
+        },
+        {
+          text: "Updated form received email with payment (processing team, new payment)",
+          href:
+            urls.emailFormSubmittedTeamPaymentNew ||
+            "/runner-sign-in-v2/static/emails/form-submitted-edited-team-payment-new",
+        },
+        {
+          text: "Updated form received email with payment (processing team, original payment)",
+          href:
+            urls.emailFormSubmittedTeamPaymentOriginal ||
+            "/runner-sign-in-v2/static/emails/form-submitted-edited-team-payment-original",
         },
         { text: "Form submitted email – public view (checked)", href: p.emailFormSubmittedCheckedPublic },
         { text: "Form submitted email – processing team (checked)", href: p.emailFormSubmittedCheckedTeam },

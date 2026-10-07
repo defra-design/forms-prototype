@@ -1,7 +1,8 @@
 {% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
 {% set formTitle = formName or "Apply to volunteer" %}
-{% set referenceNumber = referenceNumber or "YCU-C8R-7KY" %}
+{% set referenceNumber = referenceNumber or ("FL3-5H4-L8N-U2" if resubmitted else "YCU-C8R-7KY") %}
 {% set previousSubmittedOn = previousSubmittedOn or "18 April 2026" %}
+{% set previousReference = previousReference or "FL3-5H4-L8N-U1" %}
 {% set submittedAt = submittedAt or "11:10am on Tuesday 7 July 2026" %}
 {% set downloadCsvHref = downloadCsvHref or "#" %}
 {% set answers = answers or {} %}
@@ -21,7 +22,7 @@
 
 {% if resubmitted %}
   {{ govukInsetText({
-    html: "<p class=\"govuk-body\">This replaces the form submitted " ~ previousSubmittedOn ~ ".</p><p class=\"govuk-body govuk-!-margin-bottom-0\">Reference number: " ~ referenceNumber ~ "</p>"
+    html: "<p class=\"govuk-body\">The new reference number is <strong>" ~ referenceNumber ~ "</strong>.</p><p class=\"govuk-body govuk-!-margin-bottom-0\">This form replaces the one submitted on " ~ previousSubmittedOn ~ " (reference number " ~ previousReference ~ ").</p>"
   }) }}
 {% else %}
   {{ govukInsetText({
@@ -51,6 +52,25 @@
 
 <h2 class="govuk-heading-s">Declaration</h2>
 <p class="govuk-body">{{ declarationAccepted }}</p>
+
+{% if showPayment %}
+  {% set paymentFor = paymentFor or "You need to pay to attend our design community of practices." %}
+  {% set paymentAmount = paymentAmount or "£5,000.00" %}
+  {% set paymentDate = paymentDate or "3:25pm on 6 October 2026" %}
+
+  <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+
+  <h2 class="govuk-heading-m">Payment details</h2>
+
+  <h2 class="govuk-heading-s">Payment for</h2>
+  <p class="govuk-body">{{ paymentFor }}</p>
+
+  <h2 class="govuk-heading-s">Total amount</h2>
+  <p class="govuk-body">{{ paymentAmount }}</p>
+
+  <h2 class="govuk-heading-s">Date of payment</h2>
+  <p class="govuk-body">{{ paymentDate }}</p>
+{% endif %}
 
 <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
 

@@ -58,6 +58,9 @@ function runnerSignInV2BuildJourneyUrls({
     emailSaveExitWithSignIn: `${triple("/runner-sign-in-v2/emails/save-and-exit", manageUrl)}&variant=with-sign-in`,
     signOut: "/runner-sign-in-v2/sign-out",
     formSubmitted: `/runner-sign-in-v2/forms/${enc(formKey)}/${enc(applicationId)}/submitted`,
+    manageResubmitted: journeyPreviewPath
+      ? journeyPreviewPath("manage-resubmitted")
+      : `/runner-sign-in-v2/journeys/preview/manage-resubmitted`,
     viewSubmission: `/runner-sign-in-v2/forms/${enc(formKey)}/${enc(applicationId)}/view`,
     makeChanges: `/runner-sign-in-v2/forms/${enc(formKey)}/${enc(applicationId)}/make-changes`,
     startNewForm: `/runner-sign-in-v2/forms/${enc(formKey)}/${enc(applicationId)}/start-new`,
@@ -84,7 +87,15 @@ function runnerSignInV2BuildJourneyUrls({
     emailFormSubmitted: triple("/runner-sign-in-v2/emails/form-submitted", manageUrl),
     emailFormSubmittedPublic: triple("/runner-sign-in-v2/emails/form-submitted/public", manageUrl),
     emailFormSubmittedEdited: `${triple("/runner-sign-in-v2/emails/form-submitted", manageUrl)}&edited=1`,
-    emailFormSubmittedTeam: `${triple("/runner-sign-in-v2/emails/form-submitted/team", manageUrl)}&edited=1`,
+    emailFormSubmittedEditedPaymentNew:
+      "/runner-sign-in-v2/static/emails/form-submitted-edited-payment-new",
+    emailFormSubmittedEditedPaymentOriginal:
+      "/runner-sign-in-v2/static/emails/form-submitted-edited-payment-original",
+    emailFormSubmittedTeam: "/runner-sign-in-v2/static/emails/form-submitted-edited-team",
+    emailFormSubmittedTeamPaymentNew:
+      "/runner-sign-in-v2/static/emails/form-submitted-edited-team-payment-new",
+    emailFormSubmittedTeamPaymentOriginal:
+      "/runner-sign-in-v2/static/emails/form-submitted-edited-team-payment-original",
     processingCompare: `/runner-sign-in-v2/processing/forms/${enc(formKey)}/${enc(applicationId)}`,
     emailFormSubmittedCheckedPublic: journeyPreviewPath
       ? journeyPreviewPath("email-form-submitted-checked-public")
@@ -159,6 +170,7 @@ function runnerSignInV2BuildJourneyUrls({
           checkerViewOrganisation: journeyPreviewPath("checker-view-organisation"),
           readyToSubmit: journeyPreviewPath("ready-to-submit"),
           formSubmitted: journeyPreviewPath("form-submitted"),
+          manageResubmitted: journeyPreviewPath("manage-resubmitted"),
           viewSubmission: journeyPreviewPath("view-submission"),
           makeChanges: journeyPreviewPath("make-changes"),
           emailSaveExit: journeyPreviewPath("email-save-exit"),
@@ -167,7 +179,19 @@ function runnerSignInV2BuildJourneyUrls({
           emailFormSubmitted: journeyPreviewPath("email-form-submitted"),
           emailFormSubmittedPublic: journeyPreviewPath("email-form-submitted-public"),
           emailFormSubmittedEdited: journeyPreviewPath("email-form-submitted-edited"),
+          emailFormSubmittedEditedPaymentNew: journeyPreviewPath(
+            "email-form-submitted-edited-payment-new"
+          ),
+          emailFormSubmittedEditedPaymentOriginal: journeyPreviewPath(
+            "email-form-submitted-edited-payment-original"
+          ),
           emailFormSubmittedTeam: journeyPreviewPath("email-form-submitted-team"),
+          emailFormSubmittedTeamPaymentNew: journeyPreviewPath(
+            "email-form-submitted-edited-team-payment-new"
+          ),
+          emailFormSubmittedTeamPaymentOriginal: journeyPreviewPath(
+            "email-form-submitted-edited-team-payment-original"
+          ),
           processingCompare: journeyPreviewPath("processing-compare"),
           emailFormSubmittedCheckedPublic: journeyPreviewPath("email-form-submitted-checked-public"),
           emailFormSubmittedCheckedTeam: journeyPreviewPath("email-form-submitted-checked-team"),
