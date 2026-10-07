@@ -273,9 +273,10 @@
         ]) }}
         {{ journeyDocs.journeyPreviews([
           { caption: "Form designer", title: "Edit a submitted form", href: urls.formEditorEditSubmittedForm },
-          { caption: "Return and edit", title: "Manage your form", href: urls.manage },
-          { caption: "Return and edit", title: "Your submitted form", href: urls.viewSubmission },
-          { caption: "Return and edit", title: "Changes submitted", href: urls.formSubmitted },
+          { caption: "Return and edit", title: "Manage your form", href: urls.manage, previewHref: urls.preview.manage },
+          { caption: "Return and edit", title: "Your submitted form", href: urls.viewSubmission, previewHref: urls.preview.viewSubmission },
+          { caption: "Return and edit", title: "Edit form", href: urls.makeChanges, previewHref: urls.preview.makeChanges },
+          { caption: "Return and edit", title: "Changes submitted", href: urls.formSubmitted, previewHref: urls.preview.formSubmitted },
           { caption: "Return and edit", title: "Confirmation email (form filler)", href: urls.emailFormSubmittedEdited, previewHref: urls.preview.emailFormSubmittedEdited },
           { caption: "Return and edit", title: "Processing team email", href: urls.emailFormSubmittedTeam, previewHref: urls.preview.emailFormSubmittedTeam },
           { caption: "Return and edit", title: "Compare submissions", href: urls.processingCompare, previewHref: urls.preview.processingCompare }

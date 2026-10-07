@@ -373,7 +373,21 @@ function buildRunnerSignInV2AllPagesStaticSections(urls, { unexpectedPages }) {
         { text: "Manage your form", href: p.manage },
         { text: "Ready to submit", href: p.readyToSubmit },
         { text: "Form submitted", href: preview("form-submitted") },
+        { text: "Your submitted form", href: p.viewSubmission || preview("view-submission") },
+        { text: "Edit form (are you sure?)", href: p.makeChanges || preview("make-changes") },
         { text: "Form submitted confirmation email", href: p.emailFormSubmitted },
+        {
+          text: "Changes submitted email (form filler)",
+          href: p.emailFormSubmittedEdited || preview("email-form-submitted-edited"),
+        },
+        {
+          text: "Updated form received email (processing team)",
+          href: p.emailFormSubmittedTeam || preview("email-form-submitted-team"),
+        },
+        {
+          text: "Compare edited submissions (processing team)",
+          href: p.processingCompare || preview("processing-compare"),
+        },
         { text: "Start a new application", href: preview("form-start-page") },
         { text: "Manage your form (checked example)", href: urls.staticManageFormChecked },
         { text: "Manage your form (after deleting an in-progress form)", href: urls.staticManageFormAfterDelete },
@@ -528,6 +542,14 @@ function buildRunnerSignInV2AllPagesStaticSections(urls, { unexpectedPages }) {
         { text: "Applicant form checked email", href: preview("email-applicant-form-checked") },
         { text: "Form submitted email (copied answers)", href: p.emailFormSubmitted },
         { text: "Form submitted email – public view (copied answers)", href: p.emailFormSubmittedPublic },
+        {
+          text: "Changes submitted email (form filler)",
+          href: p.emailFormSubmittedEdited || preview("email-form-submitted-edited"),
+        },
+        {
+          text: "Updated form received email (processing team)",
+          href: p.emailFormSubmittedTeam || preview("email-form-submitted-team"),
+        },
         { text: "Form submitted email – public view (checked)", href: p.emailFormSubmittedCheckedPublic },
         { text: "Form submitted email – processing team (checked)", href: p.emailFormSubmittedCheckedTeam },
       ],

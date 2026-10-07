@@ -25450,6 +25450,8 @@ const RUNNER_SIGN_IN_V2_JOURNEY_PREVIEW_SIGNED_IN = new Set([
   "save-exit-with-sign-in-leave",
   "save-exit-confirm-email",
   "form-submitted",
+  "view-submission",
+  "make-changes",
   "delete-draft",
   "checker-invite",
   "checker-invite-sent",
@@ -25922,6 +25924,67 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
       confirmationEmailUrl: `/runner-sign-in-v2/journeys/preview/email-form-submitted-edited`,
       teamEmailUrl: `/runner-sign-in-v2/journeys/preview/email-form-submitted-team`,
       resubmitted: true,
+    });
+  }
+
+  if (slug === "view-submission" || slug === "make-changes") {
+    applyRunnerSignInV2EmailAuth(req, email, phone);
+    setRunnerSignInV2ManageFocus(req, formKey, applicationId);
+    data.advancedSettings = {
+      ...(data.advancedSettings || {}),
+      allowEditSubmissions: "yes",
+    };
+
+    const submittedIso = "2026-04-18T09:02:00+01:00";
+    const answers = {
+      fullName: "Alex Taylor",
+      email: "alex.taylor@example.com",
+      volunteerRole: "Gardening",
+      declarationAccepted: "yes",
+    };
+    const reference = "FL3-5H4-L8N";
+    application.formName = application.formName || "Apply to volunteer";
+    application.formKey = formKey;
+    application.reference = reference;
+    application.status = "Submitted";
+    application.answers = answers;
+    application.submittedIso = submittedIso;
+    application.amending = false;
+    application.submittedSnapshot = {
+      reference,
+      submittedIso,
+      answers: { ...answers },
+    };
+
+    if (slug === "make-changes") {
+      return res.render("titan-mvp-1.2/runner-sign-in-v2/confirm-resubmit", {
+        data,
+        application,
+        manageUrl,
+        confirmUrl: "#",
+        journeyPreview,
+        journeysUrl,
+        submittedOnText: formatRunnerSignInSubmittedDateTime(submittedIso),
+      });
+    }
+
+    return res.render("titan-mvp-1.2/runner-sign-in-v2/view-submission", {
+      data,
+      application,
+      answers,
+      reference,
+      submittedIso,
+      submittedOnText: formatRunnerSignInSubmittedDateTime(submittedIso),
+      submittedOnDate: formatRunnerSignInDate(submittedIso),
+      viewingPrevious: false,
+      isLatest: true,
+      canMakeChanges: true,
+      hasUnsubmittedChanges: false,
+      makeChangesUrl: runnerSignInV2JourneyPreviewPath("make-changes"),
+      manageUrl,
+      journeyPreview,
+      journeysUrl,
+      formDef: getRunnerSignInFormDef(formKey),
     });
   }
 
