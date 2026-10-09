@@ -55,6 +55,33 @@ Check your answers before sending your form – {{ formName }} – GOV.UK
       ]
     }) }}
 
+    <h2 class="govuk-heading-m">Payment received</h2>
+    {% if paymentScenario != "new" %}
+    {{ govukInsetText({
+      text: "You will not be charged again."
+    }) }}
+    {% endif %}
+    {{ govukSummaryList({
+      rows: [
+        {
+          key: { text: "Payment for" },
+          value: { text: paymentFor }
+        },
+        {
+          key: { text: "Total amount" },
+          value: { text: paymentAmount }
+        },
+        {
+          key: { text: "Reference" },
+          value: { text: paymentReference }
+        },
+        {
+          key: { text: "Date of payment" },
+          value: { text: paymentDate }
+        }
+      ]
+    }) }}
+
     <h2 class="govuk-heading-m">Form that will be replaced</h2>
 
     {{ govukSummaryList({
@@ -65,33 +92,6 @@ Check your answers before sending your form – {{ formName }} – GOV.UK
       ]
     }) }}
 
-    <div class="payment-summary-wrap">
-      <div class="payment-summary">
-        <h2 class="govuk-heading-m">Payment received</h2>
-        {{ govukSummaryList({
-          classes: "govuk-!-margin-bottom-0",
-          rows: [
-            {
-              key: { text: "Payment for" },
-              value: { text: paymentFor }
-            },
-            {
-              key: { text: "Total amount" },
-              value: { text: paymentAmount }
-            },
-            {
-              key: { text: "Reference" },
-              value: { text: paymentReference }
-            },
-            {
-              key: { text: "Date of payment" },
-              value: { text: paymentDate }
-            }
-          ]
-        }) }}
-      </div>
-    </div>
-
     {{ govukWarningText({
       text: "When you select submit, the changes you've made will replace the answers in your previous form.",
       iconFallbackText: "Warning"
@@ -99,7 +99,7 @@ Check your answers before sending your form – {{ formName }} – GOV.UK
 
     <div class="govuk-button-group">
       {{ govukButton({
-        text: "Accept and send",
+        text: "Submit",
         href: submitHref
       }) }}
     </div>
@@ -112,13 +112,4 @@ Check your answers before sending your form – {{ formName }} – GOV.UK
   </div>
 </div>
 
-<style>
-  .payment-summary {
-    border-top: 2px solid #1d70b8;
-    padding: 15px;
-    background-color: #f3f2f1;
-    margin-top: 30px;
-    margin-bottom: 30px;
-  }
-</style>
 {% endblock %}

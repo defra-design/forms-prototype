@@ -361,6 +361,14 @@ activeLinkId: "nav-editor"
 																			</dd>
 																		</div>
 																	</dl>
+																	{{ govukButton({
+																		text: "Remove related question",
+																		classes: "govuk-button--warning govuk-!-margin-bottom-0",
+																		type: "button",
+																		attributes: {
+																			id: "remove-related-question"
+																		}
+																	}) }}
 																</div>
 																<div id="related-question-add-panel"{% if relatedConfigured %} hidden{% endif %}>
 																	<div id="related-question-existing-choice"{% if not hasExistingRelatedQuestions or relatedConfigured %} hidden{% endif %}>
@@ -666,7 +674,7 @@ activeLinkId: "nav-editor"
 
 	.gem-c-reorderable-list__wrapper {
 		display: flex;
-		/* align-items: flex-start; */
+		align-items: flex-start;
 	}
 
 	.gem-c-reorderable-list__content {
@@ -945,6 +953,15 @@ activeLinkId: "nav-editor"
 			if (pendingRelatedQuestion && pendingRelatedQuestion.type) {
 				return { ...pendingRelatedQuestion };
 			}
+			if (editingOptionIndex) {
+				const existingItem = optionsContainer?.querySelector(
+					`.gem-c-reorderable-list__item[data-index="${editingOptionIndex}"]`
+				);
+				const fromItem = getRelatedQuestionFromItem(existingItem);
+				if (fromItem) {
+					return fromItem;
+				}
+			}
 			return null;
 		}
 
@@ -1109,6 +1126,27 @@ activeLinkId: "nav-editor"
 			}
 			updateEditRelatedButtonState();
 			setAddOptionAdvancedOpen(false);
+		}
+
+		function removePendingRelatedQuestion() {
+			pendingRelatedQuestion = null;
+			isChangingRelatedType = false;
+			relatedTypeChangeBackup = null;
+			if (editingOptionIndex) {
+				const existingItem = optionsContainer.querySelector(
+					`.gem-c-reorderable-list__item[data-index="${editingOptionIndex}"]`
+				);
+				const relatedInput = existingItem?.querySelector('input[name$="[related_question]"]');
+				if (relatedInput) {
+					relatedInput.value = '';
+				}
+				const relatedSummary = existingItem?.querySelector('.related-question-summary');
+				if (relatedSummary) {
+					relatedSummary.remove();
+				}
+			}
+			updateEditRelatedButtonState();
+			updatePreview();
 		}
 
 		function fillRelatedQuestionForm(related) {
@@ -1370,6 +1408,13 @@ activeLinkId: "nav-editor"
 				}
 			});
 		}
+		const removeRelatedQuestionButton = document.getElementById('remove-related-question');
+		if (removeRelatedQuestionButton) {
+			removeRelatedQuestionButton.addEventListener('click', function (e) {
+				e.preventDefault();
+				removePendingRelatedQuestion();
+			});
+		}
 		updateEditRelatedButtonState();
 
 		// Add focus/blur event listeners for highlighting
@@ -1579,8 +1624,8 @@ activeLinkId: "nav-editor"
 			if (addOptionButton) {
 				addOptionButton.style.display = 'none';
 			}
-			{% if relatedConfigured and relatedQuestion %}
-			pendingRelatedQuestion = {{ relatedQuestion | dump | safe }};
+			{% if relatedQuestion and relatedQuestion.type %}
+			fillRelatedQuestionForm({{ relatedQuestion | dump | safe }});
 			{% endif %}
 			hideListItemBeingEdited();
 			updateEditRelatedButtonState();
