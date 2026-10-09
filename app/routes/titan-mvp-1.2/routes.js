@@ -11692,8 +11692,16 @@ router.get("/titan-mvp-1.2/metrics/copy-answers", function (req, res) {
   res.render("titan-mvp-1.2/metrics/copy-answers");
 });
 
+router.get("/titan-mvp-1.2/metrics/edit-and-resubmit", function (req, res) {
+  res.render("titan-mvp-1.2/metrics/edit-and-resubmit");
+});
+
 router.get("/titan-mvp-1.2/metrics/3rd-party-review", function (req, res) {
   res.render("titan-mvp-1.2/metrics/3rd-party-review");
+});
+
+router.get("/titan-mvp-1.2/metrics/payments", function (req, res) {
+  res.render("titan-mvp-1.2/metrics/payments");
 });
 
 router.get("/titan-mvp-1.2/metrics/v8", function (req, res) {

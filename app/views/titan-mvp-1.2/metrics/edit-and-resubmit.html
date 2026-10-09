@@ -1,0 +1,615 @@
+{% extends "layouts/main.html" %}
+{% from "components/service-header/macro.njk" import serviceHeader %}
+{%- from "govuk/components/tag/macro.njk" import govukTag -%}
+{%- from "govuk/components/tabs/macro.njk" import govukTabs -%}
+{%- from "govuk/components/table/macro.njk" import govukTable -%}
+{%- from "moj/components/sub-navigation/macro.njk" import mojSubNavigation -%}
+
+{% block pageTitle %}
+Edit and resubmit metrics – {{ serviceName }} – GOV.UK Prototype Kit
+{% endblock %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+containerClasses: containerClasses,
+accountName: "Chris Smith ",
+homepageLink: "/",
+signOutLink: "/onboarding/sign-out-confirmation",
+navigationItems: [
+{ href: "/titan-mvp-1.2/roles/my-account.html", text: "My account", id: "my-account" },
+{ href: "/titan-mvp-1.2/roles/manage-users.html", text: "Manage users", id: "manage-users" },
+{ href: "/titan-mvp-1.2/roles/manage-users.html", text: "Admin tools", id: "admin-tools" }
+
+],
+activeLinkId: "admin-tools"
+}) }}
+
+<div class="x-govuk-masthead x-govuk-masthead--large">
+    <div class="govuk-width-container">
+        {{ govukBackLink({ classes: "govuk-back-link--inverse govuk-!-margin-bottom-0", text: "Back to admin tools",
+        href: "/titan-mvp-1.2/library.html" }) }}
+
+        <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"
+            style="border-bottom: 1px solid white; margin-bottom: 0" />
+
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full-from-desktop">
+                <h1 class="x-govuk-masthead__title">
+Defra Form Designer metrics                </h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block content %}
+
+{% macro metricLabel(text, description, id) %}
+<span class="gem-c-big-number__label">
+  <span class="app-metric-tooltip tooltip" tabindex="0" aria-describedby="{{ id }}">
+    {{ text }}
+    <span class="tooltiptext" id="{{ id }}" role="tooltip">{{ description }}</span>
+  </span>
+</span>
+{% endmacro %}
+
+
+{{ mojSubNavigation({
+  label: "Sub navigation",
+  items: [  {
+    text: "Form activity",
+    href: "/titan-mvp-1.2/metrics/v7"
+  },   {
+    text: "Component usage",
+    href: "/titan-mvp-1.2/metrics/component-usage"
+  },   {
+    text: "Sign-in",
+    href: "/titan-mvp-1.2/metrics/sign-in"
+  },   {
+    text: "Copy answers",
+    href: "/titan-mvp-1.2/metrics/copy-answers"
+  },   {
+    text: "Edit and resubmit",
+    href: "/titan-mvp-1.2/metrics/edit-and-resubmit",
+    active: true
+  },   {
+    text: "Payments",
+    href: "/titan-mvp-1.2/metrics/payments"
+  },   {
+    text: "3rd party review",
+    href: "/titan-mvp-1.2/metrics/3rd-party-review"
+  }
+  ]
+}) }}
+
+
+{% set sevenDaysContent %}
+<div class="govuk-!-margin-bottom-6">
+  <span class="govuk-caption-m">18 November 2024 to 24 November 2024</span>
+  <h2 class="govuk-heading-l govuk-!-margin-bottom-1">Last 7 days</h2>
+  <p class="govuk-body">Monitor how many forms allow people to edit a submitted form, and how many resubmissions were made.</p>
+</div>
+
+<div class="govuk-!-margin-bottom-8">
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Forms with edit a submitted form enabled', 'Total number of forms that allow people to edit a form after they have submitted it.', 'metric-tip-edit-enabled-7d') }}
+          <span class="gem-c-big-number__value">27</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+8.0%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Forms with edit a submitted form enabled increased by 8.0% compared to the previous 7 days." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">2 more forms enabled this week</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Resubmissions', 'Total number of times someone edited a submitted form and submitted it again.', 'metric-tip-resubmissions-7d') }}
+          <span class="gem-c-big-number__value">186</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+12.0%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Resubmissions increased by 12.0% compared to the previous 7 days." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">20 more than last week</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="govuk-!-margin-bottom-0">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Resubmissions by form</h2>
+  {{ govukTable({
+    attributes: {
+      "data-module": "moj-sortable-table"
+    },
+    caption: "Resubmissions by form in the last 7 days",
+    captionClasses: "govuk-visually-hidden",
+    firstCellIsHeader: true,
+    head: [
+      {
+        text: "Form name",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Organisation",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Status",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Resubmissions",
+        format: "numeric",
+        attributes: { "aria-sort": "descending" }
+      }
+    ],
+    rows: [
+      [
+        { html: '<a href="#" class="govuk-link">Waste carrier registration</a>', attributes: { "data-sort-value": "Waste carrier registration" } },
+        { text: "Environment Agency", attributes: { "data-sort-value": "Environment Agency" } },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }), attributes: { "data-sort-value": "Live" } },
+        { text: "48", format: "numeric", attributes: { "data-sort-value": "48" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Basic Payment Scheme claim</a>', attributes: { "data-sort-value": "Basic Payment Scheme claim" } },
+        { text: "Rural Payments Agency", attributes: { "data-sort-value": "Rural Payments Agency" } },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }), attributes: { "data-sort-value": "Live" } },
+        { text: "41", format: "numeric", attributes: { "data-sort-value": "41" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Export health certificate</a>', attributes: { "data-sort-value": "Export health certificate" } },
+        { text: "APHA", attributes: { "data-sort-value": "APHA" } },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }), attributes: { "data-sort-value": "Live" } },
+        { text: "32", format: "numeric", attributes: { "data-sort-value": "32" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Water abstraction return</a>', attributes: { "data-sort-value": "Water abstraction return" } },
+        { text: "Environment Agency", attributes: { "data-sort-value": "Environment Agency" } },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }), attributes: { "data-sort-value": "Live" } },
+        { text: "27", format: "numeric", attributes: { "data-sort-value": "27" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Protected species licence</a>', attributes: { "data-sort-value": "Protected species licence" } },
+        { text: "Natural England", attributes: { "data-sort-value": "Natural England" } },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }), attributes: { "data-sort-value": "Live" } },
+        { text: "18", format: "numeric", attributes: { "data-sort-value": "18" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Fishing licence application</a>', attributes: { "data-sort-value": "Fishing licence application" } },
+        { text: "Defra", attributes: { "data-sort-value": "Defra" } },
+        { html: govukTag({ text: "Draft", classes: "govuk-tag--yellow" }), attributes: { "data-sort-value": "Draft" } },
+        { text: "0", format: "numeric", attributes: { "data-sort-value": "0" } }
+      ]
+    ]
+  }) }}
+</div>
+{% endset %}
+
+{% set thirtyDaysContent %}
+<div class="govuk-!-margin-bottom-6">
+  <span class="govuk-caption-m">25 October 2024 to 24 November 2024</span>
+  <h2 class="govuk-heading-l govuk-!-margin-bottom-1">Last 30 days</h2>
+  <p class="govuk-body">Monitor how many forms allow people to edit a submitted form, and how many resubmissions were made.</p>
+</div>
+
+<div class="govuk-!-margin-bottom-8">
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Forms with edit a submitted form enabled', 'Total number of forms that allow people to edit a form after they have submitted it.', 'metric-tip-edit-enabled-30d') }}
+          <span class="gem-c-big-number__value">27</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+22.7%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Forms with edit a submitted form enabled increased by 22.7% compared to the previous 30 days." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">5 more forms enabled this month</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Resubmissions', 'Total number of times someone edited a submitted form and submitted it again.', 'metric-tip-resubmissions-30d') }}
+          <span class="gem-c-big-number__value">764</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+14.5%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Resubmissions increased by 14.5% compared to the previous 30 days." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">97 more than last month</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="govuk-!-margin-bottom-0">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Resubmissions by form</h2>
+  {{ govukTable({
+    attributes: {
+      "data-module": "moj-sortable-table"
+    },
+    caption: "Resubmissions by form in the last 30 days",
+    captionClasses: "govuk-visually-hidden",
+    firstCellIsHeader: true,
+    head: [
+      {
+        text: "Form name",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Organisation",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Status",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Resubmissions",
+        format: "numeric",
+        attributes: { "aria-sort": "descending" }
+      }
+    ],
+    rows: [
+      [
+        { html: '<a href="#" class="govuk-link">Waste carrier registration</a>', attributes: { "data-sort-value": "Waste carrier registration" } },
+        { text: "Environment Agency", attributes: { "data-sort-value": "Environment Agency" } },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }), attributes: { "data-sort-value": "Live" } },
+        { text: "198", format: "numeric", attributes: { "data-sort-value": "198" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Basic Payment Scheme claim</a>', attributes: { "data-sort-value": "Basic Payment Scheme claim" } },
+        { text: "Rural Payments Agency", attributes: { "data-sort-value": "Rural Payments Agency" } },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }), attributes: { "data-sort-value": "Live" } },
+        { text: "172", format: "numeric", attributes: { "data-sort-value": "172" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Export health certificate</a>', attributes: { "data-sort-value": "Export health certificate" } },
+        { text: "APHA", attributes: { "data-sort-value": "APHA" } },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }), attributes: { "data-sort-value": "Live" } },
+        { text: "134", format: "numeric", attributes: { "data-sort-value": "134" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Water abstraction return</a>', attributes: { "data-sort-value": "Water abstraction return" } },
+        { text: "Environment Agency", attributes: { "data-sort-value": "Environment Agency" } },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }), attributes: { "data-sort-value": "Live" } },
+        { text: "109", format: "numeric", attributes: { "data-sort-value": "109" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Protected species licence</a>', attributes: { "data-sort-value": "Protected species licence" } },
+        { text: "Natural England", attributes: { "data-sort-value": "Natural England" } },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }), attributes: { "data-sort-value": "Live" } },
+        { text: "76", format: "numeric", attributes: { "data-sort-value": "76" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Fishing licence application</a>', attributes: { "data-sort-value": "Fishing licence application" } },
+        { text: "Defra", attributes: { "data-sort-value": "Defra" } },
+        { html: govukTag({ text: "Draft", classes: "govuk-tag--yellow" }), attributes: { "data-sort-value": "Draft" } },
+        { text: "0", format: "numeric", attributes: { "data-sort-value": "0" } }
+      ]
+    ]
+  }) }}
+</div>
+{% endset %}
+
+{% set allTimeContent %}
+<div class="govuk-!-margin-bottom-6">
+  <span class="govuk-caption-m">Since launch</span>
+  <h2 class="govuk-heading-l govuk-!-margin-bottom-1">All time</h2>
+  <p class="govuk-body">Monitor how many forms allow people to edit a submitted form, and how many resubmissions were made.</p>
+</div>
+
+<div class="govuk-!-margin-bottom-8">
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Forms with edit a submitted form enabled', 'Total number of forms that allow people to edit a form after they have submitted it.', 'metric-tip-edit-enabled-all') }}
+          <span class="gem-c-big-number__value">27</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+68.8%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Forms with edit a submitted form enabled increased by 68.8% compared to the same period last year." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">11 more than same period last year</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Resubmissions', 'Total number of times someone edited a submitted form and submitted it again.', 'metric-tip-resubmissions-all') }}
+          <span class="gem-c-big-number__value">4,820</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+41.2%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Resubmissions increased by 41.2% compared to the same period last year." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">1,408 more than same period last year</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="govuk-!-margin-bottom-0">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Resubmissions by form</h2>
+  {{ govukTable({
+    attributes: {
+      "data-module": "moj-sortable-table"
+    },
+    caption: "Resubmissions by form since launch",
+    captionClasses: "govuk-visually-hidden",
+    firstCellIsHeader: true,
+    head: [
+      {
+        text: "Form name",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Organisation",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Status",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Resubmissions",
+        format: "numeric",
+        attributes: { "aria-sort": "descending" }
+      }
+    ],
+    rows: [
+      [
+        { html: '<a href="#" class="govuk-link">Waste carrier registration</a>', attributes: { "data-sort-value": "Waste carrier registration" } },
+        { text: "Environment Agency", attributes: { "data-sort-value": "Environment Agency" } },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }), attributes: { "data-sort-value": "Live" } },
+        { text: "1,246", format: "numeric", attributes: { "data-sort-value": "1246" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Basic Payment Scheme claim</a>', attributes: { "data-sort-value": "Basic Payment Scheme claim" } },
+        { text: "Rural Payments Agency", attributes: { "data-sort-value": "Rural Payments Agency" } },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }), attributes: { "data-sort-value": "Live" } },
+        { text: "1,084", format: "numeric", attributes: { "data-sort-value": "1084" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Export health certificate</a>', attributes: { "data-sort-value": "Export health certificate" } },
+        { text: "APHA", attributes: { "data-sort-value": "APHA" } },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }), attributes: { "data-sort-value": "Live" } },
+        { text: "862", format: "numeric", attributes: { "data-sort-value": "862" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Water abstraction return</a>', attributes: { "data-sort-value": "Water abstraction return" } },
+        { text: "Environment Agency", attributes: { "data-sort-value": "Environment Agency" } },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }), attributes: { "data-sort-value": "Live" } },
+        { text: "698", format: "numeric", attributes: { "data-sort-value": "698" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Protected species licence</a>', attributes: { "data-sort-value": "Protected species licence" } },
+        { text: "Natural England", attributes: { "data-sort-value": "Natural England" } },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }), attributes: { "data-sort-value": "Live" } },
+        { text: "486", format: "numeric", attributes: { "data-sort-value": "486" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Fishing licence application</a>', attributes: { "data-sort-value": "Fishing licence application" } },
+        { text: "Defra", attributes: { "data-sort-value": "Defra" } },
+        { html: govukTag({ text: "Draft", classes: "govuk-tag--yellow" }), attributes: { "data-sort-value": "Draft" } },
+        { text: "0", format: "numeric", attributes: { "data-sort-value": "0" } }
+      ]
+    ]
+  }) }}
+</div>
+{% endset %}
+
+{{ govukTabs({
+  items: [
+    {
+      label: "Last 7 days",
+      id: "last-7-days",
+      panel: {
+        html: sevenDaysContent
+      }
+    },
+    {
+      label: "Last 30 days",
+      id: "last-30-days",
+      panel: {
+        html: thirtyDaysContent
+      }
+    },
+    {
+      label: "All time",
+      id: "all-time",
+      panel: {
+        html: allTimeContent
+      }
+    }
+  ]
+}) }}
+
+{% endblock %}
+
+{% block pageScripts %}
+<style>
+  .app-metric-tile {
+    background-color: #f3f2f1;
+    padding: 24px;
+    margin-bottom: 1rem;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+  }
+
+  @media (min-width: 40.0625em) {
+    .app-metric-tile {
+      min-height: 200px;
+    }
+  }
+
+  .gem-c-big-number {
+    margin-bottom: 0;
+  }
+
+  .gem-c-big-number__value {
+    display: block;
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 0;
+    color: #0b0c0c;
+  }
+
+  @media (min-width: 40.0625em) {
+    .gem-c-big-number__value {
+      font-size: 3.5rem;
+    }
+  }
+
+  .gem-c-big-number__label {
+    display: block;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.25;
+    margin-bottom: 12px;
+    color: #0b0c0c;
+  }
+
+  .app-tag-with-icon {
+    position: relative;
+    padding-left: 26px;
+    white-space: nowrap;
+  }
+
+  .app-tag-arrow-up::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    background-color: currentColor;
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 0l6 6H7v6H5V6H0z'/%3E%3C/svg%3E");
+    mask-repeat: no-repeat;
+    mask-position: center;
+    mask-size: contain;
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 0l6 6H7v6H5V6H0z'/%3E%3C/svg%3E");
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    -webkit-mask-size: contain;
+  }
+
+  .app-tag-arrow-down::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    background-color: currentColor;
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 12L0 6h5V0h2v6h5z'/%3E%3C/svg%3E");
+    mask-repeat: no-repeat;
+    mask-position: center;
+    mask-size: contain;
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 12L0 6h5V0h2v6h5z'/%3E%3C/svg%3E");
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    -webkit-mask-size: contain;
+  }
+
+  .app-metric-tile .gem-c-big-number {
+    flex: 1 0 auto;
+  }
+
+  .app-metric-caption {
+    color: #505a5f;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  .app-metric-tooltip {
+    max-width: 100%;
+  }
+
+  .app-metric-tooltip .tooltiptext {
+    font-weight: 400;
+    user-select: text;
+    pointer-events: auto;
+  }
+
+  .app-metric-tooltip:focus-visible {
+    outline: 3px solid transparent;
+    background-color: #ffdd00;
+    box-shadow: 0 -2px #ffdd00, 0 4px #0b0c0c;
+    border-bottom-color: transparent;
+  }
+
+  .app-metric-tooltip .tooltiptext.app-metric-tooltip__tip--visible {
+    visibility: visible;
+    opacity: 1;
+  }
+
+</style>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.app-metric-tooltip').forEach(function (trigger) {
+      const tip = trigger.querySelector('[role="tooltip"]');
+      if (!tip) return;
+
+      function show() {
+        tip.classList.add('app-metric-tooltip__tip--visible');
+      }
+
+      function hide() {
+        tip.classList.remove('app-metric-tooltip__tip--visible');
+      }
+
+      trigger.addEventListener('mouseenter', show);
+      trigger.addEventListener('mouseleave', hide);
+      tip.addEventListener('mouseenter', show);
+      tip.addEventListener('mouseleave', hide);
+      trigger.addEventListener('focus', show);
+      trigger.addEventListener('blur', hide);
+
+      trigger.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          hide();
+          trigger.blur();
+        }
+      });
+    });
+  });
+</script>
+{% endblock %}
