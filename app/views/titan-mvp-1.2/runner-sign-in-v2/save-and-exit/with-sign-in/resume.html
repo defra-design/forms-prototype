@@ -2,27 +2,34 @@
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
 
-{% block pageTitle %}Sign in to continue your form{% if application and application.formName %} – {{ application.formName }}{% endif %} – GOV.UK{% endblock %}
+{% block pageTitle %}Welcome back to your form{% if application and application.formName %} – {{ application.formName }}{% endif %} – GOV.UK{% endblock %}
 
 {% block beforeContent %}{% endblock %}
 
 {% block header %}
-  {{ v2.v2ServiceHeader("", { formName: application.formName }) }}
+  {{ v2.v2ServiceHeader("forms", { formName: application.formName if application else "" }) }}
 {% endblock %}
 
 {% block content %}
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
-    {% if application and application.formName %}
-      <span class="govuk-caption-l">{{ application.formName }}</span>
-    {% endif %}
-    <h1 class="govuk-heading-l">Sign in to continue your form</h1>
-    <p class="govuk-body">Sign in using the email address you used when you saved your progress.</p>
-    {{ govukButton({
-      text: "Sign in",
-      href: signInUrl,
-      isStartButton: true
-    }) }}
+    <div class="moj-interruption-card">
+      <div class="moj-interruption-card__content">
+        <h1 class="govuk-heading-l moj-interruption-card__heading">Welcome back to your form</h1>
+        <div class="govuk-body moj-interruption-card__body">
+          <p>You will return to the page where you saved your progress unless new questions have been added to the form.</p>
+          <p>If new questions have been added to the form, you will be taken to the earliest new question.</p>
+          <p>You will need to repeat the save process again and generate a new link if you want to save your progress in the future.</p>
+        </div>
+        <div class="govuk-button-group moj-interruption-card__actions">
+          {{ govukButton({
+            text: "Continue",
+            classes: "govuk-button--inverse",
+            href: continueUrl
+          }) }}
+        </div>
+      </div>
+    </div>
     <p class="govuk-body govuk-!-margin-top-4">
       <a class="govuk-link" href="/runner-sign-in-v2/emails/save-and-exit?variant=with-sign-in&amp;formKey={{ formKey | urlencode }}&amp;applicationId={{ applicationId | urlencode }}">View the email (prototype only)</a>
     </p>

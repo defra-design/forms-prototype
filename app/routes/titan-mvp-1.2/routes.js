@@ -19854,6 +19854,10 @@ function runnerSignInV2SaveAndExitWithSignInConfirmPath(formKey, applicationId) 
   return `/runner-sign-in-v2/save-and-exit/with-sign-in/confirm-email?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}`;
 }
 
+function runnerSignInV2SaveAndExitWithSignInResumePath(formKey, applicationId) {
+  return `/runner-sign-in-v2/save-and-exit/with-sign-in/resume?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}`;
+}
+
 function runnerSignInV2AuthBackUrl(req, fallback) {
   return sanitizeRunnerSignInNext(req.query && req.query.back) || fallback;
 }
@@ -25473,6 +25477,7 @@ const RUNNER_SIGN_IN_V2_JOURNEY_PREVIEW_SIGNED_IN = new Set([
   "change-phone-check-email",
   "change-phone-new-phone",
   "save-exit-with-sign-in-leave",
+  "save-exit-resume-with-sign-in",
   "save-exit-confirm-email",
   "form-submitted",
   "view-submission",
@@ -26046,9 +26051,11 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
   }
 
   if (slug === "save-exit-resume-with-sign-in") {
+    applyRunnerSignInV2EmailAuth(req, email, phone);
+    setRunnerSignInV2ManageFocus(req, formKey, applicationId);
     return res.render("titan-mvp-1.2/runner-sign-in-v2/save-and-exit/with-sign-in/resume", {
       ...base,
-      signInUrl: triple("/runner-sign-in-v2/sign-in/email", manageUrl),
+      continueUrl: manageUrl,
     });
   }
 
@@ -28301,7 +28308,9 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/manage", function (
         ? ""
         : formatRunnerSignInDate(a.expiryIso);
     const resumeStepId = getRunnerSignInResumeStepId(a) || "name";
-    const continueHref = `/runner-sign-in/forms/${encodeURIComponent(a.formKey)}/${encodeURIComponent(a.id)}/${encodeURIComponent(resumeStepId)}`;
+    const continueHref = isRunnerSignInV2SaveAndExitDemoApplication(a)
+      ? runnerSignInV2SaveAndExitWithSignInResumePath(a.formKey, a.id)
+      : `/runner-sign-in/forms/${encodeURIComponent(a.formKey)}/${encodeURIComponent(a.id)}/${encodeURIComponent(resumeStepId)}`;
     const readyToSubmitHref = `/runner-sign-in-v2/forms/${encodeURIComponent(a.formKey)}/${encodeURIComponent(a.id)}/ready-to-submit`;
     const primaryHref = statusText === "Checked" ? readyToSubmitHref : continueHref;
     const primaryLabel = statusText === "Checked" ? "Review and submit" : "Continue";
@@ -28470,7 +28479,9 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/manage", function (
   const continueUrl =
     application.status === "Submitted"
       ? "#"
-      : `/runner-sign-in/forms/${encodeURIComponent(application.formKey)}/${encodeURIComponent(application.id)}/${encodeURIComponent(resumeStepId || "name")}`;
+      : isRunnerSignInV2SaveAndExitDemoApplication(application)
+        ? runnerSignInV2SaveAndExitWithSignInResumePath(application.formKey, application.id)
+        : `/runner-sign-in/forms/${encodeURIComponent(application.formKey)}/${encodeURIComponent(application.id)}/${encodeURIComponent(resumeStepId || "name")}`;
   const checkAnswersUrl = runnerSignInCheckAnswersUrl(application, req.query);
   const cloneUrl = `/runner-sign-in/applications/${encodeURIComponent(application.id)}/clone`;
   const saveExitWithSignInUrl = `/runner-sign-in-v2/save-and-exit/with-sign-in/confirm-email?formKey=${encodeURIComponent(application.formKey)}&applicationId=${encodeURIComponent(application.id)}`;
@@ -29004,15 +29015,24 @@ router.get("/runner-sign-in-v2/save-and-exit/with-sign-in/resume", function (req
   if (!formKey || !applicationId) {
     return res.redirect("/runner-sign-in-v2/start-page");
   }
-  const application = runnerSignInV2ResolveApplication(req, formKey, applicationId);
+  const data = ensureRunnerSignInSession(req);
   const manageUrl = runnerSignInV2ManagePath(formKey, applicationId);
-  const signInUrl = `/runner-sign-in-v2/sign-in/email?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}&next=${encodeURIComponent(manageUrl)}`;
+  if (!data.runnerSignInAuthed) {
+    const signInUrl =
+      `/runner-sign-in-v2/sign-in/email?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}` +
+      `&next=${encodeURIComponent(`/runner-sign-in-v2/save-and-exit/with-sign-in/resume?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}`)}`;
+    return res.redirect(signInUrl);
+  }
+  setRunnerSignInV2ManageFocus(req, formKey, applicationId);
+  const application = runnerSignInV2ResolveApplication(req, formKey, applicationId);
+  const resumeStepId = getRunnerSignInResumeStepId(application);
+  const continueUrl = resumeStepId ? runnerSignInFormStepUrl(application, resumeStepId) : manageUrl;
   return res.render("titan-mvp-1.2/runner-sign-in-v2/save-and-exit/with-sign-in/resume", {
-    data: ensureRunnerSignInSession(req),
+    data,
     application,
     formKey,
     applicationId,
-    signInUrl,
+    continueUrl,
   });
 });
 
