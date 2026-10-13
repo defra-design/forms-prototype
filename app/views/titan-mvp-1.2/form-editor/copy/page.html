@@ -1,0 +1,80 @@
+{% extends "layouts/main.html" %}
+
+{% from "components/service-header/macro.njk" import serviceHeader %}
+
+{% set pageName = "Duplicate page" %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+containerClasses: containerClasses,
+accountName: "Chris Smith",
+homepageLink: "/",
+signOutLink: "/titan-mvp-1.2/onboarding/sign-out-confirmation",
+navigationItems: [
+{ href: "/titan-mvp-1.2/library", text: "Forms library", id: "nav-library" },
+{ href: "/titan-mvp-1.2/form-overview/index", text: "Overview", id: "nav-overview" },
+{ href: "/titan-mvp-1.2/form-editor/listing", text: "Editor", id: "nav-editor" }
+],
+activeLinkId: "nav-editor"
+}) }}
+
+<div class="x-govuk-masthead x-govuk-masthead--large">
+  <div class="govuk-width-container">
+    {{ govukBackLink({
+      classes: "govuk-back-link--inverse govuk-!-margin-bottom-0",
+      text: "Back to editor",
+      href: "/titan-mvp-1.2/form-editor/listing"
+    }) }}
+
+    <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"
+      style="border-bottom: 1px solid white; margin-bottom: 0" />
+
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-full-from-desktop">
+        <h1 class="x-govuk-masthead__title">
+          {{ form.name }}
+        </h1>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <span class="govuk-caption-l">Page {{ pageNumber }}</span>
+    <h1 class="govuk-heading-l">Duplicate this page?</h1>
+
+    <p class="govuk-body">
+      A copy of <strong>{{ pageHeading }}</strong> will be added after this page
+      in the form.
+    </p>
+    <p class="govuk-body">
+      {% if questionCount == 1 %}
+      It includes 1 question.
+      {% else %}
+      It includes {{ questionCount }} questions.
+      {% endif %}
+      Page conditions stay linked to the same answers earlier in the form.
+    </p>
+
+    <form action="/titan-mvp-1.2/form-editor/copy/page" method="POST" novalidate>
+      <input type="hidden" name="pageId" value="{{ pageId }}">
+
+      <div class="govuk-button-group">
+        <button type="submit" class="govuk-button" data-module="govuk-button">
+          Duplicate page
+        </button>
+        <a href="/titan-mvp-1.2/form-editor/listing" class="govuk-button govuk-button--secondary"
+          data-module="govuk-button">
+          Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

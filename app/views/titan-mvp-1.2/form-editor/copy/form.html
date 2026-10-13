@@ -1,0 +1,89 @@
+{% extends "layouts/main.html" %}
+
+{% from "components/service-header/macro.njk" import serviceHeader %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+
+{% set pageName = "Make a copy of this form" %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+containerClasses: containerClasses,
+accountName: "Chris Smith",
+homepageLink: "/",
+signOutLink: "/titan-mvp-1.2/onboarding/sign-out-confirmation",
+navigationItems: [
+{ href: "/titan-mvp-1.2/library", text: "Forms library", id: "nav-library" },
+{ href: "/titan-mvp-1.2/form-overview/simplified/index-tabs", text: "Overview", id: "nav-overview" },
+{ href: "/titan-mvp-1.2/form-editor/listing", text: "Editor", id: "nav-editor" }
+],
+activeLinkId: "nav-overview"
+}) }}
+
+<div class="x-govuk-masthead x-govuk-masthead--large">
+  <div class="govuk-width-container">
+    {{ govukBackLink({
+      classes: "govuk-back-link--inverse govuk-!-margin-bottom-0",
+      text: "Back to form overview",
+      href: "/titan-mvp-1.2/form-overview/simplified/index-tabs"
+    }) }}
+
+    <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"
+      style="border-bottom: 1px solid white; margin-bottom: 0" />
+
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-full-from-desktop">
+        <h1 class="x-govuk-masthead__title">
+          {{ form.name }}
+        </h1>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">Make a copy of this form</h1>
+
+    <p class="govuk-body">
+      This creates a new draft based on the current form
+      {% if pageCount == 1 %}
+      (1 page).
+      {% else %}
+      ({{ pageCount }} pages).
+      {% endif %}
+    </p>
+    <p class="govuk-body">
+      In this prototype you’ll switch to editing the copy. The original draft name
+      is kept in session history only.
+    </p>
+
+    <form action="/titan-mvp-1.2/form-overview/copy-form" method="POST" novalidate>
+      {{ govukInput({
+        label: {
+          text: "Name of the new form",
+          classes: "govuk-label--m"
+        },
+        id: "formName",
+        name: "formName",
+        value: suggestedName,
+        classes: "govuk-!-width-two-thirds"
+      }) }}
+
+      <div class="govuk-button-group">
+        <button type="submit" class="govuk-button" data-module="govuk-button">
+          Make a copy
+        </button>
+        <a href="/titan-mvp-1.2/form-overview/simplified/index-tabs"
+          class="govuk-button govuk-button--secondary" data-module="govuk-button">
+          Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

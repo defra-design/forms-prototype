@@ -4,6 +4,9 @@ const fs = require("fs");
 const path = require("path");
 const lists = require("../../routes/lists");
 const sections = require("../../routes/sections");
+
+// Proof of concept: copy form / page / question
+require("./copy")(router);
 const terms = require("../../data/dictionary.json");
 const runnerSignInV2JourneyFlows = require("../../data/runner-sign-in-v2-journey-flows");
 const { buildRunnerSignInV2AllPagesSections, buildRunnerSignInV2AllPagesStaticSections } = require("../../data/runner-sign-in-v2-all-pages");
@@ -2177,6 +2180,7 @@ router.get("/titan-mvp-1.2/form-editor/listing", function (req, res) {
       name: formData.formName || "Form name",
     },
     request: req,
+    copied: req.query.copied || null,
   });
 });
 // Add non-.html route for listing
@@ -2230,6 +2234,7 @@ router.get("/titan-mvp-1.2/form-editor/listing.html", function (req, res) {
       name: formData.formName || "Form name",
     },
     request: req,
+    copied: req.query.copied || null,
   });
 });
 
@@ -4849,6 +4854,7 @@ router.get("/titan-mvp-1.2/page-overview", function (req, res) {
     pageNumber: pageNumber,
     currentPage: currentPage,
     sections: sections,
+    copied: req.query.copied || null,
   });
 });
 
@@ -6804,11 +6810,18 @@ router.get("/titan-mvp-1.2/form-overview/simplified/index-tabs", (req, res) => {
     delete req.session.data.favouriteFlash;
   }
 
+  const copySuccessMessage = req.session.data.copySuccessMessage || null;
+  if (copySuccessMessage) {
+    delete req.session.data.copySuccessMessage;
+  }
+
   res.render("titan-mvp-1.2/form-overview/simplified/index-tabs", {
     form: form,
     draftSettings: draftSettings,
     pageName: `Overview - ${form.name}`,
     favouriteFlash,
+    copied: req.query.copied || null,
+    copySuccessMessage,
   });
 });
 
@@ -7469,6 +7482,7 @@ router.get("/titan-mvp-1.2/form-editor/page-overview", function (req, res) {
     pageNumber: pageIndex + 1,
     currentPage: currentPage,
     sections: sections,
+    copied: req.query.copied || null,
   });
 });
 

@@ -4,9 +4,32 @@
 {% from "govuk/components/input/macro.njk" import govukInput %}
 {% from "govuk/components/textarea/macro.njk" import govukTextarea %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
 {% set pageName = "Page " + pageNumber + " overview - Apply for a county parish holding number in England" %}
 {% set headingPlaceholder = "Page heading" %}
 {% set guidancePlaceholder = "" %}
+
+{# ICDS popover menu (SIS) — loaded for this PoC page only #}
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ukic/fonts/dist/fonts.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ukic/web-components/dist/core/core.css">
+<script type="module" src="https://cdn.jsdelivr.net/npm/@ukic/web-components/dist/core/core.esm.js"></script>
+{# ICDS core.css follows prefers-color-scheme and darkens native inputs — keep GOV.UK fields light #}
+<style>
+  html {
+    color-scheme: light;
+  }
+
+  .govuk-input,
+  .govuk-textarea,
+  .govuk-select {
+    color-scheme: light;
+    background-color: #ffffff !important;
+    color: #0b0c0c !important;
+  }
+</style>
+{% endblock %}
 
 {% block header %}
 {{ serviceHeader({
@@ -55,6 +78,18 @@ navigationItems: [
 {% block content %}
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-full">
+    {% if copied == "question" %}
+    <div class="govuk-grid-row" id="copy-success-notification">
+      <div class="govuk-grid-column-two-thirds">
+        {{ govukNotificationBanner({
+          type: "success",
+          text: "Question duplicated",
+          titleText: "Success",
+          classes: "govuk-!-margin-bottom-4"
+        }) }}
+      </div>
+    </div>
+    {% endif %}
     <div class="govuk-grid-row">
       <!-- Left Column for Form Controls -->
       <div class="govuk-grid-column-one-half-from-desktop" id="container" style="flex: 1 1 75%; overflow-y: auto">
@@ -68,24 +103,69 @@ navigationItems: [
                   <div class="govuk-grid-row" id="page-settings-container-1">
                     <div id="question-1">
                       <div class="govuk-summary-card__content" style="margin-bottom: 0">
-                        <!-- Sub Navigation for Question -->
-                        <nav class="moj-sub-navigation govuk-!-padding-top-0 govuk-!-margin-bottom-2"
-                          aria-label="Sub navigation">
-                          <ul class="moj-sub-navigation__list" id="nav-list2">
-                            <li class="moj-sub-navigation__item">
-                              <a class="moj-sub-navigation__link" aria-current="page" id="overviewquestions"
-                                href="#overview-noquestions">
-                                Page {{ pageNumber }} overview
-                              </a>
-                            </li>
-                            <li class="moj-sub-navigation__item">
-                              <a class="moj-sub-navigation__link"
-                                href="/titan-mvp-1.2/form-editor/conditions/page-level/{{ currentPage.pageId }}">
-                                Conditions
-                              </a>
-                            </li>
-                          </ul>
-                        </nav>
+                        <!-- Sub Navigation for Question + page action -->
+                        <div class="app-page-sub-nav">
+                          <nav class="moj-sub-navigation govuk-!-padding-top-0 govuk-!-margin-bottom-0"
+                            aria-label="Sub navigation">
+                            <ul class="moj-sub-navigation__list" id="nav-list2">
+                              <li class="moj-sub-navigation__item">
+                                <a class="moj-sub-navigation__link" aria-current="page" id="overviewquestions"
+                                  href="#overview-noquestions">
+                                  Page {{ pageNumber }} overview
+                                </a>
+                              </li>
+                              <li class="moj-sub-navigation__item">
+                                <a class="moj-sub-navigation__link"
+                                  href="/titan-mvp-1.2/form-editor/conditions/page-level/{{ currentPage.pageId }}">
+                                  Conditions
+                                </a>
+                              </li>
+                            </ul>
+                          </nav>
+                          {# ICDS popover pattern: https://design.sis.gov.uk/components/navigation/popover-menu/code/ #}
+                          <div class="app-page-sub-nav__action hide-in-reorder-mode hide-when-edit-mode">
+                            <ic-button
+                              id="page-actions-trigger"
+                              variant="icon"
+                              title="Page actions"
+                              theme="light"
+                              onclick="handlePageActionsClick()"
+                              aria-expanded="false">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="16"
+                                height="16"
+                                fill="currentColor"
+                                class="bi bi-three-dots-vertical"
+                                viewBox="0 0 16 16"
+                                aria-hidden="true"
+                                focusable="false">
+                                <path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"></path>
+                              </svg>
+                            </ic-button>
+                            <div>
+                              <ic-popover-menu
+                                id="page-actions-menu"
+                                anchor="page-actions-trigger"
+                                aria-label="Page actions"
+                                theme="light"
+                                fixed-positioning="true">
+                                <ic-menu-item
+                                  label="Duplicate page"
+                                  theme="light"
+                                  href="/titan-mvp-1.2/form-editor/copy/page/{{ currentPage.pageId }}">
+                                </ic-menu-item>
+                                <ic-menu-item
+                                  id="page-actions-delete"
+                                  label="Delete page"
+                                  theme="light"
+                                  variant="destructive"
+                                  href="/titan-mvp-1.2/form-editor/delete/{{ currentPage.pageId }}">
+                                </ic-menu-item>
+                              </ic-popover-menu>
+                            </div>
+                          </div>
+                        </div>
 
 
                         <h2 class="govuk-heading-l govuk-!-margin-top-4">Page {{ pageNumber }} overview</h2>
@@ -105,9 +185,7 @@ navigationItems: [
                             actions: {
                             items: [
                             {
-                            href: "/titan-mvp-1.2/edit-question?questionId=" ~ question.questionId, text: "Change",
-                            visuallyHiddenText: "Edit " ~ question.label,
-                            classes: "govuk-link govuk-link--no-visited-state hide-when-edit-mode"
+                            html: '<span class="app-question-row-actions hide-when-edit-mode"><a class="govuk-link govuk-link--no-visited-state" href="/titan-mvp-1.2/edit-question?questionId=' ~ question.questionId ~ '">Change<span class="govuk-visually-hidden"> ' ~ (question.label or "question") ~ '</span></a><span class="app-question-row-actions__separator" aria-hidden="true"></span><span class="govuk-visually-hidden"> or </span><a class="govuk-link govuk-link--no-visited-state" href="/titan-mvp-1.2/form-editor/copy/question/' ~ currentPage.pageId ~ '/' ~ question.questionId ~ '">Duplicate<span class="govuk-visually-hidden"> ' ~ (question.label or "question") ~ '</span></a></span>'
                             }
                             ]
                             }
@@ -155,13 +233,6 @@ navigationItems: [
                             Re-order questions
                           </button>
                           {% endif %}
-
-                          <p class="govuk-body">
-                            <a href="/titan-mvp-1.2/form-editor/delete/{{ currentPage.pageId }}"
-                              class="govuk-link govuk-link--no-visited-state govuk-link--destructive hide-in-reorder-mode hide-when-edit-mode">
-                              Delete page
-                            </a>
-                          </p>
                         </div>
 
                         <a href="#tab-one" class="govuk-skip-link" style="margin-bottom: 30px!important;"
@@ -1671,8 +1742,96 @@ navigationItems: [
 
   /* ========== NORMAL (non-edit) MODE ========== */
 
-  /* By default, minimal styling so the summary list remains normal */
+  /* Split sub-nav: tabs left, page action right */
+  .app-page-sub-nav {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #b1b4b6;
+  }
 
+  .app-page-sub-nav .moj-sub-navigation {
+    flex: 1 1 auto;
+    margin-bottom: 0;
+    border-bottom: 0;
+  }
+
+  .app-page-sub-nav .moj-sub-navigation__list {
+    margin-bottom: 0;
+  }
+
+  .app-page-sub-nav__action {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    padding-bottom: 8px;
+    white-space: nowrap;
+  }
+
+  .app-page-sub-nav__action ic-button {
+    --ic-button-icon-colour: #0b0c0c;
+  }
+
+  #page-actions-menu {
+    --max-height: 320px;
+    --popover-width: 260px;
+    --ic-z-index-popover: 10000;
+    /* Force ICDS light appearance (OS dark mode otherwise yields white-on-white labels) */
+    color-scheme: light;
+    --ic-color-text-primary: #0b0c0c;
+    --ic-color-text-secondary: #505a5f;
+    --ic-popover-background: #ffffff;
+    --ic-popover-menu-item-label: #0b0c0c;
+    --ic-popover-menu-item-description: #505a5f;
+    --ic-popover-menu-destructive-item-label: #d4351c;
+    /* Focus styles: keep dark text + light grey highlight (blue focus bg doesn't apply with href) */
+    --ic-popover-menu-item-label-focused: #0b0c0c;
+    --ic-popover-menu-item-description-focused: #505a5f;
+    --ic-popover-menu-item-shortcut-focused: #0b0c0c;
+    --ic-popover-background-focus: #f3f2f1;
+    --ic-popover-background-hover: #f3f2f1;
+    --ic-typography-color: #0b0c0c;
+    --ic-button-tertiary-text-active: #0b0c0c;
+    --ic-button-tertiary-text-hover-active: #0b0c0c;
+    --ic-button-tertiary-text-pressed-active: #0b0c0c;
+  }
+
+  /* ICDS menu items default to inline in this kit and sit side-by-side; stack them */
+  #page-actions-menu ic-menu-item {
+    display: block !important;
+    width: 100%;
+    color-scheme: light;
+    --ic-typography-color: #0b0c0c;
+    --ic-popover-menu-item-label-focused: #0b0c0c;
+    --ic-button-tertiary-text-active: #0b0c0c;
+    --ic-button-tertiary-text-hover-active: #0b0c0c;
+    --ic-button-tertiary-text-pressed-active: #0b0c0c;
+  }
+
+
+  /* Keep Change | Duplicate on one line in the narrow overview column */
+  .app-question-row-actions {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    align-items: baseline;
+    white-space: nowrap;
+  }
+
+  .app-question-row-actions__separator {
+    display: inline-block;
+    width: 1px;
+    height: 1.125rem;
+    margin: 0 0.625rem;
+    background-color: #505a5f;
+    vertical-align: middle;
+  }
+
+  #question-list .govuk-summary-list__actions {
+    width: auto;
+    padding-left: 10px;
+  }
 
   /* .question-actions are hidden by default */
   .question-actions {
@@ -1845,4 +2004,49 @@ navigationItems: [
     padding: 15px;
   }
 </style>
+{% endblock %}
+
+{% block pageScripts %}
+{{ super() }}
+<script>
+  // Matches ICDS docs toggle pattern:
+  // https://design.sis.gov.uk/components/navigation/popover-menu/code/
+  function handlePageActionsClick() {
+    var popoverMenu = document.querySelector("#page-actions-menu");
+    var button = document.querySelector("#page-actions-trigger");
+    if (!popoverMenu || !button) {
+      return;
+    }
+    if (popoverMenu.open) {
+      popoverMenu.open = false;
+      button.setAttribute("aria-expanded", "false");
+    } else {
+      popoverMenu.open = true;
+      button.setAttribute("aria-expanded", "true");
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    var popoverMenu = document.querySelector("#page-actions-menu");
+    var button = document.querySelector("#page-actions-trigger");
+    if (!popoverMenu || !button) {
+      return;
+    }
+    popoverMenu.addEventListener("icPopoverClosed", function () {
+      button.setAttribute("aria-expanded", "false");
+    });
+
+    // Keep destructive red, but undo ICDS uppercase on the label (shadow DOM)
+    customElements.whenDefined("ic-menu-item").then(function () {
+      var deleteItem = document.querySelector("#page-actions-delete");
+      if (!deleteItem || !deleteItem.shadowRoot) {
+        return;
+      }
+      var style = document.createElement("style");
+      style.textContent =
+        ".menu-item-label { text-transform: none !important; }";
+      deleteItem.shadowRoot.appendChild(style);
+    });
+  });
+</script>
 {% endblock %}

@@ -4,12 +4,14 @@
 {% from "components/favourite-pin/macro.njk" import favouritePin %}
 {% from "govuk/components/tabs/macro.njk" import govukTabs %}
 {% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
 {% from "moj/components/timeline/macro.njk" import mojTimeline %}
 
-{% set pageName = "Form overview - Livestock registration" %}
+{% set overviewFormName = form.name if form and form.name else "Livestock registration" %}
+{% set pageName = "Form overview - " + overviewFormName %}
 {% set favouriteForms = data["favouriteForms"] if data["favouriteForms"] else [] %}
-{% set isFavourite = "Livestock registration" in favouriteForms %}
-{% set favouriteHref = "/titan-mvp-1.2/library/toggle-favourite?favouriteForm=" + ("Livestock registration" | urlencode) + "&returnTo=overview" %}
+{% set isFavourite = overviewFormName in favouriteForms %}
+{% set favouriteHref = "/titan-mvp-1.2/library/toggle-favourite?favouriteForm=" + (overviewFormName | urlencode) + "&returnTo=overview" %}
 
 {% block header %}
 {{ serviceHeader({
@@ -42,14 +44,14 @@ activeLinkId: "nav-overview"
             <div class="govuk-grid-column-full-from-desktop">
                 <div class="app-favourite-name app-favourite-name--masthead">
                     {{ favouritePin({
-                    name: "Livestock registration",
+                    name: overviewFormName,
                     href: favouriteHref,
                     isFavourite: isFavourite,
                     classes: "app-favourite-pin--inverse"
                     }) }}
                     <h1 class="x-govuk-masthead__title govuk-!-margin-bottom-0">
                         <span class="govuk-caption-xl" style="color: #fff;">Form overview</span>
-                        Livestock registration
+                        {{ overviewFormName }}
                     </h1>
                 </div>
             </div>
@@ -68,6 +70,18 @@ activeLinkId: "nav-overview"
   {% endif %}
   {% endif %}
 </div>
+{% if copied == "form" or copySuccessMessage %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {{ govukNotificationBanner({
+      type: "success",
+      text: copySuccessMessage or "Form copied",
+      titleText: "Success",
+      classes: "govuk-!-margin-bottom-4"
+    }) }}
+  </div>
+</div>
+{% endif %}
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
 
@@ -467,6 +481,9 @@ activeLinkId: "nav-overview"
                 </button>
             </a>
 
+            <p class="govuk-body govuk-!-margin-bottom-2">
+              <a href="/titan-mvp-1.2/form-overview/copy-form" class="govuk-link">Make a copy</a>
+            </p>
             <a href="/titan-mvp-1.2/form-overview/manage-form/delete-draft" class="govuk-link">Delete draft</a>
             {% else %}
             <!-- Live status: show create draft option -->
@@ -476,6 +493,9 @@ activeLinkId: "nav-overview"
                     Create draft to edit
                 </button>
             </a>
+            <p class="govuk-body govuk-!-margin-top-2 govuk-!-margin-bottom-0">
+              <a href="/titan-mvp-1.2/form-overview/copy-form" class="govuk-link">Make a copy</a>
+            </p>
             {% endif %}
             {#
             <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">

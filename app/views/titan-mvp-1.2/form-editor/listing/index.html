@@ -348,6 +348,19 @@ activeLinkId: "nav-editor"
                         </script>
                         {% endif %}
 
+                        {% if copied == "page" %}
+                        <div class="govuk-grid-row" id="copy-page-success-notification">
+                            <div class="govuk-grid-column-one-half">
+                                {{ govukNotificationBanner({
+                                type: "success",
+                                text: "Page duplicated",
+                                titleText: "Success",
+                                classes: "govuk-!-margin-bottom-4"
+                                }) }}
+                            </div>
+                        </div>
+                        {% endif %}
+
                         {% if request.query.pageOrderUpdated %}
                         <div class="govuk-grid-row" id="page-order-success-notification">
                             <div class="govuk-grid-column-one-third">
