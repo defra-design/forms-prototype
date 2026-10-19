@@ -1,0 +1,32 @@
+{% extends "layouts/runner-sign-in-v2.html" %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
+
+{% block pageTitle %}I've forgotten my email address – GOV.UK{% endblock %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ href: backUrl, text: "Back" }) }}
+{% endblock %}
+
+{% block header %}{{ v2.v2ServiceHeader("") }}{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <span class="govuk-caption-l">I've forgotten my email address</span>
+    <h1 class="govuk-heading-l">Check your phone</h1>
+    <p class="govuk-body">If this number is registered, we have sent you a text.</p>
+    <p class="govuk-body">It might take a few minutes to arrive. Check your phone signal if you do not get a text.</p>
+
+    <p class="govuk-body">
+      <a class="govuk-link" href="/runner-sign-in-v2/texts/recover-email-reminder">View the text message (prototype only)</a>
+    </p>
+
+    {{ govukButton({
+      text: "Return to sign in",
+      href: signInUrl
+    }) }}
+  </div>
+</div>
+{% endblock %}

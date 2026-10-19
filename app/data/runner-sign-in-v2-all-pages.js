@@ -220,16 +220,19 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
       ],
     },
     {
-      heading: "Recover a sign-in",
+      heading: "I've forgotten my email address",
       links: [
         { text: "Enter your mobile phone number", href: urls.recoverPhone },
-        {
-          text: "No sign-in found for mobile phone number",
-          href: urls.staticRecoverNoSignInForMobile,
-        },
+        { text: "Check your phone (email reminder)", href: urls.recoverForgottenEmailSent },
+        { text: "Email reminder text", href: urls.textRecoverEmailReminder },
+      ],
+    },
+    {
+      heading: "I can't access my email",
+      links: [
+        { text: "Enter the details you used to sign in", href: urls.recoverCantAccess },
         { text: "Get security code", href: urls.recoverGetCode },
         { text: "Check your phone", href: urls.recoverStart },
-        { text: "Check your phone (alternate)", href: triple("/runner-sign-in-v2/recover/check-mobile") },
         { text: "Enter your new email address", href: urls.recoverNewEmail },
         { text: "Check your email", href: urls.recoverCheckNewEmail },
       ],
@@ -337,6 +340,7 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
     {
       heading: "Text messages",
       links: [
+        { text: "Email reminder text (forgotten email)", href: urls.textRecoverEmailReminder },
         { text: "Security code text (recover sign-in)", href: urls.textRecoverSecurityCode },
         { text: "Security code text (change email address)", href: urls.textChangeEmailSecurityCode },
       ],
@@ -580,16 +584,19 @@ function buildRunnerSignInV2AllPagesStaticSections(urls, { unexpectedPages }) {
       ],
     },
     {
-      heading: "Recover a sign-in",
+      heading: "I've forgotten my email address",
       links: [
         { text: "Enter your mobile phone number", href: p.recoverPhone },
-        {
-          text: "No sign-in found for mobile phone number",
-          href: urls.staticRecoverNoSignInForMobile,
-        },
+        { text: "Check your phone (email reminder)", href: p.recoverForgottenEmailSent },
+        { text: "Email reminder text", href: urls.textRecoverEmailReminder },
+      ],
+    },
+    {
+      heading: "I can't access my email",
+      links: [
+        { text: "Enter the details you used to sign in", href: p.recoverCantAccess },
         { text: "Get security code", href: p.recoverGetCode },
         { text: "Check your phone", href: p.recoverStart },
-        { text: "Check your phone (alternate)", href: preview("recover-check-mobile") },
         { text: "Enter your new email address", href: p.recoverNewEmail },
         { text: "Check your email", href: p.recoverCheckNewEmail },
       ],
@@ -704,6 +711,7 @@ function buildRunnerSignInV2AllPagesStaticSections(urls, { unexpectedPages }) {
     {
       heading: "Text messages",
       links: [
+        { text: "Email reminder text (forgotten email)", href: urls.textRecoverEmailReminder },
         { text: "Security code text (recover sign-in)", href: urls.textRecoverSecurityCode },
         { text: "Security code text (change email address)", href: urls.textChangeEmailSecurityCode },
       ],

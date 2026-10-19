@@ -25,15 +25,6 @@
     {% if error and error.runnerSignInV2Email %}
       {{ govukErrorSummary({ titleText: "There is a problem", errorList: [{ text: error.runnerSignInV2Email, href: "#v2-email" }] }) }}
     {% endif %}
-    {# <h1 class="govuk-heading-l">Enter your email address</h1>
-    <p class="govuk-body">
-      <a class="govuk-link" href="/runner-sign-in-v2/create-sign-in/email?formKey={{ formKey | urlencode }}&amp;applicationId={{ applicationId | urlencode }}&amp;next={{ next | urlencode }}">Create a sign-in</a>
-      if you have not used this service before.
-    </p>
-    <p class="govuk-body">
-      <a class="govuk-link" href="/runner-sign-in-v2/recover/start?formKey={{ formKey | urlencode }}&amp;applicationId={{ applicationId | urlencode }}&amp;next={{ next | urlencode }}">Recover my sign-in</a>
-      if you cannot access your email.
-    </p> #}
     <form method="post" action="/runner-sign-in-v2/sign-in/email" novalidate>
       <input type="hidden" name="formKey" value="{{ formKey }}" />
       <input type="hidden" name="applicationId" value="{{ applicationId }}" />
@@ -51,9 +42,11 @@
     </form>
 
     <p class="govuk-body">
-      <a class="govuk-link" href="/runner-sign-in-v2/recover/phone?formKey={{ formKey | urlencode }}&amp;applicationId={{ applicationId | urlencode }}&amp;next={{ next | urlencode }}">I've forgotten my email address</a>.
+      <a class="govuk-link" href="/runner-sign-in-v2/recover/phone?formKey={{ formKey | urlencode }}&amp;applicationId={{ applicationId | urlencode }}&amp;next={{ next | urlencode }}">I've forgotten my email address</a>
     </p>
-
-
+    <p class="govuk-body">
+      <a class="govuk-link" href="/runner-sign-in-v2/recover/cant-access?formKey={{ formKey | urlencode }}&amp;applicationId={{ applicationId | urlencode }}&amp;next={{ next | urlencode }}">I can't access my email</a>
+    </p>
+  </div>
 </div>
 {% endblock %}

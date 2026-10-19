@@ -97,24 +97,39 @@
 
     {% set recoverHtml %}
       <div class="journey-docs__section">
-        <p class="govuk-body">Someone has forgotten the email address they used to sign in. We verify them with a security code sent to their <strong>mobile phone number</strong>, then let them set a new email address.</p>
+        <h3 class="govuk-heading-s">I've forgotten my email address</h3>
+        <p class="govuk-body">Someone cannot remember the email address they used to sign in. We ask for their registered <strong>mobile phone number</strong> and, if it is registered, text a masked reminder of their email address. We do not change their account.</p>
         {{ journeyDocs.journeyPath([
           { text: "Enter your email address", href: urls.signInEmail },
           { text: "I've forgotten my email address", href: urls.recoverPhone, branch: true },
           { text: "Enter your mobile phone number", href: urls.recoverPhone },
-          { text: "No sign-in found for mobile phone number", href: urls.staticRecoverNoSignInForMobile },
-          { text: "Get security code", href: urls.recoverGetCode },
+          { text: "Check your phone (email reminder sent)", href: urls.recoverForgottenEmailSent },
+          { text: "Return to sign in", href: urls.signInEmail }
+        ]) }}
+        {{ journeyDocs.journeyPreviews([
+          { caption: "Forgotten email", title: "Enter mobile phone number", href: urls.recoverPhone, previewHref: urls.preview.recoverPhone },
+          { caption: "Forgotten email", title: "Check your phone", href: urls.recoverForgottenEmailSent, previewHref: urls.preview.recoverForgottenEmailSent },
+          { caption: "Forgotten email", title: "Email reminder text", href: urls.textRecoverEmailReminder }
+        ]) }}
+
+        <h3 class="govuk-heading-s govuk-!-margin-top-6">I can't access my email</h3>
+        <p class="govuk-body">Someone knows their registered email address but cannot access that inbox. They confirm email and mobile details, verify with an SMS security code when the details match, then set and verify a new email address.</p>
+        {{ journeyDocs.journeyPath([
+          { text: "Enter your email address", href: urls.signInEmail },
+          { text: "I can't access my email", href: urls.recoverCantAccess, branch: true },
+          { text: "Enter the details you used to sign in", href: urls.recoverCantAccess },
           { text: "Check your phone", href: urls.recoverStart },
+          { text: "Get security code", href: urls.recoverGetCode },
           { text: "Enter your new email address", href: urls.recoverNewEmail },
           { text: "Check your email", href: urls.recoverCheckNewEmail },
           { text: "Manage your form", href: urls.manage }
         ]) }}
         {{ journeyDocs.journeyPreviews([
-          { caption: "Recover sign-in", title: "Enter mobile phone number", href: urls.recoverPhone, previewHref: urls.preview.recoverPhone },
-          { caption: "Recover sign-in", title: "No sign-in found for mobile phone number", href: urls.staticRecoverNoSignInForMobile },
-          { caption: "Recover sign-in", title: "Get security code (phone)", href: urls.recoverGetCode, previewHref: urls.preview.recoverGetCode },
-          { caption: "Recover sign-in", title: "Check your phone", href: urls.recoverStart, previewHref: urls.preview.recoverStart },
-          { caption: "Recover sign-in", title: "Enter new email address", href: urls.recoverNewEmail, previewHref: urls.preview.recoverNewEmail }
+          { caption: "Can't access email", title: "Enter the details you used to sign in", href: urls.recoverCantAccess, previewHref: urls.preview.recoverCantAccess },
+          { caption: "Can't access email", title: "Check your phone", href: urls.recoverStart, previewHref: urls.preview.recoverStart },
+          { caption: "Can't access email", title: "Get security code (phone)", href: urls.recoverGetCode, previewHref: urls.preview.recoverGetCode },
+          { caption: "Can't access email", title: "Enter new email address", href: urls.recoverNewEmail, previewHref: urls.preview.recoverNewEmail },
+          { caption: "Can't access email", title: "Check your email", href: urls.recoverCheckNewEmail, previewHref: urls.preview.recoverCheckNewEmail }
         ]) }}
       </div>
     {% endset %}
@@ -182,6 +197,11 @@
           { text: "Check your email", href: urls.changeEmailCheckNewEmail },
           { text: "Security", href: urls.security }
         ]) }}
+        <p class="govuk-body govuk-!-margin-top-4">If they enter the wrong phone security code too many times, we sign them out and block sign-in for 2 hours:</p>
+        {{ journeyDocs.journeyPath([
+          { text: "Check your phone", href: urls.changeEmailCheckPhone },
+          { text: "You entered the wrong security code too many times (locked out)", unexpected: true, href: urls.unexpected["change-email-wrong-security-code-locked-out"] }
+        ]) }}
         <h3 class="govuk-heading-s govuk-!-margin-top-6">Change mobile phone number</h3>
         <p class="govuk-body">Verify with a security code sent to the registered <strong>email address</strong>, then enter a new mobile phone number.</p>
         {{ journeyDocs.journeyPath([
@@ -195,6 +215,7 @@
           { caption: "Security", title: "Security", href: urls.security, previewHref: urls.preview.security },
           { caption: "Change email", title: "Get security code (phone)", href: urls.changeEmailGetCode, previewHref: urls.preview.changeEmailGetCode },
           { caption: "Change email", title: "Check your phone", href: urls.changeEmailCheckPhone, previewHref: urls.preview.changeEmailCheckPhone },
+          { caption: "Change email", title: "Wrong security code (locked out)", href: urls.unexpected["change-email-wrong-security-code-locked-out"] },
           { caption: "Change email", title: "Enter new email address", href: urls.changeEmailNewEmail, previewHref: urls.preview.changeEmailNewEmail },
           { caption: "Change email", title: "Enter new email address (same as current error)", href: urls.staticChangeEmailNewEmailSameAsCurrent, previewHref: urls.preview.changeEmailNewEmailSameAsCurrent },
           { caption: "Change email", title: "Check your email", href: urls.changeEmailCheckNewEmail, previewHref: urls.preview.changeEmailCheckNewEmail },
@@ -353,7 +374,7 @@
         },
         {
           heading: { text: "Recovering a sign-in" },
-          summary: { text: "Forgotten email address" },
+          summary: { text: "Forgotten email reminder, or change email when the inbox is inaccessible" },
           content: { html: recoverHtml }
         },
         {

@@ -36,19 +36,19 @@ function runnerSignInV2ChooseJourneyRadioItems(selected) {
     },
     {
       value: "credential-recovery",
-      text: "Credential recovery",
+      text: "I've forgotten my email address",
       hint: {
-        text: "Users who have forgotten their email address enter their mobile phone number, verify with a security code, then set a new email address. In this prototype, use 07700 900 000.",
+        text: "Users enter their registered mobile phone number and, if it matches, receive a masked email reminder by text. In this prototype, use 07700 900 000.",
       },
       checked: selected === "credential-recovery",
     },
     {
-      value: "credential-recovery-not-found",
-      text: "Credential recovery – mobile phone number not linked to sign-in",
+      value: "credential-recovery-cant-access",
+      text: "I can't access my email",
       hint: {
-        text: "Users enter a mobile phone number that is not linked to a sign-in for this form and are told to sign in with email instead.",
+        text: "Users enter their registered email and mobile number, verify with an SMS code when the details match, then set a new email address. Prototype: you@example.com and 07700 900 000.",
       },
-      checked: selected === "credential-recovery-not-found",
+      checked: selected === "credential-recovery-cant-access",
     },
     {
       value: "save-exit-signed-in",
@@ -148,11 +148,16 @@ function runnerSignInV2ChooseJourneyRedirect(
     case "signin":
     case "signin-existing":
       return formStart(SEED.inProgress.formKey, SEED.inProgress.applicationId);
-    case "credential-recovery-not-found":
-      return "/runner-sign-in-v2/static/recover-no-sign-in-for-mobile";
     case "credential-recovery":
       return triple(
         "/runner-sign-in-v2/recover/phone",
+        SEED.inProgress.formKey,
+        SEED.inProgress.applicationId,
+        managePath(SEED.inProgress.formKey, SEED.inProgress.applicationId)
+      );
+    case "credential-recovery-cant-access":
+      return triple(
+        "/runner-sign-in-v2/recover/cant-access",
         SEED.inProgress.formKey,
         SEED.inProgress.applicationId,
         managePath(SEED.inProgress.formKey, SEED.inProgress.applicationId)
@@ -221,9 +226,11 @@ function runnerSignInV2PrepareChooseJourneySession(req, journeyId, helpers) {
       clearAuth();
       seedRecoverPhone(PROTOTYPE_RECOVER_PHONE_DISPLAY);
       return;
-    case "credential-recovery-not-found":
+    case "credential-recovery-cant-access":
       clearAuth();
-      seedRecoverPhoneNotFound(PROTOTYPE_UNKNOWN_RECOVER_PHONE_DISPLAY);
+      if (typeof seedExistingAccount === "function") {
+        seedExistingAccount(PROTOTYPE_EXISTING_SIGN_IN_EMAIL, PROTOTYPE_EXISTING_SIGN_IN_PHONE);
+      }
       return;
     case "save-exit-signed-in":
       signIn();

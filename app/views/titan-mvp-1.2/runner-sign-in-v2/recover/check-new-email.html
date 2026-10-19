@@ -7,7 +7,7 @@
 {% from "govuk/components/details/macro.njk" import govukDetails %}
 {% import "titan-mvp-1.2/runner-sign-in-v2/_macros.njk" as v2 with context %}
 
-{% block pageTitle %}Recover my sign-in: check your email – GOV.UK{% endblock %}
+{% block pageTitle %}I can't access my email: check your email – GOV.UK{% endblock %}
 
 {% block beforeContent %}
   {{ govukBackLink({ href: backUrl, text: "Back" }) }}
@@ -24,7 +24,7 @@
     {% if resend %}
       {{ govukNotificationBanner({ type: "success", html: "<p class=\"govuk-notification-banner__heading\">We’ve sent you a new security code.</p>" }) }}
     {% endif %}
-    <span class="govuk-caption-l">Recover my sign-in</span>
+    <span class="govuk-caption-l">I can't access my email</span>
     <h1 class="govuk-heading-l">Check your email</h1>
     {{ govukInsetText({ html: "We have sent an email to: <strong>" + (email | e) + "</strong>" }) }}
 
