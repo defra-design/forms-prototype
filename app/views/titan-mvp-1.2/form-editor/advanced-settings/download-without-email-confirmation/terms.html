@@ -1,0 +1,65 @@
+{% extends "layouts/main.html" %}
+
+{% from "components/service-header/macro.njk" import serviceHeader %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% set pageName = "Do you agree to the data protection terms and conditions? - " + form.name %}
+{% set changeUrl = "/titan-mvp-1.2/form-editor/advanced-settings/download-without-email-confirmation" %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+containerClasses: containerClasses,
+accountName: "Chris Smith",
+homepageLink: "/",
+signOutLink: "/titan-mvp-1.2/onboarding/sign-out-confirmation",
+navigationItems: [
+{ href: "/titan-mvp-1.2/library", text: "Forms library", id: "nav-library" },
+{ href: "/titan-mvp-1.2/form-overview/index.html", text: "Overview", id: "nav-overview" },
+{ href: "/titan-mvp-1.2/form-editor/listing", text: "Editor", id: "nav-editor", active: true }
+],
+activeLinkId: "nav-editor"
+}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+
+    <form method="post" action="/titan-mvp-1.2/form-editor/advanced-settings/download-without-email-confirmation/terms" novalidate>
+      <div class="moj-interruption-card">
+        <div class="moj-interruption-card__content">
+          <span class="govuk-caption-xl moj-interruption-card__heading">{{ form.name }}</span>
+          <h1 class="govuk-heading-xl moj-interruption-card__heading">Do you agree to the data protection terms and conditions?</h1>
+          <div class="govuk-body moj-interruption-card__body">
+            <p class="govuk-body">If you collect personal information or change how personal information is being processed, you must agree to the data protection terms and conditions.</p>
+            <p class="govuk-body">By agreeing to the terms and conditions you will need to:</p>
+            <ul class="govuk-list govuk-list--bullet">
+              <li>complete the data protection impact assessment screening questions if your data protection team requires one (this will determine if a full data protection impact assessment is needed)</li>
+              <li>complete a full data protection impact assessment (if applicable)</li>
+              <li>have a data processing or data sharing agreement in place (if your organisation or the organisation receiving submission data is outside of the ‘Defra legal entity’)</li>
+            </ul>
+            <p class="govuk-body">It is your responsibility to check the submission data output options we support comply with organisation’s data protection policy.</p>
+            <p class="govuk-body">You’ll also need to:</p>
+            <ul class="govuk-list govuk-list--bullet">
+              <li>update your service operations guide (SOG) if you plan to use data from Defra Forms in your service (if applicable)</li>
+              <li>make sure your team name and contact email address is accurate in the form overview (this is so we can contact you about changes that may impact the terms and conditions or your form)</li>
+            </ul>
+            <p class="govuk-body govuk-!-margin-bottom-8">The Defra Forms team will let you know if these terms and conditions change.</p>
+          </div>
+          <div class="govuk-button-group moj-interruption-card__actions">
+            {{ govukButton({
+              text: "I agree to the terms and conditions",
+              classes: "govuk-button--inverse"
+            }) }}
+            <a class="govuk-link govuk-link--inverse" href="{{ changeUrl }}">Go back to advanced-settings</a>
+          </div>
+        </div>
+      </div>
+    </form>
+
+  </div>
+</div>
+{% endblock %}

@@ -254,7 +254,7 @@ href: backUrl
             <p class="govuk-body govuk-!-margin-bottom-0">{{ setting.noDescription }}</p>
             {% endset %}
 
-            {% if setting.slug != "manage-form-guidance" %}
+            {% if setting.slug != "manage-form-guidance" and setting.slug != "download-without-email-confirmation" %}
             {{ govukDetails({
             summaryText: "What your choice means",
             html: detailsHtml,
@@ -278,6 +278,14 @@ href: backUrl
               }) }}
               {% endif %}
             </div>
+
+            {% if setting.slug == "download-without-email-confirmation" %}
+            {{ govukDetails({
+            summaryText: "What your choice means",
+            html: detailsHtml,
+            classes: "govuk-!-margin-top-6 govuk-!-margin-bottom-6"
+            }) }}
+            {% endif %}
 
         </form>
 
