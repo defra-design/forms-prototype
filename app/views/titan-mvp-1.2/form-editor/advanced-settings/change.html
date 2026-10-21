@@ -210,6 +210,38 @@ href: backUrl
             }
             ]
             }) }}
+            {% elif setting.slug == "download-without-email-confirmation" %}
+            {{ govukRadios({
+            name: setting.key,
+            fieldset: {
+            legend: {
+            text: setting.label,
+            isPageHeading: true,
+            classes: "govuk-fieldset__legend--l"
+            }
+            },
+            hint: {
+            text: setting.hint
+            },
+            items: [
+            {
+            value: "no",
+            text: setting.optionNoText,
+            hint: {
+            text: setting.optionNoHint
+            },
+            checked: data[setting.key] == "no" or not data[setting.key]
+            },
+            {
+            value: "yes",
+            text: setting.optionYesText,
+            hint: {
+            text: setting.optionYesHint
+            },
+            checked: data[setting.key] == "yes"
+            }
+            ]
+            }) }}
             {% else %}
             {{ govukRadios({
             classes: "govuk-radios--inline",
@@ -227,12 +259,12 @@ href: backUrl
             items: [
             {
             value: "yes",
-            text: "Yes",
+            text: setting.optionYesText or "Yes",
             checked: data[setting.key] == "yes"
             },
             {
             value: "no",
-            text: "No",
+            text: setting.optionNoText or "No",
             checked: data[setting.key] == "no" or not data[setting.key]
             }
             ]
@@ -248,9 +280,9 @@ href: backUrl
             {% endif %}
 
             {% set detailsHtml %}
-            <p class="govuk-body govuk-!-margin-bottom-2"><strong>Yes</strong></p>
+            <p class="govuk-body govuk-!-margin-bottom-2"><strong>{{ setting.optionYesText or "Yes" }}</strong></p>
             <p class="govuk-body govuk-!-margin-bottom-4">{{ setting.yesDescription }}</p>
-            <p class="govuk-body govuk-!-margin-bottom-2"><strong>No</strong></p>
+            <p class="govuk-body govuk-!-margin-bottom-2"><strong>{{ setting.optionNoText or "No" }}</strong></p>
             <p class="govuk-body govuk-!-margin-bottom-0">{{ setting.noDescription }}</p>
             {% endset %}
 
@@ -278,14 +310,6 @@ href: backUrl
               }) }}
               {% endif %}
             </div>
-
-            {% if setting.slug == "download-without-email-confirmation" %}
-            {{ govukDetails({
-            summaryText: "What your choice means",
-            html: detailsHtml,
-            classes: "govuk-!-margin-top-6 govuk-!-margin-bottom-6"
-            }) }}
-            {% endif %}
 
         </form>
 

@@ -1,0 +1,585 @@
+{% extends "layouts/main.html" %}
+{% from "components/service-header/macro.njk" import serviceHeader %}
+{%- from "govuk/components/tag/macro.njk" import govukTag -%}
+{%- from "govuk/components/tabs/macro.njk" import govukTabs -%}
+{%- from "govuk/components/table/macro.njk" import govukTable -%}
+{%- from "moj/components/sub-navigation/macro.njk" import mojSubNavigation -%}
+
+{% block pageTitle %}
+File downloads metrics – {{ serviceName }} – GOV.UK Prototype Kit
+{% endblock %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+containerClasses: containerClasses,
+accountName: "Chris Smith ",
+homepageLink: "/",
+signOutLink: "/onboarding/sign-out-confirmation",
+navigationItems: [
+{ href: "/titan-mvp-1.2/roles/my-account.html", text: "My account", id: "my-account" },
+{ href: "/titan-mvp-1.2/roles/manage-users.html", text: "Manage users", id: "manage-users" },
+{ href: "/titan-mvp-1.2/roles/manage-users.html", text: "Admin tools", id: "admin-tools" }
+
+],
+activeLinkId: "admin-tools"
+}) }}
+
+<div class="x-govuk-masthead x-govuk-masthead--large">
+    <div class="govuk-width-container">
+        {{ govukBackLink({ classes: "govuk-back-link--inverse govuk-!-margin-bottom-0", text: "Back to admin tools",
+        href: "/titan-mvp-1.2/library.html" }) }}
+
+        <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"
+            style="border-bottom: 1px solid white; margin-bottom: 0" />
+
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full-from-desktop">
+                <h1 class="x-govuk-masthead__title">
+Defra Form Designer metrics                </h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block content %}
+
+{% macro metricLabel(text, description, id) %}
+<span class="gem-c-big-number__label">
+  <span class="app-metric-tooltip tooltip" tabindex="0" aria-describedby="{{ id }}">
+    {{ text }}
+    <span class="tooltiptext" id="{{ id }}" role="tooltip">{{ description }}</span>
+  </span>
+</span>
+{% endmacro %}
+
+
+{{ mojSubNavigation({
+  label: "Sub navigation",
+  items: [  {
+    text: "Form activity",
+    href: "/titan-mvp-1.2/metrics/v7"
+  },   {
+    text: "Component usage",
+    href: "/titan-mvp-1.2/metrics/component-usage"
+  },   {
+    text: "Sign-in",
+    href: "/titan-mvp-1.2/metrics/sign-in"
+  },   {
+    text: "Copy answers",
+    href: "/titan-mvp-1.2/metrics/copy-answers"
+  },   {
+    text: "Edit and resubmit",
+    href: "/titan-mvp-1.2/metrics/edit-and-resubmit"
+  },   {
+    text: "Payments",
+    href: "/titan-mvp-1.2/metrics/payments"
+  },   {
+    text: "3rd party review",
+    href: "/titan-mvp-1.2/metrics/3rd-party-review"
+  },   {
+    text: "File downloads",
+    href: "/titan-mvp-1.2/metrics/file-downloads",
+    active: true
+  }
+  ]
+}) }}
+
+
+{% set sevenDaysContent %}
+<div class="govuk-!-margin-bottom-6">
+  <span class="govuk-caption-m">18 November 2024 to 24 November 2024</span>
+  <h2 class="govuk-heading-l govuk-!-margin-bottom-1">Last 7 days</h2>
+  <p class="govuk-body">Monitor which forms require email confirmation before people can download attached files.</p>
+</div>
+
+<div class="govuk-!-margin-bottom-8">
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Forms that do not require email confirmation', 'Total number of forms where people can download eligible files without confirming their email address.', 'metric-tip-download-no-confirm-7d') }}
+          <span class="gem-c-big-number__value">14</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+16.7%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Forms that do not require email confirmation increased by 16.7% compared to the previous 7 days." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">2 more forms this week</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Forms that require email confirmation', 'Total number of forms where people must confirm their email address before downloading attached files.', 'metric-tip-download-require-7d') }}
+          <span class="gem-c-big-number__value">86</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+2.4%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Forms that require email confirmation increased by 2.4% compared to the previous 7 days." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">2 more forms this week</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="govuk-!-margin-bottom-0">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Forms by email confirmation setting</h2>
+  {{ govukTable({
+    attributes: {
+      "data-module": "moj-sortable-table"
+    },
+    caption: "Forms by email confirmation setting in the last 7 days",
+    captionClasses: "govuk-visually-hidden",
+    firstCellIsHeader: true,
+    head: [
+      {
+        text: "Form name",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Organisation",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Email confirmation",
+        attributes: { "aria-sort": "ascending" }
+      }
+    ],
+    rows: [
+      [
+        { html: '<a href="#" class="govuk-link">Waste carrier registration</a>', attributes: { "data-sort-value": "Waste carrier registration" } },
+        { text: "Environment Agency", attributes: { "data-sort-value": "Environment Agency" } },
+        { text: "Not required", attributes: { "data-sort-value": "Not required" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Export health certificate</a>', attributes: { "data-sort-value": "Export health certificate" } },
+        { text: "APHA", attributes: { "data-sort-value": "APHA" } },
+        { text: "Required", attributes: { "data-sort-value": "Required" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Basic Payment Scheme claim</a>', attributes: { "data-sort-value": "Basic Payment Scheme claim" } },
+        { text: "Rural Payments Agency", attributes: { "data-sort-value": "Rural Payments Agency" } },
+        { text: "Required", attributes: { "data-sort-value": "Required" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Water abstraction return</a>', attributes: { "data-sort-value": "Water abstraction return" } },
+        { text: "Environment Agency", attributes: { "data-sort-value": "Environment Agency" } },
+        { text: "Not required", attributes: { "data-sort-value": "Not required" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Protected species licence</a>', attributes: { "data-sort-value": "Protected species licence" } },
+        { text: "Natural England", attributes: { "data-sort-value": "Natural England" } },
+        { text: "Required", attributes: { "data-sort-value": "Required" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Fishing licence application</a>', attributes: { "data-sort-value": "Fishing licence application" } },
+        { text: "Defra", attributes: { "data-sort-value": "Defra" } },
+        { text: "Required", attributes: { "data-sort-value": "Required" } }
+      ]
+    ]
+  }) }}
+</div>
+{% endset %}
+
+{% set thirtyDaysContent %}
+<div class="govuk-!-margin-bottom-6">
+  <span class="govuk-caption-m">25 October 2024 to 24 November 2024</span>
+  <h2 class="govuk-heading-l govuk-!-margin-bottom-1">Last 30 days</h2>
+  <p class="govuk-body">Monitor which forms require email confirmation before people can download attached files.</p>
+</div>
+
+<div class="govuk-!-margin-bottom-8">
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Forms that do not require email confirmation', 'Total number of forms where people can download eligible files without confirming their email address.', 'metric-tip-download-no-confirm-30d') }}
+          <span class="gem-c-big-number__value">14</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+27.3%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Forms that do not require email confirmation increased by 27.3% compared to the previous 30 days." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">3 more forms this month</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Forms that require email confirmation', 'Total number of forms where people must confirm their email address before downloading attached files.', 'metric-tip-download-require-30d') }}
+          <span class="gem-c-big-number__value">86</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+7.5%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Forms that require email confirmation increased by 7.5% compared to the previous 30 days." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">6 more forms this month</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="govuk-!-margin-bottom-0">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Forms by email confirmation setting</h2>
+  {{ govukTable({
+    attributes: {
+      "data-module": "moj-sortable-table"
+    },
+    caption: "Forms by email confirmation setting in the last 30 days",
+    captionClasses: "govuk-visually-hidden",
+    firstCellIsHeader: true,
+    head: [
+      {
+        text: "Form name",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Organisation",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Email confirmation",
+        attributes: { "aria-sort": "ascending" }
+      }
+    ],
+    rows: [
+      [
+        { html: '<a href="#" class="govuk-link">Waste carrier registration</a>', attributes: { "data-sort-value": "Waste carrier registration" } },
+        { text: "Environment Agency", attributes: { "data-sort-value": "Environment Agency" } },
+        { text: "Not required", attributes: { "data-sort-value": "Not required" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Export health certificate</a>', attributes: { "data-sort-value": "Export health certificate" } },
+        { text: "APHA", attributes: { "data-sort-value": "APHA" } },
+        { text: "Required", attributes: { "data-sort-value": "Required" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Basic Payment Scheme claim</a>', attributes: { "data-sort-value": "Basic Payment Scheme claim" } },
+        { text: "Rural Payments Agency", attributes: { "data-sort-value": "Rural Payments Agency" } },
+        { text: "Required", attributes: { "data-sort-value": "Required" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Water abstraction return</a>', attributes: { "data-sort-value": "Water abstraction return" } },
+        { text: "Environment Agency", attributes: { "data-sort-value": "Environment Agency" } },
+        { text: "Not required", attributes: { "data-sort-value": "Not required" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Protected species licence</a>', attributes: { "data-sort-value": "Protected species licence" } },
+        { text: "Natural England", attributes: { "data-sort-value": "Natural England" } },
+        { text: "Required", attributes: { "data-sort-value": "Required" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Fishing licence application</a>', attributes: { "data-sort-value": "Fishing licence application" } },
+        { text: "Defra", attributes: { "data-sort-value": "Defra" } },
+        { text: "Required", attributes: { "data-sort-value": "Required" } }
+      ]
+    ]
+  }) }}
+</div>
+{% endset %}
+
+{% set allTimeContent %}
+<div class="govuk-!-margin-bottom-6">
+  <span class="govuk-caption-m">Since launch</span>
+  <h2 class="govuk-heading-l govuk-!-margin-bottom-1">All time</h2>
+  <p class="govuk-body">Monitor which forms require email confirmation before people can download attached files.</p>
+</div>
+
+<div class="govuk-!-margin-bottom-8">
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Forms that do not require email confirmation', 'Total number of forms where people can download eligible files without confirming their email address.', 'metric-tip-download-no-confirm-all') }}
+          <span class="gem-c-big-number__value">14</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+55.6%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Forms that do not require email confirmation increased by 55.6% compared to the same period last year." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">5 more than same period last year</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Forms that require email confirmation', 'Total number of forms where people must confirm their email address before downloading attached files.', 'metric-tip-download-require-all') }}
+          <span class="gem-c-big-number__value">86</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+34.4%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Forms that require email confirmation increased by 34.4% compared to the same period last year." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">22 more than same period last year</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="govuk-!-margin-bottom-0">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Forms by email confirmation setting</h2>
+  {{ govukTable({
+    attributes: {
+      "data-module": "moj-sortable-table"
+    },
+    caption: "Forms by email confirmation setting since launch",
+    captionClasses: "govuk-visually-hidden",
+    firstCellIsHeader: true,
+    head: [
+      {
+        text: "Form name",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Organisation",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Email confirmation",
+        attributes: { "aria-sort": "ascending" }
+      }
+    ],
+    rows: [
+      [
+        { html: '<a href="#" class="govuk-link">Waste carrier registration</a>', attributes: { "data-sort-value": "Waste carrier registration" } },
+        { text: "Environment Agency", attributes: { "data-sort-value": "Environment Agency" } },
+        { text: "Not required", attributes: { "data-sort-value": "Not required" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Export health certificate</a>', attributes: { "data-sort-value": "Export health certificate" } },
+        { text: "APHA", attributes: { "data-sort-value": "APHA" } },
+        { text: "Required", attributes: { "data-sort-value": "Required" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Basic Payment Scheme claim</a>', attributes: { "data-sort-value": "Basic Payment Scheme claim" } },
+        { text: "Rural Payments Agency", attributes: { "data-sort-value": "Rural Payments Agency" } },
+        { text: "Required", attributes: { "data-sort-value": "Required" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Water abstraction return</a>', attributes: { "data-sort-value": "Water abstraction return" } },
+        { text: "Environment Agency", attributes: { "data-sort-value": "Environment Agency" } },
+        { text: "Not required", attributes: { "data-sort-value": "Not required" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Protected species licence</a>', attributes: { "data-sort-value": "Protected species licence" } },
+        { text: "Natural England", attributes: { "data-sort-value": "Natural England" } },
+        { text: "Required", attributes: { "data-sort-value": "Required" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Fishing licence application</a>', attributes: { "data-sort-value": "Fishing licence application" } },
+        { text: "Defra", attributes: { "data-sort-value": "Defra" } },
+        { text: "Required", attributes: { "data-sort-value": "Required" } }
+      ]
+    ]
+  }) }}
+</div>
+{% endset %}
+
+{{ govukTabs({
+  items: [
+    {
+      label: "Last 7 days",
+      id: "last-7-days",
+      panel: {
+        html: sevenDaysContent
+      }
+    },
+    {
+      label: "Last 30 days",
+      id: "last-30-days",
+      panel: {
+        html: thirtyDaysContent
+      }
+    },
+    {
+      label: "All time",
+      id: "all-time",
+      panel: {
+        html: allTimeContent
+      }
+    }
+  ]
+}) }}
+
+{% endblock %}
+
+{% block pageScripts %}
+<style>
+  .app-metric-tile {
+    background-color: #f3f2f1;
+    padding: 24px;
+    margin-bottom: 1rem;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+  }
+
+  @media (min-width: 40.0625em) {
+    .app-metric-tile {
+      min-height: 220px;
+    }
+  }
+
+  .gem-c-big-number {
+    margin-bottom: 0;
+  }
+
+  .gem-c-big-number__value {
+    display: block;
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 0;
+    color: #0b0c0c;
+  }
+
+  @media (min-width: 40.0625em) {
+    .gem-c-big-number__value {
+      font-size: 3.5rem;
+    }
+  }
+
+  .gem-c-big-number__label {
+    display: block;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.25;
+    margin-bottom: 12px;
+    color: #0b0c0c;
+  }
+
+  .app-tag-with-icon {
+    position: relative;
+    padding-left: 26px;
+    white-space: nowrap;
+  }
+
+  .app-tag-arrow-up::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    background-color: currentColor;
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 0l6 6H7v6H5V6H0z'/%3E%3C/svg%3E");
+    mask-repeat: no-repeat;
+    mask-position: center;
+    mask-size: contain;
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 0l6 6H7v6H5V6H0z'/%3E%3C/svg%3E");
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    -webkit-mask-size: contain;
+  }
+
+  .app-tag-arrow-down::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    background-color: currentColor;
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 12L0 6h5V0h2v6h5z'/%3E%3C/svg%3E");
+    mask-repeat: no-repeat;
+    mask-position: center;
+    mask-size: contain;
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 12L0 6h5V0h2v6h5z'/%3E%3C/svg%3E");
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    -webkit-mask-size: contain;
+  }
+
+  .app-metric-tile .gem-c-big-number {
+    flex: 1 0 auto;
+  }
+
+  .app-metric-caption {
+    color: #505a5f;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  .app-metric-tooltip {
+    max-width: 100%;
+  }
+
+  .app-metric-tooltip .tooltiptext {
+    font-weight: 400;
+    user-select: text;
+    pointer-events: auto;
+  }
+
+  .app-metric-tooltip:focus-visible {
+    outline: 3px solid transparent;
+    background-color: #ffdd00;
+    box-shadow: 0 -2px #ffdd00, 0 4px #0b0c0c;
+    border-bottom-color: transparent;
+  }
+
+  .app-metric-tooltip .tooltiptext.app-metric-tooltip__tip--visible {
+    visibility: visible;
+    opacity: 1;
+  }
+
+</style>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.app-metric-tooltip').forEach(function (trigger) {
+      const tip = trigger.querySelector('[role="tooltip"]');
+      if (!tip) return;
+
+      function show() {
+        tip.classList.add('app-metric-tooltip__tip--visible');
+      }
+
+      function hide() {
+        tip.classList.remove('app-metric-tooltip__tip--visible');
+      }
+
+      trigger.addEventListener('mouseenter', show);
+      trigger.addEventListener('mouseleave', hide);
+      tip.addEventListener('mouseenter', show);
+      tip.addEventListener('mouseleave', hide);
+      trigger.addEventListener('focus', show);
+      trigger.addEventListener('blur', hide);
+
+      trigger.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          hide();
+          trigger.blur();
+        }
+      });
+    });
+  });
+</script>
+{% endblock %}

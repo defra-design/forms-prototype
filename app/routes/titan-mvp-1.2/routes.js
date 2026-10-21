@@ -2693,21 +2693,25 @@ const ADVANCED_SETTINGS_PAGES = {
     guidanceHint: "This appears at the top of the Manage form page and you can use Markdown to format it.",
   },
   "download-without-email-confirmation": {
-    key: "allowDownloadWithoutEmailConfirmation",
+    key: "requireEmailConfirmationBeforeDownload",
     slug: "download-without-email-confirmation",
-    summaryLabel: "Download files without email confirmation",
-    summaryValueYes: "Teams can download files without confirming their email",
-    summaryValueNo: "Teams must confirm their email before downloading files",
-    label:
-      "Can teams download attached files without confirming their email address?",
+    summaryLabel: "Email confirmation for file downloads",
+    summaryValueYes: "Required",
+    summaryValueNo: "Not required",
+    label: "Email confirmation for file downloads",
     hint:
-      "If you select yes, you’ll need to agree to new terms and conditions. This may also depend on the type of files being downloaded.",
+      "Choose whether people need to confirm their email address before downloading files attached to this form.",
+    optionYesText: "Require email confirmation",
+    optionYesHint:
+      "People must confirm their email address before downloading files.",
+    optionNoText: "Do not require email confirmation (default)",
+    optionNoHint:
+      "People can download files without confirming their email address.",
     yesDescription:
-      "Teams open the download link and get the files straight away, without entering an email address.",
+      "People must confirm their email address before downloading files.",
     noDescription:
-      "Teams must enter the email address the link was sent to before they can download the files.",
-    changeHiddenText:
-      "whether teams can download files without confirming their email",
+      "People can download files without confirming their email address.",
+    changeHiddenText: "email confirmation for file downloads",
   },
 };
 
@@ -2720,6 +2724,21 @@ function resolveAdvancedSettingsYesNo(...candidates) {
   for (const value of candidates) {
     if (value === "yes" || value === "no") return value;
   }
+  return "no";
+}
+
+function resolveRequireEmailConfirmationBeforeDownload(settings) {
+  if (
+    settings.requireEmailConfirmationBeforeDownload === "yes" ||
+    settings.requireEmailConfirmationBeforeDownload === "no"
+  ) {
+    return settings.requireEmailConfirmationBeforeDownload;
+  }
+
+  // Older prototypes stored the inverted “allow without confirmation” flag.
+  if (settings.allowDownloadWithoutEmailConfirmation === "yes") return "no";
+  if (settings.allowDownloadWithoutEmailConfirmation === "no") return "yes";
+
   return "no";
 }
 
@@ -2779,9 +2798,8 @@ function getAdvancedSettings(formData) {
     allowEditSubmissions: resolveAdvancedSettingsYesNo(settings.allowEditSubmissions),
     manageFormGuidance: resolveAdvancedSettingsYesNo(settings.manageFormGuidance),
     manageFormGuidanceText: settings.manageFormGuidanceText || "",
-    allowDownloadWithoutEmailConfirmation: resolveAdvancedSettingsYesNo(
-      settings.allowDownloadWithoutEmailConfirmation
-    ),
+    requireEmailConfirmationBeforeDownload:
+      resolveRequireEmailConfirmationBeforeDownload(settings),
   };
 }
 
@@ -3180,6 +3198,120 @@ function renderAdvancedSettingsOverview(req, res) {
   });
 }
 
+const ADVANCED_SETTINGS_GROUPED_POC = {
+  "form-submissions": {
+    slug: "form-submissions",
+    title: "Form submissions",
+    description:
+      "How people submit a form, reuse previous answers, and edit something they’ve already sent.",
+    settingSlugs: [
+      "check-before-submission",
+      "reuse-previous-answers",
+      "edit-submitted-form",
+    ],
+  },
+  "emails-and-notifications": {
+    slug: "emails-and-notifications",
+    title: "Emails and notifications",
+    description:
+      "Where submission emails go and how additional email addresses are set up.",
+    settingSlugs: ["email-actions"],
+    includeEmailActions: true,
+  },
+  "security-and-access": {
+    slug: "security-and-access",
+    title: "Security and access",
+    description:
+      "Controls for confirming identity before teams can download attached files.",
+    settingSlugs: ["download-without-email-confirmation"],
+  },
+  "guidance-and-content": {
+    slug: "guidance-and-content",
+    title: "Guidance and content",
+    description:
+      "Extra guidance shown when people manage their form.",
+    settingSlugs: ["manage-form-guidance"],
+  },
+};
+
+function getAdvancedSettingsGroupedPocSummaryRows(formData, group, options = {}) {
+  const allRows = getAdvancedSettingsSummaryRows(formData);
+  const labels = new Set();
+
+  group.settingSlugs.forEach((slug) => {
+    if (slug === "email-actions") {
+      labels.add("Email actions");
+      return;
+    }
+    const setting = ADVANCED_SETTINGS_PAGES[slug];
+    if (setting) labels.add(setting.summaryLabel);
+  });
+
+  const rows = allRows.filter((row) => labels.has(row.key.text));
+
+  if (options.includeActions === false) {
+    return rows.map((row) => ({
+      key: row.key,
+      value: row.value,
+    }));
+  }
+
+  return rows;
+}
+
+function getAdvancedSettingsGroupedPocGroups(formData) {
+  return Object.values(ADVANCED_SETTINGS_GROUPED_POC).map((group) => {
+    const summaryRows = getAdvancedSettingsGroupedPocSummaryRows(
+      formData,
+      group,
+      { includeActions: false }
+    );
+
+    return {
+      slug: group.slug,
+      title: group.title,
+      description: group.description,
+      count: summaryRows.length,
+      summaryRows,
+      href: `/titan-mvp-1.2/form-editor/advanced-settings/grouped-poc/${group.slug}`,
+    };
+  });
+}
+
+function renderAdvancedSettingsGroupedPoc(req, res) {
+  const formData = req.session.data || {};
+
+  res.render("titan-mvp-1.2/form-editor/advanced-settings/grouped-poc", {
+    groups: getAdvancedSettingsGroupedPocGroups(formData),
+    form: {
+      name: formData.formName || "Form name",
+    },
+  });
+}
+
+function renderAdvancedSettingsGroupedPocGroup(req, res) {
+  const formData = req.session.data || {};
+  const group = ADVANCED_SETTINGS_GROUPED_POC[req.params.group];
+
+  if (!group) {
+    return res.redirect(
+      "/titan-mvp-1.2/form-editor/advanced-settings/grouped-poc"
+    );
+  }
+
+  res.render("titan-mvp-1.2/form-editor/advanced-settings/grouped-poc/group", {
+    group: {
+      slug: group.slug,
+      title: group.title,
+      description: group.description,
+    },
+    summaryRows: getAdvancedSettingsGroupedPocSummaryRows(formData, group),
+    form: {
+      name: formData.formName || "Form name",
+    },
+  });
+}
+
 router.get(
   "/titan-mvp-1.2/form-editor/advanced-settings",
   renderAdvancedSettingsOverview
@@ -3188,6 +3320,16 @@ router.get(
 router.get(
   "/titan-mvp-1.2/form-editor/advanced-settings.html",
   renderAdvancedSettingsOverview
+);
+
+router.get(
+  "/titan-mvp-1.2/form-editor/advanced-settings/grouped-poc",
+  renderAdvancedSettingsGroupedPoc
+);
+
+router.get(
+  "/titan-mvp-1.2/form-editor/advanced-settings/grouped-poc/:group",
+  renderAdvancedSettingsGroupedPocGroup
 );
 
 router.get(
@@ -3597,8 +3739,8 @@ function renderDownloadWithoutEmailConfirmationTerms(req, res) {
   const formData = req.session.data || {};
   const pending =
     formData.advancedSettingsPending &&
-    formData.advancedSettingsPending.allowDownloadWithoutEmailConfirmation ===
-      "yes";
+    formData.advancedSettingsPending.requireEmailConfirmationBeforeDownload ===
+      "no";
 
   if (!pending) {
     return res.redirect(
@@ -3629,8 +3771,8 @@ router.post(
     const formData = req.session.data || {};
     const pending =
       formData.advancedSettingsPending &&
-      formData.advancedSettingsPending.allowDownloadWithoutEmailConfirmation ===
-        "yes";
+      formData.advancedSettingsPending.requireEmailConfirmationBeforeDownload ===
+        "no";
 
     if (!pending) {
       return res.redirect(
@@ -3641,7 +3783,8 @@ router.post(
     if (!formData.advancedSettings) {
       formData.advancedSettings = {};
     }
-    formData.advancedSettings.allowDownloadWithoutEmailConfirmation = "yes";
+    formData.advancedSettings.requireEmailConfirmationBeforeDownload = "no";
+    delete formData.advancedSettings.allowDownloadWithoutEmailConfirmation;
     delete formData.advancedSettingsPending;
     req.session.data = formData;
 
@@ -3676,9 +3819,10 @@ router.post(
     const selectedValue = req.body[setting.key] || "no";
 
     if (setting.slug === "download-without-email-confirmation") {
-      if (selectedValue === "yes") {
+      // Off = do not require confirmation → agree terms first
+      if (selectedValue === "no") {
         formData.advancedSettingsPending = {
-          allowDownloadWithoutEmailConfirmation: "yes",
+          requireEmailConfirmationBeforeDownload: "no",
         };
         req.session.data = formData;
         return res.redirect(
@@ -3686,7 +3830,8 @@ router.post(
         );
       }
 
-      formData.advancedSettings.allowDownloadWithoutEmailConfirmation = "no";
+      formData.advancedSettings.requireEmailConfirmationBeforeDownload = "yes";
+      delete formData.advancedSettings.allowDownloadWithoutEmailConfirmation;
       if (formData.advancedSettingsPending) {
         delete formData.advancedSettingsPending;
       }
@@ -11814,6 +11959,10 @@ router.get("/titan-mvp-1.2/metrics/3rd-party-review", function (req, res) {
 
 router.get("/titan-mvp-1.2/metrics/payments", function (req, res) {
   res.render("titan-mvp-1.2/metrics/payments");
+});
+
+router.get("/titan-mvp-1.2/metrics/file-downloads", function (req, res) {
+  res.render("titan-mvp-1.2/metrics/file-downloads");
 });
 
 router.get("/titan-mvp-1.2/metrics/v8", function (req, res) {
