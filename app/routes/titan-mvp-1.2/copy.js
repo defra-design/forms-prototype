@@ -8,6 +8,7 @@ const {
   cloneQuestion,
   clonePage,
   cloneFormSessionSlice,
+  uniqueCopyLabel,
 } = require("../../lib/titan-mvp-1.2/clone-form");
 
 function findPageIndex(formPages, pageId) {
@@ -61,13 +62,19 @@ module.exports = function registerCopyRoutes(router) {
         return res.redirect("/titan-mvp-1.2/form-editor/listing");
       }
 
+      const questionLabel = question.label || "Untitled question";
+      const existingLabels = (page.questions || []).map(
+        (item) => item.label || "Untitled question"
+      );
+
       res.render("titan-mvp-1.2/form-editor/copy/question.html", {
         form: { name: formData.formName || "Form name" },
         pageId: page.pageId,
         pageNumber: pageIndex + 1,
         pageHeading: pageLabel(page, pageIndex + 1),
         questionId: question.questionId,
-        questionLabel: question.label || "Untitled question",
+        questionLabel,
+        copiedLabel: uniqueCopyLabel(questionLabel, existingLabels, "Untitled question"),
       });
     }
   );
@@ -84,12 +91,20 @@ module.exports = function registerCopyRoutes(router) {
     }
 
     const nextId = createIdFactory();
-    const copiedQuestion = cloneQuestion(question, nextId);
-    page.questions.splice(questionIndex + 1, 0, copiedQuestion);
+    const copiedQuestion = cloneQuestion(question, nextId, {
+      identifyCopy: true,
+      existingLabels: (page.questions || []).map(
+        (item) => item.label || "Untitled question"
+      ),
+    });
+    const insertAt =
+      req.body.insert === "end" ? page.questions.length : questionIndex + 1;
+    page.questions.splice(insertAt, 0, copiedQuestion);
 
     req.session.data.formPages = formPages;
     req.session.data.currentPageIndex = pageIndex;
-    req.session.data.currentQuestionIndex = questionIndex + 1;
+    req.session.data.currentQuestionIndex =
+      req.body.insert === "end" ? insertAt : questionIndex + 1;
 
     res.redirect("/titan-mvp-1.2/page-overview?copied=question");
   });
@@ -108,11 +123,17 @@ module.exports = function registerCopyRoutes(router) {
         return res.redirect("/titan-mvp-1.2/form-editor/listing");
       }
 
+      const heading = pageLabel(page, pageIndex + 1);
+      const existingLabels = formPages.map((item, index) =>
+        pageLabel(item, index + 1)
+      );
+
       res.render("titan-mvp-1.2/form-editor/copy/page.html", {
         form: { name: formData.formName || "Form name" },
         pageId: page.pageId,
         pageNumber: pageIndex + 1,
-        pageHeading: pageLabel(page, pageIndex + 1),
+        pageHeading: heading,
+        copiedLabel: uniqueCopyLabel(heading, existingLabels, "Untitled page"),
         questionCount: (page.questions || []).length,
       });
     }
@@ -128,7 +149,12 @@ module.exports = function registerCopyRoutes(router) {
     }
 
     const nextId = createIdFactory();
-    const copiedPage = clonePage(formPages[pageIndex], nextId);
+    const copiedPage = clonePage(formPages[pageIndex], nextId, {
+      identifyCopy: true,
+      existingLabels: formPages.map((item, index) =>
+        pageLabel(item, index + 1)
+      ),
+    });
     formPages.splice(pageIndex + 1, 0, copiedPage);
 
     req.session.data.formPages = formPages;
@@ -142,10 +168,14 @@ module.exports = function registerCopyRoutes(router) {
   router.get("/titan-mvp-1.2/form-overview/copy-form", function (req, res) {
     const formData = req.session.data || {};
     const currentName = formData.formName || "Form name";
+    const existingNames = [
+      currentName,
+      ...((formData.formCopyHistory || []).map((item) => item.formName)),
+    ];
 
     res.render("titan-mvp-1.2/form-editor/copy/form.html", {
       form: { name: currentName },
-      suggestedName: `${currentName} (copy)`,
+      suggestedName: uniqueCopyLabel(currentName, existingNames, "Form name"),
       pageCount: (formData.formPages || []).length,
     });
   });
@@ -156,7 +186,15 @@ module.exports = function registerCopyRoutes(router) {
     const newFormName = (
       Array.isArray(req.body.formName)
         ? req.body.formName[0]
-        : req.body.formName || `${formData.formName || "Form name"} (copy)`
+        : req.body.formName ||
+          uniqueCopyLabel(
+            formData.formName || "Form name",
+            [
+              formData.formName,
+              ...((formData.formCopyHistory || []).map((item) => item.formName)),
+            ],
+            "Form name"
+          )
     ).trim();
 
     // Keep a lightweight snapshot of the previous draft for this prototype session

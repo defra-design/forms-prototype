@@ -5,30 +5,16 @@
 {% from "govuk/components/textarea/macro.njk" import govukTextarea %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% from "moj/components/page-header-actions/macro.njk" import mojPageHeaderActions %}
+{% from "moj/components/button-menu/macro.njk" import mojButtonMenu %}
 {% set pageName = "Page " + pageNumber + " overview - Apply for a county parish holding number in England" %}
 {% set headingPlaceholder = "Page heading" %}
 {% set guidancePlaceholder = "" %}
 
-{# ICDS popover menu (SIS) — loaded for this PoC page only #}
 {% block head %}
 {{ super() }}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ukic/fonts/dist/fonts.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ukic/web-components/dist/core/core.css">
-<script type="module" src="https://cdn.jsdelivr.net/npm/@ukic/web-components/dist/core/core.esm.js"></script>
-{# ICDS core.css follows prefers-color-scheme and darkens native inputs — keep GOV.UK fields light #}
-<style>
-  html {
-    color-scheme: light;
-  }
-
-  .govuk-input,
-  .govuk-textarea,
-  .govuk-select {
-    color-scheme: light;
-    background-color: #ffffff !important;
-    color: #0b0c0c !important;
-  }
-</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=file_copy">
 {% endblock %}
 
 {% block header %}
@@ -78,18 +64,6 @@ navigationItems: [
 {% block content %}
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-full">
-    {% if copied == "question" %}
-    <div class="govuk-grid-row" id="copy-success-notification">
-      <div class="govuk-grid-column-two-thirds">
-        {{ govukNotificationBanner({
-          type: "success",
-          text: "Question duplicated",
-          titleText: "Success",
-          classes: "govuk-!-margin-bottom-4"
-        }) }}
-      </div>
-    </div>
-    {% endif %}
     <div class="govuk-grid-row">
       <!-- Left Column for Form Controls -->
       <div class="govuk-grid-column-one-half-from-desktop" id="container" style="flex: 1 1 75%; overflow-y: auto">
@@ -122,53 +96,31 @@ navigationItems: [
                               </li>
                             </ul>
                           </nav>
-                          {# ICDS popover pattern: https://design.sis.gov.uk/components/navigation/popover-menu/code/ #}
-                          <div class="app-page-sub-nav__action hide-in-reorder-mode hide-when-edit-mode">
-                            <ic-button
-                              id="page-actions-trigger"
-                              variant="icon"
-                              title="Page actions"
-                              theme="light"
-                              onclick="handlePageActionsClick()"
-                              aria-expanded="false">
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="16"
-                                height="16"
-                                fill="currentColor"
-                                class="bi bi-three-dots-vertical"
-                                viewBox="0 0 16 16"
-                                aria-hidden="true"
-                                focusable="false">
-                                <path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"></path>
-                              </svg>
-                            </ic-button>
-                            <div>
-                              <ic-popover-menu
-                                id="page-actions-menu"
-                                anchor="page-actions-trigger"
-                                aria-label="Page actions"
-                                theme="light"
-                                fixed-positioning="true">
-                                <ic-menu-item
-                                  label="Duplicate page"
-                                  theme="light"
-                                  href="/titan-mvp-1.2/form-editor/copy/page/{{ currentPage.pageId }}">
-                                </ic-menu-item>
-                                <ic-menu-item
-                                  id="page-actions-delete"
-                                  label="Delete page"
-                                  theme="light"
-                                  variant="destructive"
-                                  href="/titan-mvp-1.2/form-editor/delete/{{ currentPage.pageId }}">
-                                </ic-menu-item>
-                              </ic-popover-menu>
-                            </div>
-                          </div>
                         </div>
 
-
-                        <h2 class="govuk-heading-l govuk-!-margin-top-4">Page {{ pageNumber }} overview</h2>
+                        {% if copied == "question" %}
+                        <div id="copy-success-notification">
+                          {{ govukNotificationBanner({
+                            type: "success",
+                            text: "Question duplicated",
+                            titleText: "Success",
+                            classes: "govuk-!-margin-top-4 govuk-!-margin-bottom-4"
+                          }) }}
+                        </div>
+                        {% endif %}
+                        {{ mojPageHeaderActions({
+                          classes: "govuk-!-margin-top-4",
+                          heading: {
+                            text: "Page " + pageNumber + " overview",
+                            level: 2,
+                            classes: "govuk-heading-l"
+                          },
+                          items: [{
+                            html: '<span class="material-symbols-outlined" aria-hidden="true">file_copy</span> Duplicate page',
+                            href: "/titan-mvp-1.2/form-editor/copy/page/" + currentPage.pageId,
+                            classes: "gem-c-button gem-c-button-publishing--secondary-quiet app-duplicate-page-button"
+                          }]
+                        }) }}
                         {# <h2 class="govuk-heading-m" id="page-heading">Questions</h2> #}
 
                         <ul id="question-list" class="govuk-list">
@@ -185,7 +137,7 @@ navigationItems: [
                             actions: {
                             items: [
                             {
-                            html: '<span class="app-question-row-actions hide-when-edit-mode"><a class="govuk-link govuk-link--no-visited-state" href="/titan-mvp-1.2/edit-question?questionId=' ~ question.questionId ~ '">Change<span class="govuk-visually-hidden"> ' ~ (question.label or "question") ~ '</span></a><span class="app-question-row-actions__separator" aria-hidden="true"></span><span class="govuk-visually-hidden"> or </span><a class="govuk-link govuk-link--no-visited-state" href="/titan-mvp-1.2/form-editor/copy/question/' ~ currentPage.pageId ~ '/' ~ question.questionId ~ '">Duplicate<span class="govuk-visually-hidden"> ' ~ (question.label or "question") ~ '</span></a></span>'
+                            html: '<span class="app-question-row-actions hide-when-edit-mode"><a class="govuk-link govuk-link--no-visited-state" href="/titan-mvp-1.2/edit-question?questionId=' ~ question.questionId ~ '">Change<span class="govuk-visually-hidden"> ' ~ (question.label or "question") ~ '</span></a></span>'
                             }
                             ]
                             }
@@ -218,22 +170,81 @@ navigationItems: [
                         {% endif %}
                         {% endfor %}
 
-                        <div class="govuk-button-group govuk-!-margin-top-6">
+                        {% if copyQuestion %}
+                        <div class="app-copy-question-panel govuk-!-margin-top-4">
+                          <form action="/titan-mvp-1.2/form-editor/copy/question" method="post" novalidate>
+                            <input type="hidden" name="pageId" value="{{ currentPage.pageId }}">
+                            <input type="hidden" name="insert" value="end">
+                            {{ govukRadios({
+                              name: "questionId",
+                              fieldset: {
+                                legend: {
+                                  text: "Copy a question",
+                                  classes: "govuk-fieldset__legend--m"
+                                }
+                              },
+                              hint: {
+                                html: "The copy is added at the bottom of this page. Conditions that use the original question are not copied."
+                              },
+                              items: copyQuestionItems
+                            }) }}
+                            <div class="govuk-button-group">
+                              {{ govukButton({
+                                text: "Add question"
+                              }) }}
+                              <a class="govuk-link" href="/titan-mvp-1.2/page-overview">Cancel</a>
+                            </div>
+                          </form>
+                        </div>
+                        {% else %}
+                        <div class="govuk-button-group govuk-!-margin-top-4 hide-in-reorder-mode hide-when-edit-mode">
                           {% if not hasLocationUserChoice %}
-                          <a href="/titan-mvp-1.2/form-editor/information-type-nf.html"
-                            class="govuk-button hide-in-reorder-mode hide-when-edit-mode">
-                            Add another question
-                          </a>
+                          {% if currentPage.questions and currentPage.questions.length %}
+                          {{ mojButtonMenu({
+                            button: {
+                              text: "Add another question"
+                            },
+                            items: [
+                              {
+                                text: "Create a new question",
+                                href: "/titan-mvp-1.2/form-editor/information-type-nf.html"
+                              },
+                              {
+                                text: "Copy an existing question",
+                                href: "/titan-mvp-1.2/page-overview?copyQuestion=1"
+                              }
+                            ]
+                          }) }}
+                          {% else %}
+                          {{ mojButtonMenu({
+                            button: {
+                              text: "Add another question"
+                            },
+                            items: [
+                              {
+                                text: "Create a new question",
+                                href: "/titan-mvp-1.2/form-editor/information-type-nf.html"
+                              }
+                            ]
+                          }) }}
+                          {% endif %}
                           {% endif %}
 
-
                           {% if currentPage.questions.length > 1 %}
-                          <button id="reorder-questions-button" class="govuk-button govuk-button--inverse"
+                          <button id="reorder-questions-button" class="govuk-button govuk-button--inverse govuk-!-margin-right-6"
                             type="button">
                             Re-order questions
                           </button>
                           {% endif %}
                         </div>
+
+                        <p class="govuk-body govuk-!-margin-top-8 govuk-!-margin-left-4 hide-in-reorder-mode hide-when-edit-mode">
+                          <a href="/titan-mvp-1.2/form-editor/delete/{{ currentPage.pageId }}"
+                            class="govuk-link govuk-link--destructive govuk-link--no-visited-state">
+                            Delete page
+                          </a>
+                        </p>
+                        {% endif %}
 
                         <a href="#tab-one" class="govuk-skip-link" style="margin-bottom: 30px!important;"
                           data-module="govuk-skip-link">
@@ -1770,46 +1781,69 @@ navigationItems: [
     white-space: nowrap;
   }
 
-  .app-page-sub-nav__action ic-button {
-    --ic-button-icon-colour: #0b0c0c;
+  .app-duplicate-page-button {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 0;
+    margin-bottom: 0;
   }
 
-  #page-actions-menu {
-    --max-height: 320px;
-    --popover-width: 260px;
-    --ic-z-index-popover: 10000;
-    /* Force ICDS light appearance (OS dark mode otherwise yields white-on-white labels) */
-    color-scheme: light;
-    --ic-color-text-primary: #0b0c0c;
-    --ic-color-text-secondary: #505a5f;
-    --ic-popover-background: #ffffff;
-    --ic-popover-menu-item-label: #0b0c0c;
-    --ic-popover-menu-item-description: #505a5f;
-    --ic-popover-menu-destructive-item-label: #d4351c;
-    /* Focus styles: keep dark text + light grey highlight (blue focus bg doesn't apply with href) */
-    --ic-popover-menu-item-label-focused: #0b0c0c;
-    --ic-popover-menu-item-description-focused: #505a5f;
-    --ic-popover-menu-item-shortcut-focused: #0b0c0c;
-    --ic-popover-background-focus: #f3f2f1;
-    --ic-popover-background-hover: #f3f2f1;
-    --ic-typography-color: #0b0c0c;
-    --ic-button-tertiary-text-active: #0b0c0c;
-    --ic-button-tertiary-text-hover-active: #0b0c0c;
-    --ic-button-tertiary-text-pressed-active: #0b0c0c;
+  .app-duplicate-page-button .material-symbols-outlined {
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1;
+    margin-right: 5px;
   }
 
-  /* ICDS menu items default to inline in this kit and sit side-by-side; stack them */
-  #page-actions-menu ic-menu-item {
-    display: block !important;
-    width: 100%;
-    color-scheme: light;
-    --ic-typography-color: #0b0c0c;
-    --ic-popover-menu-item-label-focused: #0b0c0c;
-    --ic-button-tertiary-text-active: #0b0c0c;
-    --ic-button-tertiary-text-hover-active: #0b0c0c;
-    --ic-button-tertiary-text-pressed-active: #0b0c0c;
+  .govuk-button-group .moj-button-menu {
+    margin-bottom: 0;
   }
 
+  .app-copy-question-panel {
+    background-color: #ffffff;
+    border: 1px solid #b1b4b6;
+    padding: 20px;
+  }
+
+  .moj-button-menu__items {
+    background-color: #ffffff;
+    z-index: 10;
+  }
+
+  .moj-button-menu__item,
+  .moj-button-menu__item.govuk-button--secondary {
+    background-color: #ffffff !important;
+    color: #0b0c0c !important;
+    box-shadow: none;
+  }
+
+  .moj-button-menu__item:hover,
+  .moj-button-menu__item.govuk-button--secondary:hover {
+    background-color: #e8e8e8 !important;
+    color: #0b0c0c !important;
+  }
+
+  #question-list {
+    margin-bottom: 0;
+  }
+
+  #question-list > .question-item:last-child {
+    padding-bottom: 0;
+    margin-bottom: 0;
+  }
+
+  #question-list > .question-item:last-child .govuk-summary-list {
+    margin-bottom: 0;
+  }
+
+  .moj-page-header-actions {
+    align-items: center;
+  }
+
+  .moj-page-header-actions .govuk-heading-l {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
 
   /* Keep Change | Duplicate on one line in the narrow overview column */
   .app-question-row-actions {
@@ -2004,49 +2038,4 @@ navigationItems: [
     padding: 15px;
   }
 </style>
-{% endblock %}
-
-{% block pageScripts %}
-{{ super() }}
-<script>
-  // Matches ICDS docs toggle pattern:
-  // https://design.sis.gov.uk/components/navigation/popover-menu/code/
-  function handlePageActionsClick() {
-    var popoverMenu = document.querySelector("#page-actions-menu");
-    var button = document.querySelector("#page-actions-trigger");
-    if (!popoverMenu || !button) {
-      return;
-    }
-    if (popoverMenu.open) {
-      popoverMenu.open = false;
-      button.setAttribute("aria-expanded", "false");
-    } else {
-      popoverMenu.open = true;
-      button.setAttribute("aria-expanded", "true");
-    }
-  }
-
-  document.addEventListener("DOMContentLoaded", function () {
-    var popoverMenu = document.querySelector("#page-actions-menu");
-    var button = document.querySelector("#page-actions-trigger");
-    if (!popoverMenu || !button) {
-      return;
-    }
-    popoverMenu.addEventListener("icPopoverClosed", function () {
-      button.setAttribute("aria-expanded", "false");
-    });
-
-    // Keep destructive red, but undo ICDS uppercase on the label (shadow DOM)
-    customElements.whenDefined("ic-menu-item").then(function () {
-      var deleteItem = document.querySelector("#page-actions-delete");
-      if (!deleteItem || !deleteItem.shadowRoot) {
-        return;
-      }
-      var style = document.createElement("style");
-      style.textContent =
-        ".menu-item-label { text-transform: none !important; }";
-      deleteItem.shadowRoot.appendChild(style);
-    });
-  });
-</script>
 {% endblock %}
