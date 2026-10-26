@@ -2695,23 +2695,26 @@ const ADVANCED_SETTINGS_PAGES = {
   "download-without-email-confirmation": {
     key: "requireEmailConfirmationBeforeDownload",
     slug: "download-without-email-confirmation",
-    summaryLabel: "Email confirmation for file downloads",
-    summaryValueYes: "Required",
-    summaryValueNo: "Not required",
-    label: "Email confirmation for file downloads",
-    hint:
-      "Choose whether people need to confirm their email address before downloading files attached to this form.",
-    optionYesText: "Require email confirmation",
+    summaryLabel: "Require an email address for file downloads",
+    summaryValueYes:
+      "Ask for an email address before files can be downloaded",
+    summaryValueNo:
+      "Allow file downloads without confirming the email address",
+    pageTitle: "Require an email address for file downloads",
+    label: "Do you need extra email security for file downloads?",
+    optionYesText:
+      "Yes, I need the form to ask for an email address before files can be downloaded",
     optionYesHint:
-      "People must confirm their email address before downloading files.",
-    optionNoText: "Do not require email confirmation (default)",
+      "Defra forms designer will ask for the appropriate email address before the download starts",
+    optionNoText:
+      "No, allow file downloads without confirming the email address (default)",
     optionNoHint:
-      "People can download files without confirming their email address.",
+      "You or the team processing form submissions will not need to confirm the email address when downloading files linked to this form",
     yesDescription:
-      "People must confirm their email address before downloading files.",
+      "Defra forms designer will ask for the appropriate email address before the download starts",
     noDescription:
-      "People can download files without confirming their email address.",
-    changeHiddenText: "email confirmation for file downloads",
+      "You or the team processing form submissions will not need to confirm the email address when downloading files linked to this form",
+    changeHiddenText: "whether an email address is required for file downloads",
   },
 };
 
@@ -5089,6 +5092,7 @@ router.get("/titan-mvp-1.2/page-overview", function (req, res) {
 
   const currentPage = formPages[pageIndex];
   const sections = formData.sections || [];
+  const pageQuestions = (currentPage && currentPage.questions) || [];
 
   res.render("titan-mvp-1.2/form-editor/page-overview.html", {
     form: {
@@ -5098,6 +5102,17 @@ router.get("/titan-mvp-1.2/page-overview", function (req, res) {
     currentPage: currentPage,
     sections: sections,
     copied: req.query.copied || null,
+    copyQuestion: req.query.copyQuestion === "1",
+    copyQuestionItems: pageQuestions.map(function (question, index) {
+      return {
+        value: String(question.questionId),
+        text:
+          "Question " +
+          (index + 1) +
+          ": " +
+          (question.label || "Untitled question"),
+      };
+    }),
   });
 });
 
@@ -7720,12 +7735,24 @@ router.get("/titan-mvp-1.2/form-editor/page-overview", function (req, res) {
   const pageIndex = formData.currentPageIndex || 0;
   const currentPage = formPages[pageIndex] || {};
   const sections = formData.sections || [];
+  const pageQuestions = currentPage.questions || [];
   res.render("titan-mvp-1.2/form-editor/page-overview.html", {
     form: { name: formData.formName || "Form name" },
     pageNumber: pageIndex + 1,
     currentPage: currentPage,
     sections: sections,
     copied: req.query.copied || null,
+    copyQuestion: req.query.copyQuestion === "1",
+    copyQuestionItems: pageQuestions.map(function (question, index) {
+      return {
+        value: String(question.questionId),
+        text:
+          "Question " +
+          (index + 1) +
+          ": " +
+          (question.label || "Untitled question"),
+      };
+    }),
   });
 });
 
