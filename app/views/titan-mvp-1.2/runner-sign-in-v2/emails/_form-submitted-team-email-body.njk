@@ -30,6 +30,9 @@
   }) }}
 {% endif %}
 
+{% if showCopiedAnswersNote %}
+  <p class="govuk-body">This form was submitted using a copy of the answers from a previous submission (reference {{ previousReference }}). This is a new submission and does not replace the previous one.</p>
+{% endif %}
 
 <p class="govuk-body">Do not reply to this email. Your reply will go to the Defra Forms team, not the person who submitted the form.</p>
 

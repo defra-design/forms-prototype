@@ -93,6 +93,9 @@ function runnerSignInV2BuildJourneyUrls({
     emailApplicantFormChecked: `/runner-sign-in-v2/emails/applicant-form-checked?formKey=${enc(formKey)}&applicationId=${enc(applicationId)}`,
     emailFormSubmitted: triple("/runner-sign-in-v2/emails/form-submitted", manageUrl),
     emailFormSubmittedPublic: triple("/runner-sign-in-v2/emails/form-submitted/public", manageUrl),
+    emailFormSubmittedCopied: "/runner-sign-in-v2/static/emails/form-submitted-copied",
+    emailFormSubmittedCopiedPublic: "/runner-sign-in-v2/static/emails/form-submitted-copied/public",
+    emailFormSubmittedCopiedTeam: "/runner-sign-in-v2/static/emails/form-submitted-copied/team",
     emailFormSubmittedEdited: `${triple("/runner-sign-in-v2/emails/form-submitted", manageUrl)}&edited=1`,
     emailFormSubmittedEditedPaymentNew:
       "/runner-sign-in-v2/static/emails/form-submitted-edited-payment-new",
@@ -193,6 +196,11 @@ function runnerSignInV2BuildJourneyUrls({
           emailCheckerInvite: journeyPreviewPath("email-checker-invite"),
           emailFormSubmitted: journeyPreviewPath("email-form-submitted"),
           emailFormSubmittedPublic: journeyPreviewPath("email-form-submitted-public"),
+          emailFormSubmittedCopied: "/runner-sign-in-v2/static/emails/form-submitted-copied",
+          emailFormSubmittedCopiedPublic:
+            "/runner-sign-in-v2/static/emails/form-submitted-copied/public",
+          emailFormSubmittedCopiedTeam:
+            "/runner-sign-in-v2/static/emails/form-submitted-copied/team",
           emailFormSubmittedEdited: journeyPreviewPath("email-form-submitted-edited"),
           emailFormSubmittedEditedPaymentNew: journeyPreviewPath(
             "email-form-submitted-edited-payment-new"

@@ -191,12 +191,16 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
           href: `/runner-sign-in-v2/forms/${enc(copyFormKey)}/${enc(copyApplicationId)}/submitted`,
         },
         {
-          text: "Form submitted confirmation email (copied answers)",
-          href: copyEmailTriple("/runner-sign-in-v2/emails/form-submitted"),
+          text: "Form submitted confirmation email (copied answers) – form filler",
+          href: "/runner-sign-in-v2/static/emails/form-submitted-copied",
         },
         {
           text: "Form submitted email – public view (copied answers)",
-          href: copyEmailTriple("/runner-sign-in-v2/emails/form-submitted/public"),
+          href: "/runner-sign-in-v2/static/emails/form-submitted-copied/public",
+        },
+        {
+          text: "Form received email (copied answers) – processing team",
+          href: "/runner-sign-in-v2/static/emails/form-submitted-copied/team",
         },
       ],
     },
@@ -313,8 +317,22 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
         { text: "Sign-in created email", href: `/runner-sign-in-v2/emails/one-login-created?${q}&email=you@example.com` },
         { text: "Checker invite email", href: urls.emailCheckerInvite },
         { text: "Applicant form checked email", href: urls.emailApplicantFormChecked },
-        { text: "Form submitted email (copied answers)", href: urls.emailFormSubmitted },
-        { text: "Form submitted email – public view (copied answers)", href: urls.emailFormSubmittedPublic },
+        {
+          text: "Form submitted email (copied answers) – form filler",
+          href: urls.emailFormSubmittedCopied || "/runner-sign-in-v2/static/emails/form-submitted-copied",
+        },
+        {
+          text: "Form submitted email – public view (copied answers)",
+          href:
+            urls.emailFormSubmittedCopiedPublic ||
+            "/runner-sign-in-v2/static/emails/form-submitted-copied/public",
+        },
+        {
+          text: "Form received email (copied answers) – processing team",
+          href:
+            urls.emailFormSubmittedCopiedTeam ||
+            "/runner-sign-in-v2/static/emails/form-submitted-copied/team",
+        },
         { text: "Changes submitted email (form filler)", href: urls.emailFormSubmittedEdited },
         {
           text: "Changes submitted email with payment (new payment)",
@@ -557,10 +575,21 @@ function buildRunnerSignInV2AllPagesStaticSections(urls, { unexpectedPages }) {
         { text: "Ready to submit (copied form)", href: p.readyToSubmit },
         { text: "Manage your form (after copy)", href: p.manage },
         { text: "Form submitted", href: preview("form-submitted") },
-        { text: "Form submitted confirmation email (copied answers)", href: p.emailFormSubmitted },
+        {
+          text: "Form submitted confirmation email (copied answers) – form filler",
+          href: p.emailFormSubmittedCopied || "/runner-sign-in-v2/static/emails/form-submitted-copied",
+        },
         {
           text: "Form submitted email – public view (copied answers)",
-          href: p.emailFormSubmittedPublic,
+          href:
+            p.emailFormSubmittedCopiedPublic ||
+            "/runner-sign-in-v2/static/emails/form-submitted-copied/public",
+        },
+        {
+          text: "Form received email (copied answers) – processing team",
+          href:
+            p.emailFormSubmittedCopiedTeam ||
+            "/runner-sign-in-v2/static/emails/form-submitted-copied/team",
         },
       ],
     },
@@ -668,8 +697,22 @@ function buildRunnerSignInV2AllPagesStaticSections(urls, { unexpectedPages }) {
         { text: "Sign-in created email", href: preview("email-one-login-created") },
         { text: "Checker invite email", href: p.emailCheckerInvite },
         { text: "Applicant form checked email", href: preview("email-applicant-form-checked") },
-        { text: "Form submitted email (copied answers)", href: p.emailFormSubmitted },
-        { text: "Form submitted email – public view (copied answers)", href: p.emailFormSubmittedPublic },
+        {
+          text: "Form submitted email (copied answers) – form filler",
+          href: p.emailFormSubmittedCopied || "/runner-sign-in-v2/static/emails/form-submitted-copied",
+        },
+        {
+          text: "Form submitted email – public view (copied answers)",
+          href:
+            p.emailFormSubmittedCopiedPublic ||
+            "/runner-sign-in-v2/static/emails/form-submitted-copied/public",
+        },
+        {
+          text: "Form received email (copied answers) – processing team",
+          href:
+            p.emailFormSubmittedCopiedTeam ||
+            "/runner-sign-in-v2/static/emails/form-submitted-copied/team",
+        },
         {
           text: "Changes submitted email (form filler)",
           href: p.emailFormSubmittedEdited || preview("email-form-submitted-edited"),

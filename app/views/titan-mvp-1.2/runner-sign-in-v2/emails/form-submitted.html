@@ -23,7 +23,17 @@ Form submitted email – prototype
       ·
       <a class="govuk-link" href="/titan-mvp-1.2/form-editor/advanced-settings/reuse-previous-answers">Reuse previous answers setting</a>
       ·
-      <a class="govuk-link" href="/runner-sign-in-v2/emails/form-submitted/public?formKey={{ formKey | urlencode }}&amp;applicationId={{ applicationId | urlencode }}">Public view</a>
+      {% if staticCopiedAnswers %}
+        <a class="govuk-link" href="/runner-sign-in-v2/static/emails/form-submitted-copied/public">Public view</a>
+        ·
+        <a class="govuk-link" href="/runner-sign-in-v2/static/emails/form-submitted-copied/team">Processing team email</a>
+      {% else %}
+        <a class="govuk-link" href="/runner-sign-in-v2/emails/form-submitted/public?formKey={{ formKey | urlencode }}&amp;applicationId={{ applicationId | urlencode }}">Public view</a>
+        {% if showCopiedAnswersNote %}
+          ·
+          <a class="govuk-link" href="/runner-sign-in-v2/static/emails/form-submitted-copied/team">Processing team email</a>
+        {% endif %}
+      {% endif %}
     </p>
 
     {% include "titan-mvp-1.2/runner-sign-in-v2/emails/_form-submitted-email-content.njk" %}

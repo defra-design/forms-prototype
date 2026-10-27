@@ -28632,6 +28632,76 @@ router.get(
   }
 );
 
+function runnerSignInV2CopiedAnswersEmailLocals(req, options) {
+  const opts = options || {};
+  const forTeam = opts.forTeam === true;
+  const forPublic = opts.forPublic === true;
+  const formKey = "volunteer-application";
+  const applicationId = "app-copy-volunteer-draft";
+  const signInUrl = runnerSignInV2FormSubmittedEmailSignInUrl(formKey, applicationId);
+  return {
+    staticCopiedAnswers: true,
+    toEmail: String(req.query.email || "alex.taylor@example.com").trim(),
+    teamEmail: "forms-processing@defra.gov.uk",
+    formKey,
+    applicationId,
+    formName: "Apply to volunteer",
+    answers: {
+      fullName: "Alex Taylor",
+      email: "alex.taylor@example.com",
+      volunteerRole: "Gardening",
+      declarationAccepted: "yes",
+    },
+    resubmitted: false,
+    showCopiedAnswersNote: true,
+    showPayment: false,
+    allowEditSubmissions: false,
+    referenceNumber: "K2P-7N1-M4V",
+    previousReference: "FL3-5H4-L8N",
+    previousSubmittedOn: "18 April 2026",
+    submittedAt: "11:10am on Tuesday 7 July 2026",
+    whatHappensNext: "We'll review your application and contact you if we need more information.",
+    helpEmail: "daniel.dasilveira@defra.gov.uk",
+    helpContactLinkHref: signInUrl,
+    downloadCsvHref: "#",
+    forTeam,
+    forPublic,
+  };
+}
+
+router.get("/runner-sign-in-v2/static/emails/form-submitted-copied", function (req, res) {
+  return res.render(
+    "titan-mvp-1.2/runner-sign-in-v2/emails/form-submitted",
+    runnerSignInV2CopiedAnswersEmailLocals(req)
+  );
+});
+
+router.get("/runner-sign-in-v2/static/emails/form-submitted-copied/public", function (req, res) {
+  return res.render(
+    "titan-mvp-1.2/runner-sign-in-v2/emails/form-submitted-public",
+    runnerSignInV2CopiedAnswersEmailLocals(req, { forPublic: true })
+  );
+});
+
+router.get("/runner-sign-in-v2/static/emails/form-submitted-copied/team", function (req, res) {
+  return res.render(
+    "titan-mvp-1.2/runner-sign-in-v2/emails/form-submitted-team",
+    runnerSignInV2CopiedAnswersEmailLocals(req, { forTeam: true })
+  );
+});
+
+router.get("/runner-sign-in-v2/static/emails/form-submitted-copied.html", function (req, res) {
+  return res.redirect("/runner-sign-in-v2/static/emails/form-submitted-copied");
+});
+
+router.get("/runner-sign-in-v2/static/emails/form-submitted-copied/public.html", function (req, res) {
+  return res.redirect("/runner-sign-in-v2/static/emails/form-submitted-copied/public");
+});
+
+router.get("/runner-sign-in-v2/static/emails/form-submitted-copied/team.html", function (req, res) {
+  return res.redirect("/runner-sign-in-v2/static/emails/form-submitted-copied/team");
+});
+
 router.get("/runner-sign-in-v2/static/manage-form-checked", function (req, res) {
   const data = ensureRunnerSignInSession(req);
   const application = runnerSignInV2EnsureStaticCheckedExample(req);
