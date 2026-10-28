@@ -1,0 +1,15 @@
+{% from "govuk/components/textarea/macro.njk" import govukTextarea %}
+
+{{ govukTextarea({
+  name: "changeReason",
+  id: "change-reason",
+  rows: 3,
+  value: changeReason or "",
+  label: {
+    text: "Add a note about this change (optional)",
+    classes: "govuk-label--m"
+  },
+  hint: {
+    html: "Form history already records what changed. Use this note to explain why, in a full sentence.<br>For example, ‘Policy approved this for private beta from 8 May.’ Do not write vague notes like ‘Updated’ or ‘As discussed’."
+  }
+}) }}

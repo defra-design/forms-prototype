@@ -1,0 +1,102 @@
+{% extends "layouts/main.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+{% from "moj/components/timeline/macro.njk" import mojTimeline %}
+{% from "govuk/components/tag/macro.njk" import govukTag %}
+
+{% set pageName = "Form overview - Employee Onboarding" %}
+{% set activeNav = "overview" %}
+
+{% block header %}
+{% include "titan-mvp-1.2/concepts/notes-in-history/includes/_header.njk" %}
+{% endblock %}
+
+{% block pageTitle %}
+{{ pageName }}
+{% endblock %}
+
+{% block beforeContent %}
+{{ govukPhaseBanner({
+  tag: { text: "Concept" },
+  html: 'Notes in form history prototype. <a class="govuk-link" href="/titan-mvp-1.2/concepts/notes-in-history">Back to concept overview</a>.'
+}) }}
+{% endblock %}
+
+{% block content %}
+{% if successBanner %}
+{{ govukNotificationBanner({
+  type: "success",
+  text: successBanner
+}) }}
+{% endif %}
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <span class="govuk-caption-xl">Form overview</span>
+    <h1 class="govuk-heading-xl">Employee Onboarding</h1>
+
+    <dl class="govuk-summary-list">
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Status</dt>
+        <dd class="govuk-summary-list__value">
+          {% if formStatus == "closed" %}
+            {{ govukTag({ text: "Closed", classes: "govuk-tag--grey" }) }}
+          {% elif formStatus == "live" %}
+            {{ govukTag({ text: "Live", classes: "govuk-tag--green" }) }}
+          {% else %}
+            {{ govukTag({ text: "Live", classes: "govuk-tag--green" }) }}
+            {{ govukTag({ text: "Draft", classes: "govuk-tag--orange govuk-!-margin-left-1" }) }}
+          {% endif %}
+        </dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Submitted forms sent to</dt>
+        <dd class="govuk-summary-list__value">{{ notificationEmail }}</dd>
+        <dd class="govuk-summary-list__actions">
+          <a class="govuk-link" href="/titan-mvp-1.2/concepts/notes-in-history/change-email">Change<span class="govuk-visually-hidden"> where submitted forms are sent</span></a>
+        </dd>
+      </div>
+    </dl>
+
+    <h2 class="govuk-heading-m">Manage this form</h2>
+
+    <div class="govuk-button-group">
+      {% if formStatus != "closed" %}
+        {{ govukButton({
+          text: "Make draft live",
+          href: "/titan-mvp-1.2/concepts/notes-in-history/make-live"
+        }) }}
+        {{ govukButton({
+          text: "Close form",
+          href: "/titan-mvp-1.2/concepts/notes-in-history/close",
+          classes: "govuk-button--warning"
+        }) }}
+      {% else %}
+        {{ govukButton({
+          text: "Make draft live",
+          href: "/titan-mvp-1.2/concepts/notes-in-history/make-live"
+        }) }}
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="govuk-grid-column-one-third">
+    <h2 class="govuk-heading-m">History</h2>
+    <p class="govuk-body-s">Changes are listed here. If someone added a note, it appears with that change.</p>
+
+    {{ mojTimeline({ items: recentTimelineItems }) }}
+
+    <p class="govuk-body">
+      <a class="govuk-link" href="/titan-mvp-1.2/concepts/notes-in-history/history">View full history</a>
+    </p>
+
+    <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+
+    <h2 class="govuk-heading-s">Notes</h2>
+    <p class="govuk-body-s">Notes appear in form history. People filling in the form will not see them.</p>
+    <p class="govuk-body">
+      <a class="govuk-link" href="/titan-mvp-1.2/concepts/notes-in-history/add-note">Add a note</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

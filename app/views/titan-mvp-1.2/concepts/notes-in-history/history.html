@@ -1,0 +1,67 @@
+{% extends "layouts/main.html" %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+{% from "moj/components/timeline/macro.njk" import mojTimeline %}
+
+{% set pageName = "Form history - Employee Onboarding" %}
+{% set activeNav = "history" %}
+{% set formName = "Employee Onboarding" %}
+
+{% block header %}
+{% include "titan-mvp-1.2/concepts/notes-in-history/includes/_header.njk" %}
+
+<div class="x-govuk-masthead x-govuk-masthead--large">
+  <div class="govuk-width-container">
+    {{ govukBackLink({
+      classes: "govuk-back-link--inverse govuk-!-margin-bottom-0",
+      text: "Back to form overview",
+      href: "/titan-mvp-1.2/concepts/notes-in-history/overview"
+    }) }}
+
+    <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"
+      style="border-bottom: 1px solid white; margin-bottom: 0" />
+
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-full-from-desktop">
+        <h1 class="x-govuk-masthead__title">
+          <span class="govuk-caption-l" style="color: white">Employee Onboarding</span>
+          Form history
+        </h1>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block pageTitle %}
+{{ pageName }}
+{% endblock %}
+
+{% block beforeContent %}
+{{ govukPhaseBanner({
+  tag: { text: "Concept" },
+  html: 'Notes in form history prototype.'
+}) }}
+{% endblock %}
+
+{% block content %}
+{% if successBanner %}
+{{ govukNotificationBanner({
+  type: "success",
+  text: successBanner
+}) }}
+{% endif %}
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <p class="govuk-body">
+      This page shows what changed on the form. If someone added a note, it appears under that change.
+    </p>
+
+    {{ mojTimeline({ items: timelineItems }) }}
+
+    <p class="govuk-body govuk-!-margin-top-6">
+      <a class="govuk-link" href="/titan-mvp-1.2/concepts/notes-in-history/add-note">Add a note</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

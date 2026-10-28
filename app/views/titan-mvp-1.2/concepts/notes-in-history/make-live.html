@@ -1,0 +1,59 @@
+{% extends "layouts/main.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
+
+{% set pageName = "Make draft live - Employee Onboarding" %}
+{% set activeNav = "overview" %}
+
+{% block header %}
+{% include "titan-mvp-1.2/concepts/notes-in-history/includes/_header.njk" %}
+{% endblock %}
+
+{% block pageTitle %}
+{{ pageName }}
+{% endblock %}
+
+{% block beforeContent %}
+{{ govukPhaseBanner({
+  tag: { text: "Concept" },
+  html: 'Notes in form history prototype.'
+}) }}
+{{ govukBackLink({
+  text: "Back to form overview",
+  href: "/titan-mvp-1.2/concepts/notes-in-history/overview"
+}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <span class="govuk-caption-xl">Employee Onboarding</span>
+    <h1 class="govuk-heading-xl">Are you sure you want to make the draft live?</h1>
+
+    {{ govukWarningText({
+      text: "This will replace the form that is currently live.",
+      iconFallbackText: "Warning"
+    }) }}
+
+    <p class="govuk-body">Submitted forms will be sent to
+      <a class="govuk-link" href="mailto:{{ notificationEmail }}">{{ notificationEmail }}</a>.
+    </p>
+
+    <form method="post" action="/titan-mvp-1.2/concepts/notes-in-history/make-live" novalidate>
+      {% include "titan-mvp-1.2/concepts/notes-in-history/includes/_reason-field.njk" %}
+
+      <div class="govuk-button-group">
+        {{ govukButton({
+          text: "Make draft live",
+          type: "submit"
+        }) }}
+        {{ govukButton({
+          text: "Cancel",
+          href: "/titan-mvp-1.2/concepts/notes-in-history/overview",
+          classes: "govuk-button--secondary"
+        }) }}
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

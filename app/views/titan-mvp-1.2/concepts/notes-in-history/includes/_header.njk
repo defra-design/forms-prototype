@@ -1,0 +1,31 @@
+{% from "components/service-header/macro.njk" import serviceHeader %}
+
+{% set formName = formName or "Employee Onboarding" %}
+{% set activeNav = activeNav or "overview" %}
+
+{{ serviceHeader({
+  organisationName: "Defra",
+  productName: "Form Designer",
+  serviceName: "",
+  accountName: "Chris Smith",
+  homepageLink: "/",
+  signOutLink: "/titan-mvp-1.2/onboarding/sign-out-confirmation",
+  navigationItems: [
+    {
+      href: "/titan-mvp-1.2/library",
+      text: "Forms library",
+      id: "nav-library"
+    },
+    {
+      href: "/titan-mvp-1.2/concepts/notes-in-history/overview",
+      text: "Overview",
+      id: "nav-overview"
+    },
+    {
+      href: "/titan-mvp-1.2/concepts/notes-in-history/history",
+      text: "Form history",
+      id: "nav-history"
+    }
+  ],
+  activeLinkId: "nav-" + activeNav
+}) }}

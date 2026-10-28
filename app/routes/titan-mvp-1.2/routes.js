@@ -5653,6 +5653,9 @@ router.get("/titan-mvp-1.2/concepts/file-upload-simplified/check-answers", funct
   });
 });
 
+// Notes attached to form history changes (concept POC)
+router.use(require("./notes-in-history.js"));
+
 // Edit page
 router.get("/titan-mvp-1.2/edit-page/:pageId", function (req, res) {
   const pageId = req.params.pageId;

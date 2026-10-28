@@ -1,0 +1,105 @@
+{% extends "layouts/main.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% from "govuk/components/table/macro.njk" import govukTable %}
+
+{% block pageTitle %}
+Notes in form history (concept) – Form Designer
+{% endblock %}
+
+{% block beforeContent %}
+{{ govukPhaseBanner({
+  tag: { text: "Concept" },
+  html: 'This prototype explores adding an optional reason when someone makes an important change, and showing that reason in form history.'
+}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <span class="govuk-caption-xl">Form overview</span>
+    <h1 class="govuk-heading-xl">Notes attached to changes</h1>
+
+    <p class="govuk-body">
+      Research found that internal notes were useful, but people were unsure how to use them to record changes.
+      People looking at form history also wanted to know why a change was made.
+    </p>
+
+    {{ govukInsetText({
+      html: "<p class='govuk-body govuk-!-margin-bottom-0'><strong>What we’re testing</strong><br>The service records what changed in form history. On some important actions, such as making a form live or closing it, people can add an optional note. That note appears on the same history entry. There is also a separate ‘Add a note’ link for other team information.</p>"
+    }) }}
+
+    <h2 class="govuk-heading-m">What this concept includes</h2>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>an optional note when making a draft live, replacing a live form, or closing a form</li>
+      <li>an optional note when changing the notification email</li>
+      <li>notes shown on the matching form history entry</li>
+      <li>a separate ‘Add a note’ link for other team information</li>
+      <li>no note needed for everyday edits in the editor</li>
+    </ul>
+
+    <h2 class="govuk-heading-m">How notes should be written</h2>
+    <p class="govuk-body">
+      This follows the useful parts of
+      <a class="govuk-link" href="https://guidance.publishing.service.gov.uk/writing-to-gov-uk-standards/writing-guidelines/change-notes/" rel="noreferrer noopener" target="_blank">GOV.UK change note guidance (opens in new tab)</a>,
+      adapted for Forms Designer.
+    </p>
+    <p class="govuk-body">Notes should:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>be specific</li>
+      <li>use full sentences</li>
+      <li>put the most important information first</li>
+    </ul>
+    <p class="govuk-body">
+      Unlike GOV.UK change notes, these notes are internal. Form history already records what changed, so the note is mainly for why or other context the team needs.
+    </p>
+    <p class="govuk-body">You do not need a note for small edits, such as fixing typos or minor wording.</p>
+
+    {{ govukTable({
+      caption: "Previous notes concept compared with this concept",
+      captionClasses: "govuk-table__caption--m govuk-visually-hidden",
+      firstCellIsHeader: true,
+      head: [
+        { text: "" },
+        { text: "Previous concept" },
+        { text: "This concept" }
+      ],
+      rows: [
+        [
+          { text: "When you write a note" },
+          { text: "On a separate form on the overview page" },
+          { text: "When you make an important change" }
+        ],
+        [
+          { text: "What is recorded" },
+          { text: "A title and description you write yourself" },
+          { text: "What changed, plus an optional note" }
+        ],
+        [
+          { text: "Where you read it" },
+          { text: "In an internal notes section" },
+          { text: "In form history" }
+        ],
+        [
+          { text: "Is it required?" },
+          { text: "Only if you choose to open the notes form" },
+          { text: "No. Only some actions offer a note field" }
+        ]
+      ]
+    }) }}
+
+    <div class="govuk-button-group">
+      {{ govukButton({
+        text: "Start prototype",
+        href: "/titan-mvp-1.2/concepts/notes-in-history/overview",
+        isStartButton: true
+      }) }}
+      {{ govukButton({
+        text: "Reset prototype",
+        href: "/titan-mvp-1.2/concepts/notes-in-history/reset",
+        classes: "govuk-button--secondary"
+      }) }}
+    </div>
+  </div>
+</div>
+{% endblock %}
