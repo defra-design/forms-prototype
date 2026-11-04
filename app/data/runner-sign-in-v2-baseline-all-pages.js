@@ -121,7 +121,7 @@ function buildRunnerSignInV2BaselineAllPagesSections(urls, { formKey, applicatio
         },
         {
           text: "Your previous submission (go to check answers)",
-          href: "/runner-sign-in-v2-baseline/journeys/preview/copy-intervention-check-answers",
+          href: "/runner-sign-in-v2/static/copy-intervention-check-answers",
         },
         { text: "Your details (copied form)", href: copyFormStep("details") },
         { text: "Volunteer role (copied form)", href: copyFormStep("role") },
@@ -371,7 +371,7 @@ function buildRunnerSignInV2BaselineAllPagesStaticSections(urls, { unexpectedPag
         },
         {
           text: "Your previous submission (go to check answers)",
-          href: preview("copy-intervention-check-answers"),
+          href: "/runner-sign-in-v2/static/copy-intervention-check-answers",
         },
         { text: "Your details (copied form)", href: preview("copy-form-step-details") },
         { text: "Volunteer role (copied form)", href: preview("copy-form-step-role") },

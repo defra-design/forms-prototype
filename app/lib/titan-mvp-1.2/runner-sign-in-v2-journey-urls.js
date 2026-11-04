@@ -118,6 +118,8 @@ function runnerSignInV2BuildJourneyUrls({
     staticManageFormChecked: "/runner-sign-in-v2/static/manage-form-checked",
     staticManageFormAfterDelete: "/runner-sign-in-v2/static/manage-form-after-delete",
     staticManageFormExpired: "/runner-sign-in-v2/static/manage-form-expired",
+    staticCopyInterventionCheckAnswers:
+      "/runner-sign-in-v2/static/copy-intervention-check-answers",
     staticChangeEmailNewEmailSameAsCurrent:
       "/runner-sign-in-v2/static/change-email-new-email-same-as-current",
     staticChangeEmailUsedOnOtherAccount: "/runner-sign-in-v2/static/change-email-used-on-other-account",

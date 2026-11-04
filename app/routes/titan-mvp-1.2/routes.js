@@ -27303,13 +27303,7 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
   }
 
   if (slug === "copy-intervention-check-answers") {
-    runnerSignInAllowSharedDeepLinkAccess(req);
-    return res.render("titan-mvp-1.2/runner-sign-in/intervention-copied-check-answers", {
-      data,
-      formName: "Apply to volunteer",
-      referenceNumber: "FL3-5H4-L8N",
-      continueHref: "/runner-sign-in-v2/journeys/preview/copy-check-answers",
-    });
+    return res.redirect("/runner-sign-in-v2/static/copy-intervention-check-answers");
   }
 
   if (
@@ -28632,6 +28626,14 @@ function runnerSignInV2EditedPaymentCheckAnswersLocals(options) {
       : "/runner-sign-in-v2/static/emails/form-submitted-edited-team-payment-original",
   };
 }
+
+router.get("/runner-sign-in-v2/static/copy-intervention-check-answers", function (req, res) {
+  return res.render("titan-mvp-1.2/runner-sign-in-v2/static/copy-intervention-check-answers");
+});
+
+router.get("/runner-sign-in-v2/static/copy-intervention-check-answers.html", function (req, res) {
+  return res.redirect("/runner-sign-in-v2/static/copy-intervention-check-answers");
+});
 
 router.get("/runner-sign-in-v2/static/check-answers/edited-payment-new", function (req, res) {
   return res.render(
@@ -32981,13 +32983,7 @@ router.get("/runner-sign-in-v2-baseline/journeys/preview/:slug", function (req, 
   }
 
   if (slug === "copy-intervention-check-answers") {
-    runnerSignInAllowSharedDeepLinkAccess(req);
-    return res.render("titan-mvp-1.2/runner-sign-in/intervention-copied-check-answers", {
-      data,
-      formName: "Apply to volunteer",
-      referenceNumber: "FL3-5H4-L8N",
-      continueHref: "/runner-sign-in-v2-baseline/journeys/preview/copy-check-answers",
-    });
+    return res.redirect("/runner-sign-in-v2/static/copy-intervention-check-answers");
   }
 
   if (
