@@ -1,0 +1,56 @@
+{% extends "layouts/runner.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% import "components/one-login-service-header/service-header.njk" as oneLoginHeader %}
+
+{% set formName = formName or "Apply to volunteer" %}
+{% set referenceNumber = referenceNumber or "FL3-5H4-L8N" %}
+{% set continueHref = continueHref or "/runner-sign-in-v2/journeys/preview/copy-check-answers" %}
+
+{% block pageTitle %}
+These answers were copied from your previous submission – {{ formName }} – GOV.UK
+{% endblock %}
+
+{% block beforeContent %}{% endblock %}
+
+{% block header %}
+  {{ oneLoginHeader.govukOneLoginServiceHeader({
+    signOutLink: "/titan-mvp-1.2/roles/sign-out",
+    homepageLink: "/runner-sign-in/applications",
+    oneLoginLinkText: "you@example.com",
+    productName: formName
+  }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">These answers were copied from your previous submission</h1>
+
+    <p class="govuk-body">
+      <strong>Form:</strong> {{ formName }}<br>
+      <strong>Previous reference number:</strong> {{ referenceNumber }}
+    </p>
+
+    <p class="govuk-body">
+      We’ve copied your answers into this new form. Any changes you make will not affect your previous submission.
+    </p>
+
+    <p class="govuk-body">
+      On the next page, you can check and change your answers before submitting the form.
+    </p>
+
+    <div class="govuk-button-group">
+      {{ govukButton({
+        text: "Continue",
+        href: continueHref
+      }) }}
+      {{ govukButton({
+        text: "Save and exit",
+        classes: "govuk-button--secondary",
+        href: "/save-progress",
+        type: "button"
+      }) }}
+    </div>
+  </div>
+</div>
+{% endblock %}
