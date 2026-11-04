@@ -6171,6 +6171,104 @@ router.get(
   renderFormOverviewIndex
 );
 
+// Proof of concept: form overview with "Make a copy" in Manage form
+const renderFormOverviewCopyPoc = (req, res) => {
+  const formData = req.session.data || {};
+
+  const statusColorMap = {
+    Draft: "orange",
+    Live: "green",
+    "Draft-Live": "blue",
+    "Live-Draft": "blue",
+    Closed: "red",
+  };
+
+  const statusOverride = {
+    draft: "Draft",
+    live: "Live",
+    "draft-live": "Draft-Live",
+    "live-draft": "Draft-Live",
+  }[String(req.query.status || "").toLowerCase()];
+
+  // PoC defaults to Draft-Live so both summary cards are visible
+  const status = statusOverride || "Draft-Live";
+  const statusColor = statusColorMap[status] || "grey";
+
+  const urlFriendlyName = (formData.formName || "untitled-form")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+
+  const previewUrl = `https://forms-runner.prototype.cdp-int.defra.cloud/preview/draft/${urlFriendlyName}`;
+  const liveUrl =
+    formData.formDetails?.liveUrl ||
+    `https://forms-runner.prototype.cdp-int.defra.cloud/${urlFriendlyName}`;
+  const livePreviewUrl =
+    formData.formDetails?.livePreviewUrl ||
+    `https://forms-runner.prototype.cdp-int.defra.cloud/preview/live/${urlFriendlyName}`;
+
+  const form = {
+    name: formData.formName || "Form name",
+    status: {
+      text: status,
+      color: statusColor,
+    },
+    previewUrl: previewUrl,
+    createdAt: formData.formDetails?.createdAt || "2024-05-01T10:00:00.000Z",
+    updatedAt: formData.formDetails?.lastUpdated || "2024-05-10T10:00:00.000Z",
+    organisation: {
+      name: formData.formDetails?.organisation || "Not set",
+    },
+    team: {
+      name: formData.formDetails?.teamName || "Not set",
+      email: formData.formDetails?.email || "Not set",
+    },
+    support: {
+      phone: formData.formDetails?.support?.phone,
+      email: formData.formDetails?.support?.email,
+      link: formData.formDetails?.support?.link,
+      responseTime: formData.formDetails?.support?.responseTime,
+    },
+    nextSteps: formData.formDetails?.nextSteps,
+    privacyNotice: formData.formDetails?.privacyNotice,
+    notificationEmail: formData.formDetails?.notificationEmail,
+    termsAndConditions: formData.formDetails?.termsAndConditions,
+    createdBy: formData.formDetails?.createdBy || "Chris Smith",
+    updatedBy: formData.formDetails?.updatedBy || "Chris Smith",
+    publishedAt: formData.formDetails?.publishedAt || "2024-05-08T14:45:00.000Z",
+    publishedBy: formData.formDetails?.publishedBy || "Emily Wong",
+    liveUpdatedAt: formData.formDetails?.liveUpdatedAt || "2024-05-09T09:30:00.000Z",
+    liveUpdatedBy: formData.formDetails?.liveUpdatedBy || "Alex Patel",
+    lastUpdatedAt: formData.formDetails?.lastUpdatedAt || "2024-05-09T09:30:00.000Z",
+    lastUpdatedBy: formData.formDetails?.lastUpdatedBy || "Alex Patel",
+    draftCreatedAt: formData.formDetails?.draftCreatedAt || "2024-05-08T15:00:00.000Z",
+    draftCreatedBy: formData.formDetails?.draftCreatedBy || "Chris Smith",
+    liveUrl: liveUrl,
+    livePreviewUrl: livePreviewUrl,
+  };
+
+  const copySuccessMessage = req.session.data.copySuccessMessage || null;
+  if (copySuccessMessage) {
+    delete req.session.data.copySuccessMessage;
+  }
+
+  res.render("titan-mvp-1.2/form-overview/copy-poc", {
+    form: form,
+    pageName: `Overview - ${form.name}`,
+    copied: req.query.copied || null,
+    copySuccessMessage,
+  });
+};
+
+router.get(
+  [
+    "/titan-mvp-1.2/form-overview/copy-poc",
+    "/titan-mvp-1.2/form-overview/copy-poc/",
+    "/titan-mvp-1.2/form-overview/copy-poc.html",
+  ],
+  renderFormOverviewCopyPoc
+);
+
 // POC form overview route
 router.get("/titan-mvp-1.2/form-overview/poc", (req, res) => {
   // Get the form data from the session
@@ -27204,6 +27302,16 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
     });
   }
 
+  if (slug === "copy-intervention-check-answers") {
+    runnerSignInAllowSharedDeepLinkAccess(req);
+    return res.render("titan-mvp-1.2/runner-sign-in/intervention-copied-check-answers", {
+      data,
+      formName: "Apply to volunteer",
+      referenceNumber: "FL3-5H4-L8N",
+      continueHref: "/runner-sign-in-v2/journeys/preview/copy-check-answers",
+    });
+  }
+
   if (
     slug === "copy-form-step-details" ||
     slug === "copy-form-step-role" ||
@@ -32869,6 +32977,16 @@ router.get("/runner-sign-in-v2-baseline/journeys/preview/:slug", function (req, 
       formKey: RUNNER_SIGN_IN_V2_BASELINE_SEED.copyDeclarationRequired.formKey,
       applicationId: RUNNER_SIGN_IN_V2_BASELINE_SEED.copyDeclarationRequired.applicationId,
       step: "declaration",
+    });
+  }
+
+  if (slug === "copy-intervention-check-answers") {
+    runnerSignInAllowSharedDeepLinkAccess(req);
+    return res.render("titan-mvp-1.2/runner-sign-in/intervention-copied-check-answers", {
+      data,
+      formName: "Apply to volunteer",
+      referenceNumber: "FL3-5H4-L8N",
+      continueHref: "/runner-sign-in-v2-baseline/journeys/preview/copy-check-answers",
     });
   }
 
