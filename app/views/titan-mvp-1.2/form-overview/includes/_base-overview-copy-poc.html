@@ -1,0 +1,296 @@
+{% extends "layouts/main.html" %}
+{% from "components/service-header/macro.njk" import serviceHeader %}
+{% from "moj/components/timeline/macro.njk" import mojTimeline %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+containerClasses: containerClasses,
+accountName: "Chris Smith",
+homepageLink: "/",
+signOutLink: "/titan-mvp-1.2/onboarding/sign-out-confirmation",
+navigationItems: [
+{
+href: "/titan-mvp-1.2/library",
+text: "Forms library",
+id: "nav-library"
+},
+{
+href: "/titan-mvp-1.2/form-overview/copy-poc",
+text: "Overview",
+id: "nav-overview",
+active: true
+},
+{
+href: "/titan-mvp-1.2/form-overview/submissions/improved-2-table",
+text: "Responses",
+id: "nav-responses"
+},
+{
+href: "/titan-mvp-1.2/form-overview/form-history",
+text: "Form history",
+id: "nav-history"
+},
+{
+href: "/titan-mvp-1.2/form-editor/listing",
+text: "Editor",
+id: "nav-editor"
+}],
+activeLinkId: "nav-overview"
+}) }}
+
+<div class="x-govuk-masthead x-govuk-masthead--large x-govuk-masthead--inverse">
+    <div class="govuk-width-container">
+        {{ govukBackLink({
+        classes: "govuk-back-link--inverse govuk-!-margin-bottom-0",
+        text: "Back to forms library",
+        href: "/titan-mvp-1.2/library"
+        }) }}
+
+        <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"
+            style="border-bottom:1px solid white; margin-bottom: 0;">
+
+        <h1 class="govuk-heading-l--inverse x-govuk-masthead__title">
+            {{ form.name }}
+        </h1>
+    </div>
+</div>
+{% endblock %}
+
+{% block pageTitle %}
+{{ pageName }}
+{% endblock %}
+
+{% block content %}
+{% if copied == "form" or copySuccessMessage %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        {{ govukNotificationBanner({
+            type: "success",
+            text: copySuccessMessage or "Form copied",
+            titleText: "Success",
+            classes: "govuk-!-margin-bottom-4"
+        }) }}
+    </div>
+</div>
+{% endif %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        {% include "titan-mvp-1.2/form-overview/includes/_form-status-copy-poc.html" %}
+        {% include "titan-mvp-1.2/form-overview/includes/_organisation-details.html" %}
+        {% include "titan-mvp-1.2/form-overview/includes/_submission-details.html" %}
+        {% include "titan-mvp-1.2/form-overview/includes/_support-details.html" %}
+        {% include "titan-mvp-1.2/form-overview/includes/_next-steps.html" %}
+        {% include "titan-mvp-1.2/form-overview/includes/_data-protection.html" %}
+    </div>
+
+    <div class="govuk-grid-column-one-third-from-desktop">
+        <div style="background-color: #f3f2f1; padding: 15px;">
+            <h2 class="govuk-heading-m">{{ commonTerms.form_editor.overview.manage_form.title }}</h2>
+
+            {% if not form.status or form.status.text === "Draft" %}
+            <a href="/titan-mvp-1.2/form-editor/listing"
+                class="gem-c-button govuk-button gem-c-button-publishing--secondary-quiet"
+                style="width: 100%; margin-bottom: 15px;">{{ commonTerms.form_editor.overview.manage_form.edit_draft }}</a>
+
+            <a href="/titan-mvp-1.2/form-overview/manage-form/make-draft-live/passed-validation">
+                <button type="button" class="govuk-button" data-module="govuk-button"
+                    style="width: 100%; margin-bottom: 15px;">
+                    {{ commonTerms.form_editor.overview.manage_form.make_live }}
+                </button>
+            </a>
+
+            <a href="/titan-mvp-1.2/form-overview/manage-form/delete-draft" class="govuk-link">{{
+                commonTerms.form_editor.overview.manage_form.delete_draft }}</a>
+            {% endif %}
+
+            {% if form.status.text === "Live" %}
+            <a href="/titan-mvp-1.2/form-overview/live-draft">
+                <button type="button" class="govuk-button" data-module="govuk-button"
+                    style="width: 100%; margin-bottom: 15px;">
+                    {{ commonTerms.form_editor.overview.manage_form.create_draft }}
+                </button>
+            </a>
+
+            <a href="/titan-mvp-1.2/form-overview/manage-form/take-offline/confirm">
+                <button type="button" class="govuk-button govuk-button--secondary" data-module="govuk-button"
+                    style="width: 100%; margin-bottom: 15px;">
+                    {{ commonTerms.form_editor.overview.manage_form.take_offline }}
+                </button>
+            </a>
+            {% endif %}
+
+            {% if form.status.text === "Draft-Live" %}
+            <a href="/titan-mvp-1.2/form-editor/listing"
+                class="gem-c-button govuk-button gem-c-button-publishing--secondary-quiet"
+                style="width: 100%; margin-bottom: 15px;">{{ commonTerms.form_editor.overview.manage_form.edit_draft }}</a>
+
+            <a href="/titan-mvp-1.2/form-overview/manage-form/make-draft-live/passed-validation">
+                <button type="button" class="govuk-button" data-module="govuk-button"
+                    style="width: 100%; margin-bottom: 15px;">
+                    {{ commonTerms.form_editor.overview.manage_form.make_live }}
+                </button>
+            </a>
+
+            <a href="/titan-mvp-1.2/form-overview/manage-form/take-offline/confirm">
+                <button type="button" class="govuk-button govuk-button--secondary" data-module="govuk-button"
+                    style="width: 100%; margin-bottom: 15px;">
+                    {{ commonTerms.form_editor.overview.manage_form.take_offline }}
+                </button>
+            </a>
+
+            <a href="/titan-mvp-1.2/form-overview/manage-form/delete-draft" class="govuk-link">{{
+                commonTerms.form_editor.overview.manage_form.delete_draft }}</a>
+            {% endif %}
+        </div>
+
+
+        <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+        <h2 class="govuk-heading-m">History</h2>
+        <div id="timeline-container">
+            {{ mojTimeline({
+            items: [
+            {
+            label: { text: "Switched to new editor" },
+            datetime: { timestamp: "2024-05-08T15:30:00.000Z", type: "datetime" },
+            byline: { text: "Chris Smith" }
+            },
+            {
+            label: { text: "Draft form deleted" },
+            datetime: { timestamp: "2024-05-08T15:15:00.000Z", type: "datetime" },
+            byline: { text: "Alex Patel" }
+            },
+            {
+            label: { text: "Replaced live form with a draft form" },
+            datetime: { timestamp: "2024-05-08T14:45:00.000Z", type: "datetime" },
+            byline: { text: "Samira Khan" }
+            },
+            {
+            label: { text: "Draft created from live form" },
+            datetime: { timestamp: "2024-05-08T14:45:00.000Z", type: "datetime" },
+            byline: { text: "Chris Smith" }
+            },
+            {
+            label: { text: "🎉 Form went live" },
+            datetime: { timestamp: "2024-05-08T14:45:00.000Z", type: "datetime" },
+            byline: { text: "Emily Wong" }
+            }
+            ]
+            }) }}
+            <a href="/titan-mvp-1.2/form-overview/form-history"
+                class="govuk-link govuk-link--no-visited-state govuk-!-margin-top-2">
+                View full history<span class="govuk-visually-hidden">, opens in a new page</span>
+            </a>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .moj-button-group .govuk-button,
+    .moj-button-group,
+    .moj-button-group,
+    .moj-button-group .moj-button-menu {
+        margin-bottom: 0;
+        width: 100% !important;
+        margin-right: 0;
+    }
+
+    .moj-button-menu__items {
+        background-color: #fff;
+
+    }
+
+    .moj-button-menu__item {
+        background-color: #fff !important;
+
+    }
+
+    /* .moj-button-menu__item:last-child {
+        border-bottom: none;
+    } */
+
+    .moj-button-menu li>.moj-button-menu__item:hover {
+        background-color: #767676 !important;
+    }
+
+    .moj-button-menu__wrapper,
+    .moj-button-menu__wrapper {
+        position: relative;
+
+    }
+
+
+
+    .gem-c-button {
+        margin-bottom: 0;
+    }
+
+    .gem-c-button--secondary {
+        padding: 8px 10px;
+        border-color: #00823b;
+        color: #00823b !important;
+        background-color: #fff;
+        box-shadow: none;
+    }
+
+
+    .gem-c-button--secondary:before {
+        content: none;
+    }
+
+
+    .gem-c-button--secondary:hover {
+        border-color: rgb(0, 104.5, 47.4269230769);
+        color: rgb(0, 104.5, 47.4269230769);
+        background-color: #f3f2f1;
+        text-decoration: none;
+    }
+</style>
+{% endblock %}
+
+{%- set formCreatedHtml %}
+Created a new form named 'NewEmployeeForm' with:
+<ul class="govuk-list govuk-list--bullet">
+    <li>Lead organisation as 'Defra'</li>
+    <li>Team name as 'Dev team'</li>
+    <li>Shared team email address as 'dev@defra.com'</li>
+</ul>
+{% endset -%}
+
+{%- set fileExportHtml %}
+<ul class="moj-timeline__documents">
+    <li class="moj-timeline__document-item">
+        <a class="govuk-link" href="#">
+            <svg class="moj-timeline__document-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 20" width="20"
+                height="16">
+                <path d="M9 7V1.5L14.5 7H9zM2 0C.9 0 0 .9 0 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V6l-6-6H2z" />
+            </svg>
+            Exported form in JSON format
+        </a>
+    </li>
+</ul>
+{% endset -%}
+
+{%- set fileUploadHtml %}
+<ul class="moj-timeline__documents">
+    <li class="moj-timeline__document-item">
+        <a class="govuk-link" href="#">
+            <svg class="moj-timeline__document-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 20" width="20"
+                height="16">
+                <path d="M9 7V1.5L14.5 7H9zM2 0C.9 0 0 .9 0 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V6l-6-6H2z" />
+            </svg>
+            Uploaded file: myform.JSON
+        </a>
+    </li>
+</ul>
+{% endset -%}
+
+{%- set formPublishedHtml %}
+<span style="display: flex; align-items: center;">
+    <span aria-hidden="true" style="font-size: 1.3em; margin-right: 8px; line-height: 1;">🎉</span>
+    <span>Made the form live.</span>
+</span>
+{% endset -%}

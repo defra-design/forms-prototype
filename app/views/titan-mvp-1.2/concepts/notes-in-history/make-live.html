@@ -1,6 +1,7 @@
 {% extends "layouts/main.html" %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
+{% from "govuk/components/details/macro.njk" import govukDetails %}
 
 {% set pageName = "Make draft live - Employee Onboarding" %}
 {% set activeNav = "overview" %}
@@ -40,7 +41,13 @@
     </p>
 
     <form method="post" action="/titan-mvp-1.2/concepts/notes-in-history/make-live" novalidate>
-      {% include "titan-mvp-1.2/concepts/notes-in-history/includes/_reason-field.njk" %}
+      {% set noteDetailsHtml %}
+        {% include "titan-mvp-1.2/concepts/notes-in-history/includes/_reason-field.njk" %}
+      {% endset %}
+      {{ govukDetails({
+        summaryText: "Add a note about this change (optional)",
+        html: noteDetailsHtml
+      }) }}
 
       <div class="govuk-button-group">
         {{ govukButton({

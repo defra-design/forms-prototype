@@ -172,17 +172,27 @@ module.exports = function registerCopyRoutes(router) {
       currentName,
       ...((formData.formCopyHistory || []).map((item) => item.formName)),
     ];
+    const source =
+      req.query.source === "live" || req.query.source === "draft"
+        ? req.query.source
+        : "draft";
 
     res.render("titan-mvp-1.2/form-editor/copy/form.html", {
       form: { name: currentName },
       suggestedName: uniqueCopyLabel(currentName, existingNames, "Form name"),
       pageCount: (formData.formPages || []).length,
+      source,
+      sourceLabel: source === "live" ? "live" : "draft",
     });
   });
 
   router.post("/titan-mvp-1.2/form-overview/copy-form", function (req, res) {
     const formData = req.session.data || {};
     const nextId = createIdFactory();
+    const source =
+      req.body.source === "live" || req.body.source === "draft"
+        ? req.body.source
+        : "draft";
     const newFormName = (
       Array.isArray(req.body.formName)
         ? req.body.formName[0]
@@ -203,15 +213,16 @@ module.exports = function registerCopyRoutes(router) {
       formName: formData.formName,
       formId: formData.formId || formData.formDetails?.id,
       copiedAt: new Date().toISOString(),
+      source,
     });
 
     const cloned = cloneFormSessionSlice(formData, nextId, newFormName);
 
     Object.assign(req.session.data, cloned);
-    req.session.data.copySuccessMessage = `Form copied as “${newFormName}”`;
+    req.session.data.copySuccessMessage = `${
+      source === "live" ? "Live" : "Draft"
+    } form copied as “${newFormName}”`;
 
-    res.redirect(
-      "/titan-mvp-1.2/form-overview/simplified/index-tabs?copied=form"
-    );
+    res.redirect("/titan-mvp-1.2/form-overview/copy-poc?copied=form");
   });
 };

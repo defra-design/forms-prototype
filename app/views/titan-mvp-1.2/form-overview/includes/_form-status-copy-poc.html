@@ -1,0 +1,208 @@
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+
+{% set statusText = form.status.text if form.status and form.status.text else "Draft" %}
+
+{# Draft only #}
+{% if statusText === "Draft" %}
+<section class="govuk-summary-card">
+    <div class="govuk-summary-card__title-wrapper">
+        <h2 class="govuk-summary-card__title">
+            <strong class="govuk-tag govuk-tag--orange">Draft</strong>
+        </h2>
+        <ul class="govuk-summary-card__actions">
+            <li class="govuk-summary-card__action">
+                <a class="govuk-link" href="/titan-mvp-1.2/form-overview/copy-form?source=draft">
+                    Copy<span class="govuk-visually-hidden"> draft form</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+    <div class="govuk-summary-card__content">
+        <dl class="govuk-summary-list">
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">
+                    {{ commonTerms.form_editor.overview.sections.form_status.updated }}
+                </dt>
+                <dd class="govuk-summary-list__value">
+                    {{ form.updatedAt | date("DD MMM YYYY") }} by {{ form.updatedBy }}
+                </dd>
+            </div>
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">
+                    {{ commonTerms.form_editor.overview.sections.form_status.created }}
+                </dt>
+                <dd class="govuk-summary-list__value">
+                    {{ form.createdAt | date("DD MMM YYYY") }} by {{ form.createdBy }}
+                </dd>
+            </div>
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">
+                    {{ commonTerms.form_editor.overview.sections.form_status.preview_link }}
+                </dt>
+                <dd class="govuk-summary-list__value" style="padding-right:0!important;">
+                    <a href="{{ form.previewUrl }}" class="govuk-link" rel="noreferrer noopener" target="_blank">{{
+                        form.previewUrl }} (opens in new tab)</a>
+                </dd>
+            </div>
+        </dl>
+    </div>
+</section>
+
+{# Live only #}
+{% elif statusText === "Live" %}
+<section class="govuk-summary-card">
+    <div class="govuk-summary-card__title-wrapper">
+        <h2 class="govuk-summary-card__title">
+            <strong class="govuk-tag govuk-tag--green">Live</strong>
+        </h2>
+        <ul class="govuk-summary-card__actions">
+            <li class="govuk-summary-card__action">
+                <a class="govuk-link" href="/titan-mvp-1.2/form-overview/copy-form?source=live">
+                    Copy<span class="govuk-visually-hidden"> live form</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+    <div class="govuk-summary-card__content">
+        <dl class="govuk-summary-list">
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">
+                    {{ commonTerms.form_editor.overview.sections.form_status.made_live }}
+                </dt>
+                <dd class="govuk-summary-list__value">
+                    {{ form.publishedAt | date("DD MMM YYYY") }} by {{ form.publishedBy }}
+                </dd>
+            </div>
+            {% if form.liveUpdatedAt or form.lastUpdatedAt %}
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">
+                    {{ commonTerms.form_editor.overview.sections.form_status.last_updated }}
+                </dt>
+                <dd class="govuk-summary-list__value">
+                    {{ (form.liveUpdatedAt or form.lastUpdatedAt) | date("DD MMM YYYY") }} by {{ form.liveUpdatedBy or form.lastUpdatedBy or form.updatedBy }}
+                </dd>
+            </div>
+            {% endif %}
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">
+                    {{ commonTerms.form_editor.overview.sections.form_status.preview_link }}
+                </dt>
+                <dd class="govuk-summary-list__value" style="padding-right:0!important;">
+                    <a href="{{ form.previewUrl }}" class="govuk-link" rel="noreferrer noopener" target="_blank">{{
+                        form.previewUrl }} (opens in new tab)</a>
+                </dd>
+            </div>
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">
+                    {{ commonTerms.form_editor.overview.sections.form_status.live_link }}
+                </dt>
+                <dd class="govuk-summary-list__value" style="padding-right:0!important;">
+                    <a href="{{ form.liveUrl }}" class="govuk-link" rel="noreferrer noopener" target="_blank">{{
+                        form.liveUrl }} (opens in new tab)</a>
+                </dd>
+            </div>
+        </dl>
+    </div>
+</section>
+
+{# Draft and Live #}
+{% elif statusText === "Draft-Live" or statusText === "Live-Draft" %}
+<section class="govuk-summary-card">
+    <div class="govuk-summary-card__title-wrapper">
+        <h2 class="govuk-summary-card__title">
+            <strong class="govuk-tag govuk-tag--orange">Draft</strong>
+        </h2>
+        <ul class="govuk-summary-card__actions">
+            <li class="govuk-summary-card__action">
+                <a class="govuk-link" href="/titan-mvp-1.2/form-overview/copy-form?source=draft">
+                    Copy<span class="govuk-visually-hidden"> draft form</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+    <div class="govuk-summary-card__content">
+        <dl class="govuk-summary-list">
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">
+                    {{ commonTerms.form_editor.overview.sections.form_status.updated }}
+                </dt>
+                <dd class="govuk-summary-list__value">
+                    {{ form.updatedAt | date("DD MMM YYYY") }} by {{ form.updatedBy }}
+                </dd>
+            </div>
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">
+                    {{ commonTerms.form_editor.overview.sections.form_status.created }}
+                </dt>
+                <dd class="govuk-summary-list__value">
+                    {{ form.draftCreatedAt | date("DD MMM YYYY") }} by {{ form.draftCreatedBy }}
+                </dd>
+            </div>
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">
+                    {{ commonTerms.form_editor.overview.sections.form_status.preview_link }}
+                </dt>
+                <dd class="govuk-summary-list__value" style="padding-right:0!important;">
+                    <a href="{{ form.previewUrl }}" class="govuk-link" rel="noreferrer noopener" target="_blank">{{
+                        form.previewUrl }} (opens in new tab)</a>
+                </dd>
+            </div>
+        </dl>
+    </div>
+</section>
+
+<section class="govuk-summary-card govuk-!-margin-top-6">
+    <div class="govuk-summary-card__title-wrapper">
+        <h2 class="govuk-summary-card__title">
+            <strong class="govuk-tag govuk-tag--green">Live</strong>
+        </h2>
+        <ul class="govuk-summary-card__actions">
+            <li class="govuk-summary-card__action">
+                <a class="govuk-link" href="/titan-mvp-1.2/form-overview/copy-form?source=live">
+                    Copy<span class="govuk-visually-hidden"> live form</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+    <div class="govuk-summary-card__content">
+        <dl class="govuk-summary-list">
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">
+                    {{ commonTerms.form_editor.overview.sections.form_status.made_live }}
+                </dt>
+                <dd class="govuk-summary-list__value">
+                    {{ form.publishedAt | date("DD MMM YYYY") }} by {{ form.publishedBy }}
+                </dd>
+            </div>
+            {% if form.liveUpdatedAt or form.lastUpdatedAt %}
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">
+                    {{ commonTerms.form_editor.overview.sections.form_status.last_updated }}
+                </dt>
+                <dd class="govuk-summary-list__value">
+                    {{ (form.liveUpdatedAt or form.lastUpdatedAt) | date("DD MMM YYYY") }} by {{ form.liveUpdatedBy or form.lastUpdatedBy or form.updatedBy }}
+                </dd>
+            </div>
+            {% endif %}
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">
+                    {{ commonTerms.form_editor.overview.sections.form_status.preview_link }}
+                </dt>
+                <dd class="govuk-summary-list__value" style="padding-right:0!important;">
+                    <a href="{{ form.livePreviewUrl or form.previewUrl }}" class="govuk-link" rel="noreferrer noopener" target="_blank">{{
+                        form.livePreviewUrl or form.previewUrl }} (opens in new tab)</a>
+                </dd>
+            </div>
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">
+                    {{ commonTerms.form_editor.overview.sections.form_status.live_link }}
+                </dt>
+                <dd class="govuk-summary-list__value" style="padding-right:0!important;">
+                    <a href="{{ form.liveUrl }}" class="govuk-link" rel="noreferrer noopener" target="_blank">{{
+                        form.liveUrl }} (opens in new tab)</a>
+                </dd>
+            </div>
+        </dl>
+    </div>
+</section>
+{% endif %}

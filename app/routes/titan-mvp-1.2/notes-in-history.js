@@ -39,6 +39,17 @@ function eventHtml(text, note) {
 function seedEvents() {
   return [
     {
+      id: "seed-meme",
+      label: "Internal note added",
+      html:
+        '<p class="govuk-body">Someone asked for the change note. This was the reply.</p>' +
+        '<img src="/public/images/concepts/form-history-meme.jpg" alt="Meme: Form history. When someone asks why you made it live. A person shrugs." style="max-width: 100%; height: auto; border: 1px solid #b1b4b6;">',
+      text: null,
+      note: null,
+      timestamp: "2024-05-08T16:45:00.000Z",
+      byline: "Chris Smith",
+    },
+    {
       id: "seed-draft-edited",
       label: "Draft edited",
       text: "Edited the draft 3 times between 3:30pm and 4:30pm.",
@@ -106,11 +117,15 @@ function toTimelineItem(event) {
     datetime: { timestamp: event.timestamp, type: "datetime" },
     byline: { text: event.byline },
   };
-  const html = eventHtml(event.text, event.note);
-  if (html) {
-    item.html = html;
-  } else if (event.text) {
-    item.text = event.text;
+  if (event.html) {
+    item.html = event.html;
+  } else {
+    const html = eventHtml(event.text, event.note);
+    if (html) {
+      item.html = html;
+    } else if (event.text) {
+      item.text = event.text;
+    }
   }
   return item;
 }
