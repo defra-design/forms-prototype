@@ -55,6 +55,15 @@ activeLinkId: "nav-overview"
         <h1 class="govuk-heading-l--inverse x-govuk-masthead__title">
             {{ form.name }}
         </h1>
+
+        {% if not form.status or form.status.text === "Draft" or form.status.text === "Draft-Live" or form.status.text === "Live-Draft" %}
+        <div class="govuk-button-group">
+            <a href="/titan-mvp-1.2/form-editor/listing" role="button" draggable="false"
+                class="govuk-button govuk-button--inverse" data-module="govuk-button">
+                Edit draft
+            </a>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
@@ -91,19 +100,12 @@ activeLinkId: "nav-overview"
             <h2 class="govuk-heading-m">{{ commonTerms.form_editor.overview.manage_form.title }}</h2>
 
             {% if not form.status or form.status.text === "Draft" %}
-            <a href="/titan-mvp-1.2/form-editor/listing"
-                class="gem-c-button govuk-button gem-c-button-publishing--secondary-quiet"
-                style="width: 100%; margin-bottom: 15px;">{{ commonTerms.form_editor.overview.manage_form.edit_draft }}</a>
-
             <a href="/titan-mvp-1.2/form-overview/manage-form/make-draft-live/passed-validation">
                 <button type="button" class="govuk-button" data-module="govuk-button"
                     style="width: 100%; margin-bottom: 15px;">
                     {{ commonTerms.form_editor.overview.manage_form.make_live }}
                 </button>
             </a>
-
-            <a href="/titan-mvp-1.2/form-overview/manage-form/delete-draft" class="govuk-link">{{
-                commonTerms.form_editor.overview.manage_form.delete_draft }}</a>
             {% endif %}
 
             {% if form.status.text === "Live" %}
@@ -114,19 +116,12 @@ activeLinkId: "nav-overview"
                 </button>
             </a>
 
-            <a href="/titan-mvp-1.2/form-overview/manage-form/take-offline/confirm">
-                <button type="button" class="govuk-button govuk-button--secondary" data-module="govuk-button"
-                    style="width: 100%; margin-bottom: 15px;">
-                    {{ commonTerms.form_editor.overview.manage_form.take_offline }}
-                </button>
-            </a>
+            <a href="/titan-mvp-1.2/form-overview/manage-form/take-offline/confirm"
+                class="gem-c-button govuk-button gem-c-button-publishing--secondary-quiet"
+                style="width: 100%; margin-bottom: 15px;">{{ commonTerms.form_editor.overview.manage_form.take_offline }}</a>
             {% endif %}
 
             {% if form.status.text === "Draft-Live" %}
-            <a href="/titan-mvp-1.2/form-editor/listing"
-                class="gem-c-button govuk-button gem-c-button-publishing--secondary-quiet"
-                style="width: 100%; margin-bottom: 15px;">{{ commonTerms.form_editor.overview.manage_form.edit_draft }}</a>
-
             <a href="/titan-mvp-1.2/form-overview/manage-form/make-draft-live/passed-validation">
                 <button type="button" class="govuk-button" data-module="govuk-button"
                     style="width: 100%; margin-bottom: 15px;">
@@ -134,15 +129,9 @@ activeLinkId: "nav-overview"
                 </button>
             </a>
 
-            <a href="/titan-mvp-1.2/form-overview/manage-form/take-offline/confirm">
-                <button type="button" class="govuk-button govuk-button--secondary" data-module="govuk-button"
-                    style="width: 100%; margin-bottom: 15px;">
-                    {{ commonTerms.form_editor.overview.manage_form.take_offline }}
-                </button>
-            </a>
-
-            <a href="/titan-mvp-1.2/form-overview/manage-form/delete-draft" class="govuk-link">{{
-                commonTerms.form_editor.overview.manage_form.delete_draft }}</a>
+            <a href="/titan-mvp-1.2/form-overview/manage-form/take-offline/confirm"
+                class="gem-c-button govuk-button gem-c-button-publishing--secondary-quiet"
+                style="width: 100%; margin-bottom: 15px;">{{ commonTerms.form_editor.overview.manage_form.take_offline }}</a>
             {% endif %}
         </div>
 

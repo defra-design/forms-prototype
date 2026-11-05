@@ -6190,9 +6190,15 @@ const renderFormOverviewCopyPoc = (req, res) => {
     "live-draft": "Draft-Live",
   }[String(req.query.status || "").toLowerCase()];
 
-  // PoC defaults to Draft-Live so both summary cards are visible
-  const status = statusOverride || "Draft-Live";
+  if (statusOverride) {
+    req.session.data.copyPocViewStatus = statusOverride;
+  }
+
+  // After a copy, show draft-only. Otherwise default to Draft-Live so both cards are visible for the PoC.
+  const status =
+    statusOverride || formData.copyPocViewStatus || "Draft-Live";
   const statusColor = statusColorMap[status] || "grey";
+  const isDraftOnly = status === "Draft";
 
   const urlFriendlyName = (formData.formName || "untitled-form")
     .toLowerCase()
@@ -6200,12 +6206,14 @@ const renderFormOverviewCopyPoc = (req, res) => {
     .replace(/(^-|-$)/g, "");
 
   const previewUrl = `https://forms-runner.prototype.cdp-int.defra.cloud/preview/draft/${urlFriendlyName}`;
-  const liveUrl =
-    formData.formDetails?.liveUrl ||
-    `https://forms-runner.prototype.cdp-int.defra.cloud/${urlFriendlyName}`;
-  const livePreviewUrl =
-    formData.formDetails?.livePreviewUrl ||
-    `https://forms-runner.prototype.cdp-int.defra.cloud/preview/live/${urlFriendlyName}`;
+  const liveUrl = isDraftOnly
+    ? null
+    : formData.formDetails?.liveUrl ||
+      `https://forms-runner.prototype.cdp-int.defra.cloud/${urlFriendlyName}`;
+  const livePreviewUrl = isDraftOnly
+    ? null
+    : formData.formDetails?.livePreviewUrl ||
+      `https://forms-runner.prototype.cdp-int.defra.cloud/preview/live/${urlFriendlyName}`;
 
   const form = {
     name: formData.formName || "Form name",
@@ -6235,16 +6243,35 @@ const renderFormOverviewCopyPoc = (req, res) => {
     termsAndConditions: formData.formDetails?.termsAndConditions,
     createdBy: formData.formDetails?.createdBy || "Chris Smith",
     updatedBy: formData.formDetails?.updatedBy || "Chris Smith",
-    publishedAt: formData.formDetails?.publishedAt || "2024-05-08T14:45:00.000Z",
-    publishedBy: formData.formDetails?.publishedBy || "Emily Wong",
-    liveUpdatedAt: formData.formDetails?.liveUpdatedAt || "2024-05-09T09:30:00.000Z",
-    liveUpdatedBy: formData.formDetails?.liveUpdatedBy || "Alex Patel",
-    lastUpdatedAt: formData.formDetails?.lastUpdatedAt || "2024-05-09T09:30:00.000Z",
-    lastUpdatedBy: formData.formDetails?.lastUpdatedBy || "Alex Patel",
-    draftCreatedAt: formData.formDetails?.draftCreatedAt || "2024-05-08T15:00:00.000Z",
-    draftCreatedBy: formData.formDetails?.draftCreatedBy || "Chris Smith",
+    publishedAt: isDraftOnly
+      ? null
+      : formData.formDetails?.publishedAt || "2024-05-08T14:45:00.000Z",
+    publishedBy: isDraftOnly
+      ? null
+      : formData.formDetails?.publishedBy || "Emily Wong",
+    liveUpdatedAt: isDraftOnly
+      ? null
+      : formData.formDetails?.liveUpdatedAt || "2024-05-09T09:30:00.000Z",
+    liveUpdatedBy: isDraftOnly
+      ? null
+      : formData.formDetails?.liveUpdatedBy || "Alex Patel",
+    lastUpdatedAt: isDraftOnly
+      ? null
+      : formData.formDetails?.lastUpdatedAt || "2024-05-09T09:30:00.000Z",
+    lastUpdatedBy: isDraftOnly
+      ? null
+      : formData.formDetails?.lastUpdatedBy || "Alex Patel",
+    draftCreatedAt:
+      formData.formDetails?.draftCreatedAt ||
+      formData.formDetails?.createdAt ||
+      "2024-05-08T15:00:00.000Z",
+    draftCreatedBy:
+      formData.formDetails?.draftCreatedBy ||
+      formData.formDetails?.createdBy ||
+      "Chris Smith",
     liveUrl: liveUrl,
     livePreviewUrl: livePreviewUrl,
+    copiedFrom: formData.formDetails?.copiedFrom || null,
   };
 
   const copySuccessMessage = req.session.data.copySuccessMessage || null;

@@ -1,0 +1,89 @@
+{% extends "layouts/main.html" %}
+
+{% from "components/service-header/macro.njk" import serviceHeader %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+
+{% set pageName = "Copy questions from another page" %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+accountName: "Chris Smith",
+homepageLink: "/",
+signOutLink: "/titan-mvp-1.2/onboarding/sign-out-confirmation",
+navigationItems: [
+{ href: "/titan-mvp-1.2/library", text: "Forms library", id: "nav-library" },
+{ href: "/titan-mvp-1.2/form-overview/index", text: "Overview", id: "nav-overview" },
+{ href: "/titan-mvp-1.2/form-editor/listing", text: "Editor", id: "nav-editor" }
+],
+activeLinkId: "nav-editor"
+}) }}
+{% endblock %}
+
+{% block beforeContent %}
+{{ govukBackLink({
+  text: "Back to page " + pageNumber + " overview",
+  href: "/titan-mvp-1.2/page-overview"
+}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% if errorMessage == "page" %}
+    {{ govukErrorSummary({
+      titleText: "There is a problem",
+      errorList: [
+        {
+          text: "Select a page to copy questions from",
+          href: "#sourcePageId"
+        }
+      ]
+    }) }}
+    {% endif %}
+
+    <span class="govuk-caption-xl">Page {{ pageNumber }}: {{ pageHeading }}</span>
+    <h1 class="govuk-heading-xl">Copy questions from another page</h1>
+
+    <p class="govuk-body">
+      Questions are copied to the bottom of the current page.
+    </p>
+
+    {% if pageItems.length %}
+    <form action="/titan-mvp-1.2/form-editor/copy/questions-from-page/select" method="POST" novalidate>
+      {{ govukRadios({
+        name: "sourcePageId",
+        fieldset: {
+          legend: {
+            text: "Choose a page",
+            classes: "govuk-fieldset__legend--m"
+          }
+        },
+        errorMessage: errorMessage == "page" and {
+          text: "Select a page to copy questions from"
+        },
+        items: pageItems
+      }) }}
+
+      <div class="govuk-button-group">
+        {{ govukButton({
+          text: "Continue"
+        }) }}
+        <a class="govuk-link" href="/titan-mvp-1.2/page-overview">Cancel</a>
+      </div>
+    </form>
+    {% else %}
+    <p class="govuk-body">
+      There are no other pages with questions to copy from.
+    </p>
+    <p class="govuk-body">
+      <a class="govuk-link" href="/titan-mvp-1.2/page-overview">Back to page overview</a>
+    </p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

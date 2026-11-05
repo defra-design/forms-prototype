@@ -1,0 +1,120 @@
+{% extends "layouts/main.html" %}
+
+{% from "components/service-header/macro.njk" import serviceHeader %}
+{% from "govuk/components/checkboxes/macro.njk" import govukCheckboxes %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
+
+{% set pageName = "Choose questions to copy" %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+accountName: "Chris Smith",
+homepageLink: "/",
+signOutLink: "/titan-mvp-1.2/onboarding/sign-out-confirmation",
+navigationItems: [
+{ href: "/titan-mvp-1.2/library", text: "Forms library", id: "nav-library" },
+{ href: "/titan-mvp-1.2/form-overview/index", text: "Overview", id: "nav-overview" },
+{ href: "/titan-mvp-1.2/form-editor/listing", text: "Editor", id: "nav-editor" }
+],
+activeLinkId: "nav-editor"
+}) }}
+{% endblock %}
+
+{% block beforeContent %}
+{{ govukBackLink({
+  text: "Back to choose a page",
+  href: "/titan-mvp-1.2/form-editor/copy/questions-from-page"
+}) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% if errorMessage == "questions" %}
+    {{ govukErrorSummary({
+      titleText: "There is a problem",
+      errorList: [
+        {
+          text: "Select at least one question to copy",
+          href: "#questionIds"
+        }
+      ]
+    }) }}
+    {% endif %}
+
+    <span class="govuk-caption-xl">Page {{ pageNumber }}: {{ pageHeading }}</span>
+    <h1 class="govuk-heading-xl">Choose questions to copy</h1>
+
+    <p class="govuk-body">
+      From page {{ sourcePageNumber }}: {{ sourcePageHeading }}.
+      Questions are copied to the bottom of the current page.
+    </p>
+
+    <form action="/titan-mvp-1.2/form-editor/copy/questions-from-page" method="POST" novalidate>
+      <input type="hidden" name="sourcePageId" value="{{ sourcePageId }}">
+
+      {{ govukCheckboxes({
+        name: "questionIds",
+        fieldset: {
+          legend: {
+            text: "Choose questions to copy",
+            classes: "govuk-fieldset__legend--m"
+          }
+        },
+        hint: {
+          text: "Select one or more questions."
+        },
+        errorMessage: errorMessage == "questions" and {
+          text: "Select at least one question to copy"
+        },
+        items: questionItems
+      }) }}
+
+      <div id="conditions-warning" class="govuk-!-display-none" hidden>
+        {{ govukWarningText({
+          text: "Any conditions associated with these questions will not be copied.",
+          iconFallbackText: "Warning"
+        }) }}
+      </div>
+
+      <div class="govuk-button-group">
+        {{ govukButton({
+          text: "Copy questions"
+        }) }}
+        <a class="govuk-link" href="/titan-mvp-1.2/page-overview">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var warning = document.getElementById("conditions-warning");
+    if (!warning) {
+      return;
+    }
+
+    function updateWarning() {
+      var checkedWithConditions = document.querySelectorAll(
+        'input[name="questionIds"]:checked[data-has-conditions="true"]'
+      );
+      var show = checkedWithConditions.length > 0;
+      warning.hidden = !show;
+      warning.classList.toggle("govuk-!-display-none", !show);
+    }
+
+    document.addEventListener("change", function (event) {
+      if (event.target && event.target.name === "questionIds") {
+        updateWarning();
+      }
+    });
+
+    updateWarning();
+  })();
+</script>
+{% endblock %}

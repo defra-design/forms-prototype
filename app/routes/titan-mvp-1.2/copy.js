@@ -9,6 +9,7 @@ const {
   clonePage,
   cloneFormSessionSlice,
   uniqueCopyLabel,
+  copyStem,
 } = require("../../lib/titan-mvp-1.2/clone-form");
 
 function findPageIndex(formPages, pageId) {
@@ -109,6 +110,252 @@ module.exports = function registerCopyRoutes(router) {
     res.redirect("/titan-mvp-1.2/page-overview?copied=question");
   });
 
+  // ---- Copy questions from another page ------------------------------------
+
+  function questionHasAssociatedConditions(question, page, formConditions) {
+    if (
+      question &&
+      Array.isArray(question.conditions) &&
+      question.conditions.length > 0
+    ) {
+      return true;
+    }
+
+    const questionId = String(question && question.questionId);
+    const questionLabel = String(
+      (question && question.label) || ""
+    ).toLowerCase();
+
+    function rulesReferenceQuestion(rules) {
+      return (rules || []).some(function (rule) {
+        if (rule.questionId && String(rule.questionId) === questionId) {
+          return true;
+        }
+        if (
+          rule.questionText &&
+          String(rule.questionText).toLowerCase() === questionLabel
+        ) {
+          return true;
+        }
+        return false;
+      });
+    }
+
+    if (
+      page &&
+      Array.isArray(page.conditions) &&
+      page.conditions.some(function (condition) {
+        return rulesReferenceQuestion(condition.rules);
+      })
+    ) {
+      return true;
+    }
+
+    return (formConditions || []).some(function (condition) {
+      return rulesReferenceQuestion(condition.rules);
+    });
+  }
+
+  router.get(
+    "/titan-mvp-1.2/form-editor/copy/questions-from-page",
+    function (req, res) {
+      const formData = req.session.data || {};
+      const formPages = formData.formPages || [];
+      const currentPageIndex = formData.currentPageIndex || 0;
+      const currentPage = formPages[currentPageIndex];
+
+      if (!currentPage) {
+        return res.redirect("/titan-mvp-1.2/form-editor/listing");
+      }
+
+      const pageItems = formPages
+        .map(function (page, index) {
+          if (index === currentPageIndex) {
+            return null;
+          }
+          if (!page.questions || page.questions.length === 0) {
+            return null;
+          }
+          return {
+            value: String(page.pageId),
+            text:
+              "Page " +
+              (index + 1) +
+              ": " +
+              pageLabel(page, index + 1),
+            hint: {
+              text:
+                page.questions.length === 1
+                  ? "1 question"
+                  : page.questions.length + " questions",
+            },
+          };
+        })
+        .filter(Boolean);
+
+      res.render("titan-mvp-1.2/form-editor/copy/questions-from-page.html", {
+        form: { name: formData.formName || "Form name" },
+        pageNumber: currentPageIndex + 1,
+        pageHeading: pageLabel(currentPage, currentPageIndex + 1),
+        pageItems,
+        errorMessage: req.query.error || null,
+      });
+    }
+  );
+
+  router.get(
+    "/titan-mvp-1.2/form-editor/copy/questions-from-page/select",
+    function (req, res) {
+      const formData = req.session.data || {};
+      const formPages = formData.formPages || [];
+      const currentPageIndex = formData.currentPageIndex || 0;
+      const currentPage = formPages[currentPageIndex];
+      const sourcePageId = req.query.sourcePageId;
+      const sourcePageIndex = findPageIndex(formPages, sourcePageId);
+      const sourcePage =
+        sourcePageIndex === -1 ? null : formPages[sourcePageIndex];
+
+      if (
+        !currentPage ||
+        !sourcePage ||
+        sourcePageIndex === currentPageIndex ||
+        !sourcePage.questions ||
+        sourcePage.questions.length === 0
+      ) {
+        return res.redirect(
+          "/titan-mvp-1.2/form-editor/copy/questions-from-page"
+        );
+      }
+
+      const formConditions = formData.conditions || [];
+      const questionItems = sourcePage.questions.map(function (question, index) {
+        return {
+          value: String(question.questionId),
+          text: question.label || "Untitled question",
+          hint: {
+            text: "Question " + (index + 1),
+          },
+          attributes: {
+            "data-has-conditions": questionHasAssociatedConditions(
+              question,
+              sourcePage,
+              formConditions
+            )
+              ? "true"
+              : "false",
+          },
+        };
+      });
+
+      res.render(
+        "titan-mvp-1.2/form-editor/copy/questions-from-page-select.html",
+        {
+          form: { name: formData.formName || "Form name" },
+          pageNumber: currentPageIndex + 1,
+          pageHeading: pageLabel(currentPage, currentPageIndex + 1),
+          sourcePageId: sourcePage.pageId,
+          sourcePageNumber: sourcePageIndex + 1,
+          sourcePageHeading: pageLabel(sourcePage, sourcePageIndex + 1),
+          questionItems,
+          errorMessage: req.query.error || null,
+        }
+      );
+    }
+  );
+
+  router.post(
+    "/titan-mvp-1.2/form-editor/copy/questions-from-page/select",
+    function (req, res) {
+      const sourcePageId = Array.isArray(req.body.sourcePageId)
+        ? req.body.sourcePageId[0]
+        : req.body.sourcePageId;
+
+      if (!sourcePageId) {
+        return res.redirect(
+          "/titan-mvp-1.2/form-editor/copy/questions-from-page?error=page"
+        );
+      }
+
+      res.redirect(
+        "/titan-mvp-1.2/form-editor/copy/questions-from-page/select?sourcePageId=" +
+          encodeURIComponent(sourcePageId)
+      );
+    }
+  );
+
+  router.post(
+    "/titan-mvp-1.2/form-editor/copy/questions-from-page",
+    function (req, res) {
+      const formData = req.session.data || {};
+      const formPages = formData.formPages || [];
+      const currentPageIndex = formData.currentPageIndex || 0;
+      const currentPage = formPages[currentPageIndex];
+      const sourcePageId = Array.isArray(req.body.sourcePageId)
+        ? req.body.sourcePageId[0]
+        : req.body.sourcePageId;
+      const sourcePageIndex = findPageIndex(formPages, sourcePageId);
+      const sourcePage =
+        sourcePageIndex === -1 ? null : formPages[sourcePageIndex];
+
+      let selectedIds = req.body.questionIds || [];
+      if (!Array.isArray(selectedIds)) {
+        selectedIds = selectedIds ? [selectedIds] : [];
+      }
+      selectedIds = selectedIds.map(String);
+
+      if (
+        !currentPage ||
+        !sourcePage ||
+        sourcePageIndex === currentPageIndex
+      ) {
+        return res.redirect(
+          "/titan-mvp-1.2/form-editor/copy/questions-from-page"
+        );
+      }
+
+      if (selectedIds.length === 0) {
+        return res.redirect(
+          "/titan-mvp-1.2/form-editor/copy/questions-from-page/select?sourcePageId=" +
+            encodeURIComponent(sourcePageId) +
+            "&error=questions"
+        );
+      }
+
+      currentPage.questions = currentPage.questions || [];
+      const nextId = createIdFactory();
+
+      // Keep the order the questions appear on the source page
+      const questionsToCopy = (sourcePage.questions || []).filter(function (
+        question
+      ) {
+        return selectedIds.indexOf(String(question.questionId)) !== -1;
+      });
+
+      const clonedQuestions = questionsToCopy.map(function (question) {
+        const copiedQuestion = cloneQuestion(question, nextId);
+        // PoC: do not add or keep a “(copy)” suffix on the label
+        copiedQuestion.label = copyStem(
+          question.label,
+          "Untitled question"
+        );
+        if (Array.isArray(copiedQuestion.conditions)) {
+          delete copiedQuestion.conditions;
+        }
+        return copiedQuestion;
+      });
+
+      // Always add copied questions at the bottom of the current page
+      currentPage.questions = currentPage.questions.concat(clonedQuestions);
+
+      req.session.data.formPages = formPages;
+      req.session.data.currentPageIndex = currentPageIndex;
+      req.session.data.currentQuestionIndex = currentPage.questions.length - 1;
+      req.session.data.copyQuestionsSuccessCount = clonedQuestions.length;
+
+      res.redirect("/titan-mvp-1.2/page-overview?copied=questions-from-page");
+    }
+  );
+
   // ---- Copy page -----------------------------------------------------------
 
   router.get(
@@ -207,7 +454,7 @@ module.exports = function registerCopyRoutes(router) {
           )
     ).trim();
 
-    // Keep a lightweight snapshot of the previous draft for this prototype session
+    // Keep a lightweight snapshot of the previous form for this prototype session
     req.session.data.formCopyHistory = req.session.data.formCopyHistory || [];
     req.session.data.formCopyHistory.push({
       formName: formData.formName,
@@ -216,13 +463,20 @@ module.exports = function registerCopyRoutes(router) {
       source,
     });
 
-    const cloned = cloneFormSessionSlice(formData, nextId, newFormName);
+    const cloned = cloneFormSessionSlice(formData, nextId, newFormName, {
+      copiedFrom: source,
+    });
 
     Object.assign(req.session.data, cloned);
-    req.session.data.copySuccessMessage = `${
-      source === "live" ? "Live" : "Draft"
-    } form copied as “${newFormName}”`;
 
-    res.redirect("/titan-mvp-1.2/form-overview/copy-poc?copied=form");
+    if (source === "live") {
+      req.session.data.copySuccessMessage = `Live form copied as “${newFormName}”. The copy is a draft.`;
+    } else {
+      req.session.data.copySuccessMessage = `Draft copied as “${newFormName}”. Only the draft was copied.`;
+    }
+
+    res.redirect(
+      "/titan-mvp-1.2/form-overview/copy-poc?copied=form&status=draft"
+    );
   });
 };

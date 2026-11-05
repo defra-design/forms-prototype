@@ -111,12 +111,17 @@ function clonePage(page, nextId, options) {
   return copy;
 }
 
-function cloneFormSessionSlice(sessionData, nextId, newFormName) {
+function cloneFormSessionSlice(sessionData, nextId, newFormName, options) {
   const source = sessionData || {};
+  const copiedFrom = options && options.copiedFrom;
+  const now = new Date().toISOString();
   const formPages = Array.isArray(source.formPages)
     ? source.formPages.map((page) => clonePage(page, nextId))
     : [];
 
+  const previousDetails = source.formDetails || {};
+
+  // A copy is always a new draft — never inherits live status or live links
   return {
     formPages,
     conditions: deepClone(source.conditions || []),
@@ -125,17 +130,31 @@ function cloneFormSessionSlice(sessionData, nextId, newFormName) {
     formName: newFormName,
     formId: `FORM-${nextId()}`,
     formDetails: {
-      ...(source.formDetails || {}),
+      organisation: previousDetails.organisation,
+      teamName: previousDetails.teamName,
+      email: previousDetails.email,
+      support: deepClone(previousDetails.support || {}),
+      nextSteps: previousDetails.nextSteps,
+      privacyNotice: previousDetails.privacyNotice,
+      notificationEmail: previousDetails.notificationEmail,
+      termsAndConditions: previousDetails.termsAndConditions,
       name: newFormName,
       id: `FORM-${nextId()}`,
       status: "Draft",
-      lastUpdated: new Date().toISOString(),
+      createdAt: now,
+      createdBy: previousDetails.createdBy || "Chris Smith",
+      lastUpdated: now,
+      updatedBy: previousDetails.updatedBy || "Chris Smith",
+      draftCreatedAt: now,
+      draftCreatedBy: previousDetails.updatedBy || "Chris Smith",
+      copiedFrom: copiedFrom || null,
     },
     organisationName: source.organisationName,
     teamName: source.teamName,
     email: source.email,
     currentPageIndex: 0,
     currentQuestionIndex: 0,
+    copyPocViewStatus: "Draft",
   };
 }
 

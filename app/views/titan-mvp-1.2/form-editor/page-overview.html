@@ -108,6 +108,15 @@ navigationItems: [
                           }) }}
                         </div>
                         {% endif %}
+                        {% if copied == "questions-from-page" %}
+                        <div id="copy-success-notification">
+                          {{ govukNotificationBanner({
+                            type: "success",
+                            html: "<p class=\"govuk-notification-banner__heading\">Questions copied</p><p class=\"govuk-body\">The questions have been added to the bottom of this page.</p>",
+                            classes: "govuk-!-margin-top-4 govuk-!-margin-bottom-4"
+                          }) }}
+                        </div>
+                        {% endif %}
                         {{ mojPageHeaderActions({
                           classes: "govuk-!-margin-top-4",
                           heading: {
@@ -170,64 +179,12 @@ navigationItems: [
                         {% endif %}
                         {% endfor %}
 
-                        {% if copyQuestion %}
-                        <div class="app-copy-question-panel govuk-!-margin-top-4">
-                          <form action="/titan-mvp-1.2/form-editor/copy/question" method="post" novalidate>
-                            <input type="hidden" name="pageId" value="{{ currentPage.pageId }}">
-                            <input type="hidden" name="insert" value="end">
-                            {{ govukRadios({
-                              name: "questionId",
-                              fieldset: {
-                                legend: {
-                                  text: "Copy a question",
-                                  classes: "govuk-fieldset__legend--m"
-                                }
-                              },
-                              hint: {
-                                html: "The copy is added at the bottom of this page. Conditions that use the original question are not copied."
-                              },
-                              items: copyQuestionItems
-                            }) }}
-                            <div class="govuk-button-group">
-                              {{ govukButton({
-                                text: "Add question"
-                              }) }}
-                              <a class="govuk-link" href="/titan-mvp-1.2/page-overview">Cancel</a>
-                            </div>
-                          </form>
-                        </div>
-                        {% else %}
                         <div class="govuk-button-group govuk-!-margin-top-4 hide-in-reorder-mode hide-when-edit-mode">
                           {% if not hasLocationUserChoice %}
-                          {% if currentPage.questions and currentPage.questions.length %}
-                          {{ mojButtonMenu({
-                            button: {
-                              text: "Add another question"
-                            },
-                            items: [
-                              {
-                                text: "Create a new question",
-                                href: "/titan-mvp-1.2/form-editor/information-type-nf.html"
-                              },
-                              {
-                                text: "Copy an existing question",
-                                href: "/titan-mvp-1.2/page-overview?copyQuestion=1"
-                              }
-                            ]
+                          {{ govukButton({
+                            text: "Add another question",
+                            href: "/titan-mvp-1.2/form-editor/information-type-nf.html"
                           }) }}
-                          {% else %}
-                          {{ mojButtonMenu({
-                            button: {
-                              text: "Add another question"
-                            },
-                            items: [
-                              {
-                                text: "Create a new question",
-                                href: "/titan-mvp-1.2/form-editor/information-type-nf.html"
-                              }
-                            ]
-                          }) }}
-                          {% endif %}
                           {% endif %}
 
                           {% if currentPage.questions.length > 1 %}
@@ -244,7 +201,6 @@ navigationItems: [
                             Delete page
                           </a>
                         </p>
-                        {% endif %}
 
                         <a href="#tab-one" class="govuk-skip-link" style="margin-bottom: 30px!important;"
                           data-module="govuk-skip-link">
