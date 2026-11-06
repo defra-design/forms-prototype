@@ -55,6 +55,15 @@ Defra Form Designer metrics                </h1>
 
 {%- from "moj/components/sub-navigation/macro.njk" import mojSubNavigation -%}
 
+{% macro metricLabel(text, description, id) %}
+<span class="gem-c-big-number__label">
+  <span class="app-metric-tooltip tooltip" tabindex="0" aria-describedby="{{ id }}">
+    {{ text }}
+    <span class="tooltiptext" id="{{ id }}" role="tooltip">{{ description }}</span>
+  </span>
+</span>
+{% endmacro %}
+
 {{ mojSubNavigation({
   label: "Sub navigation",
   items: [  {
@@ -130,7 +139,7 @@ Defra Form Designer metrics                </h1>
     <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-third-from-desktop" data-testid="headline-column-forms-created" data-metric="forms-created" data-period="7d">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
-          <span class="gem-c-big-number__label">New forms created</span>
+          {{ metricLabel('New forms created', 'How many new forms people started in Form Designer.', 'metric-tip-forms-created-7d') }}
           <span class="gem-c-big-number__value">142</span>
         </div>
         <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
@@ -150,7 +159,7 @@ Defra Form Designer metrics                </h1>
     <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-third-from-desktop" data-testid="headline-column-forms-published" data-metric="forms-published" data-period="7d">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
-          <span class="gem-c-big-number__label">Forms published</span>
+          {{ metricLabel('Forms published', 'How many forms were made available for people to fill in.', 'metric-tip-forms-published-7d') }}
           <span class="gem-c-big-number__value">86</span>
         </div>
         <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
@@ -170,7 +179,7 @@ Defra Form Designer metrics                </h1>
     <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-third-from-desktop" data-testid="headline-column-submissions" data-metric="submissions" data-period="7d">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
-          <span class="gem-c-big-number__label">Form submissions</span>
+          {{ metricLabel('Form submissions', 'How many times someone completed and submitted a form.', 'metric-tip-submissions-7d') }}
           <span class="gem-c-big-number__value">12,500</span>
         </div>
         <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
@@ -198,7 +207,7 @@ Defra Form Designer metrics                </h1>
     <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-half-from-desktop" data-testid="headline-column-draft" data-metric="draft" data-period="7d">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
-          <span class="gem-c-big-number__label">Forms in draft</span>
+          {{ metricLabel('Forms in draft', 'How many forms are being worked on and have not been published yet.', 'metric-tip-draft-7d') }}
           <span class="gem-c-big-number__value">56</span>
         </div>
         <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
@@ -218,7 +227,7 @@ Defra Form Designer metrics                </h1>
     <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-half-from-desktop" data-testid="headline-column-days-to-publish" data-metric="days-to-publish" data-period="7d">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
-          <span class="gem-c-big-number__label">Average time to publish</span>
+          {{ metricLabel('Average time to publish', 'The average number of days from creating a form to publishing it for the first time.', 'metric-tip-days-to-publish-7d') }}
           <span class="gem-c-big-number__value">18<span class="app-big-number-unit"> days</span></span>
         </div>
         <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
@@ -251,7 +260,7 @@ Defra Form Designer metrics                </h1>
     <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-third-from-desktop" data-testid="headline-column-forms-created-30d" data-metric="forms-created" data-period="30d">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
-          <span class="gem-c-big-number__label">New forms created</span>
+          {{ metricLabel('New forms created', 'How many new forms people started in Form Designer.', 'metric-tip-forms-created-30d') }}
           <span class="gem-c-big-number__value">598</span>
         </div>
         <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
@@ -271,7 +280,7 @@ Defra Form Designer metrics                </h1>
     <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-third-from-desktop" data-testid="headline-column-forms-published-30d" data-metric="forms-published" data-period="30d">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
-          <span class="gem-c-big-number__label">Forms published</span>
+          {{ metricLabel('Forms published', 'How many forms were made available for people to fill in.', 'metric-tip-forms-published-30d') }}
           <span class="gem-c-big-number__value">364</span>
         </div>
         <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
@@ -291,7 +300,7 @@ Defra Form Designer metrics                </h1>
     <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-third-from-desktop" data-testid="headline-column-submissions-30d" data-metric="submissions" data-period="30d">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
-          <span class="gem-c-big-number__label">Form submissions</span>
+          {{ metricLabel('Form submissions', 'How many times someone completed and submitted a form.', 'metric-tip-submissions-30d') }}
           <span class="gem-c-big-number__value">54,200</span>
         </div>
         <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
@@ -319,7 +328,7 @@ Defra Form Designer metrics                </h1>
     <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-half-from-desktop" data-testid="headline-column-draft-30d" data-metric="draft" data-period="30d">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
-          <span class="gem-c-big-number__label">Forms in draft</span>
+          {{ metricLabel('Forms in draft', 'How many forms are being worked on and have not been published yet.', 'metric-tip-draft-30d') }}
           <span class="gem-c-big-number__value">56</span>
         </div>
         <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
@@ -339,7 +348,7 @@ Defra Form Designer metrics                </h1>
     <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-half-from-desktop" data-testid="headline-column-days-to-publish-30d" data-metric="days-to-publish" data-period="30d">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
-          <span class="gem-c-big-number__label">Average time to publish</span>
+          {{ metricLabel('Average time to publish', 'The average number of days from creating a form to publishing it for the first time.', 'metric-tip-days-to-publish-30d') }}
           <span class="gem-c-big-number__value">18<span class="app-big-number-unit"> days</span></span>
         </div>
         <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
@@ -372,7 +381,7 @@ Defra Form Designer metrics                </h1>
     <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-third-from-desktop" data-testid="headline-column-forms-created-all-time" data-metric="forms-created" data-period="all-time">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
-          <span class="gem-c-big-number__label">New forms created</span>
+          {{ metricLabel('New forms created', 'How many new forms people started in Form Designer.', 'metric-tip-forms-created-all') }}
           <span class="gem-c-big-number__value">8,542</span>
         </div>
         <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
@@ -392,7 +401,7 @@ Defra Form Designer metrics                </h1>
     <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-third-from-desktop" data-testid="headline-column-forms-published-all-time" data-metric="forms-published" data-period="all-time">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
-          <span class="gem-c-big-number__label">Forms published</span>
+          {{ metricLabel('Forms published', 'How many forms were made available for people to fill in.', 'metric-tip-forms-published-all') }}
           <span class="gem-c-big-number__value">5,234</span>
         </div>
         <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
@@ -412,7 +421,7 @@ Defra Form Designer metrics                </h1>
     <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-third-from-desktop" data-testid="headline-column-submissions-all-time" data-metric="submissions" data-period="all-time">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
-          <span class="gem-c-big-number__label">Form submissions</span>
+          {{ metricLabel('Form submissions', 'How many times someone completed and submitted a form.', 'metric-tip-submissions-all') }}
           <span class="gem-c-big-number__value">2.4M</span>
         </div>
         <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
@@ -440,7 +449,7 @@ Defra Form Designer metrics                </h1>
     <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-half-from-desktop" data-testid="headline-column-draft-all-time" data-metric="draft" data-period="all-time">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
-          <span class="gem-c-big-number__label">Forms in draft</span>
+          {{ metricLabel('Forms in draft', 'How many forms are being worked on and have not been published yet.', 'metric-tip-draft-all') }}
           <span class="gem-c-big-number__value">56</span>
         </div>
         <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
@@ -460,7 +469,7 @@ Defra Form Designer metrics                </h1>
     <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-tablet govuk-grid-column-one-half-from-desktop" data-testid="headline-column-days-to-publish-all-time" data-metric="days-to-publish" data-period="all-time">
       <div class="app-metric-tile">
         <div class="gem-c-big-number">
-          <span class="gem-c-big-number__label">Average time to publish</span>
+          {{ metricLabel('Average time to publish', 'The average number of days from creating a form to publishing it for the first time.', 'metric-tip-days-to-publish-all') }}
           <span class="gem-c-big-number__value">18<span class="app-big-number-unit"> days</span></span>
         </div>
         <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
@@ -1032,6 +1041,28 @@ Defra Form Designer metrics                </h1>
     margin-bottom: 0;
   }
 
+  /* Accessible metric tooltips */
+  .app-metric-tooltip {
+    max-width: 100%;
+  }
+
+  .app-metric-tooltip .tooltiptext {
+    font-weight: 400;
+    user-select: text;
+    pointer-events: auto;
+  }
+
+  .app-metric-tooltip:focus-visible {
+    outline: 3px solid transparent;
+    background-color: #ffdd00;
+    box-shadow: 0 -2px #ffdd00, 0 4px #0b0c0c;
+    border-bottom-color: transparent;
+  }
+
+  .app-metric-tooltip .tooltiptext.app-metric-tooltip__tip--visible {
+    visibility: visible;
+    opacity: 1;
+  }
 
   .moj-filter__tag-icon {
     margin-left: 8px;
@@ -1043,6 +1074,35 @@ Defra Form Designer metrics                </h1>
 </style>
 
 <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.app-metric-tooltip').forEach(function (trigger) {
+      const tip = trigger.querySelector('[role="tooltip"]');
+      if (!tip) return;
+
+      function show() {
+        tip.classList.add('app-metric-tooltip__tip--visible');
+      }
+
+      function hide() {
+        tip.classList.remove('app-metric-tooltip__tip--visible');
+      }
+
+      trigger.addEventListener('mouseenter', show);
+      trigger.addEventListener('mouseleave', hide);
+      tip.addEventListener('mouseenter', show);
+      tip.addEventListener('mouseleave', hide);
+      trigger.addEventListener('focus', show);
+      trigger.addEventListener('blur', hide);
+
+      trigger.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          hide();
+          trigger.blur();
+        }
+      });
+    });
+  });
+
   document.addEventListener('DOMContentLoaded', function() {
     var cohortFilter = document.getElementById('metrics-cohort-filter');
     var welshNotice = document.getElementById('welsh-metrics-notice');
