@@ -2,6 +2,7 @@
 {% from "components/service-header/macro.njk" import serviceHeader %}
 {%- from "govuk/components/tag/macro.njk" import govukTag -%}
 {%- from "govuk/components/tabs/macro.njk" import govukTabs -%}
+{%- from "govuk/components/table/macro.njk" import govukTable -%}
 {%- from "moj/components/sub-navigation/macro.njk" import mojSubNavigation -%}
 
 {% block pageTitle %}
@@ -96,7 +97,7 @@ Defra Form Designer metrics                </h1>
   <p class="govuk-body">Monitor copy answers adoption and submission activity across Defra Forms.</p>
 </div>
 
-<div class="govuk-!-margin-bottom-0">
+<div class="govuk-!-margin-bottom-8">
     <div class="govuk-grid-row">
     <div class="govuk-grid-column-one-half">
       <div class="app-metric-tile">
@@ -132,6 +133,75 @@ Defra Form Designer metrics                </h1>
     </div>
   </div>
 </div>
+
+<div class="govuk-!-margin-bottom-0">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Submissions using copy answers by form</h2>
+  {{ govukTable({
+    attributes: {
+      "data-module": "moj-sortable-table"
+    },
+    caption: "Submissions using copy answers by form in the last 7 days",
+    captionClasses: "govuk-visually-hidden",
+    firstCellIsHeader: true,
+    head: [
+      {
+        text: "Form name",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Organisation",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Status",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Submissions",
+        format: "numeric",
+        attributes: { "aria-sort": "descending" }
+      }
+    ],
+    rows: [
+      [
+        { html: '<a href="#" class="govuk-link">Waste carrier registration</a>', attributes: { "data-sort-value": "Waste carrier registration" } },
+        { text: "Environment Agency", attributes: { "data-sort-value": "Environment Agency" } },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }), attributes: { "data-sort-value": "Live" } },
+        { text: "214", format: "numeric", attributes: { "data-sort-value": "214" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Basic Payment Scheme claim</a>', attributes: { "data-sort-value": "Basic Payment Scheme claim" } },
+        { text: "Rural Payments Agency", attributes: { "data-sort-value": "Rural Payments Agency" } },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }), attributes: { "data-sort-value": "Live" } },
+        { text: "186", format: "numeric", attributes: { "data-sort-value": "186" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Export health certificate</a>', attributes: { "data-sort-value": "Export health certificate" } },
+        { text: "APHA", attributes: { "data-sort-value": "APHA" } },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }), attributes: { "data-sort-value": "Live" } },
+        { text: "142", format: "numeric", attributes: { "data-sort-value": "142" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Water abstraction return</a>', attributes: { "data-sort-value": "Water abstraction return" } },
+        { text: "Environment Agency", attributes: { "data-sort-value": "Environment Agency" } },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }), attributes: { "data-sort-value": "Live" } },
+        { text: "118", format: "numeric", attributes: { "data-sort-value": "118" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Protected species licence</a>', attributes: { "data-sort-value": "Protected species licence" } },
+        { text: "Natural England", attributes: { "data-sort-value": "Natural England" } },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }), attributes: { "data-sort-value": "Live" } },
+        { text: "84", format: "numeric", attributes: { "data-sort-value": "84" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Fishing licence application</a>', attributes: { "data-sort-value": "Fishing licence application" } },
+        { text: "Defra", attributes: { "data-sort-value": "Defra" } },
+        { html: govukTag({ text: "Draft", classes: "govuk-tag--yellow" }), attributes: { "data-sort-value": "Draft" } },
+        { text: "0", format: "numeric", attributes: { "data-sort-value": "0" } }
+      ]
+    ]
+  }) }}
+</div>
 {% endset %}
 
 {% set thirtyDaysContent %}
@@ -141,7 +211,7 @@ Defra Form Designer metrics                </h1>
   <p class="govuk-body">Monitor copy answers adoption and submission activity across Defra Forms.</p>
 </div>
 
-<div class="govuk-!-margin-bottom-0">
+<div class="govuk-!-margin-bottom-8">
     <div class="govuk-grid-row">
     <div class="govuk-grid-column-one-half">
       <div class="app-metric-tile">
@@ -169,6 +239,75 @@ Defra Form Designer metrics                </h1>
     </div>
   </div>
 </div>
+
+<div class="govuk-!-margin-bottom-0">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Submissions using copy answers by form</h2>
+  {{ govukTable({
+    attributes: {
+      "data-module": "moj-sortable-table"
+    },
+    caption: "Submissions using copy answers by form in the last 30 days",
+    captionClasses: "govuk-visually-hidden",
+    firstCellIsHeader: true,
+    head: [
+      {
+        text: "Form name",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Organisation",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Status",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Submissions",
+        format: "numeric",
+        attributes: { "aria-sort": "descending" }
+      }
+    ],
+    rows: [
+      [
+        { html: '<a href="#" class="govuk-link">Waste carrier registration</a>', attributes: { "data-sort-value": "Waste carrier registration" } },
+        { text: "Environment Agency", attributes: { "data-sort-value": "Environment Agency" } },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }), attributes: { "data-sort-value": "Live" } },
+        { text: "864", format: "numeric", attributes: { "data-sort-value": "864" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Basic Payment Scheme claim</a>', attributes: { "data-sort-value": "Basic Payment Scheme claim" } },
+        { text: "Rural Payments Agency", attributes: { "data-sort-value": "Rural Payments Agency" } },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }), attributes: { "data-sort-value": "Live" } },
+        { text: "742", format: "numeric", attributes: { "data-sort-value": "742" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Export health certificate</a>', attributes: { "data-sort-value": "Export health certificate" } },
+        { text: "APHA", attributes: { "data-sort-value": "APHA" } },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }), attributes: { "data-sort-value": "Live" } },
+        { text: "598", format: "numeric", attributes: { "data-sort-value": "598" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Water abstraction return</a>', attributes: { "data-sort-value": "Water abstraction return" } },
+        { text: "Environment Agency", attributes: { "data-sort-value": "Environment Agency" } },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }), attributes: { "data-sort-value": "Live" } },
+        { text: "486", format: "numeric", attributes: { "data-sort-value": "486" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Protected species licence</a>', attributes: { "data-sort-value": "Protected species licence" } },
+        { text: "Natural England", attributes: { "data-sort-value": "Natural England" } },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }), attributes: { "data-sort-value": "Live" } },
+        { text: "352", format: "numeric", attributes: { "data-sort-value": "352" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Fishing licence application</a>', attributes: { "data-sort-value": "Fishing licence application" } },
+        { text: "Defra", attributes: { "data-sort-value": "Defra" } },
+        { html: govukTag({ text: "Draft", classes: "govuk-tag--yellow" }), attributes: { "data-sort-value": "Draft" } },
+        { text: "0", format: "numeric", attributes: { "data-sort-value": "0" } }
+      ]
+    ]
+  }) }}
+</div>
 {% endset %}
 
 {% set allTimeContent %}
@@ -178,7 +317,7 @@ Defra Form Designer metrics                </h1>
   <p class="govuk-body">Monitor copy answers adoption and submission activity across Defra Forms.</p>
 </div>
 
-<div class="govuk-!-margin-bottom-0">
+<div class="govuk-!-margin-bottom-8">
     <div class="govuk-grid-row">
     <div class="govuk-grid-column-one-half">
       <div class="app-metric-tile">
@@ -205,6 +344,75 @@ Defra Form Designer metrics                </h1>
       </div>
     </div>
   </div>
+</div>
+
+<div class="govuk-!-margin-bottom-0">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Submissions using copy answers by form</h2>
+  {{ govukTable({
+    attributes: {
+      "data-module": "moj-sortable-table"
+    },
+    caption: "Submissions using copy answers by form since launch",
+    captionClasses: "govuk-visually-hidden",
+    firstCellIsHeader: true,
+    head: [
+      {
+        text: "Form name",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Organisation",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Status",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Submissions",
+        format: "numeric",
+        attributes: { "aria-sort": "descending" }
+      }
+    ],
+    rows: [
+      [
+        { html: '<a href="#" class="govuk-link">Waste carrier registration</a>', attributes: { "data-sort-value": "Waste carrier registration" } },
+        { text: "Environment Agency", attributes: { "data-sort-value": "Environment Agency" } },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }), attributes: { "data-sort-value": "Live" } },
+        { text: "6,842", format: "numeric", attributes: { "data-sort-value": "6842" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Basic Payment Scheme claim</a>', attributes: { "data-sort-value": "Basic Payment Scheme claim" } },
+        { text: "Rural Payments Agency", attributes: { "data-sort-value": "Rural Payments Agency" } },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }), attributes: { "data-sort-value": "Live" } },
+        { text: "5,910", format: "numeric", attributes: { "data-sort-value": "5910" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Export health certificate</a>', attributes: { "data-sort-value": "Export health certificate" } },
+        { text: "APHA", attributes: { "data-sort-value": "APHA" } },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }), attributes: { "data-sort-value": "Live" } },
+        { text: "4,628", format: "numeric", attributes: { "data-sort-value": "4628" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Water abstraction return</a>', attributes: { "data-sort-value": "Water abstraction return" } },
+        { text: "Environment Agency", attributes: { "data-sort-value": "Environment Agency" } },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }), attributes: { "data-sort-value": "Live" } },
+        { text: "3,814", format: "numeric", attributes: { "data-sort-value": "3814" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Protected species licence</a>', attributes: { "data-sort-value": "Protected species licence" } },
+        { text: "Natural England", attributes: { "data-sort-value": "Natural England" } },
+        { html: govukTag({ text: "Live", classes: "govuk-tag--green" }), attributes: { "data-sort-value": "Live" } },
+        { text: "2,746", format: "numeric", attributes: { "data-sort-value": "2746" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Fishing licence application</a>', attributes: { "data-sort-value": "Fishing licence application" } },
+        { text: "Defra", attributes: { "data-sort-value": "Defra" } },
+        { html: govukTag({ text: "Draft", classes: "govuk-tag--yellow" }), attributes: { "data-sort-value": "Draft" } },
+        { text: "0", format: "numeric", attributes: { "data-sort-value": "0" } }
+      ]
+    ]
+  }) }}
 </div>
 {% endset %}
 
