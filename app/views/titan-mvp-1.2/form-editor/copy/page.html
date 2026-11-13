@@ -2,7 +2,7 @@
 
 {% from "components/service-header/macro.njk" import serviceHeader %}
 
-{% set pageName = "Duplicate page" %}
+{% set pageName = "Copy page" %}
 
 {% block header %}
 {{ serviceHeader({
@@ -25,8 +25,8 @@ activeLinkId: "nav-editor"
   <div class="govuk-width-container">
     {{ govukBackLink({
       classes: "govuk-back-link--inverse govuk-!-margin-bottom-0",
-      text: "Back to editor",
-      href: "/titan-mvp-1.2/form-editor/listing"
+      text: "Back to page " + pageNumber + " overview",
+      href: "/titan-mvp-1.2/page-overview"
     }) }}
 
     <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"
@@ -46,20 +46,25 @@ activeLinkId: "nav-editor"
 {% block content %}
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
-    <span class="govuk-caption-l">Page {{ pageNumber }}</span>
-    <h1 class="govuk-heading-l">Duplicate this page?</h1>
+    <h1 class="govuk-heading-l">Copy this page?</h1>
 
     <p class="govuk-body">
-      A copy named <strong>{{ copiedLabel }}</strong> will be added after this page
-      in the form. Rename it so it is clear what the page is for.
+      A copy of Page {{ pageNumber }}, “{{ pageHeading }}”, will be added after this page and named “{{ copiedLabel }}”.
     </p>
     <p class="govuk-body">
-      {% if questionCount == 1 %}
-      It includes 1 question.
+      Rename the copy so it is clear what the page is for.
+    </p>
+    <p class="govuk-body">
+      {% if questionCount == 0 %}
+      The page has no questions.
+      {% elif questionCount == 1 %}
+      The page has 1 question.
       {% else %}
-      It includes {{ questionCount }} questions.
+      The page has {{ questionCount }} questions.
       {% endif %}
-      Page conditions stay linked to the same answers earlier in the form.
+    </p>
+    <p class="govuk-body">
+      Page conditions will not be copied.
     </p>
 
     <form action="/titan-mvp-1.2/form-editor/copy/page" method="POST" novalidate>
@@ -67,10 +72,9 @@ activeLinkId: "nav-editor"
 
       <div class="govuk-button-group">
         <button type="submit" class="govuk-button" data-module="govuk-button">
-          Duplicate page
+          Copy page
         </button>
-        <a href="/titan-mvp-1.2/form-editor/listing" class="govuk-button govuk-button--secondary"
-          data-module="govuk-button">
+        <a href="/titan-mvp-1.2/page-overview" class="govuk-link">
           Cancel
         </a>
       </div>

@@ -12,6 +12,7 @@
 organisationName: "Defra",
 productName: "Form Designer",
 serviceName: "",
+containerClasses: containerClasses,
 accountName: "Chris Smith",
 homepageLink: "/",
 signOutLink: "/titan-mvp-1.2/onboarding/sign-out-confirmation",
@@ -22,13 +23,27 @@ navigationItems: [
 ],
 activeLinkId: "nav-editor"
 }) }}
-{% endblock %}
 
-{% block beforeContent %}
-{{ govukBackLink({
-  text: "Back to page " + pageNumber + " overview",
-  href: "/titan-mvp-1.2/page-overview"
-}) }}
+<div class="x-govuk-masthead x-govuk-masthead--large">
+  <div class="govuk-width-container">
+    {{ govukBackLink({
+      classes: "govuk-back-link--inverse govuk-!-margin-bottom-0",
+      text: "Back to page " + pageNumber + " overview",
+      href: "/titan-mvp-1.2/page-overview"
+    }) }}
+
+    <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"
+      style="border-bottom: 1px solid white; margin-bottom: 0" />
+
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-full-from-desktop">
+        <h1 class="x-govuk-masthead__title">
+          {{ form.name }}
+        </h1>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block content %}
@@ -46,11 +61,12 @@ activeLinkId: "nav-editor"
     }) }}
     {% endif %}
 
-    <span class="govuk-caption-xl">Page {{ pageNumber }}: {{ pageHeading }}</span>
-    <h1 class="govuk-heading-xl">Copy questions from another page</h1>
+    <span class="govuk-caption-l">Page {{ pageNumber }}: {{ pageHeading }}</span>
+    <h1 class="govuk-heading-l">Copy questions from another page</h1>
 
     <p class="govuk-body">
       Questions are copied to the bottom of the current page.
+      Conditions associated with those questions are not copied.
     </p>
 
     {% if pageItems.length %}

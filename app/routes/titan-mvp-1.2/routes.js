@@ -5092,7 +5092,19 @@ router.get("/titan-mvp-1.2/page-overview", function (req, res) {
 
   const currentPage = formPages[pageIndex];
   const sections = formData.sections || [];
-  const pageQuestions = (currentPage && currentPage.questions) || [];
+  const copyQuestionsSuccessCount =
+    formData.copyQuestionsSuccessCount || null;
+  if (copyQuestionsSuccessCount) {
+    delete req.session.data.copyQuestionsSuccessCount;
+  }
+
+  let copied = req.query.copied || null;
+  if (!copied && formData.copyPageSuccess) {
+    copied = "page";
+  }
+  if (formData.copyPageSuccess) {
+    delete req.session.data.copyPageSuccess;
+  }
 
   res.render("titan-mvp-1.2/form-editor/page-overview.html", {
     form: {
@@ -5101,18 +5113,8 @@ router.get("/titan-mvp-1.2/page-overview", function (req, res) {
     pageNumber: pageNumber,
     currentPage: currentPage,
     sections: sections,
-    copied: req.query.copied || null,
-    copyQuestion: req.query.copyQuestion === "1",
-    copyQuestionItems: pageQuestions.map(function (question, index) {
-      return {
-        value: String(question.questionId),
-        text:
-          "Question " +
-          (index + 1) +
-          ": " +
-          (question.label || "Untitled question"),
-      };
-    }),
+    copied: copied,
+    copyQuestionsSuccessCount: copyQuestionsSuccessCount,
   });
 });
 
@@ -7863,24 +7865,27 @@ router.get("/titan-mvp-1.2/form-editor/page-overview", function (req, res) {
   const pageIndex = formData.currentPageIndex || 0;
   const currentPage = formPages[pageIndex] || {};
   const sections = formData.sections || [];
-  const pageQuestions = currentPage.questions || [];
+  const copyQuestionsSuccessCount =
+    formData.copyQuestionsSuccessCount || null;
+  if (copyQuestionsSuccessCount) {
+    delete req.session.data.copyQuestionsSuccessCount;
+  }
+
+  let copied = req.query.copied || null;
+  if (!copied && formData.copyPageSuccess) {
+    copied = "page";
+  }
+  if (formData.copyPageSuccess) {
+    delete req.session.data.copyPageSuccess;
+  }
+
   res.render("titan-mvp-1.2/form-editor/page-overview.html", {
     form: { name: formData.formName || "Form name" },
     pageNumber: pageIndex + 1,
     currentPage: currentPage,
     sections: sections,
-    copied: req.query.copied || null,
-    copyQuestion: req.query.copyQuestion === "1",
-    copyQuestionItems: pageQuestions.map(function (question, index) {
-      return {
-        value: String(question.questionId),
-        text:
-          "Question " +
-          (index + 1) +
-          ": " +
-          (question.label || "Untitled question"),
-      };
-    }),
+    copied: copied,
+    copyQuestionsSuccessCount: copyQuestionsSuccessCount,
   });
 });
 
@@ -12102,6 +12107,14 @@ router.get("/titan-mvp-1.2/metrics/save-and-exit", function (req, res) {
 
 router.get("/titan-mvp-1.2/metrics/copy-answers", function (req, res) {
   res.render("titan-mvp-1.2/metrics/copy-answers");
+});
+
+router.get("/titan-mvp-1.2/metrics/copy-page", function (req, res) {
+  res.render("titan-mvp-1.2/metrics/copy-page");
+});
+
+router.get("/titan-mvp-1.2/metrics/copy-form", function (req, res) {
+  res.render("titan-mvp-1.2/metrics/copy-form");
 });
 
 router.get("/titan-mvp-1.2/metrics/edit-and-resubmit", function (req, res) {

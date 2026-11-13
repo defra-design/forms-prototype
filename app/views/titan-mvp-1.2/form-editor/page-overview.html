@@ -7,7 +7,6 @@
 {% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
 {% from "govuk/components/radios/macro.njk" import govukRadios %}
 {% from "moj/components/page-header-actions/macro.njk" import mojPageHeaderActions %}
-{% from "moj/components/button-menu/macro.njk" import mojButtonMenu %}
 {% set pageName = "Page " + pageNumber + " overview - Apply for a county parish holding number in England" %}
 {% set headingPlaceholder = "Page heading" %}
 {% set guidancePlaceholder = "" %}
@@ -98,6 +97,15 @@ navigationItems: [
                           </nav>
                         </div>
 
+                        {% if copied == "page" %}
+                        <div id="copy-success-notification">
+                          {{ govukNotificationBanner({
+                            type: "success",
+                            html: "<p class=\"govuk-notification-banner__heading\">Page copied</p><p class=\"govuk-body\">Rename it so it is clear what the page is for.</p>",
+                            classes: "govuk-!-margin-top-4 govuk-!-margin-bottom-4"
+                          }) }}
+                        </div>
+                        {% endif %}
                         {% if copied == "question" %}
                         <div id="copy-success-notification">
                           {{ govukNotificationBanner({
@@ -110,12 +118,28 @@ navigationItems: [
                         {% endif %}
                         {% if copied == "questions-from-page" %}
                         <div id="copy-success-notification">
+                          {% set copiedQuestionsCount = copyQuestionsSuccessCount or 0 %}
+                          {% if copiedQuestionsCount == 1 %}
+                            {% set questionsCopiedHtml = '<p class="govuk-notification-banner__heading">1 question copied</p><p class="govuk-body">It has been added to the bottom of this page.</p>' %}
+                          {% elif copiedQuestionsCount > 1 %}
+                            {% set questionsCopiedHtml = '<p class="govuk-notification-banner__heading">' ~ copiedQuestionsCount ~ ' questions copied</p><p class="govuk-body">They have been added to the bottom of this page.</p>' %}
+                          {% else %}
+                            {% set questionsCopiedHtml = '<p class="govuk-notification-banner__heading">Questions copied</p><p class="govuk-body">They have been added to the bottom of this page.</p>' %}
+                          {% endif %}
                           {{ govukNotificationBanner({
                             type: "success",
-                            html: "<p class=\"govuk-notification-banner__heading\">Questions copied</p><p class=\"govuk-body\">The questions have been added to the bottom of this page.</p>",
+                            html: questionsCopiedHtml,
                             classes: "govuk-!-margin-top-4 govuk-!-margin-bottom-4"
                           }) }}
                         </div>
+                        {% endif %}
+                        {% set duplicatePageItems = [] %}
+                        {% if currentPage.pageId %}
+                          {% set duplicatePageItems = [{
+                            html: '<span class="material-symbols-outlined" aria-hidden="true">file_copy</span> Copy page',
+                            href: "/titan-mvp-1.2/form-editor/copy/page/" + currentPage.pageId,
+                            classes: "gem-c-button gem-c-button-publishing--secondary-quiet app-duplicate-page-button"
+                          }] %}
                         {% endif %}
                         {{ mojPageHeaderActions({
                           classes: "govuk-!-margin-top-4",
@@ -124,11 +148,7 @@ navigationItems: [
                             level: 2,
                             classes: "govuk-heading-l"
                           },
-                          items: [{
-                            html: '<span class="material-symbols-outlined" aria-hidden="true">file_copy</span> Duplicate page',
-                            href: "/titan-mvp-1.2/form-editor/copy/page/" + currentPage.pageId,
-                            classes: "gem-c-button gem-c-button-publishing--secondary-quiet app-duplicate-page-button"
-                          }]
+                          items: duplicatePageItems
                         }) }}
                         {# <h2 class="govuk-heading-m" id="page-heading">Questions</h2> #}
 
@@ -1749,34 +1769,6 @@ navigationItems: [
     font-weight: 400;
     line-height: 1;
     margin-right: 5px;
-  }
-
-  .govuk-button-group .moj-button-menu {
-    margin-bottom: 0;
-  }
-
-  .app-copy-question-panel {
-    background-color: #ffffff;
-    border: 1px solid #b1b4b6;
-    padding: 20px;
-  }
-
-  .moj-button-menu__items {
-    background-color: #ffffff;
-    z-index: 10;
-  }
-
-  .moj-button-menu__item,
-  .moj-button-menu__item.govuk-button--secondary {
-    background-color: #ffffff !important;
-    color: #0b0c0c !important;
-    box-shadow: none;
-  }
-
-  .moj-button-menu__item:hover,
-  .moj-button-menu__item.govuk-button--secondary:hover {
-    background-color: #e8e8e8 !important;
-    color: #0b0c0c !important;
   }
 
   #question-list {

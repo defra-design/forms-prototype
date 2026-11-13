@@ -63,6 +63,8 @@ module.exports = function registerCopyRoutes(router) {
         return res.redirect("/titan-mvp-1.2/form-editor/listing");
       }
 
+      req.session.data.currentPageIndex = pageIndex;
+
       const questionLabel = question.label || "Untitled question";
       const existingLabels = (page.questions || []).map(
         (item) => item.label || "Untitled question"
@@ -370,6 +372,8 @@ module.exports = function registerCopyRoutes(router) {
         return res.redirect("/titan-mvp-1.2/form-editor/listing");
       }
 
+      req.session.data.currentPageIndex = pageIndex;
+
       const heading = pageLabel(page, pageIndex + 1);
       const existingLabels = formPages.map((item, index) =>
         pageLabel(item, index + 1)
@@ -398,6 +402,7 @@ module.exports = function registerCopyRoutes(router) {
     const nextId = createIdFactory();
     const copiedPage = clonePage(formPages[pageIndex], nextId, {
       identifyCopy: true,
+      omitConditions: true,
       existingLabels: formPages.map((item, index) =>
         pageLabel(item, index + 1)
       ),
@@ -406,8 +411,10 @@ module.exports = function registerCopyRoutes(router) {
 
     req.session.data.formPages = formPages;
     req.session.data.currentPageIndex = pageIndex + 1;
+    req.session.data.copyPageSuccess = true;
 
-    res.redirect("/titan-mvp-1.2/form-editor/listing?copied=page");
+    // Land on the new page so the user can rename it immediately
+    res.redirect("/titan-mvp-1.2/page-overview?copied=page");
   });
 
   // ---- Copy form -----------------------------------------------------------

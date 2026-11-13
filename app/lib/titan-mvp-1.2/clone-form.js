@@ -102,9 +102,11 @@ function clonePage(page, nextId, options) {
     }
   }
 
-  // Keep page condition objects as-is (same upstream refs in this form).
-  // Give them distinct object identity only — do not invent new form-level conditions.
-  if (Array.isArray(copy.conditions)) {
+  if (options && options.omitConditions) {
+    delete copy.conditions;
+  } else if (Array.isArray(copy.conditions)) {
+    // Keep page condition objects as-is (same upstream refs in this form).
+    // Give them distinct object identity only — do not invent new form-level conditions.
     copy.conditions = deepClone(copy.conditions);
   }
 
