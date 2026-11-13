@@ -1,0 +1,74 @@
+{% extends "layouts/main.html" %}
+{% from "components/service-header/macro.njk" import serviceHeader %}
+{% from "govuk/components/table/macro.njk" import govukTable %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+
+{% set pageName = "Copy page static journey - " + form.name %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+containerClasses: containerClasses,
+accountName: "Chris Smith",
+homepageLink: "/",
+signOutLink: "/titan-mvp-1.2/onboarding/sign-out-confirmation",
+navigationItems: [
+{ href: "/titan-mvp-1.2/library", text: "Forms library", id: "nav-library" },
+{ href: "/titan-mvp-1.2/form-overview/index", text: "Overview", id: "nav-overview" },
+{ href: "/titan-mvp-1.2/form-editor/listing", text: "Editor", id: "nav-editor" }
+],
+activeLinkId: "nav-editor"
+}) }}
+
+<div class="x-govuk-masthead x-govuk-masthead--large">
+  <div class="govuk-width-container">
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds-from-desktop">
+        <h1 class="x-govuk-masthead__title">
+          <span class="govuk-caption-l" style="color: white;">{{ form.name }}</span>
+          Copy page — static journey
+        </h1>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <p class="govuk-body">
+      Use these seeded static screens for development handover. They do not need session data.
+    </p>
+
+    {{ govukInsetText({
+      html: '<p class="govuk-body">To try the interactive flow with the same seeded pages, <a class="govuk-link" href="' + seedSessionUrl + '">load the seed into your session</a>, then open the live page overview.</p>'
+    }) }}
+
+    {% set tableRows = [] %}
+    {% for page in staticPages %}
+    {% set tableRows = tableRows.concat([[
+      { html: '<a class="govuk-link" href="' + page.href + '">' + page.title + '</a>' },
+      { text: page.description }
+    ]]) %}
+    {% endfor %}
+
+    {{ govukTable({
+      caption: "Copy page journey steps",
+      captionClasses: "govuk-table__caption--m",
+      head: [{ text: "Step" }, { text: "What it shows" }],
+      rows: tableRows
+    }) }}
+
+    <h2 class="govuk-heading-m govuk-!-margin-top-8">Related</h2>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><a class="govuk-link" href="{{ liveOverviewUrl }}">Live page overview</a> (session)</li>
+      <li><a class="govuk-link" href="/titan-mvp-1.2/form-overview/copy-poc">Copy form PoC</a></li>
+      <li><a class="govuk-link" href="/titan-mvp-1.2/metrics/copy-page">Copy page metrics</a></li>
+      <li><a class="govuk-link" href="/titan-mvp-1.2/form-overview/form-history">Form history</a></li>
+    </ul>
+  </div>
+</div>
+{% endblock %}

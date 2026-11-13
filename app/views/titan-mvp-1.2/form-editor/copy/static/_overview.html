@@ -1,0 +1,207 @@
+{% extends "layouts/main.html" %}
+{% from "components/service-header/macro.njk" import serviceHeader %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "moj/components/page-header-actions/macro.njk" import mojPageHeaderActions %}
+
+{% set pageName = "Edit page " + pageNumber + " - " + form.name %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=file_copy">
+<style>
+  .app-page-overview-panel {
+    border: 0;
+    border-left: 10px solid #008938;
+    box-shadow: none;
+    background-color: #ffffff;
+  }
+  .app-page-overview-panel__content {
+    background-color: #ffffff;
+  }
+  .app-page-overview-panel .govuk-summary-list__row {
+    border-bottom: 0;
+  }
+  .app-page-overview-panel .govuk-summary-list__value {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .app-page-sub-nav {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #b1b4b6;
+  }
+  .app-page-sub-nav .moj-sub-navigation {
+    flex: 1 1 auto;
+    margin-bottom: 0;
+    border-bottom: 0;
+  }
+  .app-page-sub-nav .moj-sub-navigation__list {
+    margin-bottom: 0;
+  }
+  .app-duplicate-page-button {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+  .app-duplicate-page-button .material-symbols-outlined {
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1;
+    margin-right: 5px;
+  }
+  .moj-page-header-actions {
+    align-items: center;
+  }
+  .moj-page-header-actions .govuk-heading-l {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+  .app-static-preview {
+    outline: solid 1px #008938;
+    padding: 20px;
+    box-shadow: 5px 10px #008938;
+    background: #ffffff;
+  }
+</style>
+{% endblock %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+containerClasses: containerClasses,
+accountName: "Chris Smith",
+homepageLink: "/",
+signOutLink: "/titan-mvp-1.2/onboarding/sign-out-confirmation",
+activeLinkId: "nav-editor",
+navigationItems: [
+{ href: "/titan-mvp-1.2/library", text: "Forms library", id: "nav-library" },
+{ href: "/titan-mvp-1.2/form-overview/index", text: "Overview", id: "nav-overview" },
+{ href: "/titan-mvp-1.2/form-editor/listing", text: "Editor", id: "nav-editor" }
+]
+}) }}
+
+<div class="x-govuk-masthead x-govuk-masthead--large">
+  <div class="govuk-width-container">
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds-from-desktop">
+        <h1 class="x-govuk-masthead__title">
+          <span class="govuk-caption-l" style="color: white;">{{ form.name }}</span>
+          Edit page {{ pageNumber }}
+        </h1>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-full">
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-one-half-from-desktop">
+        <div class="govuk-summary-card app-page-overview-panel govuk-!-margin-top-0">
+          <div class="govuk-summary-card__content govuk-!-padding-top-0 app-page-overview-panel__content">
+            <div class="app-page-sub-nav">
+              <nav class="moj-sub-navigation govuk-!-padding-top-0 govuk-!-margin-bottom-0" aria-label="Sub navigation">
+                <ul class="moj-sub-navigation__list">
+                  <li class="moj-sub-navigation__item">
+                    <a class="moj-sub-navigation__link" aria-current="page" href="#content">
+                      Page {{ pageNumber }} overview
+                    </a>
+                  </li>
+                  <li class="moj-sub-navigation__item">
+                    <a class="moj-sub-navigation__link" href="#">Conditions</a>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+
+            {% if copied == "page" %}
+            <div id="copy-success-notification">
+              {{ govukNotificationBanner({
+                type: "success",
+                html: "<p class=\"govuk-notification-banner__heading\">Page copied</p><p class=\"govuk-body\">Rename it so it is clear what the page is for.</p>",
+                classes: "govuk-!-margin-top-4 govuk-!-margin-bottom-4"
+              }) }}
+            </div>
+            {% endif %}
+
+            {{ mojPageHeaderActions({
+              classes: "govuk-!-margin-top-4",
+              heading: {
+                text: "Content",
+                level: 2,
+                classes: "govuk-heading-l"
+              },
+              items: [{
+                html: '<span class="material-symbols-outlined" aria-hidden="true">file_copy</span> Copy page',
+                href: copyPageHref,
+                classes: "gem-c-button gem-c-button-publishing--secondary-quiet app-duplicate-page-button"
+              }]
+            }) }}
+
+            {% if pageHeading %}
+            <p class="govuk-body govuk-!-margin-bottom-2">
+              <span class="govuk-visually-hidden">Page heading:</span>
+              <strong>{{ pageHeading }}</strong>
+            </p>
+            {% endif %}
+
+            <ul id="question-list" class="govuk-list">
+              {% for question in currentPage.questions %}
+              <li class="question-item govuk-summary-list__row">
+                {{ govukSummaryList({
+                  classes: "govuk-summary-list",
+                  rows: [{
+                    classes: "govuk-summary-list__row--force-border",
+                    key: { text: "Question " ~ loop.index },
+                    value: { html: question.label },
+                    actions: {
+                      items: [{
+                        html: '<a class="govuk-link govuk-link--no-visited-state" href="#">Change<span class="govuk-visually-hidden"> ' ~ question.label ~ '</span></a>'
+                      }]
+                    }
+                  }]
+                }) }}
+              </li>
+              {% endfor %}
+            </ul>
+
+            <div class="govuk-button-group govuk-!-margin-top-4">
+              {{ govukButton({
+                text: "Add another question",
+                href: "#"
+              }) }}
+              <a href="#" class="govuk-link govuk-link--no-visited-state">Delete page</a>
+            </div>
+          </div>
+        </div>
+
+        <p class="govuk-body govuk-!-margin-top-6">
+          <a class="govuk-link" href="/titan-mvp-1.2/form-editor/copy/static">Back to copy page static journey</a>
+        </p>
+      </div>
+
+      <div class="govuk-grid-column-one-half-from-desktop">
+        <div class="app-static-preview">
+          <p class="govuk-body-s govuk-!-margin-bottom-2"><strong>Preview</strong></p>
+          {% if pageHeading %}
+          <h2 class="govuk-heading-l">{{ pageHeading }}</h2>
+          {% endif %}
+          {% for question in currentPage.questions %}
+          <p class="govuk-body"><strong>{{ question.label }}</strong></p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

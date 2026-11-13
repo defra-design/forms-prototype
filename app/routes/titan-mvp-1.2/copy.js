@@ -12,6 +12,14 @@ const {
   copyStem,
 } = require("../../lib/titan-mvp-1.2/clone-form");
 
+const {
+  buildCopyPageStaticIndexContext,
+  buildCopyPageStaticOverviewContext,
+  buildCopyPageStaticConfirmationContext,
+  buildCopyPageStaticSuccessContext,
+  seedCopyPageSession,
+} = require("../../data/copy-page-static");
+
 function findPageIndex(formPages, pageId) {
   return (formPages || []).findIndex(
     (page) => String(page.pageId) === String(pageId)
@@ -486,4 +494,63 @@ module.exports = function registerCopyRoutes(router) {
       "/titan-mvp-1.2/form-overview/copy-poc?copied=form&status=draft"
     );
   });
+
+  // ---- Copy page static handover journey -----------------------------------
+
+  router.get("/titan-mvp-1.2/form-editor/copy/static", function (req, res) {
+    res.render(
+      "titan-mvp-1.2/form-editor/copy/static/index",
+      buildCopyPageStaticIndexContext()
+    );
+  });
+
+  router.get("/titan-mvp-1.2/form-editor/copy/static/", function (req, res) {
+    res.redirect("/titan-mvp-1.2/form-editor/copy/static");
+  });
+
+  router.get(
+    "/titan-mvp-1.2/form-editor/copy/static.html",
+    function (req, res) {
+      res.redirect("/titan-mvp-1.2/form-editor/copy/static");
+    }
+  );
+
+  router.get(
+    "/titan-mvp-1.2/form-editor/copy/static/overview",
+    function (req, res) {
+      res.render(
+        "titan-mvp-1.2/form-editor/copy/static/overview",
+        buildCopyPageStaticOverviewContext()
+      );
+    }
+  );
+
+  router.get(
+    "/titan-mvp-1.2/form-editor/copy/static/confirmation",
+    function (req, res) {
+      res.render(
+        "titan-mvp-1.2/form-editor/copy/static/confirmation",
+        buildCopyPageStaticConfirmationContext()
+      );
+    }
+  );
+
+  router.get(
+    "/titan-mvp-1.2/form-editor/copy/static/success",
+    function (req, res) {
+      res.render(
+        "titan-mvp-1.2/form-editor/copy/static/success",
+        buildCopyPageStaticSuccessContext()
+      );
+    }
+  );
+
+  router.get(
+    "/titan-mvp-1.2/form-editor/copy/static/seed",
+    function (req, res) {
+      req.session.data = req.session.data || {};
+      seedCopyPageSession(req.session.data);
+      res.redirect("/titan-mvp-1.2/page-overview");
+    }
+  );
 };
