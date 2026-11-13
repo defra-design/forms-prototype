@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "customer-journey-map": {
+      "source": "phuryn/pm-skills",
+      "sourceType": "github",
+      "skillPath": "pm-market-research/skills/customer-journey-map/SKILL.md",
+      "computedHash": "793689f403818a1a357e5fac0f36f9a83397fbca2ed9e56de849cfc957010f68"
+    },
+    "journey-mapping": {
+      "source": "rampstackco/claude-skills",
+      "sourceType": "github",
+      "skillPath": "skills/journey-mapping/SKILL.md",
+      "computedHash": "c083b91bd0bee9e3b4b686e6cf04873f19238183e9e34eac4f88d02d5298f6ab"
+    }
+  }
+}

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Copy form user journey — flow with screenshots</title>
+  <style>
+    :root {
+      --ink: #0b0c0c;
+      --muted: #505a5f;
+      --border: #b1b4b6;
+      --panel: #ffffff;
+      --bg: #f3f2f1;
+      --decision: #fff4e5;
+      --decision-border: #b36b00;
+      --system: #e8f1ff;
+      --system-border: #1a5fb4;
+      --success: #e6f4ea;
+      --success-border: #1e7e34;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 32px;
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.4;
+    }
+    h1 { margin: 0 0 8px; font-size: 28px; font-weight: 700; }
+    .intro { margin: 0 0 28px; color: var(--muted); max-width: 720px; }
+    .flow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: 880px;
+      margin: 0 auto;
+    }
+    .step {
+      width: 100%;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .step-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      background: #fafafa;
+    }
+    .step-header h2 { margin: 0; font-size: 18px; font-weight: 700; }
+    .badge {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fff;
+      white-space: nowrap;
+    }
+    .badge.decision { background: var(--decision); border-color: var(--decision-border); }
+    .badge.success { background: var(--success); border-color: var(--success-border); }
+    .step-body {
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+    .shot {
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .shot img { display: block; width: 100%; height: auto; }
+    .meta p { margin: 0 0 8px; }
+    .meta ul { margin: 0; padding-left: 18px; }
+    .meta li { margin-bottom: 4px; }
+    .arrow {
+      width: 2px;
+      height: 28px;
+      background: #505a5f;
+      position: relative;
+      margin: 4px 0;
+    }
+    .arrow::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: -1px;
+      transform: translateX(-50%);
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 8px solid #505a5f;
+    }
+    .branch {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 8px 0 4px;
+    }
+    .branch-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .branch-card.confirm {
+      border-color: var(--system-border);
+      background: var(--system);
+    }
+    .branch-card strong { display: block; margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+  <h1>Copy form user journey</h1>
+  <p class="intro">
+    Visual flow with live prototype screenshots. Persona: Chris (form designer).
+    Critical path: choose draft or live source → name the copy → land on new draft.
+  </p>
+
+  <div class="flow">
+    <section class="step">
+      <div class="step-header">
+        <h2>1. Form overview — discover Copy</h2>
+        <span class="badge">Entry</span>
+      </div>
+      <div class="step-body">
+        <div class="shot">
+          <img src="copy-form-flow-screenshots/01-overview-copy-actions.png" alt="Form overview with Copy on draft status card">
+        </div>
+        <div class="meta">
+          <p><strong>User action</strong></p>
+          <ul>
+            <li>Opens form overview</li>
+            <li>Clicks <strong>Copy</strong> on Draft and/or Live</li>
+          </ul>
+          <p><strong>Thought</strong></p>
+          <ul>
+            <li>“Should I copy the draft or the live version?”</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <div class="arrow" aria-hidden="true"></div>
+
+    <section class="step">
+      <div class="step-header">
+        <h2>2. Make a copy — name and checks</h2>
+        <span class="badge decision">Moment of truth</span>
+      </div>
+      <div class="step-body">
+        <div class="shot">
+          <img src="copy-form-flow-screenshots/02-make-a-copy.png" alt="Make a copy of this form screen with name field">
+        </div>
+        <div class="meta">
+          <p><strong>User sees</strong></p>
+          <ul>
+            <li>New draft with same pages, questions and details</li>
+            <li>Prompt to check org, team, support, next steps, privacy</li>
+            <li>Suggested name with <code>(copy)</code></li>
+          </ul>
+          <p><strong>Decision</strong></p>
+          <ul>
+            <li>Make a copy, or Cancel</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <div class="branch">
+      <div class="branch-card">
+        <strong>Cancel</strong>
+        Return to original form overview — no change
+      </div>
+      <div class="branch-card confirm">
+        <strong>Make a copy</strong>
+        System clones into a new draft; never inherits live status
+      </div>
+    </div>
+
+    <div class="arrow" aria-hidden="true"></div>
+
+    <section class="step">
+      <div class="step-header">
+        <h2>3. New draft overview — success</h2>
+        <span class="badge success">Aha moment</span>
+      </div>
+      <div class="step-body">
+        <div class="shot">
+          <img src="copy-form-flow-screenshots/03-success-new-draft.png" alt="Success banner on new draft form overview">
+        </div>
+        <div class="meta">
+          <p><strong>User sees</strong></p>
+          <ul>
+            <li>New form title (for example Form name (copy 2))</li>
+            <li>Success: live/draft copied; copy is a draft</li>
+            <li>Edit draft as primary next step</li>
+          </ul>
+          <p><strong>Next</strong></p>
+          <ul>
+            <li>Rename if needed</li>
+            <li>Check organisation, support and privacy</li>
+            <li>Edit pages in the editor</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

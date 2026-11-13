@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Form overview — before and after</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 28px;
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      background: #f3f2f1;
+      color: #0b0c0c;
+    }
+    h1 {
+      margin: 0 0 6px;
+      font-size: 26px;
+      font-weight: 700;
+    }
+    .intro {
+      margin: 0 0 20px;
+      color: #505a5f;
+      font-size: 15px;
+      max-width: 960px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    .panel {
+      background: #fff;
+      border: 1px solid #b1b4b6;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border-bottom: 1px solid #b1b4b6;
+      background: #fafafa;
+    }
+    .panel-header h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .badge {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid #b1b4b6;
+      background: #fff;
+      white-space: nowrap;
+    }
+    .badge.before { background: #fff4e5; border-color: #b36b00; }
+    .badge.after { background: #e6f4ea; border-color: #1e7e34; }
+    .shot img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    .notes {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .notes .panel { padding: 14px 16px; }
+    .notes h3 { margin: 0 0 8px; font-size: 16px; }
+    .notes ul { margin: 0; padding-left: 18px; }
+    .notes li { margin-bottom: 4px; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <h1>Form overview — before and after</h1>
+  <p class="intro">Copy form PoC: masthead, relocated Edit draft / Delete draft, and Copy on Draft and Live status cards.</p>
+  <div class="grid">
+    <section class="panel">
+      <div class="panel-header">
+        <h2>Before</h2>
+        <span class="badge before">/form-overview/index</span>
+      </div>
+      <div class="shot">
+        <img src="01-before-overview.png" alt="Before: form overview without masthead">
+      </div>
+    </section>
+    <section class="panel">
+      <div class="panel-header">
+        <h2>After</h2>
+        <span class="badge after">/form-overview/copy-poc</span>
+      </div>
+      <div class="shot">
+        <img src="02-after-overview.png" alt="After: form overview with masthead and Copy actions">
+      </div>
+    </section>
+  </div>
+  <div class="notes">
+    <section class="panel">
+      <h3>Before</h3>
+      <ul>
+        <li>No masthead — plain page title</li>
+        <li>Edit draft and Delete draft in Manage form</li>
+        <li>Flat status summary list</li>
+        <li>No Copy action</li>
+      </ul>
+    </section>
+    <section class="panel">
+      <h3>After</h3>
+      <ul>
+        <li>Inverse masthead with Edit draft</li>
+        <li>Draft/Live status cards</li>
+        <li>Copy on Draft and Live cards</li>
+        <li>Delete draft on Draft card; sidebar is lifecycle-only</li>
+      </ul>
+    </section>
+  </div>
+</body>
+</html>

@@ -62,6 +62,37 @@ Form history - Employee Onboarding
         {{ mojTimeline({
         items: [
         {
+        label: { text: "Form copied from live" },
+        html: formCopiedFromLiveHtml,
+        datetime: { timestamp: "2026-11-10T16:30:00.000Z", type: "datetime" },
+        byline: { text: "Chris Smith" }
+        },
+        {
+        label: { text: "Page copied" },
+        html: pageCopiedHtml,
+        datetime: { timestamp: "2026-11-10T15:42:00.000Z", type: "datetime" },
+        byline: { text: "Chris Smith" }
+        },
+        {
+        label: { text: "Questions copied from another page" },
+        html: questionsFromPageCopiedHtml,
+        datetime: { timestamp: "2026-11-10T14:18:00.000Z", type: "datetime" },
+        byline: { text: "Chris Smith" }
+        },
+        {
+        label: { text: "Question duplicated" },
+        text: "Duplicated ‘Email address’ as ‘Email address (copy)’ on page 2, ‘Contact details’. Conditions that used the original question were not copied.",
+        datetime: { timestamp: "2026-11-10T11:05:00.000Z", type: "datetime" },
+        byline: { text: "Emily Wong" }
+        },
+        {
+        label: { text: "Form copied from draft" },
+        html: formCopiedFromDraftHtml,
+        datetime: { timestamp: "2026-11-09T16:20:00.000Z", type: "datetime" },
+        byline: { text: "Chris Smith" }
+        },
+
+        {
         label: { text: "Spreadsheet schedule cancelled" },
         text: "Stopped sending spreadsheets automatically.",
         datetime: { timestamp: "2026-08-21T11:15:00.000Z", type: "datetime" },
@@ -246,4 +277,39 @@ Form history - Employee Onboarding
     <span aria-hidden="true" style="font-size: 1.3em; margin-right: 8px; line-height: 1;">🎉</span>
     <span>Made the form live.</span>
 </span>
+{% endset %}
+
+{% set pageCopiedHtml %}
+<p class="govuk-body">Copied page 4, ‘Business address’, as ‘Business address (copy)’.</p>
+<ul class="govuk-list govuk-list--bullet">
+    <li>Inserted after page 4</li>
+    <li>Copied 3 questions</li>
+    <li>Page conditions were not copied</li>
+</ul>
+{% endset %}
+
+{% set questionsFromPageCopiedHtml %}
+<p class="govuk-body">Copied 2 questions from page 1, ‘About you’, to page 6, ‘Additional contacts’.</p>
+<ul class="govuk-list govuk-list--bullet">
+    <li>Full name</li>
+    <li>Phone number</li>
+    <li>Conditions associated with those questions were not copied</li>
+</ul>
+{% endset %}
+
+{% set formCopiedFromLiveHtml %}
+<p class="govuk-body">Created a new draft named ‘Employee Onboarding (copy 2)’ from the <strong>live</strong> form.</p>
+<ul class="govuk-list govuk-list--bullet">
+    <li>Copied all pages, questions and form details</li>
+    <li>The copy is a draft — it did not go live</li>
+    <li>Live URL and live status were not copied</li>
+</ul>
+{% endset %}
+
+{% set formCopiedFromDraftHtml %}
+<p class="govuk-body">Created a new draft named ‘Employee Onboarding (copy)’ from the <strong>draft</strong> form.</p>
+<ul class="govuk-list govuk-list--bullet">
+    <li>Copied all pages, questions and form details</li>
+    <li>Only the draft was copied</li>
+</ul>
 {% endset %}

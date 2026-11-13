@@ -1,0 +1,904 @@
+{% extends "layouts/main.html" %}
+{% from "components/service-header/macro.njk" import serviceHeader %}
+{%- from "govuk/components/tag/macro.njk" import govukTag -%}
+{%- from "govuk/components/tabs/macro.njk" import govukTabs -%}
+{%- from "govuk/components/table/macro.njk" import govukTable -%}
+{%- from "moj/components/sub-navigation/macro.njk" import mojSubNavigation -%}
+
+{% block pageTitle %}
+Copy form metrics – {{ serviceName }} – GOV.UK Prototype Kit
+{% endblock %}
+
+{% block header %}
+{{ serviceHeader({
+organisationName: "Defra",
+productName: "Form Designer",
+serviceName: "",
+containerClasses: containerClasses,
+accountName: "Chris Smith ",
+homepageLink: "/",
+signOutLink: "/onboarding/sign-out-confirmation",
+navigationItems: [
+{ href: "/titan-mvp-1.2/roles/my-account.html", text: "My account", id: "my-account" },
+{ href: "/titan-mvp-1.2/roles/manage-users.html", text: "Manage users", id: "manage-users" },
+{ href: "/titan-mvp-1.2/roles/manage-users.html", text: "Admin tools", id: "admin-tools" }
+
+],
+activeLinkId: "admin-tools"
+}) }}
+
+<div class="x-govuk-masthead x-govuk-masthead--large">
+    <div class="govuk-width-container">
+        {{ govukBackLink({ classes: "govuk-back-link--inverse govuk-!-margin-bottom-0", text: "Back to admin tools",
+        href: "/titan-mvp-1.2/library.html" }) }}
+
+        <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"
+            style="border-bottom: 1px solid white; margin-bottom: 0" />
+
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full-from-desktop">
+                <h1 class="x-govuk-masthead__title">
+Defra Form Designer metrics                </h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block content %}
+
+{% macro metricLabel(text, description, id) %}
+<span class="gem-c-big-number__label">
+  <span class="app-metric-tooltip tooltip" tabindex="0" aria-describedby="{{ id }}">
+    {{ text }}
+    <span class="tooltiptext" id="{{ id }}" role="tooltip">{{ description }}</span>
+  </span>
+</span>
+{% endmacro %}
+
+
+{{ mojSubNavigation({
+  label: "Sub navigation",
+  items: [  {
+    text: "Form activity",
+    href: "/titan-mvp-1.2/metrics/v7"
+  },   {
+    text: "Component usage",
+    href: "/titan-mvp-1.2/metrics/component-usage"
+  },   {
+    text: "Sign-in",
+    href: "/titan-mvp-1.2/metrics/sign-in"
+  },   {
+    text: "Copy answers",
+    href: "/titan-mvp-1.2/metrics/copy-answers"
+  },   {
+    text: "Copy page",
+    href: "/titan-mvp-1.2/metrics/copy-page"
+  },   {
+    text: "Copy form",
+    href: "/titan-mvp-1.2/metrics/copy-form",
+    active: true
+  },   {
+    text: "Edit and resubmit",
+    href: "/titan-mvp-1.2/metrics/edit-and-resubmit"
+  },   {
+    text: "Payments",
+    href: "/titan-mvp-1.2/metrics/payments"
+  },   {
+    text: "Third party review",
+    href: "/titan-mvp-1.2/metrics/3rd-party-review"
+  },   {
+    text: "File downloads",
+    href: "/titan-mvp-1.2/metrics/file-downloads"
+  }
+  ]
+}) }}
+
+
+{% set sevenDaysContent %}
+<div class="govuk-!-margin-bottom-6">
+  <span class="govuk-caption-m">4 November 2026 to 10 November 2026</span>
+  <h2 class="govuk-heading-l govuk-!-margin-bottom-1">Last 7 days</h2>
+  <p class="govuk-body">See how many forms people copied, which forms were copied most often, which organisations copy the most, and who is doing the copying.</p>
+</div>
+
+<!-- How many forms copied -->
+<div class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Forms copied</h2>
+  <p class="govuk-body govuk-!-margin-bottom-4">How many times someone used Make a copy of this form, and which form was copied most often.</p>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Forms copied', 'How many times someone made a copy of a form. Each copy creates a new draft.', 'metric-tip-forms-copied-7d') }}
+          <span class="gem-c-big-number__value">17</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({
+            text: "+6.3%",
+            classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up",
+            attributes: { "aria-label": "Forms copied increased by 6.3% compared to the previous 7 days." }
+          }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">1 more than last week</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile app-metric-tile--form-name">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Form copied most often', 'The form that other people copied from the most times in this period.', 'metric-tip-most-copied-form-7d') }}
+          <span class="gem-c-big-number__value gem-c-big-number__value--form-name">Waste carrier registration</span>
+        </div>
+        <p class="govuk-body govuk-!-margin-top-2 govuk-!-margin-bottom-1"><strong>3</strong> copies · Environment Agency</p>
+        <p class="govuk-body-xs app-metric-caption">Most copied form this week</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- List of forms copied -->
+<div class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Forms that were copied</h2>
+  <p class="govuk-body govuk-!-margin-bottom-4">Every form that was used as a copy source in this period. Select a column heading to sort the table.</p>
+  {{ govukTable({
+    attributes: {
+      "data-module": "moj-sortable-table"
+    },
+    caption: "Forms that were copied in the last 7 days",
+    captionClasses: "govuk-table__caption--m",
+    firstCellIsHeader: true,
+    head: [
+      {
+        text: "Form",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Source",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Times copied",
+        format: "numeric",
+        attributes: { "aria-sort": "descending" }
+      }
+    ],
+    rows: [
+      [
+        { html: '<a href="#" class="govuk-link">Waste carrier registration</a><span class="govuk-caption-m govuk-!-display-block">Environment Agency</span>', attributes: { "data-sort-value": "Waste carrier registration" } },
+        { text: "Live", attributes: { "data-sort-value": "Live" } },
+        { text: "3", format: "numeric", attributes: { "data-sort-value": "3" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Export health certificate</a><span class="govuk-caption-m govuk-!-display-block">Animal and Plant Health Agency</span>', attributes: { "data-sort-value": "Export health certificate" } },
+        { text: "Live", attributes: { "data-sort-value": "Live" } },
+        { text: "2", format: "numeric", attributes: { "data-sort-value": "2" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Apply for a county parish holding number</a><span class="govuk-caption-m govuk-!-display-block">Rural Payments Agency</span>', attributes: { "data-sort-value": "Apply for a county parish holding number" } },
+        { text: "Draft", attributes: { "data-sort-value": "Draft" } },
+        { text: "2", format: "numeric", attributes: { "data-sort-value": "2" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Protected species licence</a><span class="govuk-caption-m govuk-!-display-block">Natural England</span>', attributes: { "data-sort-value": "Protected species licence" } },
+        { text: "Live", attributes: { "data-sort-value": "Live" } },
+        { text: "2", format: "numeric", attributes: { "data-sort-value": "2" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Employee onboarding</a><span class="govuk-caption-m govuk-!-display-block">Defra</span>', attributes: { "data-sort-value": "Employee onboarding" } },
+        { text: "Live", attributes: { "data-sort-value": "Live" } },
+        { text: "1", format: "numeric", attributes: { "data-sort-value": "1" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Tree felling licence</a><span class="govuk-caption-m govuk-!-display-block">Forestry Commission</span>', attributes: { "data-sort-value": "Tree felling licence" } },
+        { text: "Live", attributes: { "data-sort-value": "Live" } },
+        { text: "1", format: "numeric", attributes: { "data-sort-value": "1" } }
+      ]
+    ]
+  }) }}
+</div>
+
+<!-- Org view -->
+<div class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Copies by organisation</h2>
+  <p class="govuk-body govuk-!-margin-bottom-4">How many form copies were made from forms owned by each organisation.</p>
+  {{ govukTable({
+    attributes: {
+      "data-module": "moj-sortable-table"
+    },
+    caption: "Form copies by organisation in the last 7 days",
+    captionClasses: "govuk-table__caption--m",
+    firstCellIsHeader: true,
+    head: [
+      {
+        text: "Organisation",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Forms copied",
+        format: "numeric",
+        attributes: { "aria-sort": "descending" }
+      }
+    ],
+    rows: [
+      [
+        { text: "Environment Agency", attributes: { "data-sort-value": "Environment Agency" } },
+        { text: "4", format: "numeric", attributes: { "data-sort-value": "4" } }
+      ],
+      [
+        { text: "Animal and Plant Health Agency", attributes: { "data-sort-value": "Animal and Plant Health Agency" } },
+        { text: "3", format: "numeric", attributes: { "data-sort-value": "3" } }
+      ],
+      [
+        { text: "Natural England", attributes: { "data-sort-value": "Natural England" } },
+        { text: "3", format: "numeric", attributes: { "data-sort-value": "3" } }
+      ],
+      [
+        { text: "Rural Payments Agency", attributes: { "data-sort-value": "Rural Payments Agency" } },
+        { text: "3", format: "numeric", attributes: { "data-sort-value": "3" } }
+      ],
+      [
+        { text: "Defra", attributes: { "data-sort-value": "Defra" } },
+        { text: "2", format: "numeric", attributes: { "data-sort-value": "2" } }
+      ],
+      [
+        { text: "Forestry Commission", attributes: { "data-sort-value": "Forestry Commission" } },
+        { text: "2", format: "numeric", attributes: { "data-sort-value": "2" } }
+      ]
+    ]
+  }) }}
+</div>
+
+<!-- User view -->
+<div class="govuk-!-margin-bottom-0">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Who copied forms</h2>
+  <p class="govuk-body govuk-!-margin-bottom-4">People who made at least one form copy in this period.</p>
+  {{ govukTable({
+    attributes: {
+      "data-module": "moj-sortable-table"
+    },
+    caption: "People who copied forms in the last 7 days",
+    captionClasses: "govuk-table__caption--m",
+    firstCellIsHeader: true,
+    head: [
+      {
+        text: "Name",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Organisation",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Forms copied",
+        format: "numeric",
+        attributes: { "aria-sort": "descending" }
+      }
+    ],
+    rows: [
+      [
+        { text: "Sam Okeke", attributes: { "data-sort-value": "Sam Okeke" } },
+        { text: "Environment Agency", attributes: { "data-sort-value": "Environment Agency" } },
+        { text: "3", format: "numeric", attributes: { "data-sort-value": "3" } }
+      ],
+      [
+        { text: "Priya Shah", attributes: { "data-sort-value": "Priya Shah" } },
+        { text: "Animal and Plant Health Agency", attributes: { "data-sort-value": "Animal and Plant Health Agency" } },
+        { text: "2", format: "numeric", attributes: { "data-sort-value": "2" } }
+      ],
+      [
+        { text: "Chris Smith", attributes: { "data-sort-value": "Chris Smith" } },
+        { text: "Defra", attributes: { "data-sort-value": "Defra" } },
+        { text: "2", format: "numeric", attributes: { "data-sort-value": "2" } }
+      ],
+      [
+        { text: "Jordan Miles", attributes: { "data-sort-value": "Jordan Miles" } },
+        { text: "Natural England", attributes: { "data-sort-value": "Natural England" } },
+        { text: "2", format: "numeric", attributes: { "data-sort-value": "2" } }
+      ],
+      [
+        { text: "Alex Morgan", attributes: { "data-sort-value": "Alex Morgan" } },
+        { text: "Rural Payments Agency", attributes: { "data-sort-value": "Rural Payments Agency" } },
+        { text: "1", format: "numeric", attributes: { "data-sort-value": "1" } }
+      ]
+    ]
+  }) }}
+</div>
+{% endset %}
+
+{% set thirtyDaysContent %}
+<div class="govuk-!-margin-bottom-6">
+  <span class="govuk-caption-m">12 October 2026 to 10 November 2026</span>
+  <h2 class="govuk-heading-l govuk-!-margin-bottom-1">Last 30 days</h2>
+  <p class="govuk-body">See how many forms people copied, which forms were copied most often, which organisations copy the most, and who is doing the copying.</p>
+</div>
+
+<div class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Forms copied</h2>
+  <p class="govuk-body govuk-!-margin-bottom-4">How many times someone used Make a copy of this form, and which form was copied most often.</p>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Forms copied', 'How many times someone made a copy of a form. Each copy creates a new draft.', 'metric-tip-forms-copied-30d') }}
+          <span class="gem-c-big-number__value">63</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({ text: "+14.5%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Forms copied increased by 14.5% compared to the previous 30 days." } }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">8 more than last month</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile app-metric-tile--form-name">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Form copied most often', 'The form that other people copied from the most times in this period.', 'metric-tip-most-copied-form-30d') }}
+          <span class="gem-c-big-number__value gem-c-big-number__value--form-name">Waste carrier registration</span>
+        </div>
+        <p class="govuk-body govuk-!-margin-top-2 govuk-!-margin-bottom-1"><strong>9</strong> copies · Environment Agency</p>
+        <p class="govuk-body-xs app-metric-caption">Most copied form this month</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Forms that were copied</h2>
+  <p class="govuk-body govuk-!-margin-bottom-4">Every form that was used as a copy source in this period. Select a column heading to sort the table.</p>
+  {{ govukTable({
+    attributes: {
+      "data-module": "moj-sortable-table"
+    },
+    caption: "Forms that were copied in the last 30 days",
+    captionClasses: "govuk-table__caption--m",
+    firstCellIsHeader: true,
+    head: [
+      {
+        text: "Form",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Source",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Times copied",
+        format: "numeric",
+        attributes: { "aria-sort": "descending" }
+      }
+    ],
+    rows: [
+      [
+        { html: '<a href="#" class="govuk-link">Waste carrier registration</a><span class="govuk-caption-m govuk-!-display-block">Environment Agency</span>', attributes: { "data-sort-value": "Waste carrier registration" } },
+        { text: "Live", attributes: { "data-sort-value": "Live" } },
+        { text: "9", format: "numeric", attributes: { "data-sort-value": "9" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Export health certificate</a><span class="govuk-caption-m govuk-!-display-block">Animal and Plant Health Agency</span>', attributes: { "data-sort-value": "Export health certificate" } },
+        { text: "Live", attributes: { "data-sort-value": "Live" } },
+        { text: "7", format: "numeric", attributes: { "data-sort-value": "7" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Apply for a county parish holding number</a><span class="govuk-caption-m govuk-!-display-block">Rural Payments Agency</span>', attributes: { "data-sort-value": "Apply for a county parish holding number" } },
+        { text: "Draft", attributes: { "data-sort-value": "Draft" } },
+        { text: "6", format: "numeric", attributes: { "data-sort-value": "6" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Protected species licence</a><span class="govuk-caption-m govuk-!-display-block">Natural England</span>', attributes: { "data-sort-value": "Protected species licence" } },
+        { text: "Live", attributes: { "data-sort-value": "Live" } },
+        { text: "5", format: "numeric", attributes: { "data-sort-value": "5" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Employee onboarding</a><span class="govuk-caption-m govuk-!-display-block">Defra</span>', attributes: { "data-sort-value": "Employee onboarding" } },
+        { text: "Live", attributes: { "data-sort-value": "Live" } },
+        { text: "4", format: "numeric", attributes: { "data-sort-value": "4" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Tree felling licence</a><span class="govuk-caption-m govuk-!-display-block">Forestry Commission</span>', attributes: { "data-sort-value": "Tree felling licence" } },
+        { text: "Live", attributes: { "data-sort-value": "Live" } },
+        { text: "3", format: "numeric", attributes: { "data-sort-value": "3" } }
+      ]
+    ]
+  }) }}
+</div>
+
+<div class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Copies by organisation</h2>
+  <p class="govuk-body govuk-!-margin-bottom-4">How many form copies were made from forms owned by each organisation.</p>
+  {{ govukTable({
+    attributes: {
+      "data-module": "moj-sortable-table"
+    },
+    caption: "Form copies by organisation in the last 30 days",
+    captionClasses: "govuk-table__caption--m",
+    firstCellIsHeader: true,
+    head: [
+      {
+        text: "Organisation",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Forms copied",
+        format: "numeric",
+        attributes: { "aria-sort": "descending" }
+      }
+    ],
+    rows: [
+      [
+        { text: "Environment Agency", attributes: { "data-sort-value": "Environment Agency" } },
+        { text: "16", format: "numeric", attributes: { "data-sort-value": "16" } }
+      ],
+      [
+        { text: "Animal and Plant Health Agency", attributes: { "data-sort-value": "Animal and Plant Health Agency" } },
+        { text: "12", format: "numeric", attributes: { "data-sort-value": "12" } }
+      ],
+      [
+        { text: "Natural England", attributes: { "data-sort-value": "Natural England" } },
+        { text: "11", format: "numeric", attributes: { "data-sort-value": "11" } }
+      ],
+      [
+        { text: "Rural Payments Agency", attributes: { "data-sort-value": "Rural Payments Agency" } },
+        { text: "10", format: "numeric", attributes: { "data-sort-value": "10" } }
+      ],
+      [
+        { text: "Defra", attributes: { "data-sort-value": "Defra" } },
+        { text: "8", format: "numeric", attributes: { "data-sort-value": "8" } }
+      ],
+      [
+        { text: "Forestry Commission", attributes: { "data-sort-value": "Forestry Commission" } },
+        { text: "6", format: "numeric", attributes: { "data-sort-value": "6" } }
+      ]
+    ]
+  }) }}
+</div>
+
+<div class="govuk-!-margin-bottom-0">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Who copied forms</h2>
+  <p class="govuk-body govuk-!-margin-bottom-4">People who made at least one form copy in this period.</p>
+  {{ govukTable({
+    attributes: {
+      "data-module": "moj-sortable-table"
+    },
+    caption: "People who copied forms in the last 30 days",
+    captionClasses: "govuk-table__caption--m",
+    firstCellIsHeader: true,
+    head: [
+      {
+        text: "Name",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Organisation",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Forms copied",
+        format: "numeric",
+        attributes: { "aria-sort": "descending" }
+      }
+    ],
+    rows: [
+      [
+        { text: "Sam Okeke", attributes: { "data-sort-value": "Sam Okeke" } },
+        { text: "Environment Agency", attributes: { "data-sort-value": "Environment Agency" } },
+        { text: "11", format: "numeric", attributes: { "data-sort-value": "11" } }
+      ],
+      [
+        { text: "Priya Shah", attributes: { "data-sort-value": "Priya Shah" } },
+        { text: "Animal and Plant Health Agency", attributes: { "data-sort-value": "Animal and Plant Health Agency" } },
+        { text: "9", format: "numeric", attributes: { "data-sort-value": "9" } }
+      ],
+      [
+        { text: "Chris Smith", attributes: { "data-sort-value": "Chris Smith" } },
+        { text: "Defra", attributes: { "data-sort-value": "Defra" } },
+        { text: "8", format: "numeric", attributes: { "data-sort-value": "8" } }
+      ],
+      [
+        { text: "Jordan Miles", attributes: { "data-sort-value": "Jordan Miles" } },
+        { text: "Natural England", attributes: { "data-sort-value": "Natural England" } },
+        { text: "7", format: "numeric", attributes: { "data-sort-value": "7" } }
+      ],
+      [
+        { text: "Alex Morgan", attributes: { "data-sort-value": "Alex Morgan" } },
+        { text: "Rural Payments Agency", attributes: { "data-sort-value": "Rural Payments Agency" } },
+        { text: "6", format: "numeric", attributes: { "data-sort-value": "6" } }
+      ]
+    ]
+  }) }}
+</div>
+{% endset %}
+
+{% set allTimeContent %}
+<div class="govuk-!-margin-bottom-6">
+  <span class="govuk-caption-m">Since private beta</span>
+  <h2 class="govuk-heading-l govuk-!-margin-bottom-1">All time</h2>
+  <p class="govuk-body">See how many forms people copied, which forms were copied most often, which organisations copy the most, and who is doing the copying.</p>
+</div>
+
+<div class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Forms copied</h2>
+  <p class="govuk-body govuk-!-margin-bottom-4">How many times someone used Make a copy of this form, and which form was copied most often.</p>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Forms copied', 'How many times someone made a copy of a form. Each copy creates a new draft.', 'metric-tip-forms-copied-all') }}
+          <span class="gem-c-big-number__value">412</span>
+        </div>
+        <div class="govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+          {{ govukTag({ text: "+29.0%", classes: "govuk-tag--green app-tag-with-icon app-tag-arrow-up", attributes: { "aria-label": "Forms copied increased by 29.0% compared to the same period last year." } }) }}
+        </div>
+        <p class="govuk-body-xs app-metric-caption">93 more than same period last year</p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="app-metric-tile app-metric-tile--form-name">
+        <div class="gem-c-big-number">
+          {{ metricLabel('Form copied most often', 'The form that other people copied from the most times in this period.', 'metric-tip-most-copied-form-all') }}
+          <span class="gem-c-big-number__value gem-c-big-number__value--form-name">Waste carrier registration</span>
+        </div>
+        <p class="govuk-body govuk-!-margin-top-2 govuk-!-margin-bottom-1"><strong>48</strong> copies · Environment Agency</p>
+        <p class="govuk-body-xs app-metric-caption">Most copied form since private beta</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Forms that were copied</h2>
+  <p class="govuk-body govuk-!-margin-bottom-4">Every form that was used as a copy source in this period. Select a column heading to sort the table.</p>
+  {{ govukTable({
+    attributes: {
+      "data-module": "moj-sortable-table"
+    },
+    caption: "Forms that were copied since private beta",
+    captionClasses: "govuk-table__caption--m",
+    firstCellIsHeader: true,
+    head: [
+      {
+        text: "Form",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Source",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Times copied",
+        format: "numeric",
+        attributes: { "aria-sort": "descending" }
+      }
+    ],
+    rows: [
+      [
+        { html: '<a href="#" class="govuk-link">Waste carrier registration</a><span class="govuk-caption-m govuk-!-display-block">Environment Agency</span>', attributes: { "data-sort-value": "Waste carrier registration" } },
+        { text: "Live", attributes: { "data-sort-value": "Live" } },
+        { text: "48", format: "numeric", attributes: { "data-sort-value": "48" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Export health certificate</a><span class="govuk-caption-m govuk-!-display-block">Animal and Plant Health Agency</span>', attributes: { "data-sort-value": "Export health certificate" } },
+        { text: "Live", attributes: { "data-sort-value": "Live" } },
+        { text: "39", format: "numeric", attributes: { "data-sort-value": "39" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Apply for a county parish holding number</a><span class="govuk-caption-m govuk-!-display-block">Rural Payments Agency</span>', attributes: { "data-sort-value": "Apply for a county parish holding number" } },
+        { text: "Draft", attributes: { "data-sort-value": "Draft" } },
+        { text: "27", format: "numeric", attributes: { "data-sort-value": "27" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Protected species licence</a><span class="govuk-caption-m govuk-!-display-block">Natural England</span>', attributes: { "data-sort-value": "Protected species licence" } },
+        { text: "Live", attributes: { "data-sort-value": "Live" } },
+        { text: "24", format: "numeric", attributes: { "data-sort-value": "24" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Employee onboarding</a><span class="govuk-caption-m govuk-!-display-block">Defra</span>', attributes: { "data-sort-value": "Employee onboarding" } },
+        { text: "Live", attributes: { "data-sort-value": "Live" } },
+        { text: "18", format: "numeric", attributes: { "data-sort-value": "18" } }
+      ],
+      [
+        { html: '<a href="#" class="govuk-link">Tree felling licence</a><span class="govuk-caption-m govuk-!-display-block">Forestry Commission</span>', attributes: { "data-sort-value": "Tree felling licence" } },
+        { text: "Live", attributes: { "data-sort-value": "Live" } },
+        { text: "14", format: "numeric", attributes: { "data-sort-value": "14" } }
+      ]
+    ]
+  }) }}
+</div>
+
+<div class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Copies by organisation</h2>
+  <p class="govuk-body govuk-!-margin-bottom-4">How many form copies were made from forms owned by each organisation.</p>
+  {{ govukTable({
+    attributes: {
+      "data-module": "moj-sortable-table"
+    },
+    caption: "Form copies by organisation since private beta",
+    captionClasses: "govuk-table__caption--m",
+    firstCellIsHeader: true,
+    head: [
+      {
+        text: "Organisation",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Forms copied",
+        format: "numeric",
+        attributes: { "aria-sort": "descending" }
+      }
+    ],
+    rows: [
+      [
+        { text: "Environment Agency", attributes: { "data-sort-value": "Environment Agency" } },
+        { text: "98", format: "numeric", attributes: { "data-sort-value": "98" } }
+      ],
+      [
+        { text: "Animal and Plant Health Agency", attributes: { "data-sort-value": "Animal and Plant Health Agency" } },
+        { text: "76", format: "numeric", attributes: { "data-sort-value": "76" } }
+      ],
+      [
+        { text: "Natural England", attributes: { "data-sort-value": "Natural England" } },
+        { text: "64", format: "numeric", attributes: { "data-sort-value": "64" } }
+      ],
+      [
+        { text: "Rural Payments Agency", attributes: { "data-sort-value": "Rural Payments Agency" } },
+        { text: "58", format: "numeric", attributes: { "data-sort-value": "58" } }
+      ],
+      [
+        { text: "Defra", attributes: { "data-sort-value": "Defra" } },
+        { text: "47", format: "numeric", attributes: { "data-sort-value": "47" } }
+      ],
+      [
+        { text: "Forestry Commission", attributes: { "data-sort-value": "Forestry Commission" } },
+        { text: "31", format: "numeric", attributes: { "data-sort-value": "31" } }
+      ]
+    ]
+  }) }}
+</div>
+
+<div class="govuk-!-margin-bottom-0">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Who copied forms</h2>
+  <p class="govuk-body govuk-!-margin-bottom-4">People who made at least one form copy in this period.</p>
+  {{ govukTable({
+    attributes: {
+      "data-module": "moj-sortable-table"
+    },
+    caption: "People who copied forms since private beta",
+    captionClasses: "govuk-table__caption--m",
+    firstCellIsHeader: true,
+    head: [
+      {
+        text: "Name",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Organisation",
+        attributes: { "aria-sort": "none" }
+      },
+      {
+        text: "Forms copied",
+        format: "numeric",
+        attributes: { "aria-sort": "descending" }
+      }
+    ],
+    rows: [
+      [
+        { text: "Sam Okeke", attributes: { "data-sort-value": "Sam Okeke" } },
+        { text: "Environment Agency", attributes: { "data-sort-value": "Environment Agency" } },
+        { text: "54", format: "numeric", attributes: { "data-sort-value": "54" } }
+      ],
+      [
+        { text: "Priya Shah", attributes: { "data-sort-value": "Priya Shah" } },
+        { text: "Animal and Plant Health Agency", attributes: { "data-sort-value": "Animal and Plant Health Agency" } },
+        { text: "41", format: "numeric", attributes: { "data-sort-value": "41" } }
+      ],
+      [
+        { text: "Chris Smith", attributes: { "data-sort-value": "Chris Smith" } },
+        { text: "Defra", attributes: { "data-sort-value": "Defra" } },
+        { text: "38", format: "numeric", attributes: { "data-sort-value": "38" } }
+      ],
+      [
+        { text: "Jordan Miles", attributes: { "data-sort-value": "Jordan Miles" } },
+        { text: "Natural England", attributes: { "data-sort-value": "Natural England" } },
+        { text: "33", format: "numeric", attributes: { "data-sort-value": "33" } }
+      ],
+      [
+        { text: "Alex Morgan", attributes: { "data-sort-value": "Alex Morgan" } },
+        { text: "Rural Payments Agency", attributes: { "data-sort-value": "Rural Payments Agency" } },
+        { text: "29", format: "numeric", attributes: { "data-sort-value": "29" } }
+      ]
+    ]
+  }) }}
+</div>
+{% endset %}
+
+{{ govukTabs({
+  items: [
+    {
+      label: "Last 7 days",
+      id: "last-7-days",
+      panel: {
+        html: sevenDaysContent
+      }
+    },
+    {
+      label: "Last 30 days",
+      id: "last-30-days",
+      panel: {
+        html: thirtyDaysContent
+      }
+    },
+    {
+      label: "All time",
+      id: "all-time",
+      panel: {
+        html: allTimeContent
+      }
+    }
+  ]
+}) }}
+
+{% endblock %}
+
+{% block pageScripts %}
+<style>
+  .app-metric-tile {
+    background-color: #f3f2f1;
+    padding: 24px;
+    margin-bottom: 1rem;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+  }
+
+  @media (min-width: 40.0625em) {
+    .app-metric-tile {
+      min-height: 220px;
+    }
+  }
+
+  .gem-c-big-number {
+    margin-bottom: 0;
+  }
+
+  .gem-c-big-number__value {
+    display: block;
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 0;
+    color: #0b0c0c;
+  }
+
+  @media (min-width: 40.0625em) {
+    .gem-c-big-number__value {
+      font-size: 3.5rem;
+    }
+  }
+
+  .gem-c-big-number__label {
+    display: block;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.25;
+    margin-bottom: 12px;
+    color: #0b0c0c;
+  }
+
+  .app-tag-with-icon {
+    position: relative;
+    padding-left: 26px;
+    white-space: nowrap;
+  }
+
+  .app-tag-arrow-up::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    background-color: currentColor;
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 0l6 6H7v6H5V6H0z'/%3E%3C/svg%3E");
+    mask-repeat: no-repeat;
+    mask-position: center;
+    mask-size: contain;
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 0l6 6H7v6H5V6H0z'/%3E%3C/svg%3E");
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    -webkit-mask-size: contain;
+  }
+
+  .app-tag-arrow-down::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    background-color: currentColor;
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 12L0 6h5V0h2v6h5z'/%3E%3C/svg%3E");
+    mask-repeat: no-repeat;
+    mask-position: center;
+    mask-size: contain;
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 12L0 6h5V0h2v6h5z'/%3E%3C/svg%3E");
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    -webkit-mask-size: contain;
+  }
+
+  .app-metric-tile .gem-c-big-number {
+    flex: 1 0 auto;
+  }
+
+  .app-metric-tile--form-name .gem-c-big-number {
+    flex: 0 0 auto;
+  }
+
+  .gem-c-big-number__value--form-name {
+    font-size: 2.25rem;
+    line-height: 1.15;
+    margin-bottom: 0;
+  }
+
+  .app-metric-caption {
+    color: #505a5f;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  .app-metric-tooltip {
+    max-width: 100%;
+  }
+
+  .app-metric-tooltip .tooltiptext {
+    font-weight: 400;
+    user-select: text;
+    pointer-events: auto;
+  }
+
+  .app-metric-tooltip:focus-visible {
+    outline: 3px solid transparent;
+    background-color: #ffdd00;
+    box-shadow: 0 -2px #ffdd00, 0 4px #0b0c0c;
+    border-bottom-color: transparent;
+  }
+
+  .app-metric-tooltip .tooltiptext.app-metric-tooltip__tip--visible {
+    visibility: visible;
+    opacity: 1;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.app-metric-tooltip').forEach(function (trigger) {
+      const tip = trigger.querySelector('[role="tooltip"]');
+      if (!tip) return;
+
+      function show() {
+        tip.classList.add('app-metric-tooltip__tip--visible');
+      }
+
+      function hide() {
+        tip.classList.remove('app-metric-tooltip__tip--visible');
+      }
+
+      trigger.addEventListener('mouseenter', show);
+      trigger.addEventListener('mouseleave', hide);
+      tip.addEventListener('mouseenter', show);
+      tip.addEventListener('mouseleave', hide);
+      trigger.addEventListener('focus', show);
+      trigger.addEventListener('blur', hide);
+
+      trigger.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          hide();
+          trigger.blur();
+        }
+      });
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,26 @@
+flowchart TD
+  A[Form overview] --> B{Need a similar form?}
+  B -->|No| Z[Stay on overview / other actions]
+  B -->|Yes| C{Copy draft or live?}
+
+  C -->|Draft| D[Open Make a copy — source draft]
+  C -->|Live| E[Open Make a copy — source live]
+
+  D --> F[Name new form + review checks]
+  E --> F
+
+  F -->|Cancel| A
+  F -->|Make a copy| G[Clone pages, questions, details as new draft]
+
+  G --> H[Land on new form overview]
+  H --> I[Success: copied as draft]
+  I --> J[Edit draft / check org support privacy]
+  J --> K[Journey complete]
+
+  classDef decision fill:#fff4e5,stroke:#b36b00
+  classDef system fill:#e8f1ff,stroke:#1a5fb4
+  classDef success fill:#e6f4ea,stroke:#1e7e34
+
+  class B,C decision
+  class G system
+  class I,K success

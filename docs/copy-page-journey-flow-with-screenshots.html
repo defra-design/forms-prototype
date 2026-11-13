@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Copy page user journey — flow with screenshots</title>
+  <style>
+    :root {
+      --ink: #0b0c0c;
+      --muted: #505a5f;
+      --border: #b1b4b6;
+      --panel: #ffffff;
+      --bg: #f3f2f1;
+      --decision: #fff4e5;
+      --decision-border: #b36b00;
+      --system: #e8f1ff;
+      --system-border: #1a5fb4;
+      --success: #e6f4ea;
+      --success-border: #1e7e34;
+      --risk: #fde8e8;
+      --risk-border: #c62828;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 32px;
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.4;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      font-weight: 700;
+    }
+    .intro {
+      margin: 0 0 28px;
+      color: var(--muted);
+      max-width: 720px;
+    }
+    .flow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      max-width: 880px;
+      margin: 0 auto;
+    }
+    .step {
+      width: 100%;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .step-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      background: #fafafa;
+    }
+    .step-header h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .badge {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fff;
+      white-space: nowrap;
+    }
+    .badge.decision { background: var(--decision); border-color: var(--decision-border); }
+    .badge.system { background: var(--system); border-color: var(--system-border); }
+    .badge.success { background: var(--success); border-color: var(--success-border); }
+    .badge.risk { background: var(--risk); border-color: var(--risk-border); }
+    .step-body {
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+    .step-body.single { grid-template-columns: 1fr; }
+    .shot {
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .shot img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    .meta p { margin: 0 0 8px; }
+    .meta ul { margin: 0; padding-left: 18px; }
+    .meta li { margin-bottom: 4px; }
+    .arrow {
+      width: 2px;
+      height: 28px;
+      background: #505a5f;
+      position: relative;
+      margin: 4px 0;
+    }
+    .arrow::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: -1px;
+      transform: translateX(-50%);
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 8px solid #505a5f;
+    }
+    .branch {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 8px 0 4px;
+    }
+    .branch-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .branch-card.cancel { border-color: var(--border); }
+    .branch-card.confirm { border-color: var(--system-border); background: var(--system); }
+    .branch-card strong { display: block; margin-bottom: 4px; }
+    .note {
+      font-size: 13px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <h1>Copy page user journey</h1>
+  <p class="intro">
+    Visual flow with live prototype screenshots. Persona: Chris (form designer).
+    Critical path: confirmation (conditions warning) → land on copy → rename.
+  </p>
+
+  <div class="flow">
+    <section class="step">
+      <div class="step-header">
+        <h2>1. Page overview — discover Copy page</h2>
+        <span class="badge">Entry</span>
+      </div>
+      <div class="step-body">
+        <div class="shot">
+          <img src="copy-page-flow-screenshots/01-page-overview.png" alt="Page overview showing the Copy page action">
+        </div>
+        <div class="meta">
+          <p><strong>User action</strong></p>
+          <ul>
+            <li>Opens page overview</li>
+            <li>Clicks <strong>Copy page</strong></li>
+          </ul>
+          <p><strong>Thought</strong></p>
+          <ul>
+            <li>“Is this the right control?”</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <div class="arrow" aria-hidden="true"></div>
+
+    <section class="step">
+      <div class="step-header">
+        <h2>2. Confirmation — review what will be copied</h2>
+        <span class="badge decision">Moment of truth</span>
+      </div>
+      <div class="step-body">
+        <div class="shot">
+          <img src="copy-page-flow-screenshots/02-confirmation.png" alt="Copy this page confirmation screen">
+        </div>
+        <div class="meta">
+          <p><strong>User sees</strong></p>
+          <ul>
+            <li>Proposed name with <code>(copy)</code></li>
+            <li>Question count</li>
+            <li class="note" style="color:#c62828"><strong>Page conditions will not be copied</strong></li>
+          </ul>
+          <p><strong>Decision</strong></p>
+          <ul>
+            <li>Copy page, or Cancel back to overview</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <div class="branch">
+      <div class="branch-card cancel">
+        <strong>Cancel</strong>
+        Return to original page overview — no change
+      </div>
+      <div class="branch-card confirm">
+        <strong>Copy page</strong>
+        System clones questions, omits page conditions, inserts after source
+      </div>
+    </div>
+
+    <div class="arrow" aria-hidden="true"></div>
+
+    <section class="step">
+      <div class="step-header">
+        <h2>3. New page overview — success and rename</h2>
+        <span class="badge success">Aha moment</span>
+      </div>
+      <div class="step-body">
+        <div class="shot">
+          <img src="copy-page-flow-screenshots/03-success-rename.png" alt="Success banner prompting rename after copy">
+        </div>
+        <div class="meta">
+          <p><strong>User sees</strong></p>
+          <ul>
+            <li>Success: Page copied</li>
+            <li>Prompt to rename</li>
+            <li>Lands on the new page, not the original</li>
+          </ul>
+          <p><strong>Next</strong></p>
+          <ul>
+            <li>Rename the page</li>
+            <li>Edit questions if needed</li>
+            <li>Rebuild conditions manually if required</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

@@ -1,0 +1,356 @@
+<div id="gov-add-another-tasklist" class="gov-mock">
+  <p class="vis-sr-only">Add another page using GOV.UK task list statuses for missing answers on each item.</p>
+
+  <div class="gov-mock__page">
+    <h1 class="gov-mock__h1">Cows you’ve added</h1>
+    <p class="gov-mock__lede">You have completed 1 of 3 cows.</p>
+
+    <h2 class="gov-mock__section-h">
+      <span class="gov-mock__section-num" aria-hidden="true">1.</span>
+      Daisy
+      <a class="gov-mock__remove" href="#">Remove<span class="gov-mock__vh"> Daisy</span></a>
+    </h2>
+    <ul class="gov-mock__tasks" aria-label="Tasks for Daisy">
+      <li class="gov-mock__task gov-mock__task--link">
+        <div class="gov-mock__task-main">
+          <a class="gov-mock__task-link" href="#" aria-describedby="daisy-name-status">Name</a>
+          <div class="gov-mock__hint">Daisy</div>
+        </div>
+        <div class="gov-mock__status" id="daisy-name-status">Completed</div>
+      </li>
+      <li class="gov-mock__task gov-mock__task--link">
+        <div class="gov-mock__task-main">
+          <a class="gov-mock__task-link" href="#" aria-describedby="daisy-breed-status">Breed</a>
+        </div>
+        <div class="gov-mock__status" id="daisy-breed-status">
+          <strong class="gov-mock__tag">Incomplete</strong>
+        </div>
+      </li>
+    </ul>
+
+    <h2 class="gov-mock__section-h">
+      <span class="gov-mock__section-num" aria-hidden="true">2.</span>
+      Buttercup
+      <a class="gov-mock__remove" href="#">Remove<span class="gov-mock__vh"> Buttercup</span></a>
+    </h2>
+    <ul class="gov-mock__tasks" aria-label="Tasks for Buttercup">
+      <li class="gov-mock__task gov-mock__task--link">
+        <div class="gov-mock__task-main">
+          <a class="gov-mock__task-link" href="#" aria-describedby="buttercup-name-status">Name</a>
+          <div class="gov-mock__hint">Buttercup</div>
+        </div>
+        <div class="gov-mock__status" id="buttercup-name-status">Completed</div>
+      </li>
+      <li class="gov-mock__task gov-mock__task--link">
+        <div class="gov-mock__task-main">
+          <a class="gov-mock__task-link" href="#" aria-describedby="buttercup-breed-status">Breed</a>
+        </div>
+        <div class="gov-mock__status" id="buttercup-breed-status">
+          <strong class="gov-mock__tag">Incomplete</strong>
+        </div>
+      </li>
+    </ul>
+
+    <h2 class="gov-mock__section-h">
+      <span class="gov-mock__section-num" aria-hidden="true">3.</span>
+      Clover
+      <a class="gov-mock__remove" href="#">Remove<span class="gov-mock__vh"> Clover</span></a>
+    </h2>
+    <ul class="gov-mock__tasks" aria-label="Tasks for Clover">
+      <li class="gov-mock__task gov-mock__task--link">
+        <div class="gov-mock__task-main">
+          <a class="gov-mock__task-link" href="#" aria-describedby="clover-name-status">Name</a>
+          <div class="gov-mock__hint">Clover</div>
+        </div>
+        <div class="gov-mock__status" id="clover-name-status">Completed</div>
+      </li>
+      <li class="gov-mock__task gov-mock__task--link">
+        <div class="gov-mock__task-main">
+          <a class="gov-mock__task-link" href="#" aria-describedby="clover-breed-status">Breed</a>
+          <div class="gov-mock__hint">Holstein Friesian</div>
+        </div>
+        <div class="gov-mock__status" id="clover-breed-status">Completed</div>
+      </li>
+    </ul>
+
+    <button type="button" class="gov-mock__btn gov-mock__btn--secondary">Add another cow</button>
+
+    <hr class="gov-mock__divider">
+
+    <h2 class="gov-mock__h2">Leaner variant</h2>
+    <p class="gov-mock__body">One task row per cow. Hint shows what’s missing; status drives attention.</p>
+
+    <p class="gov-mock__lede gov-mock__lede--tight">You have completed 1 of 3 cows.</p>
+    <ul class="gov-mock__tasks" aria-label="Cows">
+      <li class="gov-mock__task gov-mock__task--link">
+        <div class="gov-mock__task-main">
+          <a class="gov-mock__task-link" href="#" aria-describedby="lean-daisy-hint lean-daisy-status">Daisy</a>
+          <div class="gov-mock__hint" id="lean-daisy-hint">Breed not answered</div>
+        </div>
+        <div class="gov-mock__status" id="lean-daisy-status">
+          <strong class="gov-mock__tag">Incomplete</strong>
+        </div>
+      </li>
+      <li class="gov-mock__task gov-mock__task--link">
+        <div class="gov-mock__task-main">
+          <a class="gov-mock__task-link" href="#" aria-describedby="lean-buttercup-hint lean-buttercup-status">Buttercup</a>
+          <div class="gov-mock__hint" id="lean-buttercup-hint">Breed not answered</div>
+        </div>
+        <div class="gov-mock__status" id="lean-buttercup-status">
+          <strong class="gov-mock__tag">Incomplete</strong>
+        </div>
+      </li>
+      <li class="gov-mock__task gov-mock__task--link">
+        <div class="gov-mock__task-main">
+          <a class="gov-mock__task-link" href="#" aria-describedby="lean-clover-status">Clover</a>
+        </div>
+        <div class="gov-mock__status" id="lean-clover-status">Completed</div>
+      </li>
+    </ul>
+
+    <div class="gov-mock__actions-row">
+      <button type="button" class="gov-mock__btn gov-mock__btn--secondary">Add another cow</button>
+      <button type="button" class="gov-mock__btn">Continue</button>
+    </div>
+  </div>
+
+  <style>
+    #gov-add-another-tasklist {
+      --gov-black: #0b0c0c;
+      --gov-grey: #505a5f;
+      --gov-border: #b1b4b6;
+      --gov-mid: #f3f2f1;
+      --gov-blue: #1d70b8;
+      --gov-blue-tag-bg: #d2e2f1;
+      --gov-blue-tag-text: #144e81;
+      --gov-yellow: #ffdd00;
+      --gov-green: #00703c;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--gov-black);
+      line-height: 1.25;
+    }
+
+    #gov-add-another-tasklist .gov-mock__page {
+      background: #fff;
+      padding: 24px 20px 32px;
+      max-width: 640px;
+      border: 1px solid var(--gov-border);
+    }
+
+    #gov-add-another-tasklist .gov-mock__h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin: 0 0 12px;
+      line-height: 1.15;
+    }
+
+    #gov-add-another-tasklist .gov-mock__h2 {
+      font-size: 19px;
+      font-weight: 700;
+      margin: 0 0 8px;
+    }
+
+    #gov-add-another-tasklist .gov-mock__lede {
+      font-size: 19px;
+      margin: 0 0 28px;
+    }
+
+    #gov-add-another-tasklist .gov-mock__lede--tight {
+      margin-bottom: 12px;
+    }
+
+    #gov-add-another-tasklist .gov-mock__body {
+      font-size: 16px;
+      color: var(--gov-grey);
+      margin: 0 0 16px;
+    }
+
+    #gov-add-another-tasklist .gov-mock__section-h {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 0 0 12px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 8px 12px;
+      line-height: 1.25;
+    }
+
+    #gov-add-another-tasklist .gov-mock__section-num {
+      margin-right: 2px;
+    }
+
+    #gov-add-another-tasklist .gov-mock__remove {
+      margin-left: auto;
+      font-size: 16px;
+      font-weight: 400;
+      color: var(--gov-blue);
+    }
+
+    #gov-add-another-tasklist a {
+      color: var(--gov-blue);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    #gov-add-another-tasklist a:hover {
+      color: #003078;
+    }
+
+    #gov-add-another-tasklist a:focus {
+      outline: 3px solid transparent;
+      background: var(--gov-yellow);
+      box-shadow: 0 -2px var(--gov-yellow), 0 4px var(--gov-black);
+      color: var(--gov-black);
+      text-decoration: none;
+    }
+
+    #gov-add-another-tasklist .gov-mock__vh {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    #gov-add-another-tasklist .gov-mock__tasks {
+      list-style: none;
+      margin: 0 0 32px;
+      padding: 0;
+      border-top: 2px solid var(--gov-black);
+    }
+
+    #gov-add-another-tasklist .gov-mock__task {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 0 12px 10px;
+      border-bottom: 1px solid var(--gov-border);
+      font-size: 16px;
+    }
+
+    #gov-add-another-tasklist .gov-mock__task--link {
+      position: relative;
+    }
+
+    #gov-add-another-tasklist .gov-mock__task-main {
+      min-width: 0;
+      flex: 1;
+    }
+
+    #gov-add-another-tasklist .gov-mock__task-link {
+      font-weight: 700;
+      display: inline;
+    }
+
+    #gov-add-another-tasklist .gov-mock__task--link::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+    }
+
+    #gov-add-another-tasklist .gov-mock__task-link,
+    #gov-add-another-tasklist .gov-mock__status {
+      position: relative;
+      z-index: 1;
+    }
+
+    #gov-add-another-tasklist .gov-mock__hint {
+      color: var(--gov-grey);
+      margin-top: 4px;
+      font-weight: 400;
+    }
+
+    #gov-add-another-tasklist .gov-mock__status {
+      flex: 0 0 auto;
+      text-align: right;
+      min-width: 7.5rem;
+      padding-top: 2px;
+    }
+
+    #gov-add-another-tasklist .gov-mock__tag {
+      display: inline-block;
+      background: var(--gov-blue-tag-bg);
+      color: var(--gov-blue-tag-text);
+      font-size: 16px;
+      font-weight: 700;
+      padding: 4px 8px;
+      line-height: 1;
+    }
+
+    #gov-add-another-tasklist .gov-mock__btn {
+      appearance: none;
+      border: 2px solid transparent;
+      background: var(--gov-green);
+      color: #fff;
+      font: inherit;
+      font-size: 16px;
+      font-weight: 700;
+      padding: 8px 12px 7px;
+      box-shadow: 0 2px 0 #002d18;
+      cursor: pointer;
+    }
+
+    #gov-add-another-tasklist .gov-mock__btn--secondary {
+      background: #fff;
+      color: var(--gov-black);
+      box-shadow: 0 2px 0 var(--gov-black);
+      border-color: var(--gov-black);
+      margin-bottom: 8px;
+    }
+
+    #gov-add-another-tasklist .gov-mock__btn:hover {
+      background: #005a30;
+    }
+
+    #gov-add-another-tasklist .gov-mock__btn--secondary:hover {
+      background: var(--gov-mid);
+      color: var(--gov-black);
+    }
+
+    #gov-add-another-tasklist .gov-mock__btn:focus,
+    #gov-add-another-tasklist .gov-mock__btn--secondary:focus {
+      outline: 3px solid transparent;
+      background: var(--gov-yellow);
+      color: var(--gov-black);
+      box-shadow: 0 2px 0 var(--gov-black);
+    }
+
+    #gov-add-another-tasklist .gov-mock__divider {
+      border: 0;
+      border-top: 1px solid var(--gov-border);
+      margin: 28px 0 20px;
+    }
+
+    #gov-add-another-tasklist .gov-mock__actions-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 24px;
+      align-items: center;
+    }
+
+    @media (max-width: 520px) {
+      #gov-add-another-tasklist .gov-mock__h1 {
+        font-size: 27px;
+      }
+
+      #gov-add-another-tasklist .gov-mock__section-h {
+        font-size: 21px;
+      }
+
+      #gov-add-another-tasklist .gov-mock__status {
+        min-width: 0;
+      }
+
+      #gov-add-another-tasklist .gov-mock__remove {
+        margin-left: 0;
+        width: 100%;
+      }
+    }
+  </style>
+</div>

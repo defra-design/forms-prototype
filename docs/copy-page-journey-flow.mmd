@@ -1,0 +1,22 @@
+flowchart TD
+  A["<img src='/Users/daniel_defra/Documents/prototypes/forms-prototype/docs/copy-page-flow-screenshots/01-page-overview.png' width='420' /><br/>Page overview — click Copy page"]
+  A --> B["<img src='/Users/daniel_defra/Documents/prototypes/forms-prototype/docs/copy-page-flow-screenshots/02-confirmation.png' width='420' /><br/>Confirmation — name, question count,<br/>conditions will not be copied"]
+  B -->|Cancel| Z[Stay on original page overview]
+  B -->|Copy page| C[Clone page + questions · omit conditions · insert after source]
+  C --> D["<img src='/Users/daniel_defra/Documents/prototypes/forms-prototype/docs/copy-page-flow-screenshots/03-success-rename.png' width='420' /><br/>Success — Page copied · rename prompt"]
+  D --> E[Rename / edit questions]
+  E --> F{Conditions needed?}
+  F -->|Yes| G[Rebuild conditions manually]
+  F -->|No| H[Check listing / preview]
+  G --> H
+  H --> I[Journey complete]
+
+  classDef decision fill:#fff4e5,stroke:#b36b00
+  classDef system fill:#e8f1ff,stroke:#1a5fb4
+  classDef success fill:#e6f4ea,stroke:#1e7e34
+  classDef risk fill:#fde8e8,stroke:#c62828
+
+  class F decision
+  class C system
+  class I success
+  class G risk
