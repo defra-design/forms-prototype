@@ -2,7 +2,7 @@
 
 {% from "components/service-header/macro.njk" import serviceHeader %}
 
-{% set pageName = "Copy page" %}
+{% set pageName = "Are you sure you want to copy Page " + pageNumber + ", “" + pageHeading + "”?" %}
 
 {% block header %}
 {{ serviceHeader({
@@ -23,19 +23,11 @@ activeLinkId: "nav-editor"
 
 <div class="x-govuk-masthead x-govuk-masthead--large">
   <div class="govuk-width-container">
-    {{ govukBackLink({
-      classes: "govuk-back-link--inverse govuk-!-margin-bottom-0",
-      text: "Back to page " + pageNumber + " overview",
-      href: "/titan-mvp-1.2/page-overview"
-    }) }}
-
-    <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"
-      style="border-bottom: 1px solid white; margin-bottom: 0" />
-
     <div class="govuk-grid-row">
-      <div class="govuk-grid-column-full-from-desktop">
+      <div class="govuk-grid-column-two-thirds-from-desktop">
         <h1 class="x-govuk-masthead__title">
-          {{ form.name }}
+          <span class="govuk-caption-l" style="color: white;">{{ form.name }}</span>
+          Edit page {{ pageNumber }}
         </h1>
       </div>
     </div>
@@ -46,21 +38,21 @@ activeLinkId: "nav-editor"
 {% block content %}
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
-    <h1 class="govuk-heading-l">Copy this page?</h1>
+    <h1 class="govuk-heading-l">Are you sure you want to copy Page {{ pageNumber }}, “{{ pageHeading }}”?</h1>
 
     <p class="govuk-body">
-      A copy of Page {{ pageNumber }}, “{{ pageHeading }}”, will be added after this page and named “{{ copiedLabel }}”.
+      A copy will be added after this page and named “{{ copiedLabel }}”.
     </p>
     <p class="govuk-body">
       Rename the copy so it is clear what the page is for.
     </p>
     <p class="govuk-body">
       {% if questionCount == 0 %}
-      The page has no questions.
+      This page has no questions.
       {% elif questionCount == 1 %}
-      The page has 1 question.
+      This page has 1 question.
       {% else %}
-      The page has {{ questionCount }} questions.
+      This page has {{ questionCount }} questions.
       {% endif %}
     </p>
     <p class="govuk-body">

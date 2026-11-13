@@ -7,7 +7,7 @@
 {% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
 {% from "govuk/components/radios/macro.njk" import govukRadios %}
 {% from "moj/components/page-header-actions/macro.njk" import mojPageHeaderActions %}
-{% set pageName = "Page " + pageNumber + " overview - Apply for a county parish holding number in England" %}
+{% set pageName = "Edit page " + pageNumber + " - " + (form.name if form and form.name else "Form name") %}
 {% set headingPlaceholder = "Page heading" %}
 {% set guidancePlaceholder = "" %}
 
@@ -35,25 +35,12 @@ navigationItems: [
 
 <div class="x-govuk-masthead x-govuk-masthead--large">
   <div class="govuk-width-container">
-    {{ govukBackLink({
-    classes: "govuk-back-link--inverse govuk-!-margin-bottom-0",
-    text: commonTerms.form_editor.navigation.back_to_add_edit_pages,
-    href: "/titan-mvp-1.2/form-editor/listing.html"
-    }) }}
-
-    <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"
-      style="border-bottom: 1px solid white; margin-bottom: 0" />
-
     <div class="govuk-grid-row">
-      <div class="govuk-grid-column-full-from-desktop">
+      <div class="govuk-grid-column-two-thirds-from-desktop">
         <h1 class="x-govuk-masthead__title">
-          {{ form.name }}
+          <span class="govuk-caption-l" style="color: white;">{{ form.name }}</span>
+          Edit page {{ pageNumber }}
         </h1>
-
-        <a href="/titan-mvp-1.2/form-editor/page-type.html" role="button" draggable="false"
-          class="govuk-button govuk-button--inverse" data-module="govuk-button">
-          Add new page
-        </a>
       </div>
     </div>
   </div>
@@ -66,8 +53,8 @@ navigationItems: [
     <div class="govuk-grid-row">
       <!-- Left Column for Form Controls -->
       <div class="govuk-grid-column-one-half-from-desktop" id="container" style="flex: 1 1 75%; overflow-y: auto">
-        <div class="govuk-summary-card govuk-!-margin-top-0" style="border-left: 10px solid #008938">
-          <div class="govuk-summary-card__content govuk-!-padding-top-0" style="background-color: #f3f2f1">
+        <div class="govuk-summary-card app-page-overview-panel govuk-!-margin-top-0">
+          <div class="govuk-summary-card__content govuk-!-padding-top-0 app-page-overview-panel__content">
             <dl class="govuk-summary-list">
               <div class="govuk-summary-list__row">
                 <dd class="govuk-summary-list__value">
@@ -144,7 +131,7 @@ navigationItems: [
                         {{ mojPageHeaderActions({
                           classes: "govuk-!-margin-top-4",
                           heading: {
-                            text: "Page " + pageNumber + " overview",
+                            text: "Content",
                             level: 2,
                             classes: "govuk-heading-l"
                           },
@@ -208,19 +195,17 @@ navigationItems: [
                           {% endif %}
 
                           {% if currentPage.questions.length > 1 %}
-                          <button id="reorder-questions-button" class="govuk-button govuk-button--inverse govuk-!-margin-right-6"
+                          <button id="reorder-questions-button" class="govuk-button govuk-button--inverse"
                             type="button">
                             Re-order questions
                           </button>
                           {% endif %}
-                        </div>
 
-                        <p class="govuk-body govuk-!-margin-top-8 govuk-!-margin-left-4 hide-in-reorder-mode hide-when-edit-mode">
                           <a href="/titan-mvp-1.2/form-editor/delete/{{ currentPage.pageId }}"
-                            class="govuk-link govuk-link--destructive govuk-link--no-visited-state">
+                            class="govuk-link govuk-link--no-visited-state">
                             Delete page
                           </a>
-                        </p>
+                        </div>
 
                         <a href="#tab-one" class="govuk-skip-link" style="margin-bottom: 30px!important;"
                           data-module="govuk-skip-link">
@@ -1728,6 +1713,27 @@ navigationItems: [
   }
 
   /* ========== NORMAL (non-edit) MODE ========== */
+
+  /* Left editor panel: green accent border, white content surface */
+  .app-page-overview-panel {
+    border: 0;
+    border-left: 10px solid #008938;
+    box-shadow: none;
+    background-color: #ffffff;
+  }
+
+  .app-page-overview-panel__content {
+    background-color: #ffffff;
+  }
+
+  .app-page-overview-panel .govuk-summary-list__row {
+    border-bottom: 0;
+  }
+
+  .app-page-overview-panel .govuk-summary-list__value {
+    padding-left: 0;
+    padding-right: 0;
+  }
 
   /* Split sub-nav: tabs left, page action right */
   .app-page-sub-nav {
