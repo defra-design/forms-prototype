@@ -20323,32 +20323,59 @@ function getRunnerSignInFirstStepId(formDef) {
   return formDef.steps[0].id;
 }
 
+function runnerSignInAnswerIsPresent(value) {
+  if (value === null || value === undefined) return false;
+  if (typeof value === "string") return value.trim().length > 0;
+  if (Array.isArray(value)) return value.length > 0;
+  return true;
+}
+
+function getRunnerSignInFirstUnansweredStepId(application) {
+  const formDef = getRunnerSignInFormDef(application && application.formKey);
+  if (!formDef) return null;
+  const answers =
+    application && typeof application.answers === "object" && application.answers
+      ? application.answers
+      : {};
+
+  // Prefer the first step with missing answers (new, changed, or need answering again).
+  for (const step of formDef.steps || []) {
+    const fields = Array.isArray(step.fields) ? step.fields : [];
+    const allAnswered =
+      fields.length === 0 ? true : fields.every((f) => runnerSignInAnswerIsPresent(answers[f]));
+    if (!allAnswered) return step.id;
+  }
+  return null;
+}
+
 function getRunnerSignInResumeStepId(application) {
   const formDef = getRunnerSignInFormDef(application && application.formKey);
   if (!formDef) return null;
   const first = getRunnerSignInFirstStepId(formDef);
   if (!first) return null;
-  const answers = application && typeof application.answers === "object" && application.answers ? application.answers : {};
 
-  function isAnswered(value) {
-    if (value === null || value === undefined) return false;
-    if (typeof value === "string") return value.trim().length > 0;
-    if (Array.isArray(value)) return value.length > 0;
-    return true;
-  }
-
-  // Prefer resuming at the first "logical" unanswered step.
-  for (const step of formDef.steps || []) {
-    const fields = Array.isArray(step.fields) ? step.fields : [];
-    const allAnswered = fields.length === 0 ? true : fields.every((f) => isAnswered(answers[f]));
-    if (!allAnswered) return step.id;
-  }
+  const firstUnanswered = getRunnerSignInFirstUnansweredStepId(application);
+  if (firstUnanswered) return firstUnanswered;
 
   // If everything is answered, fall back to the last step (or the saved step if valid).
   const stepId = String((application && application.step) || "").trim();
   if (stepId && getRunnerSignInStepDef(formDef, stepId)) return stepId;
   const last = (formDef.steps && formDef.steps[formDef.steps.length - 1] && formDef.steps[formDef.steps.length - 1].id) || first;
   return last;
+}
+
+function runnerSignInCopiedFormStepUrl(application, stepId, { showBanner } = {}) {
+  let url = `/runner-sign-in/forms/${encodeURIComponent(application.formKey)}/${encodeURIComponent(application.id)}/${encodeURIComponent(stepId)}?copied=1`;
+  if (showBanner) url += "&copiedBanner=1";
+  return url;
+}
+
+function consumeRunnerSignInCopiedAnswersBanner(req, query) {
+  const data = ensureRunnerSignInSession(req);
+  const fromQuery = String((query && query.copiedBanner) || "").trim();
+  const fromFlash = Boolean(data.runnerSignInShowCopiedAnswersBanner);
+  if (fromFlash) delete data.runnerSignInShowCopiedAnswersBanner;
+  return fromFlash || fromQuery === "1" || fromQuery === "true";
 }
 
 function seedRunnerSignInApplicationsPrototype() {
@@ -22082,6 +22109,7 @@ router.get("/runner-sign-in/forms/:formKey/:id/:step", function (req, res) {
 
   const copied = runnerSignInIsCopiedJourney(req.query, application);
   const copiedQuerySuffix = runnerSignInCopiedQuerySuffix(req.query, application);
+  const showCopiedAnswersBanner = copied && consumeRunnerSignInCopiedAnswersBanner(req, req.query);
   const optionalSignIn = isRunnerSignInFormSignInOptionalUntilSaveAndExit(application.formKey);
   const formStartUrl = `/runner-sign-in-v2/forms/${encodeURIComponent(application.formKey)}/${encodeURIComponent(application.id)}/start-page`;
   let backHref = "/runner-sign-in/applications";
@@ -22100,6 +22128,7 @@ router.get("/runner-sign-in/forms/:formKey/:id/:step", function (req, res) {
     stepDef,
     copied,
     copiedQuerySuffix,
+    showCopiedAnswersBanner,
     optionalSignIn,
     backHref,
   });
@@ -22210,6 +22239,9 @@ router.get("/runner-sign-in/applications/:id/clone", function (req, res) {
   const snapshot = runnerSignInV2FindSubmissionSnapshot(application, copyFromReference);
   const copyReference = (snapshot && snapshot.reference) || application.reference;
   const copySubmittedIso = (snapshot && snapshot.submittedIso) || application.submittedIso;
+  const changedQuestionsFlag = String(req.query.changedQuestions || "").trim();
+  const simulateChangedQuestions =
+    changedQuestionsFlag === "1" || changedQuestionsFlag === "true";
 
   return res.render("titan-mvp-1.2/runner-sign-in/clone-application", {
     data,
@@ -22220,6 +22252,7 @@ router.get("/runner-sign-in/applications/:id/clone", function (req, res) {
       ? formatRunnerSignInSubmittedDateTime(copySubmittedIso)
       : "Not provided",
     copyReference,
+    simulateChangedQuestions,
   });
 });
 
@@ -22289,6 +22322,16 @@ router.post("/runner-sign-in/applications/:id/clone", function (req, res) {
   const firstStepId = getRunnerSignInFirstStepId(formDef);
   const answersCopy =
     copyAnswers && typeof copyAnswers === "object" ? JSON.parse(JSON.stringify(copyAnswers)) : {};
+
+  // Prototype-only: simulate “form changed / answer again” so Copy answers can
+  // land on the first question needing attention instead of check answers.
+  const changedQuestionsFlag = String(req.body.changedQuestions || req.query.changedQuestions || "").trim();
+  const simulateChangedQuestions =
+    changedQuestionsFlag === "1" || changedQuestionsFlag === "true";
+  if (simulateChangedQuestions && Object.prototype.hasOwnProperty.call(answersCopy, "declarationAccepted")) {
+    delete answersCopy.declarationAccepted;
+  }
+
   const cloned = {
     ...source,
     id: `app-${ts}`,
@@ -22328,13 +22371,32 @@ router.post("/runner-sign-in/applications/:id/clone", function (req, res) {
   applications.unshift(cloned);
   data.runnerSignInApplications = applications;
 
-  // After copying, take the user to check answers (runner-v5 pattern).
-  // This is useful in the v2 manage hub flow where the primary action is "Copy".
+  // After copying, go straight into the form: first unanswered question if any,
+  // otherwise check answers. Skip the old success / previous-submission pages.
   if (data.runnerSignInV2RedirectApplicationsToManage) {
     setRunnerSignInV2ManageFocus(req, cloned.formKey, cloned.id);
   }
+
+  const firstUnansweredStepId = getRunnerSignInFirstUnansweredStepId(cloned);
+  if (firstUnansweredStepId) {
+    cloned.step = firstUnansweredStepId;
+    data.runnerSignInCopiedInterventionTarget = {
+      formKey: cloned.formKey,
+      applicationId: cloned.id,
+      step: firstUnansweredStepId,
+    };
+    return res.redirect(
+      `/runner-sign-in/intervention-copied-new-questions?formKey=${encodeURIComponent(cloned.formKey)}&applicationId=${encodeURIComponent(cloned.id)}&step=${encodeURIComponent(firstUnansweredStepId)}`
+    );
+  }
+
+  data.runnerSignInCopiedInterventionTarget = {
+    formKey: cloned.formKey,
+    applicationId: cloned.id,
+    step: "",
+  };
   return res.redirect(
-    `/runner-sign-in/forms/${encodeURIComponent(cloned.formKey)}/${encodeURIComponent(cloned.id)}/check-answers?copied=1`
+    `/runner-sign-in/intervention-copied-check-answers?formKey=${encodeURIComponent(cloned.formKey)}&applicationId=${encodeURIComponent(cloned.id)}`
   );
 });
 
@@ -22359,78 +22421,159 @@ function runnerSignInAllowSharedDeepLinkAccess(req) {
   }
 }
 
+function runnerSignInResolveCopiedInterventionTarget(req, { formKey, applicationId, step } = {}) {
+  const data = ensureRunnerSignInSession(req);
+  runnerSignInAllowSharedDeepLinkAccess(req);
+
+  const remembered = data.runnerSignInCopiedInterventionTarget || {};
+  const resolvedFormKey = String(formKey || remembered.formKey || "").trim();
+  const resolvedApplicationId = String(applicationId || remembered.applicationId || "").trim();
+  const requestedStep = String(step || remembered.step || "").trim();
+
+  if (!resolvedFormKey || !resolvedApplicationId) {
+    return { errorRedirect: "/runner-sign-in/applications" };
+  }
+
+  data.runnerSignInCopiedInterventionTarget = {
+    formKey: resolvedFormKey,
+    applicationId: resolvedApplicationId,
+    step: requestedStep,
+  };
+
+  const applications = ensureRunnerSignInApplications(req);
+  const application = applications.find(
+    (a) => a && a.id === resolvedApplicationId && a.formKey === resolvedFormKey
+  );
+  if (!application) {
+    return { errorRedirect: "/runner-sign-in/applications" };
+  }
+
+  const formDef = getRunnerSignInFormDef(resolvedFormKey);
+  const firstUnansweredStepId = getRunnerSignInFirstUnansweredStepId(application);
+  const resumeStepId = getRunnerSignInResumeStepId(application);
+  const stepId =
+    (requestedStep && getRunnerSignInStepDef(formDef, requestedStep) && requestedStep) ||
+    firstUnansweredStepId ||
+    resumeStepId;
+
+  return { data, application, formKey: resolvedFormKey, applicationId: resolvedApplicationId, stepId };
+}
+
+function runnerSignInContinueCopiedIntervention(req, res, { formKey, applicationId, step } = {}) {
+  const resolved = runnerSignInResolveCopiedInterventionTarget(req, { formKey, applicationId, step });
+  if (resolved.errorRedirect) return res.redirect(resolved.errorRedirect);
+  delete resolved.data.runnerSignInShowCopiedAnswersBanner;
+  return res.redirect(runnerSignInCopiedFormStepUrl(resolved.application, resolved.stepId));
+}
+
 router.get("/runner-sign-in/check-answers-copied", function (req, res) {
-  const data = ensureRunnerSignInSession(req);
-  runnerSignInAllowSharedDeepLinkAccess(req);
-  return res.render("titan-mvp-1.2/runner-sign-in/check-answers-copied", { data });
-});
-
-router.post("/runner-sign-in/check-answers-copied", function (req, res) {
-  ensureRunnerSignInSession(req);
-  runnerSignInAllowSharedDeepLinkAccess(req);
-  const formKey = String(req.body.formKey || req.query.formKey || "").trim();
-  const applicationId = String(req.body.applicationId || req.query.applicationId || "").trim();
-  const step = String(req.body.step || req.query.step || "").trim();
-  let redirect = "/runner-sign-in/intervention-copied";
-  if (formKey && applicationId) {
-    redirect += `?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}`;
-    if (step) redirect += `&step=${encodeURIComponent(step)}`;
-  }
-  return res.redirect(redirect);
-});
-
-router.get("/runner-sign-in/intervention-copied", function (req, res) {
-  const data = ensureRunnerSignInSession(req);
-  runnerSignInAllowSharedDeepLinkAccess(req);
-
-  const formKey = String(req.query.formKey || "").trim();
-  const applicationId = String(req.query.applicationId || "").trim();
-  const step = String(req.query.step || "").trim();
-
-  // If provided, persist the target so POST can succeed without relying on querystring.
-  if (formKey && applicationId) {
-    data.runnerSignInCopiedInterventionTarget = { formKey, applicationId, step };
-  }
-
-  return res.render("titan-mvp-1.2/runner-sign-in/intervention-copied", {
-    data,
-    formKey,
-    applicationId,
-    step,
+  return runnerSignInContinueCopiedIntervention(req, res, {
+    formKey: req.query.formKey,
+    applicationId: req.query.applicationId,
+    step: req.query.step,
   });
 });
 
+router.post("/runner-sign-in/check-answers-copied", function (req, res) {
+  return runnerSignInContinueCopiedIntervention(req, res, {
+    formKey: req.body.formKey || req.query.formKey,
+    applicationId: req.body.applicationId || req.query.applicationId,
+    step: req.body.step || req.query.step,
+  });
+});
+
+function runnerSignInCopiedNewQuestionsPath({ formKey, applicationId, step }) {
+  let url = `/runner-sign-in/intervention-copied-new-questions?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}`;
+  if (step) url += `&step=${encodeURIComponent(step)}`;
+  return url;
+}
+
+router.get("/runner-sign-in/intervention-copied", function (req, res) {
+  return res.redirect(
+    runnerSignInCopiedNewQuestionsPath({
+      formKey: req.query.formKey,
+      applicationId: req.query.applicationId,
+      step: req.query.step,
+    })
+  );
+});
+
 router.post("/runner-sign-in/intervention-copied", function (req, res) {
-  const data = ensureRunnerSignInSession(req);
-  runnerSignInAllowSharedDeepLinkAccess(req);
+  return res.redirect(307, runnerSignInCopiedNewQuestionsPath({
+    formKey: req.body.formKey || req.query.formKey,
+    applicationId: req.body.applicationId || req.query.applicationId,
+    step: req.body.step || req.query.step,
+  }));
+});
 
-  const bodyFormKey = String(req.body.formKey || "").trim();
-  const bodyApplicationId = String(req.body.applicationId || "").trim();
-  const bodyStep = String(req.body.step || "").trim();
+router.get("/runner-sign-in/intervention-copied-new-questions", function (req, res) {
+  const resolved = runnerSignInResolveCopiedInterventionTarget(req, {
+    formKey: req.query.formKey,
+    applicationId: req.query.applicationId,
+    step: req.query.step,
+  });
+  if (resolved.errorRedirect) return res.redirect(resolved.errorRedirect);
 
-  const remembered = data.runnerSignInCopiedInterventionTarget || {};
-  const formKey = bodyFormKey || remembered.formKey || "";
-  const applicationId = bodyApplicationId || remembered.applicationId || "";
-  const requestedStep = bodyStep || remembered.step || "";
+  const copiedFrom = resolved.application.copiedFrom || {};
+  const cancelHref = resolved.data.runnerSignInV2RedirectApplicationsToManage
+    ? `/runner-sign-in-v2/forms/${encodeURIComponent(resolved.formKey)}/${encodeURIComponent(resolved.applicationId)}/manage`
+    : "/runner-sign-in/applications";
 
-  if (!formKey || !applicationId) {
-    return res.redirect("/runner-sign-in/applications");
-  }
+  return res.render("titan-mvp-1.2/runner-sign-in/intervention-copied", {
+    data: resolved.data,
+    application: resolved.application,
+    formKey: resolved.formKey,
+    applicationId: resolved.applicationId,
+    step: resolved.stepId,
+    formName: copiedFrom.formName || resolved.application.formName,
+    referenceNumber: copiedFrom.reference || resolved.application.reference,
+    submittedOnText: copiedFrom.submittedIso
+      ? formatRunnerSignInSubmittedDateTime(copiedFrom.submittedIso)
+      : "Not provided",
+    cancelHref,
+  });
+});
 
-  const applications = ensureRunnerSignInApplications(req);
-  const application = applications.find((a) => a && a.id === applicationId && a.formKey === formKey);
-  if (!application) {
-    return res.redirect("/runner-sign-in/applications");
-  }
+router.post("/runner-sign-in/intervention-copied-new-questions", function (req, res) {
+  return runnerSignInContinueCopiedIntervention(req, res, {
+    formKey: req.body.formKey || req.query.formKey,
+    applicationId: req.body.applicationId || req.query.applicationId,
+    step: req.body.step || req.query.step,
+  });
+});
 
-  const formDef = getRunnerSignInFormDef(formKey);
-  const resumeStepId = getRunnerSignInResumeStepId(application);
-  const stepId = requestedStep && getRunnerSignInStepDef(formDef, requestedStep)
-    ? requestedStep
-    : resumeStepId;
+router.get("/runner-sign-in/intervention-copied-check-answers", function (req, res) {
+  const resolved = runnerSignInResolveCopiedInterventionTarget(req, {
+    formKey: req.query.formKey,
+    applicationId: req.query.applicationId,
+  });
+  if (resolved.errorRedirect) return res.redirect(resolved.errorRedirect);
+
+  const copiedFrom = resolved.application.copiedFrom || {};
+  const cancelHref = resolved.data.runnerSignInV2RedirectApplicationsToManage
+    ? `/runner-sign-in-v2/forms/${encodeURIComponent(resolved.formKey)}/${encodeURIComponent(resolved.applicationId)}/manage`
+    : "/runner-sign-in/applications";
+
+  return res.render("titan-mvp-1.2/runner-sign-in/intervention-copied-check-answers", {
+    data: resolved.data,
+    application: resolved.application,
+    formKey: resolved.formKey,
+    applicationId: resolved.applicationId,
+    formName: copiedFrom.formName || resolved.application.formName,
+    referenceNumber: copiedFrom.reference || resolved.application.reference,
+    cancelHref,
+  });
+});
+
+router.post("/runner-sign-in/intervention-copied-check-answers", function (req, res) {
+  const resolved = runnerSignInResolveCopiedInterventionTarget(req, {
+    formKey: req.body.formKey || req.query.formKey,
+    applicationId: req.body.applicationId || req.query.applicationId,
+  });
+  if (resolved.errorRedirect) return res.redirect(resolved.errorRedirect);
 
   return res.redirect(
-    `/runner-sign-in/forms/${encodeURIComponent(formKey)}/${encodeURIComponent(applicationId)}/${encodeURIComponent(stepId)}?copied=1`
+    `/runner-sign-in/forms/${encodeURIComponent(resolved.formKey)}/${encodeURIComponent(resolved.applicationId)}/check-answers?copied=1`
   );
 });
 
@@ -25957,6 +26100,7 @@ function runnerSignInV2ClearAuthForPreview(req, { phone } = {}) {
 const RUNNER_SIGN_IN_V2_JOURNEY_PREVIEW_SIGNED_IN = new Set([
   "manage",
   "manage-submitted",
+  "manage-copy-new-questions",
   "manage-resubmitted",
   "security",
   "change-email-get-security-code",
@@ -25980,6 +26124,7 @@ const RUNNER_SIGN_IN_V2_JOURNEY_PREVIEW_SIGNED_IN = new Set([
   "ready-to-submit",
   "create-sign-in-created",
   "copy-clone",
+  "copy-clone-changed-questions",
 ]);
 
 const RUNNER_SIGN_IN_V2_JOURNEY_PREVIEW_ACCOUNT_CREATED = new Set(["save-exit-progress-saved"]);
@@ -27058,33 +27203,55 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
     });
   }
 
-  if (slug === "manage-submitted") {
+  if (slug === "manage-submitted" || slug === "manage-copy-new-questions") {
     applyRunnerSignInV2EmailAuth(req, email, phone);
-    setRunnerSignInV2ManageFocus(req, formKey, applicationId);
+    const copySourceFormKey = SEED.submittedCopy.formKey;
+    const copySourceApplicationId = SEED.submittedCopy.applicationId;
+    const copySourceApplication =
+      ensureRunnerSignInApplications(req).find((a) => a && a.id === copySourceApplicationId) ||
+      application;
+    setRunnerSignInV2ManageFocus(req, copySourceFormKey, copySourceApplicationId);
+    const cloneUrl =
+      slug === "manage-copy-new-questions"
+        ? `/runner-sign-in/applications/${enc(copySourceApplicationId)}/clone?changedQuestions=1`
+        : `/runner-sign-in/applications/${enc(copySourceApplicationId)}/clone`;
+    const reference = (copySourceApplication && copySourceApplication.reference) || "FL3-5H4-L8N";
+    const submittedIso =
+      (copySourceApplication && copySourceApplication.submittedIso) || "2026-04-18T09:02:00+01:00";
+    const lastUpdatedText = `Submitted ${formatRunnerSignInDate(submittedIso)}`;
+    const tableRow = {
+      reference,
+      statusText: "Submitted",
+      statusTagClasses: "govuk-tag--green",
+      lastUpdatedText,
+      expiryText: "—",
+      actionsHtml: `<a class="govuk-link" href="${cloneUrl}">Copy</a>`,
+    };
     return res.render("titan-mvp-1.2/runner-sign-in-v2/manage-form", {
       data,
-      application,
-      formKey,
-      applicationId,
-      journeyPreview,
-      tableRow: {
-        reference: application.reference || "YCU-C8R-7KY",
-        statusText: "Submitted",
-        statusTagClasses: "govuk-tag--green",
-        lastUpdatedText: "Submitted today",
-        expiryText: "—",
-        actionsHtml: '<a class="govuk-link" href="#">Copy</a>',
+      application: {
+        ...copySourceApplication,
+        formKey: copySourceFormKey,
+        id: copySourceApplicationId,
+        formName: (copySourceApplication && copySourceApplication.formName) || "Apply to volunteer",
+        reference,
+        status: "Submitted",
+        submittedIso,
       },
-      tableRows: [],
+      formKey: copySourceFormKey,
+      applicationId: copySourceApplicationId,
+      journeyPreview,
+      tableRow,
+      tableRows: [tableRow],
       query: {},
       v2PrimaryAction: "copy",
       v2StatusLabel: "Submitted",
       v2StatusTagClasses: "govuk-tag--green",
-      lastUpdatedText: "Submitted today",
+      lastUpdatedText,
       expiryText: "—",
       continueUrl: "#",
       checkAnswersUrl: "#",
-      cloneUrl: "#",
+      cloneUrl,
       saveExitWithSignInUrl: "#",
       saveExitWithoutSignInUrl: "#",
       checkerInviteUrl: "#",
@@ -27302,7 +27469,7 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
     });
   }
 
-  if (slug === "copy-clone") {
+  if (slug === "copy-clone" || slug === "copy-clone-changed-questions") {
     applyRunnerSignInV2EmailAuth(req, email, phone);
     const applications = ensureRunnerSignInApplications(req);
     const copyApplication = applications.find((a) => a && a.id === SEED.submittedCopy.applicationId);
@@ -27314,6 +27481,8 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
       submittedOnText: copyApplication.submittedIso
         ? formatRunnerSignInSubmittedDateTime(copyApplication.submittedIso)
         : "Not provided",
+      copyReference: copyApplication.reference,
+      simulateChangedQuestions: slug === "copy-clone-changed-questions",
     });
   }
 
@@ -27334,16 +27503,20 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
 
   if (slug === "copy-intervention") {
     runnerSignInAllowSharedDeepLinkAccess(req);
-    return res.render("titan-mvp-1.2/runner-sign-in/intervention-copied", {
-      data,
-      formKey: SEED.copyDeclarationRequired.formKey,
-      applicationId: SEED.copyDeclarationRequired.applicationId,
-      step: "declaration",
-    });
+    return res.redirect(
+      runnerSignInCopiedNewQuestionsPath({
+        formKey: SEED.copyDeclarationRequired.formKey,
+        applicationId: SEED.copyDeclarationRequired.applicationId,
+        step: "declaration",
+      })
+    );
   }
 
   if (slug === "copy-intervention-check-answers") {
-    return res.redirect("/runner-sign-in-v2/static/copy-intervention-check-answers");
+    runnerSignInAllowSharedDeepLinkAccess(req);
+    return res.redirect(
+      `/runner-sign-in/intervention-copied-check-answers?formKey=${encodeURIComponent(SEED.copyDraft.formKey)}&applicationId=${encodeURIComponent(SEED.copyDraft.applicationId)}`
+    );
   }
 
   if (
@@ -27376,6 +27549,7 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
       stepDef,
       copied: true,
       copiedQuerySuffix: "?copied=1",
+      showCopiedAnswersBanner: false,
       optionalSignIn,
       backHref: "#",
     });
@@ -28668,7 +28842,10 @@ function runnerSignInV2EditedPaymentCheckAnswersLocals(options) {
 }
 
 router.get("/runner-sign-in-v2/static/copy-intervention-check-answers", function (req, res) {
-  return res.render("titan-mvp-1.2/runner-sign-in-v2/static/copy-intervention-check-answers");
+  runnerSignInAllowSharedDeepLinkAccess(req);
+  return res.redirect(
+    `/runner-sign-in/intervention-copied-check-answers?formKey=${encodeURIComponent(SEED.copyDraft.formKey)}&applicationId=${encodeURIComponent(SEED.copyDraft.applicationId)}`
+  );
 });
 
 router.get("/runner-sign-in-v2/static/copy-intervention-check-answers.html", function (req, res) {
@@ -31942,6 +32119,7 @@ function runnerSignInV2BaselineClearAuthForPreview(req, { phone } = {}) {
 const RUNNER_SIGN_IN_V2_BASELINE_JOURNEY_PREVIEW_SIGNED_IN = new Set([
   "manage",
   "manage-submitted",
+  "manage-copy-new-questions",
   "security",
   "change-email-get-security-code",
   "change-phone-get-security-code",
@@ -31961,6 +32139,7 @@ const RUNNER_SIGN_IN_V2_BASELINE_JOURNEY_PREVIEW_SIGNED_IN = new Set([
   "ready-to-submit",
   "create-sign-in-created",
   "copy-clone",
+  "copy-clone-changed-questions",
 ]);
 
 const RUNNER_SIGN_IN_V2_BASELINE_JOURNEY_PREVIEW_ACCOUNT_CREATED = new Set(["save-exit-progress-saved"]);
@@ -32813,33 +32992,55 @@ router.get("/runner-sign-in-v2-baseline/journeys/preview/:slug", function (req, 
     });
   }
 
-  if (slug === "manage-submitted") {
+  if (slug === "manage-submitted" || slug === "manage-copy-new-questions") {
     applyRunnerSignInV2EmailAuthBaseline(req, email, phone);
-    setRunnerSignInV2ManageFocusBaseline(req, formKey, applicationId);
+    const copySourceFormKey = RUNNER_SIGN_IN_V2_BASELINE_SEED.submittedCopy.formKey;
+    const copySourceApplicationId = RUNNER_SIGN_IN_V2_BASELINE_SEED.submittedCopy.applicationId;
+    const copySourceApplication =
+      ensureRunnerSignInApplications(req).find((a) => a && a.id === copySourceApplicationId) ||
+      application;
+    setRunnerSignInV2ManageFocusBaseline(req, copySourceFormKey, copySourceApplicationId);
+    const cloneUrl =
+      slug === "manage-copy-new-questions"
+        ? `/runner-sign-in/applications/${enc(copySourceApplicationId)}/clone?changedQuestions=1`
+        : `/runner-sign-in/applications/${enc(copySourceApplicationId)}/clone`;
+    const reference = (copySourceApplication && copySourceApplication.reference) || "FL3-5H4-L8N";
+    const submittedIso =
+      (copySourceApplication && copySourceApplication.submittedIso) || "2026-04-18T09:02:00+01:00";
+    const lastUpdatedText = `Submitted ${formatRunnerSignInDate(submittedIso)}`;
+    const tableRow = {
+      reference,
+      statusText: "Submitted",
+      statusTagClasses: "govuk-tag--green",
+      lastUpdatedText,
+      expiryText: "—",
+      actionsHtml: `<a class="govuk-link" href="${cloneUrl}">Copy</a>`,
+    };
     return res.render("titan-mvp-1.2/runner-sign-in-v2-baseline/manage-form", {
       data,
-      application,
-      formKey,
-      applicationId,
-      journeyPreview,
-      tableRow: {
-        reference: application.reference || "YCU-C8R-7KY",
-        statusText: "Submitted",
-        statusTagClasses: "govuk-tag--green",
-        lastUpdatedText: "Submitted today",
-        expiryText: "—",
-        actionsHtml: '<a class="govuk-link" href="#">Copy</a>',
+      application: {
+        ...copySourceApplication,
+        formKey: copySourceFormKey,
+        id: copySourceApplicationId,
+        formName: (copySourceApplication && copySourceApplication.formName) || "Apply to volunteer",
+        reference,
+        status: "Submitted",
+        submittedIso,
       },
-      tableRows: [],
+      formKey: copySourceFormKey,
+      applicationId: copySourceApplicationId,
+      journeyPreview,
+      tableRow,
+      tableRows: [tableRow],
       query: {},
       v2PrimaryAction: "copy",
       v2StatusLabel: "Submitted",
       v2StatusTagClasses: "govuk-tag--green",
-      lastUpdatedText: "Submitted today",
+      lastUpdatedText,
       expiryText: "—",
       continueUrl: "#",
       checkAnswersUrl: "#",
-      cloneUrl: "#",
+      cloneUrl,
       saveExitWithSignInUrl: "#",
       saveExitWithoutSignInUrl: "#",
       checkerInviteUrl: "#",
@@ -32982,7 +33183,7 @@ router.get("/runner-sign-in-v2-baseline/journeys/preview/:slug", function (req, 
     });
   }
 
-  if (slug === "copy-clone") {
+  if (slug === "copy-clone" || slug === "copy-clone-changed-questions") {
     applyRunnerSignInV2EmailAuthBaseline(req, email, phone);
     const applications = ensureRunnerSignInApplications(req);
     const copyApplication = applications.find((a) => a && a.id === RUNNER_SIGN_IN_V2_BASELINE_SEED.submittedCopy.applicationId);
@@ -32994,6 +33195,8 @@ router.get("/runner-sign-in-v2-baseline/journeys/preview/:slug", function (req, 
       submittedOnText: copyApplication.submittedIso
         ? formatRunnerSignInSubmittedDateTime(copyApplication.submittedIso)
         : "Not provided",
+      copyReference: copyApplication.reference,
+      simulateChangedQuestions: slug === "copy-clone-changed-questions",
     });
   }
 
@@ -33014,16 +33217,20 @@ router.get("/runner-sign-in-v2-baseline/journeys/preview/:slug", function (req, 
 
   if (slug === "copy-intervention") {
     runnerSignInAllowSharedDeepLinkAccess(req);
-    return res.render("titan-mvp-1.2/runner-sign-in/intervention-copied", {
-      data,
-      formKey: RUNNER_SIGN_IN_V2_BASELINE_SEED.copyDeclarationRequired.formKey,
-      applicationId: RUNNER_SIGN_IN_V2_BASELINE_SEED.copyDeclarationRequired.applicationId,
-      step: "declaration",
-    });
+    return res.redirect(
+      runnerSignInCopiedNewQuestionsPath({
+        formKey: RUNNER_SIGN_IN_V2_BASELINE_SEED.copyDeclarationRequired.formKey,
+        applicationId: RUNNER_SIGN_IN_V2_BASELINE_SEED.copyDeclarationRequired.applicationId,
+        step: "declaration",
+      })
+    );
   }
 
   if (slug === "copy-intervention-check-answers") {
-    return res.redirect("/runner-sign-in-v2/static/copy-intervention-check-answers");
+    runnerSignInAllowSharedDeepLinkAccess(req);
+    return res.redirect(
+      `/runner-sign-in/intervention-copied-check-answers?formKey=${encodeURIComponent(RUNNER_SIGN_IN_V2_BASELINE_SEED.copyDraft.formKey)}&applicationId=${encodeURIComponent(RUNNER_SIGN_IN_V2_BASELINE_SEED.copyDraft.applicationId)}`
+    );
   }
 
   if (
@@ -33056,6 +33263,7 @@ router.get("/runner-sign-in-v2-baseline/journeys/preview/:slug", function (req, 
       stepDef,
       copied: true,
       copiedQuerySuffix: "?copied=1",
+      showCopiedAnswersBanner: false,
       optionalSignIn,
       backHref: "#",
     });
