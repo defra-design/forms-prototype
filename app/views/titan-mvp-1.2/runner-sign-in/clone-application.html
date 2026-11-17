@@ -2,6 +2,7 @@
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
 {% import "components/one-login-service-header/service-header.njk" as oneLoginHeader %}
 
 {% block pageTitle %}
@@ -49,6 +50,9 @@ You are about to clone this application – {{ serviceName }} – GOV.UK
       <input type="hidden" name="cloneApplication" value="yes">
       {% if copyFromReference %}
         <input type="hidden" name="from" value="{{ copyFromReference }}">
+      {% endif %}
+      {% if simulateChangedQuestions %}
+        <input type="hidden" name="changedQuestions" value="1">
       {% endif %}
 
       <div class="govuk-button-group">

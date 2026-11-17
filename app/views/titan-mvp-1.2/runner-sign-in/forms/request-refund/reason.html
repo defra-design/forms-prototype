@@ -26,6 +26,7 @@ Reason for refund – {{ formDef.formName }} – GOV.UK
 {% block content %}
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
+    {% include "titan-mvp-1.2/runner-sign-in/forms/_copied-answers-banner.njk" %}
     <form method="post" action="{{ baseHref }}/reason" class="form">
       {{ govukTextarea({
         id: "refundReason",
