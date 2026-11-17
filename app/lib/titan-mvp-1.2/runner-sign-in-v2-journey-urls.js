@@ -118,8 +118,12 @@ function runnerSignInV2BuildJourneyUrls({
     staticManageFormChecked: "/runner-sign-in-v2/static/manage-form-checked",
     staticManageFormAfterDelete: "/runner-sign-in-v2/static/manage-form-after-delete",
     staticManageFormExpired: "/runner-sign-in-v2/static/manage-form-expired",
+    manageCopyNewQuestions:
+      "/runner-sign-in-v2/journeys/preview/manage-copy-new-questions",
+    staticCopyInterventionNewQuestions:
+      "/runner-sign-in/intervention-copied-new-questions?formKey=volunteer-application&applicationId=app-copy-volunteer-declaration&step=declaration",
     staticCopyInterventionCheckAnswers:
-      "/runner-sign-in-v2/static/copy-intervention-check-answers",
+      "/runner-sign-in/intervention-copied-check-answers?formKey=volunteer-application&applicationId=app-copy-volunteer-draft",
     staticChangeEmailNewEmailSameAsCurrent:
       "/runner-sign-in-v2/static/change-email-new-email-same-as-current",
     staticChangeEmailUsedOnOtherAccount: "/runner-sign-in-v2/static/change-email-used-on-other-account",

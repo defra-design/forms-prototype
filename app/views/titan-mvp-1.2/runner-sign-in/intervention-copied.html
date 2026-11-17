@@ -2,8 +2,13 @@
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% import "components/one-login-service-header/service-header.njk" as oneLoginHeader %}
 
+{% set formName = formName or (application and application.formName) or "Apply to volunteer" %}
+{% set submittedOnText = submittedOnText or "Not provided" %}
+{% set referenceNumber = referenceNumber or (application and application.copiedFrom and application.copiedFrom.reference) or "FL3-5H4-L8N" %}
+{% set cancelHref = cancelHref or "/runner-sign-in/applications" %}
+
 {% block pageTitle %}
-Your previous submission – {{ serviceName }} – GOV.UK
+Your previous submission – {{ formName }} – GOV.UK
 {% endblock %}
 
 {% block beforeContent %}{% endblock %}
@@ -13,7 +18,7 @@ Your previous submission – {{ serviceName }} – GOV.UK
     signOutLink: "/titan-mvp-1.2/roles/sign-out",
     homepageLink: "/runner-sign-in/applications",
     oneLoginLinkText: "you@example.com",
-    productName: "Register as a unicorn breeder"
+    productName: formName
   }) }}
 {% endblock %}
 
@@ -27,9 +32,9 @@ Your previous submission – {{ serviceName }} – GOV.UK
     </p>
 
     <p class="govuk-body">
-      <strong>Form:</strong> Register as a unicorn breeder<br>
-      <strong>Submitted on:</strong> 18 April 2026<br>
-      <strong>Reference number:</strong> FL3-5H4-L8N
+      <strong>Form name:</strong> {{ formName }}<br>
+      <strong>Submitted on:</strong> {{ submittedOnText }}<br>
+      <strong>Reference:</strong> {{ referenceNumber }}
     </p>
 
     <h2 class="govuk-heading-m">You need to answer new questions</h2>
@@ -44,7 +49,7 @@ Your previous submission – {{ serviceName }} – GOV.UK
       <li>submit the form</li>
     </ul>
 
-    <form class="form" action="/runner-sign-in/intervention-copied" method="post">
+    <form class="form" action="/runner-sign-in/intervention-copied-new-questions" method="post">
       {% if formKey and applicationId %}
         <input type="hidden" name="formKey" value="{{ formKey }}">
         <input type="hidden" name="applicationId" value="{{ applicationId }}">
@@ -55,9 +60,9 @@ Your previous submission – {{ serviceName }} – GOV.UK
       <div class="govuk-button-group">
         {{ govukButton({ text: "Continue" }) }}
         {{ govukButton({
-          text: "Save and exit",
+          text: "Cancel",
           classes: "govuk-button--secondary",
-          href: "/save-progress",
+          href: cancelHref,
           type: "button"
         }) }}
       </div>
@@ -65,4 +70,3 @@ Your previous submission – {{ serviceName }} – GOV.UK
   </div>
 </div>
 {% endblock %}
-

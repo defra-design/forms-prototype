@@ -325,9 +325,17 @@
           { text: "Confirmation email", href: urls.emailFormSubmitted },
           { text: "Confirmation email – public view", href: urls.emailFormSubmittedPublic }
         ]) }}
+        <p class="govuk-body govuk-!-margin-top-4"><strong>Copy with new or changed questions</strong> — start from Manage your form, confirm copy, then see the interstitial before answering the new questions.</p>
+        {{ journeyDocs.journeyPath([
+          { text: "Manage your form (start)", href: "/runner-sign-in-v2/journeys/preview/manage-copy-new-questions" },
+          { text: "Copy answers confirmation", href: "/runner-sign-in-v2/journeys/preview/copy-clone-changed-questions" },
+          { text: "Your previous submission (new questions)", href: "/runner-sign-in-v2/journeys/preview/copy-intervention" },
+          { text: "First question needing attention", href: "/runner-sign-in-v2/journeys/preview/copy-form-step-declaration-answer-again" }
+        ]) }}
         {{ journeyDocs.journeyPreviews([
           { caption: "Form designer", title: "Reuse previous answers", href: urls.formEditorReusePreviousAnswers },
           { caption: "Form designer", title: "Check before submission", href: urls.formEditorCheckBeforeSubmission },
+          { caption: "Runner", title: "Manage your form (copy with new questions)", href: "/runner-sign-in-v2/journeys/preview/manage-copy-new-questions", previewHref: "/runner-sign-in-v2/journeys/preview/manage-copy-new-questions" },
           { caption: "Runner", title: "Form submitted", href: urls.formSubmitted },
           { caption: "Runner", title: "Form submitted email", href: urls.emailFormSubmitted, previewHref: urls.preview.emailFormSubmitted }
         ]) }}

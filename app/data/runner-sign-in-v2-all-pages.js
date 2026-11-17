@@ -160,27 +160,39 @@ function buildRunnerSignInV2AllPagesSections(urls, { formKey, applicationId, rev
         },
         { text: "Manage your form (submitted example)", href: copyManageUrl },
         {
+          text: "Start: Manage your form (copy with new questions)",
+          href: `/runner-sign-in-v2/journeys/preview/manage-copy-new-questions`,
+        },
+        {
           text: "Copy answers confirmation",
           href: `/runner-sign-in/applications/${enc(copyApplicationId)}/clone`,
         },
         {
-          text: "Check answers (copied)",
-          href: `/runner-sign-in/forms/${enc(copyFormKey)}/${enc(copyDraftId)}/check-answers?copied=1`,
+          text: "Copy answers confirmation (new or changed questions)",
+          href: `/runner-sign-in/applications/${enc(copyApplicationId)}/clone?changedQuestions=1`,
         },
         {
           text: "Your previous submission (new or changed questions)",
-          href: `/runner-sign-in/intervention-copied?formKey=${enc(copyFormKey)}&applicationId=${enc(copyDeclarationRequiredId)}&step=declaration`,
+          href: `/runner-sign-in/intervention-copied-new-questions?formKey=${enc(copyFormKey)}&applicationId=${enc(copyDeclarationRequiredId)}&step=declaration`,
         },
         {
           text: "Your previous submission (go to check answers)",
-          href: "/runner-sign-in-v2/static/copy-intervention-check-answers",
+          href: `/runner-sign-in/intervention-copied-check-answers?formKey=${enc(copyFormKey)}&applicationId=${enc(copyDraftId)}`,
+        },
+        {
+          text: "First question needing attention (after copy)",
+          href: `/runner-sign-in/forms/${enc(copyFormKey)}/${enc(copyDeclarationRequiredId)}/declaration?copied=1`,
+        },
+        {
+          text: "Check answers (copied)",
+          href: `/runner-sign-in/forms/${enc(copyFormKey)}/${enc(copyDraftId)}/check-answers?copied=1`,
         },
         { text: "Your details (copied form)", href: copyFormStep("details") },
         { text: "Volunteer role (copied form)", href: copyFormStep("role") },
         { text: "Declaration (copied form)", href: copyFormStep("declaration") },
         {
           text: "Declaration (answer again)",
-          href: copyFormStep("declaration", copyDeclarationRequiredId),
+          href: `/runner-sign-in/forms/${enc(copyFormKey)}/${enc(copyDeclarationRequiredId)}/declaration?copied=1`,
         },
         {
           text: "Ready to submit (copied form)",
@@ -563,16 +575,28 @@ function buildRunnerSignInV2AllPagesStaticSections(urls, { unexpectedPages }) {
           href: `${STATIC_BASE}/reuse-previous-answers-on`,
         },
         { text: "Manage your form (submitted example)", href: preview("manage-submitted") },
+        {
+          text: "Start: Manage your form (copy with new questions)",
+          href: preview("manage-copy-new-questions"),
+        },
         { text: "Copy answers confirmation", href: preview("copy-clone") },
-        { text: "Check answers (copied)", href: preview("copy-check-answers") },
+        {
+          text: "Copy answers confirmation (new or changed questions)",
+          href: preview("copy-clone-changed-questions"),
+        },
         {
           text: "Your previous submission (new or changed questions)",
           href: preview("copy-intervention"),
         },
         {
           text: "Your previous submission (go to check answers)",
-          href: "/runner-sign-in-v2/static/copy-intervention-check-answers",
+          href: preview("copy-intervention-check-answers"),
         },
+        {
+          text: "First question needing attention (after copy)",
+          href: preview("copy-form-step-declaration-answer-again"),
+        },
+        { text: "Check answers (copied)", href: preview("copy-check-answers") },
         { text: "Your details (copied form)", href: preview("copy-form-step-details") },
         { text: "Volunteer role (copied form)", href: preview("copy-form-step-role") },
         { text: "Declaration (copied form)", href: preview("copy-form-step-declaration") },
