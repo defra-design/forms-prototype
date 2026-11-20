@@ -1,0 +1,58 @@
+{% extends "layouts/main.html" %}
+{% import "titan-mvp-1.2/runner-sign-in-v2/emails/_security-code-email.njk" as securityCodeEmail %}
+{% import "titan-mvp-1.2/runner-sign-in-v2/texts/_security-code-text-message.njk" as textMessage %}
+
+{% block pageTitle %}Security code messages – prototype{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-xl">Security code messages</h1>
+    <p class="govuk-body-l">All OTP email and text message variants used in the runner sign-in v2 journeys.</p>
+
+    <h2 class="govuk-heading-l govuk-!-margin-top-8">Emails</h2>
+
+    {% for item in emailVariants %}
+      <section class="govuk-!-margin-top-8" id="email-{{ item.variant }}">
+        {{ securityCodeEmail.securityCodeEmail({
+          variant: item.variant,
+          caption: item.caption,
+          code: code,
+          formName: formName,
+          toEmail: toEmail,
+          headingTag: "h2",
+          includeStyles: loop.first
+        }) }}
+      </section>
+    {% endfor %}
+
+    <h2 class="govuk-heading-l govuk-!-margin-top-9">Text messages</h2>
+
+    <section class="govuk-!-margin-top-8" id="sms-cant-access-email">
+      {{ textMessage.securityCodeTextMessage({
+        caption: "I can't access my email",
+        variant: "recover",
+        fromName: "Submit form to Defra",
+        formNameEn: formName,
+        formNameCy: formNameCy,
+        code: code,
+        headingTag: "h2",
+        includeStyles: true
+      }) }}
+    </section>
+
+    <section class="govuk-!-margin-top-8" id="sms-change-email">
+      {{ textMessage.securityCodeTextMessage({
+        caption: "Change email address",
+        variant: "change-email",
+        fromName: "Submit form to Defra",
+        formNameEn: formName,
+        formNameCy: formNameCy,
+        code: code,
+        headingTag: "h2",
+        includeStyles: false
+      }) }}
+    </section>
+  </div>
+</div>
+{% endblock %}

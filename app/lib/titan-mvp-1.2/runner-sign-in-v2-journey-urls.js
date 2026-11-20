@@ -113,6 +113,15 @@ function runnerSignInV2BuildJourneyUrls({
     emailFormSubmittedCheckedTeam: journeyPreviewPath
       ? journeyPreviewPath("email-form-submitted-checked-team")
       : "/runner-sign-in-v2/emails/form-submitted-checked/team",
+    securityCodeMessages: "/runner-sign-in-v2/static/security-code-messages",
+    emailSecurityCodeCreate: "/runner-sign-in-v2/static/emails/security-code-create",
+    emailSecurityCodeSignIn: "/runner-sign-in-v2/static/emails/security-code-sign-in",
+    emailSecurityCodeSaveExit: "/runner-sign-in-v2/static/emails/security-code-save-exit",
+    emailSecurityCodeRecoverNewEmail: "/runner-sign-in-v2/static/emails/security-code-recover-new-email",
+    emailSecurityCodeChangeEmailNew: "/runner-sign-in-v2/static/emails/security-code-change-email-new",
+    emailSecurityCodeChangeMobile: "/runner-sign-in-v2/static/emails/security-code-change-mobile",
+    emailSecurityCodeDelete: "/runner-sign-in-v2/static/emails/security-code-delete",
+    emailSecurityCodeChecker: "/runner-sign-in-v2/static/emails/security-code-checker",
     textRecoverSecurityCode: "/runner-sign-in-v2/texts/recover-security-code",
     textChangeEmailSecurityCode: "/runner-sign-in-v2/texts/change-email-security-code",
     staticManageFormChecked: "/runner-sign-in-v2/static/manage-form-checked",

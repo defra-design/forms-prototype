@@ -26888,6 +26888,9 @@ router.get("/runner-sign-in-v2/journeys/preview/:slug", function (req, res) {
       ...base,
       code: "123456",
       formName: application.formName,
+      variant: "create",
+      caption: "Create a sign-in",
+      toEmail: email,
     });
   }
 
@@ -27849,7 +27852,7 @@ function runnerSignInV2DocsUrls() {
     journeys: "/runner-sign-in-v2/journeys",
     journeyFlowcharts: "/runner-sign-in-v2/journey-flowcharts",
     unexpectedJourneys: "/runner-sign-in-v2/unexpected-journeys",
-    emailConfirmation: `/runner-sign-in-v2/emails/email-confirmation-code?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}`,
+    emailConfirmation: "/runner-sign-in-v2/static/emails/security-code-create",
   };
 }
 
@@ -28999,6 +29002,54 @@ function runnerSignInV2CopiedAnswersEmailLocals(req, options) {
   };
 }
 
+const RUNNER_SIGN_IN_V2_SECURITY_CODE_EMAIL_VARIANTS = {
+  create: { caption: "Create a sign-in" },
+  "sign-in": { caption: "Sign in" },
+  "save-exit": { caption: "Save and exit" },
+  "recover-new-email": { caption: "I can't access my email" },
+  "change-email-new": { caption: "Change email address" },
+  "change-mobile": { caption: "Change mobile phone number" },
+  delete: { caption: "Delete your sign-in" },
+  checker: { caption: "Checker" },
+};
+
+function runnerSignInV2SecurityCodeEmailLocals(req, variant) {
+  const key = RUNNER_SIGN_IN_V2_SECURITY_CODE_EMAIL_VARIANTS[variant] ? variant : "create";
+  const meta = RUNNER_SIGN_IN_V2_SECURITY_CODE_EMAIL_VARIANTS[key];
+  return {
+    variant: key,
+    caption: meta.caption,
+    code: "123456",
+    formName: "Apply for a grant",
+    toEmail: String(req.query.email || "you@example.com").trim(),
+  };
+}
+
+Object.keys(RUNNER_SIGN_IN_V2_SECURITY_CODE_EMAIL_VARIANTS).forEach(function (variant) {
+  router.get(`/runner-sign-in-v2/static/emails/security-code-${variant}`, function (req, res) {
+    return res.render(
+      "titan-mvp-1.2/runner-sign-in-v2/emails/email-confirmation-code",
+      runnerSignInV2SecurityCodeEmailLocals(req, variant)
+    );
+  });
+});
+
+router.get("/runner-sign-in-v2/static/security-code-messages", function (req, res) {
+  const emailVariants = Object.keys(RUNNER_SIGN_IN_V2_SECURITY_CODE_EMAIL_VARIANTS).map(function (variant) {
+    return {
+      variant,
+      caption: RUNNER_SIGN_IN_V2_SECURITY_CODE_EMAIL_VARIANTS[variant].caption,
+    };
+  });
+  return res.render("titan-mvp-1.2/runner-sign-in-v2/static/security-code-messages", {
+    emailVariants,
+    code: "123456",
+    formName: "Apply for a grant",
+    formNameCy: "Gwneud cais am grant",
+    toEmail: String(req.query.email || "you@example.com").trim(),
+  });
+});
+
 router.get("/runner-sign-in-v2/static/emails/form-submitted-copied", function (req, res) {
   return res.render(
     "titan-mvp-1.2/runner-sign-in-v2/emails/form-submitted",
@@ -29715,7 +29766,7 @@ router.get("/runner-sign-in-v2/forms/:formKey/:applicationId/security/delete-sig
   const { data, formKey, applicationId, application, securityUrl } = ctx;
   const resend = req.query.resend === "1" || req.query.resend === "true";
   const checkEmailPath = runnerSignInV2SecurityDeleteSignInPath(formKey, applicationId, "check-email");
-  const emailPrototypeUrl = `/runner-sign-in-v2/emails/email-confirmation-code?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}`;
+  const emailPrototypeUrl = `/runner-sign-in-v2/emails/email-confirmation-code?formKey=${encodeURIComponent(formKey)}&applicationId=${encodeURIComponent(applicationId)}&variant=delete`;
   return res.render("titan-mvp-1.2/runner-sign-in-v2/security/delete-sign-in/check-email", {
     data,
     application,
@@ -30146,6 +30197,8 @@ router.get("/runner-sign-in-v2/emails/email-confirmation-code", function (req, r
   const applicationId = String(req.query.applicationId || "").trim();
   const application = runnerSignInV2ResolveApplication(req, formKey, applicationId);
   const formName = (application && application.formName) || "";
+  const variant = String(req.query.variant || "create").trim();
+  const variantMeta = RUNNER_SIGN_IN_V2_SECURITY_CODE_EMAIL_VARIANTS[variant];
   return res.render("titan-mvp-1.2/runner-sign-in-v2/emails/email-confirmation-code", {
     toEmail,
     code,
@@ -30153,6 +30206,8 @@ router.get("/runner-sign-in-v2/emails/email-confirmation-code", function (req, r
     applicationId,
     application,
     formName,
+    variant: variantMeta ? variant : "create",
+    caption: variantMeta ? variantMeta.caption : RUNNER_SIGN_IN_V2_SECURITY_CODE_EMAIL_VARIANTS.create.caption,
   });
 });
 
